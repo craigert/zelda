@@ -6,11 +6,12 @@ import * as Tone from "tone";
 // Supports any direct audio URL (MP3, OGG, WAV, M4A).
 // Leave as null to use the built-in synthesized theme.
 const DEFAULT_MUSIC = {
-  title: null,     // e.g. "https://example.com/title-theme.mp3"
-  overworld: null,  // e.g. "https://example.com/overworld.mp3"
-  forest: null,     // e.g. "https://example.com/forest-temple.mp3"
-  fire: null,       // e.g. "https://example.com/fire-cavern.mp3"
-  shadow: null,     // e.g. "https://example.com/shadow-keep.mp3"
+  title: null,
+  overworld: null,
+  forest: null,
+  fire: null,
+  shadow: null,
+  triforce: null,  // plays when boss is defeated and triforce appears
 };
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
@@ -126,6 +127,25 @@ const MUSIC = {
       "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
       "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
   },
+  // TRIFORCE — Triumphant ascending fanfare, G major. Plays when triforce appears.
+  triforce: { tempo: 100,
+    lead: ["G4",null,"B4",null,"D5",null,"G5",null,"B5",null,null,null,"A5",null,"G5",null,
+      "F#5",null,"G5",null,"A5",null,"B5",null,"D6",null,null,null,null,null,null,null,
+      "B5",null,"A5",null,"G5",null,"F#5",null,"G5",null,null,null,"A5",null,"B5",null,
+      "G5",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    pad: ["G3","G3","G3","G3","G3","G3","G3","G3","D4","D4","D4","D4","D4","D4","D4","D4",
+      "C4","C4","C4","C4","D4","D4","D4","D4","G4","G4","G4","G4","G4","G4","G4","G4",
+      "E4","E4","E4","E4","D4","D4","D4","D4","C4","C4","C4","C4","D4","D4","D4","D4",
+      "G3","G3","G3","G3","G3","G3","G3","G3","G3",null,null,null,null,null,null,null],
+    bass: ["G1",null,null,null,"G2",null,null,null,"D2",null,null,null,"D2",null,null,null,
+      "C2",null,null,null,"D2",null,null,null,"G2",null,null,null,"G1",null,null,null,
+      "E2",null,null,null,"D2",null,null,null,"C2",null,null,null,"D2",null,null,null,
+      "G1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    drums: ["K",null,null,null,"K",null,null,null,"K",null,"S",null,"K",null,null,null,
+      "K",null,null,null,"K",null,"S",null,"K",null,"S",null,"K","S","K","S",
+      "K",null,null,null,"K",null,null,null,null,null,null,null,null,null,"S",null,
+      "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  },
 };
 
 // Orchestral audio engine — FM lead, sine pad, triangle bass, membrane drums. No effects chain.
@@ -206,188 +226,201 @@ function oe(m,s,t2){const t=t2||T.GRASS;
   if(s==="W"){for(let r=3;r<=8;r++){m[r][0]=t;m[r][1]=T.PATH;m[r][2]=T.PATH;}}
   if(s==="E"){for(let r=3;r<=8;r++){m[r][CO-1]=t;m[r][CO-2]=T.PATH;m[r][CO-3]=T.PATH;}}}
 
-// ============ OVERWORLD — 5 screens, each with unique character ============
-// Layout:  0,0(forest)  1,0(river)  2,0(desert)
-//          0,1(swamp)   1,1(spawn)
+// ============ OVERWORLD — 12 screens (4x3 grid), hidden caves, overworld enemies ============
+// Layout:  0,0(forest) 1,0(plains) 2,0(desert) 3,0(canyon)
+//          0,1(swamp)  1,1(spawn)  2,1(lake)   3,1(ruins)
+//          0,2(deep)   1,2(south)  2,2(beach)  3,2(volcano)
+// Overworld enemy definitions per screen
+const OW_EN={
+  "0,0":[{x:3*TL,y:3*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"bat"}],
+  "1,0":[{x:4*TL,y:6*TL,hp:1,type:"bat"},{x:11*TL,y:4*TL,hp:1,type:"bat"}],
+  "2,0":[{x:5*TL,y:4*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"skeleton"}],
+  "3,0":[{x:6*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
+  "0,1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:7*TL,hp:2,type:"skeleton"}],
+  "1,1":[],
+  "2,1":[{x:3*TL,y:5*TL,hp:1,type:"bat"}],
+  "3,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"}],
+  "0,2":[{x:4*TL,y:5*TL,hp:2,type:"skeleton"},{x:11*TL,y:6*TL,hp:3,type:"skeleton"}],
+  "1,2":[{x:6*TL,y:4*TL,hp:1,type:"bat"},{x:9*TL,y:8*TL,hp:1,type:"bat"}],
+  "2,2":[],
+  "3,2":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}],
+};
 const OW={
-  // 0,0: FOREST CLEARING — Dungeon 1 entrance in a grove, winding path, pond
+  // 0,0: FOREST — Dungeon 1 entrance, dense trees, pond
   "0,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
-    // Dense tree border with irregular shape
-    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}
-    for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-    // Extra trees making forest feel thick
-    m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
-    m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][13]=T.TREE;
-    m[2][1]=T.TREE;m[9][1]=T.TREE;m[2][14]=T.TREE;
-    // Interior trees creating a clearing
-    m[2][5]=T.TREE;m[2][6]=T.TREE;m[3][3]=T.TREE;m[3][4]=T.TREE;
-    m[8][3]=T.TREE;m[9][4]=T.TREE;m[9][5]=T.TREE;
-    m[2][10]=T.TREE;m[3][11]=T.TREE;m[3][12]=T.TREE;
-    m[8][12]=T.TREE;m[9][10]=T.TREE;m[9][11]=T.TREE;
-    // Small pond in top-left of clearing
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][13]=T.TREE;m[2][1]=T.TREE;m[10][1]=T.TREE;m[10][2]=T.TREE;m[2][14]=T.TREE;
+    m[2][5]=T.TREE;m[2][6]=T.TREE;m[3][3]=T.TREE;m[3][4]=T.TREE;m[8][3]=T.TREE;m[9][4]=T.TREE;
+    m[2][10]=T.TREE;m[3][11]=T.TREE;m[3][12]=T.TREE;m[8][12]=T.TREE;m[9][10]=T.TREE;
     m[3][6]=T.WATER;m[3][7]=T.WATER;m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;
-    m[3][5]=T.TALLGRASS;m[4][8]=T.TALLGRASS;m[5][5]=T.TALLGRASS;
-    // Dungeon entrance with ritual stones
     m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
     m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
-    // Path from entrance toward exits
-    m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
-    m[5][10]=T.PATH;m[5][11]=T.PATH;m[5][12]=T.PATH;m[6][10]=T.PATH;m[6][11]=T.PATH;m[6][12]=T.PATH;
-    // Scattered flora
-    m[6][3]=T.FLOWER;m[6][4]=T.FLOWER;m[7][4]=T.STUMP;m[8][10]=T.BUSH;m[3][9]=T.FLOWER;
-    m[7][11]=T.TALLGRASS;m[8][5]=T.TALLGRASS;m[2][8]=T.BUSH;
+    m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
+    m[6][3]=T.FLOWER;m[6][4]=T.FLOWER;m[7][11]=T.TALLGRASS;m[8][5]=T.TALLGRASS;
     oe(m,"E");oe(m,"S");return m;})(),
-
-  // 1,0: RIVER VALLEY — River snaking through with multiple crossings, islands
+  // 1,0: PLAINS — Open grassland, flowers, gentle
   "1,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
-    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}
-    for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-    // Winding river (wider in middle, narrower at edges)
-    m[1][8]=T.WATER;m[1][9]=T.WATER;
-    m[2][7]=T.WATER;m[2][8]=T.WATER;m[2][9]=T.WATER;
-    m[3][6]=T.WATER;m[3][7]=T.WATER;m[3][8]=T.WATER;m[3][9]=T.WATER;
-    m[4][6]=T.WATER;m[4][7]=T.WATER;m[4][8]=T.WATER;m[4][9]=T.WATER;m[4][10]=T.WATER;
-    m[5][6]=T.WATER;m[5][7]=T.WATER;m[5][8]=T.WATER;m[5][9]=T.WATER;m[5][10]=T.WATER;
-    m[6][5]=T.WATER;m[6][6]=T.WATER;m[6][7]=T.WATER;m[6][8]=T.WATER;m[6][9]=T.WATER;
-    m[7][5]=T.WATER;m[7][6]=T.WATER;m[7][7]=T.WATER;m[7][8]=T.WATER;
-    m[8][6]=T.WATER;m[8][7]=T.WATER;m[8][8]=T.WATER;
-    m[9][7]=T.WATER;m[9][8]=T.WATER;
-    m[10][7]=T.WATER;m[10][8]=T.WATER;
-    // Two bridges
-    m[4][7]=T.BRIDGE;m[4][8]=T.BRIDGE;m[5][7]=T.BRIDGE;m[5][8]=T.BRIDGE;
-    m[7][6]=T.BRIDGE;m[7][7]=T.BRIDGE;m[8][6]=T.BRIDGE;m[8][7]=T.BRIDGE;
-    // Small island in river
-    m[6][7]=T.GRASS;m[6][8]=T.FLOWER;
-    // River-bank tall grass
-    m[2][6]=T.TALLGRASS;m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[7][9]=T.TALLGRASS;
-    m[8][5]=T.TALLGRASS;m[9][6]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
-    // West bank features
-    m[2][3]=T.TREE;m[3][2]=T.BUSH;m[4][3]=T.FLOWER;m[5][2]=T.STUMP;m[8][3]=T.TREE;m[9][2]=T.BUSH;
-    // East bank features
-    m[2][12]=T.TREE;m[3][13]=T.BUSH;m[4][12]=T.FLOWER;m[7][11]=T.TREE;m[8][12]=T.STUMP;m[9][13]=T.BUSH;
-    oe(m,"W");oe(m,"S");oe(m,"E");return m;})(),
-
-  // 2,0: DESERT CANYON — Rocky terrain, sand, dried features, dungeon 3
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
+    m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
+    m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
+    // Hidden cave under tree at 2,2
+    m[2][2]=T.TREE;m[2][3]=T.ENTRANCE;
+    oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
+  // 2,0: DESERT — Sandy, rocks, Dungeon 3
   "2,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
-    for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}
-    for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
-    // Canyon walls cutting through
-    m[1][5]=T.ROCK;m[1][6]=T.ROCK;m[2][5]=T.ROCK;
-    m[1][10]=T.ROCK;m[1][11]=T.ROCK;m[2][11]=T.ROCK;
-    m[9][4]=T.ROCK;m[9][5]=T.ROCK;m[10][5]=T.ROCK;
-    m[9][11]=T.ROCK;m[10][10]=T.ROCK;m[10][11]=T.ROCK;
-    // Inner rock formations
-    m[3][3]=T.ROCK;m[4][3]=T.ROCK;m[3][4]=T.ROCK;
-    m[3][12]=T.ROCK;m[4][12]=T.ROCK;
-    m[8][3]=T.ROCK;m[8][12]=T.ROCK;m[8][13]=T.ROCK;
-    // Oasis — small water with bush
-    m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;
-    m[6][10]=T.BUSH;m[6][11]=T.TALLGRASS;m[9][10]=T.TALLGRASS;
-    // Dungeon entrance in canyon center
+    for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+    m[1][5]=T.ROCK;m[1][10]=T.ROCK;m[9][4]=T.ROCK;m[9][11]=T.ROCK;
+    m[3][3]=T.ROCK;m[4][3]=T.ROCK;m[3][12]=T.ROCK;m[8][12]=T.ROCK;
+    m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[6][10]=T.BUSH;m[6][11]=T.TALLGRASS;
     m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
-    // Stone path to entrance
     m[4][7]=T.PATH;m[4][8]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;
-    m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
-    m[5][9]=T.PATH;m[5][10]=T.PATH;m[6][9]=T.PATH;
-    m[3][7]=T.PATH;m[3][8]=T.PATH;m[2][7]=T.PATH;m[2][8]=T.PATH;
-    // Scattered features
-    m[2][3]=T.STUMP;m[4][10]=T.STUMP;m[9][7]=T.STUMP;
-    oe(m,"W",T.SAND);return m;})(),
-
-  // 0,1: DEEP WOODS — Thick forest with narrow winding paths, dungeon 2
+    oe(m,"W",T.SAND);oe(m,"E",T.SAND);oe(m,"S",T.SAND);return m;})(),
+  // 3,0: CANYON — Rocky terrain, narrow paths
+  "3,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+    for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+    m[2][3]=T.ROCK;m[2][4]=T.ROCK;m[3][3]=T.ROCK;m[2][11]=T.ROCK;m[2][12]=T.ROCK;m[3][12]=T.ROCK;
+    m[8][3]=T.ROCK;m[8][4]=T.ROCK;m[9][3]=T.ROCK;m[8][11]=T.ROCK;m[8][12]=T.ROCK;m[9][12]=T.ROCK;
+    m[5][6]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;m[5][9]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;
+    // Hidden cave
+    m[4][10]=T.ENTRANCE;
+    m[2][7]=T.STUMP;m[9][7]=T.STUMP;
+    oe(m,"W",T.SAND);oe(m,"S",T.SAND);return m;})(),
+  // 0,1: DEEP WOODS — Dungeon 2, dense forest
   "0,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
-    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}
-    for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-    // Dense forest — trees everywhere with paths cut through
-    m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][5]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
-    m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][5]=T.TREE;m[2][10]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;
-    m[3][2]=T.TREE;m[3][4]=T.TREE;m[3][11]=T.TREE;m[3][13]=T.TREE;
-    m[4][2]=T.TREE;m[4][3]=T.TREE;m[4][11]=T.TREE;m[4][12]=T.TREE;
-    m[7][2]=T.TREE;m[7][3]=T.TREE;m[7][12]=T.TREE;m[7][13]=T.TREE;
-    m[8][2]=T.TREE;m[8][4]=T.TREE;m[8][11]=T.TREE;m[8][13]=T.TREE;
-    m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][5]=T.TREE;m[9][10]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;
-    m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][5]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;
-    // Interior clearing for dungeon
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
+    m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;
+    m[3][2]=T.TREE;m[3][13]=T.TREE;m[4][2]=T.TREE;m[4][12]=T.TREE;
+    m[7][2]=T.TREE;m[7][13]=T.TREE;m[8][2]=T.TREE;m[8][13]=T.TREE;
+    m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;
+    m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;
     m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
-    m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
-    m[7][7]=T.PATH;m[7][8]=T.PATH;
-    // Winding path through forest
-    m[5][4]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;
-    m[6][4]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
-    m[5][9]=T.PATH;m[5][10]=T.PATH;
-    m[6][9]=T.PATH;m[6][10]=T.PATH;
     m[3][5]=T.PATH;m[3][6]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[3][9]=T.PATH;m[3][10]=T.PATH;
+    m[5][4]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][4]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
     m[8][5]=T.PATH;m[8][6]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;
-    // Forest undergrowth
-    m[4][4]=T.TALLGRASS;m[4][10]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[7][10]=T.TALLGRASS;
-    m[2][7]=T.BUSH;m[2][8]=T.BUSH;m[9][7]=T.BUSH;m[9][8]=T.BUSH;
-    m[3][3]=T.FLOWER;m[8][12]=T.FLOWER;m[6][11]=T.STUMP;m[5][3]=T.STUMP;
-    m[2][6]=T.TALLGRASS;m[2][9]=T.TALLGRASS;m[9][6]=T.TALLGRASS;m[9][9]=T.TALLGRASS;
-    oe(m,"N");oe(m,"E");return m;})(),
-
-  // 1,1: SPAWN VILLAGE — Central hub, fountain pond, garden, paths to all exits
+    m[4][4]=T.TALLGRASS;m[7][10]=T.TALLGRASS;m[2][7]=T.BUSH;m[9][7]=T.BUSH;
+    oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+  // 1,1: SPAWN VILLAGE — Central hub, fountain, safe
   "1,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
-    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}
-    for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-    // Cross-shaped path network
-    for(let c=2;c<=13;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    for(let c2=2;c2<=13;c2++){m[5][c2]=T.PATH;m[6][c2]=T.PATH;}
     for(let r=1;r<=10;r++){m[r][7]=T.PATH;m[r][8]=T.PATH;}
-    // Central fountain pond
     m[5][7]=T.WATER;m[5][8]=T.WATER;m[6][7]=T.WATER;m[6][8]=T.WATER;
-    m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;
-    m[5][6]=T.ROCK;m[6][6]=T.ROCK;m[5][9]=T.ROCK;m[6][9]=T.ROCK;
-    // Gardens in quadrants
-    // NW garden
-    m[2][3]=T.FLOWER;m[2][4]=T.FLOWER;m[3][3]=T.FLOWER;m[3][4]=T.FLOWER;
-    m[2][5]=T.BUSH;m[3][5]=T.TALLGRASS;m[4][3]=T.TALLGRASS;
-    // NE garden  
-    m[2][11]=T.FLOWER;m[2][12]=T.FLOWER;m[3][11]=T.FLOWER;m[3][12]=T.FLOWER;
-    m[2][10]=T.BUSH;m[3][10]=T.TALLGRASS;m[4][12]=T.TALLGRASS;
-    // SW garden
-    m[8][3]=T.BUSH;m[8][4]=T.BUSH;m[9][3]=T.STUMP;m[9][4]=T.TALLGRASS;
-    m[8][5]=T.FLOWER;m[9][5]=T.FLOWER;
-    // SE garden
-    m[8][11]=T.BUSH;m[8][12]=T.BUSH;m[9][11]=T.TALLGRASS;m[9][12]=T.STUMP;
-    m[8][10]=T.FLOWER;m[9][10]=T.FLOWER;
-    // Decorative trees along paths
+    m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[5][6]=T.ROCK;m[6][6]=T.ROCK;m[5][9]=T.ROCK;m[6][9]=T.ROCK;
+    m[2][3]=T.FLOWER;m[2][4]=T.FLOWER;m[3][3]=T.FLOWER;m[3][12]=T.FLOWER;m[2][11]=T.FLOWER;m[2][12]=T.FLOWER;
+    m[8][3]=T.BUSH;m[8][12]=T.BUSH;m[9][4]=T.STUMP;m[9][11]=T.STUMP;
     m[1][4]=T.TREE;m[1][11]=T.TREE;m[10][4]=T.TREE;m[10][11]=T.TREE;
-    m[4][1]=T.TREE;m[4][14]=T.TREE;m[7][1]=T.TREE;m[7][14]=T.TREE;
-    oe(m,"W");oe(m,"N");return m;})(),
+    oe(m,"W");oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+  // 2,1: LAKE — Large water body, bridge crossing
+  "2,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    for(let r=2;r<=9;r++)for(let c2=5;c2<=11;c2++)m[r][c2]=T.WATER;
+    m[5][5]=T.BRIDGE;m[5][6]=T.BRIDGE;m[5][7]=T.BRIDGE;m[5][8]=T.BRIDGE;m[5][9]=T.BRIDGE;m[5][10]=T.BRIDGE;m[5][11]=T.BRIDGE;
+    m[6][5]=T.BRIDGE;m[6][6]=T.BRIDGE;m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[6][9]=T.BRIDGE;m[6][10]=T.BRIDGE;m[6][11]=T.BRIDGE;
+    m[2][3]=T.TALLGRASS;m[9][3]=T.TALLGRASS;m[2][12]=T.BUSH;m[9][12]=T.BUSH;
+    m[4][3]=T.FLOWER;m[7][12]=T.FLOWER;
+    oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
+  // 3,1: RUINS — Ancient stone ruins, ghosts, Dungeon entrance appears here when all 3 triforce collected
+  "3,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    m[3][4]=T.ROCK;m[3][5]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
+    m[8][4]=T.ROCK;m[8][5]=T.ROCK;m[8][10]=T.ROCK;m[8][11]=T.ROCK;
+    m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[7][4]=T.ROCK;m[7][11]=T.ROCK;
+    // Center area — final dungeon entrance placed dynamically
+    m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
+    m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
+    m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
+    m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+    oe(m,"W");oe(m,"S");return m;})(),
+  // 0,2: DEEP SOUTH FOREST
+  "0,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    m[1][3]=T.TREE;m[1][4]=T.TREE;m[2][2]=T.TREE;m[3][2]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
+    m[9][2]=T.TREE;m[9][3]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;
+    m[5][5]=T.TALLGRASS;m[5][6]=T.TALLGRASS;m[6][9]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
+    // Hidden cave behind bush
+    m[8][8]=T.ENTRANCE;m[7][8]=T.BUSH;
+    m[3][7]=T.FLOWER;m[3][8]=T.FLOWER;m[4][9]=T.STUMP;m[7][4]=T.STUMP;
+    oe(m,"N");oe(m,"E");return m;})(),
+  // 1,2: SOUTHERN PLAINS
+  "1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+    for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+    for(let c2=3;c2<=12;c2++){m[5][c2]=T.PATH;m[6][c2]=T.PATH;}
+    m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
+    m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
+    m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
+    // Hidden cave
+    m[9][3]=T.ENTRANCE;
+    oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
+  // 2,2: BEACH — Sandy coast
+  "2,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+    for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+    for(let r=1;r<=10;r++)for(let c2=10;c2<=14;c2++)m[r][c2]=T.WATER;
+    m[3][9]=T.TALLGRASS;m[7][9]=T.TALLGRASS;m[5][4]=T.BUSH;m[4][6]=T.FLOWER;m[8][5]=T.STUMP;
+    oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"E",T.SAND);return m;})(),
+  // 3,2: VOLCANIC — Hot area, fire enemies
+  "3,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+    for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+    m[3][3]=T.ROCK;m[4][3]=T.ROCK;m[3][12]=T.ROCK;m[4][12]=T.ROCK;
+    m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[8][12]=T.ROCK;m[9][12]=T.ROCK;
+    m[5][6]=T.WATER;m[5][7]=T.WATER;m[6][6]=T.WATER;m[6][7]=T.WATER; // lava (rendered as water)
+    m[5][8]=T.WATER;m[6][8]=T.WATER;m[5][9]=T.WATER;m[6][9]=T.WATER;
+    m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;
+    m[2][7]=T.PATH;m[2][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+    oe(m,"W",T.SAND);oe(m,"N",T.SAND);return m;})(),
 };
 
-// ============ DUNGEONS — each with theme key ============
-const d1={name:"Forest Temple",color:"#14261a",wc:"#2a4a2a",fc:"#1c3420",th:"forest",rooms:{
+// Hidden caves — overworld entrances that lead to small treasure rooms
+const CAVES=[
+  {s:"1,0",t:[[3,2]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][6]=T.HEART;m[5][7]=T.HEART;m[5][8]=T.BOMB;m[5][9]=T.BOMB;m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;}),enemies:[]}},
+  {s:"3,0",t:[[10,4]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][7]=T.KEY;m[5][8]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[3][7]=T.TORCH;m[8][7]=T.TORCH;}),enemies:[]}},
+  {s:"0,2",t:[[8,8]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[4][7]=T.HEART;m[5][7]=T.HEART;m[5][8]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[6][9]=T.BOMB;m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;}),enemies:[]}},
+  {s:"1,2",t:[[3,9]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][6]=T.KEY;m[5][7]=T.KEY;m[5][8]=T.HEART;m[5][9]=T.HEART;m[4][7]=T.TORCH;m[7][7]=T.TORCH;}),enemies:[]}},
+];
+
+// ============ DUNGEONS — 3 temples + final dungeon ============
+const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"forest",rooms:{
   "0,0":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][3]=T.TORCH;m[5][12]=T.TORCH;}),enemies:[{x:6*TL,y:4*TL,hp:2,type:"skeleton"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
   "1,0":{tiles:mr(m=>{ae(m,["W"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.HEART;}),enemies:[{x:7*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"},{x:4*TL,y:5*TL,hp:2,type:"bat"},{x:11*TL,y:5*TL,hp:2,type:"bat"}]},
-  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][5]=T.WALL;m[5][6]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:10*TL,y:4*TL,hp:2,type:"skeleton"},{x:3*TL,y:8*TL,hp:2,type:"bat"},{x:12*TL,y:8*TL,hp:2,type:"bat"}]},
+  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[5][6]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[7][3]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:10*TL,y:4*TL,hp:2,type:"skeleton"},{x:3*TL,y:8*TL,hp:2,type:"bat"},{x:12*TL,y:8*TL,hp:2,type:"bat"}]},
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][3]=T.WALL;m[4][3]=T.WALL;m[5][3]=T.WALL;m[3][12]=T.WALL;m[4][12]=T.WALL;m[5][12]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[7][9]=T.WALL;m[7][10]=T.WALL;m[5][7]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:3,type:"bat"},{x:9*TL,y:5*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
   "2,-1":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[5][6]=T.HEART;m[5][7]=T.HEART;m[5][8]=T.BOMB;m[5][9]=T.BOMB;m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;}),enemies:[]},
-  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[0][7]=T.BOSS_DOOR;m[0][8]=T.BOSS_DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[5][5]=T.WALL;m[5][6]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[9][7]=T.HEART;m[2][3]=T.TORCH;m[2][12]=T.TORCH;}),enemies:[{x:12*TL,y:4*TL,hp:3,type:"bat"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:12*TL,y:8*TL,hp:3,type:"bat"}]},
-  "0,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[5][7]=T.TRIFORCE;m[5][8]=T.TRIFORCE;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;m[7][11]=T.WALL;m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[6][7]=T.TORCH;m[6][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:8,type:"boss",name:"Forest Guardian"}]},
+  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[0][7]=T.BOSS_DOOR;m[0][8]=T.BOSS_DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[5][5]=T.WALL;m[5][6]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[9][7]=T.HEART;m[2][3]=T.TORCH;m[2][12]=T.TORCH;}),enemies:[{x:12*TL,y:4*TL,hp:3,type:"bat"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:12*TL,y:8*TL,hp:3,type:"bat"}]},
+  "0,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;m[7][11]=T.WALL;m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[6][7]=T.TORCH;m[6][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:10,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
-const d2={name:"Fire Cavern",color:"#2a1008",wc:"#5a2a1a",fc:"#3a1a10",th:"fire",rooms:{
+const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire",rooms:{
   "0,1":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[4][4]=T.WALL;m[4][5]=T.WALL;m[4][10]=T.WALL;m[4][11]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;m[7][11]=T.WALL;m[3][2]=T.TORCH;m[3][13]=T.TORCH;}),enemies:[{x:3*TL,y:5*TL,hp:3,type:"fire_bat"},{x:12*TL,y:5*TL,hp:3,type:"fire_bat"}]},
-  "1,1":{tiles:mr(m=>{ae(m,["W"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[4][3]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;m[4][12]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[7][3]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[7][12]=T.WALL;m[5][7]=T.KEY;}),enemies:[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:5*TL,hp:3,type:"fire_bat"},{x:7*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  "1,1":{tiles:mr(m=>{ae(m,["W"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[4][3]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;m[4][12]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[5][7]=T.KEY;}),enemies:[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:5*TL,hp:3,type:"fire_bat"},{x:7*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
   "0,0":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][6]=T.WALL;m[3][7]=T.WALL;m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;m[8][9]=T.WALL;m[5][4]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;}),enemies:[{x:3*TL,y:3*TL,hp:3,type:"skeleton"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
   "1,0":{tiles:mr(m=>{ae(m,["W"]);m[2][4]=T.WALL;m[3][4]=T.WALL;m[4][4]=T.WALL;m[5][4]=T.WALL;m[6][4]=T.WALL;m[7][4]=T.WALL;m[8][4]=T.WALL;m[9][4]=T.WALL;m[2][11]=T.WALL;m[3][11]=T.WALL;m[4][11]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;m[7][11]=T.WALL;m[8][11]=T.WALL;m[9][11]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;m[6][7]=T.WALL;m[6][8]=T.WALL;m[3][7]=T.HEART;m[8][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
   "2,0":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[4][7]=T.HEART;m[5][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;m[5][8]=T.KEY;}),enemies:[]},
-  "-1,0":{tiles:mr(m=>{ae(m,["E"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][7]=T.WALL;m[3][8]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[5][7]=T.HEART;m[6][8]=T.HEART;}),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}]},
-  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WB"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[4][4]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[4][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[7][4]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[7][11]=T.WALL;}),enemies:[{x:7*TL,y:4*TL,hp:3,type:"skeleton"},{x:4*TL,y:6*TL,hp:3,type:"fire_bat"},{x:11*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
-  "-1,-1":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;m[5][7]=T.TRIFORCE;m[5][8]=T.TRIFORCE;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[7][9]=T.WALL;m[7][10]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:10,type:"boss",name:"Flame Wyrm"}]},
+  "-1,0":{tiles:mr(m=>{ae(m,["E"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[5][7]=T.HEART;m[6][8]=T.HEART;}),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}]},
+  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WB"]);m[3][4]=T.WALL;m[4][4]=T.WALL;m[3][10]=T.WALL;m[4][11]=T.WALL;m[8][4]=T.WALL;m[7][4]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[7][11]=T.WALL;}),enemies:[{x:7*TL,y:4*TL,hp:3,type:"skeleton"},{x:4*TL,y:6*TL,hp:3,type:"fire_bat"},{x:11*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  "-1,-1":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[7][9]=T.WALL;m[7][10]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Flame Wyrm",pattern:"spawn"}]},
 }};
-const d3={name:"Shadow Keep",color:"#0e0e1e",wc:"#2a2a4e",fc:"#161628",th:"shadow",rooms:{
+const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shadow",rooms:{
   "0,0":{tiles:mr(m=>{ae(m,["N","W"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[3][3]=T.WALL;m[3][12]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][12]=T.WALL;m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:3*TL,y:6*TL,hp:3,type:"ghost"},{x:12*TL,y:6*TL,hp:3,type:"ghost"}]},
   "-1,0":{tiles:mr(m=>{ae(m,["E"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[5][3]=T.WALL;m[6][3]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;m[8][9]=T.WALL;m[4][12]=T.KEY;m[7][2]=T.HEART;}),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:12*TL,y:7*TL,hp:3,type:"ghost"},{x:3*TL,y:9*TL,hp:3,type:"skeleton"}]},
-  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[9][8]=T.WALL;m[9][9]=T.WALL;m[9][10]=T.WALL;}),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:10*TL,y:8*TL,hp:3,type:"ghost"},{x:4*TL,y:9*TL,hp:3,type:"skeleton"}]},
-  "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[5][3]=T.WALL;m[5][12]=T.WALL;m[6][3]=T.WALL;m[6][12]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:5*TL,hp:4,type:"ghost"},{x:7*TL,y:7*TL,hp:4,type:"skeleton"},{x:7*TL,y:4*TL,hp:4,type:"skeleton"}]},
+  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[9][8]=T.WALL;m[9][9]=T.WALL;m[9][10]=T.WALL;}),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
+  "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[5][3]=T.WALL;m[5][12]=T.WALL;m[6][3]=T.WALL;m[6][12]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:5*TL,hp:4,type:"ghost"},{x:7*TL,y:7*TL,hp:4,type:"skeleton"}]},
   "2,-1":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[5][7]=T.BOMB;m[5][8]=T.BOMB;m[6][7]=T.HEART;m[6][8]=T.HEART;m[4][5]=T.TORCH;m[4][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;m[3][7]=T.KEY;}),enemies:[]},
-  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WD"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[5][7]=T.HEART;m[5][8]=T.HEART;}),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
-  "-1,-2":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;ae(m,["NB"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][7]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[5][3]=T.WALL;m[5][4]=T.WALL;m[6][3]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[6][11]=T.WALL;m[6][12]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;}),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:3*TL,y:8*TL,hp:4,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"},{x:7*TL,y:9*TL,hp:4,type:"skeleton"}]},
-  "-1,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[5][7]=T.TRIFORCE;m[5][8]=T.TRIFORCE;m[3][4]=T.WALL;m[3][11]=T.WALL;m[4][4]=T.WALL;m[4][11]=T.WALL;m[7][4]=T.WALL;m[7][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Shadow Lord"}]},
+  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WD"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.HEART;m[5][8]=T.HEART;}),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
+  "-1,-2":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;ae(m,["NB"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[5][3]=T.WALL;m[5][4]=T.WALL;m[6][3]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[6][11]=T.WALL;m[6][12]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;}),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:3*TL,y:8*TL,hp:4,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  "-1,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[3][4]=T.WALL;m[3][11]=T.WALL;m[4][4]=T.WALL;m[4][11]=T.WALL;m[7][4]=T.WALL;m[7][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:14,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
+}};
+// FINAL DUNGEON — Opens when all 3 triforce pieces collected
+const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shadow",rooms:{
+  "0,0":{tiles:mr(m=>{ae(m,["N"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;}),enemies:[{x:4*TL,y:5*TL,hp:5,type:"ghost"},{x:11*TL,y:5*TL,hp:5,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"skeleton"},{x:7*TL,y:8*TL,hp:5,type:"skeleton"}]},
+  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;m[5][5]=T.WALL;m[5][6]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[6][7]=T.KEY;}),enemies:[{x:3*TL,y:6*TL,hp:5,type:"fire_bat"},{x:12*TL,y:6*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
+  "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.HEART;}),enemies:[{x:5*TL,y:5*TL,hp:6,type:"skeleton"},{x:10*TL,y:5*TL,hp:6,type:"skeleton"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
+  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[0][7]=T.BOSS_DOOR;m[0][8]=T.BOSS_DOOR;m[3][3]=T.WALL;m[3][12]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][12]=T.WALL;m[5][7]=T.HEART;m[5][8]=T.HEART;m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:4*TL,y:6*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"},{x:7*TL,y:4*TL,hp:6,type:"fire_bat"},{x:7*TL,y:8*TL,hp:6,type:"skeleton"}]},
+  "0,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[3][3]=T.WALL;m[3][12]=T.WALL;m[8][3]=T.WALL;m[8][12]=T.WALL;m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:20,type:"boss",name:"Dark King",pattern:"all"}]},
 }};
 
-const DG=[d1,d2,d3];
-const DE=[{s:"0,0",t:[[7,5],[8,5],[7,6],[8,6]],d:0},{s:"0,1",t:[[7,5],[8,5],[7,6],[8,6]],d:1},{s:"2,0",t:[[7,5],[8,5],[7,6],[8,6]],d:2}];
+const DG=[d1,d2,d3,d4];
+const DE=[{s:"0,0",t:[[7,5],[8,5],[7,6],[8,6]],d:0},{s:"0,1",t:[[7,5],[8,5],[7,6],[8,6]],d:1},{s:"2,0",t:[[7,5],[8,5],[7,6],[8,6]],d:2},{s:"3,1",t:[[7,5],[8,5],[7,6],[8,6]],d:3}];
+
 
 function dc(o){return JSON.parse(JSON.stringify(o));}
 function hs(x,y,s){let h=(x*374761393+y*668265263+s*1274126177)&0x7fffffff;h=((h>>13)^h)*1274126177&0x7fffffff;return(h&0xff)/255;}
@@ -501,34 +534,48 @@ function dP(c,x,y,d,t){
   }
 }
 function dSw(c,px,py,d,tm){
-  const p=1-tm/SD; // 0→1 over swing
-  // Stab motion: quick extend (0-0.3), hold (0.3-0.7), retract (0.7-1)
-  let ext; // 0=retracted, 1=fully extended
-  if(p<0.3) ext=p/0.3;
-  else if(p<0.7) ext=1;
-  else ext=1-(p-0.7)/0.3;
-  ext=Math.max(0,Math.min(1,ext));
-  const len=(SR*ext)|0;
-  if(len<3)return;
+  const p2=1-tm/SD; // 0→1 over swing duration
   const cx=(px+PS/2)|0,cy=(py+PS/2)|0;
-  // Blade
-  c.fillStyle="#d0d0e0";
-  if(d===0){c.fillRect(cx-2,cy-len-4,5,len);c.fillStyle="#fff";c.fillRect(cx-1,cy-len-2,1,len-4);}
-  else if(d===2){c.fillRect(cx-2,cy+4,5,len);c.fillStyle="#fff";c.fillRect(cx-1,cy+6,1,len-4);}
-  else if(d===3){c.fillRect(cx-len-4,cy-2,len,5);c.fillStyle="#fff";c.fillRect(cx-len-2,cy-1,len-4,1);}
-  else{c.fillRect(cx+4,cy-2,len,5);c.fillStyle="#fff";c.fillRect(cx+6,cy-1,len-4,1);}
-  // Tip sparkle at full extend
-  if(ext>0.8){c.fillStyle="#ffe";
-    if(d===0)c.fillRect(cx-2,cy-len-6,5,3);
-    else if(d===2)c.fillRect(cx-2,cy+len+3,5,3);
-    else if(d===3)c.fillRect(cx-len-6,cy-2,3,5);
-    else c.fillRect(cx+len+3,cy-2,3,5);}
-  // Guard
-  c.fillStyle="#a87832";
-  if(d===0)c.fillRect(cx-5,cy-4,11,4);
-  else if(d===2)c.fillRect(cx-5,cy,11,4);
-  else if(d===3)c.fillRect(cx-4,cy-5,4,11);
-  else c.fillRect(cx,cy-5,4,11);
+  // Sweeping arc: angle goes from -80deg to +80deg relative to facing
+  const baseAng=d===0?-Math.PI/2:d===2?Math.PI/2:d===3?Math.PI:0;
+  const swAng=((p2*160-80)*Math.PI/180); // -80 to +80
+  const ang=baseAng+swAng;
+  const reach=SR*(1+Math.sin(p2*Math.PI)*0.3); // slight reach pulse at peak
+  const tipX=cx+Math.cos(ang)*reach,tipY=cy+Math.sin(ang)*reach;
+  // Motion trail — draw 6 previous positions as fading arcs
+  c.lineCap="round";
+  for(let i=6;i>=0;i--){
+    const tp=Math.max(0,p2-i*0.04);const ta=baseAng+((tp*160-80)*Math.PI/180);
+    const tr=SR*(1+Math.sin(tp*Math.PI)*0.3);
+    const alpha=(1-i/7)*0.25;const width=4-i*0.4;
+    c.strokeStyle=`rgba(200,220,255,${alpha})`;c.lineWidth=Math.max(0.5,width);
+    c.beginPath();c.moveTo(cx+Math.cos(ta)*8,cy+Math.sin(ta)*8);c.lineTo(cx+Math.cos(ta)*tr,cy+Math.sin(ta)*tr);c.stroke();
+  }
+  // Main blade — gradient from guard to tip
+  const bg=c.createLinearGradient(cx,cy,tipX,tipY);
+  bg.addColorStop(0,"#a0a0b8");bg.addColorStop(0.3,"#d0d0e8");bg.addColorStop(0.7,"#e8e8ff");bg.addColorStop(1,"#ffffff");
+  c.strokeStyle=bg;c.lineWidth=4;c.lineCap="round";
+  c.beginPath();c.moveTo(cx+Math.cos(ang)*8,cy+Math.sin(ang)*8);c.lineTo(tipX,tipY);c.stroke();
+  // Bright edge highlight
+  c.strokeStyle="rgba(255,255,255,0.7)";c.lineWidth=1.5;
+  c.beginPath();c.moveTo(cx+Math.cos(ang)*10,cy+Math.sin(ang)*10);c.lineTo(tipX,tipY);c.stroke();
+  // Guard (crossguard)
+  const gAng=ang+Math.PI/2;
+  c.strokeStyle="#b8862a";c.lineWidth=3;
+  c.beginPath();c.moveTo(cx+Math.cos(gAng)*6+Math.cos(ang)*7,cy+Math.sin(gAng)*6+Math.sin(ang)*7);
+  c.lineTo(cx-Math.cos(gAng)*6+Math.cos(ang)*7,cy-Math.sin(gAng)*6+Math.sin(ang)*7);c.stroke();
+  // Tip sparkle burst at peak of swing
+  if(p2>0.3&&p2<0.7){
+    const sparkAlpha=(1-Math.abs(p2-0.5)/0.2)*0.8;
+    c.fillStyle=`rgba(255,255,200,${sparkAlpha})`;
+    for(let i=0;i<4;i++){const sa=ang+Math.PI*(i/2-1)*0.3;const sr=reach+3+Math.sin(p2*20+i)*4;
+      c.beginPath();c.arc(cx+Math.cos(sa)*sr,cy+Math.sin(sa)*sr,1.5,0,Math.PI*2);c.fill();}
+    // Arc glow at tip
+    const glw=c.createRadialGradient(tipX,tipY,0,tipX,tipY,8);
+    glw.addColorStop(0,`rgba(200,230,255,${sparkAlpha*0.6})`);glw.addColorStop(1,"rgba(200,230,255,0)");
+    c.fillStyle=glw;c.beginPath();c.arc(tipX,tipY,8,0,Math.PI*2);c.fill();
+  }
+  c.lineCap="butt";
 }
 
 function dSk(c,x,y,sz,fl,t){c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(x+sz/2,y+sz-2,sz/2-2,3,0,0,Math.PI*2);c.fill();
@@ -587,7 +634,7 @@ function dH(c,x,y,s){c.beginPath();c.moveTo(x+s/2,y+s*.85);c.bezierCurveTo(x,y+s
 function dT(c,tl,px,py,iD,dg,t){
   switch(tl){
     case T.GRASS:{const g=c.createRadialGradient(px+16+hs(px,py,0)*12-6,py+16+hs(px,py,1)*12-6,3,px+16,py+16,24);
-      g.addColorStop(0,hs(px,py,0)>.5?"#2e7020":"#287818");g.addColorStop(1,"#245a18");c.fillStyle=g;c.fillRect(px,py,TL,TL);
+      g.addColorStop(0,hs(px,py,0)>.5?"#4aaa3a":"#40b838");g.addColorStop(1,"#38982e");c.fillStyle=g;c.fillRect(px,py,TL,TL);
       // Organic grass clumps (circles instead of rects)
       c.fillStyle="#3a9028";const n=4+((hs(px,py,50)*4)|0);
       for(let i=0;i<n;i++){const gx=px+hs(px,py,i*10+1)*28+2,gy=py+hs(px,py,i*10+2)*26+3;
@@ -597,7 +644,7 @@ function dT(c,tl,px,py,iD,dg,t){
       c.beginPath();c.arc(cx2,cy2,5+hs(px,py,72)*4,0,Math.PI*2);c.fill();
       break;}
     case T.WATER:{const wg=c.createRadialGradient(px+16+Math.sin(t/800+px/40)*4,py+16+Math.cos(t/700+py/40)*4,4,px+16,py+16,24);
-      wg.addColorStop(0,"#1e4268");wg.addColorStop(0.6,"#163858");wg.addColorStop(1,"#122e48");c.fillStyle=wg;c.fillRect(px,py,TL,TL);
+      wg.addColorStop(0,"#3070b8");wg.addColorStop(0.6,"#2860a0");wg.addColorStop(1,"#205088");c.fillStyle=wg;c.fillRect(px,py,TL,TL);
       const w=Math.sin(t/600+px/30)*2,w2=Math.sin(t/500+py/25)*2;
       // Flowing wave curves
       c.strokeStyle="rgba(80,150,210,0.3)";c.lineWidth=1.5;
@@ -609,7 +656,7 @@ function dT(c,tl,px,py,iD,dg,t){
       c.fillStyle=`rgba(200,230,255,${sh})`;c.beginPath();c.arc(px+10+w,py+6,3,0,Math.PI*2);c.fill();
       c.fillStyle=`rgba(180,210,245,${sh*.7})`;c.beginPath();c.arc(px+22-w2,py+24,2.5,0,Math.PI*2);c.fill();
       break;}
-    case T.TREE:{c.fillStyle="#2d6a1e";c.fillRect(px,py,TL,TL);
+    case T.TREE:{c.fillStyle="#38982e";c.fillRect(px,py,TL,TL);
       const tv=((Math.floor(px/TL)*13+Math.floor(py/TL)*7)&3); // 4 tree varieties
       if(tv===0){// Round oak
         c.fillStyle="#4a2810";c.fillRect(px+12,py+20,8,12);c.fillStyle="#5a3818";c.fillRect(px+14,py+22,2,8);
@@ -685,7 +732,7 @@ function dT(c,tl,px,py,iD,dg,t){
     case T.TRIFORCE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const tg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(253,211,51,${tg})`;c.beginPath();c.arc(px+16,py+16,14,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+27,py+26);c.lineTo(px+5,py+26);c.fill();c.fillStyle="#ffe866";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+23,py+22);c.lineTo(px+9,py+22);c.fill();break;}
     case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);for(let i=0;i<4;i++){c.fillStyle=`rgb(${80+i*20},${80+i*20},${80+i*20})`;c.fillRect(px+3,py+3+i*7,TL-6,5);}c.fillStyle="#6c6";c.font="bold 9px monospace";c.fillText("EXIT",px+5,py+20);break;}
     case T.SAND:{const sg=c.createRadialGradient(px+16+hs(px,py,0)*10-5,py+16+hs(px,py,1)*10-5,5,px+16,py+16,24);
-      sg.addColorStop(0,"#d8bc60");sg.addColorStop(0.5,"#ccb050");sg.addColorStop(1,"#bca040");c.fillStyle=sg;c.fillRect(px,py,TL,TL);
+      sg.addColorStop(0,"#e8d478");sg.addColorStop(0.5,"#dcc468");sg.addColorStop(1,"#d0b858");c.fillStyle=sg;c.fillRect(px,py,TL,TL);
       // Wind ripple lines (curved)
       c.strokeStyle="rgba(160,130,60,0.25)";c.lineWidth=1;
       const wr=hs(px,py,80)*8;
@@ -714,7 +761,7 @@ function dT(c,tl,px,py,iD,dg,t){
       c.fillStyle=fv<2?"#ffe844":"#fff";c.fillRect(fcx,fcy,2,2);
       break;}
     case T.PATH:{const pg=c.createRadialGradient(px+16+hs(px,py,5)*10-5,py+16+hs(px,py,6)*10-5,5,px+16,py+16,22);
-      pg.addColorStop(0,"#bca878");pg.addColorStop(0.6,"#a89060");pg.addColorStop(1,"#96804a");c.fillStyle=pg;c.fillRect(px,py,TL,TL);
+      pg.addColorStop(0,"#d4be90");pg.addColorStop(0.6,"#c0a878");pg.addColorStop(1,"#b09868");c.fillStyle=pg;c.fillRect(px,py,TL,TL);
       // Rounded dirt patches
       c.fillStyle="rgba(130,110,70,0.4)";
       c.beginPath();c.arc(px+hs(px,py,1)*20+6,py+hs(px,py,2)*20+6,4+hs(px,py,3)*3,0,Math.PI*2);c.fill();
@@ -800,10 +847,146 @@ function dT(c,tl,px,py,iD,dg,t){
   }
 }
 
+// Organic terrain overlay — paints curved blobs and spline edges over the tile grid
+function drawTerrainOverlay(c,m,t){
+  if(!m)return;
+  // For each tile, draw soft organic extensions that overlap neighbors of same type
+  // This breaks up the grid pattern and creates flowing landscape feel
+  const tColor=(tl)=>{
+    if(tl===T.GRASS||tl===T.FLOWER||tl===T.TALLGRASS||tl===T.BUSH||tl===T.STUMP)return["#44aa38","#3ca030","#38982e"];
+    if(tl===T.WATER)return["#3070b8","#2860a0","#205088"];
+    if(tl===T.PATH||tl===T.BRIDGE)return["#d0b880","#c0a870","#b09860"];
+    if(tl===T.SAND)return["#e0cc68","#d4c058","#c8b448"];
+    if(tl===T.TREE)return["#2a8020","#248018","#1e7010"];
+    return null;
+  };
+  const tGrp=(tl)=>{
+    if(tl===T.WATER)return 1;
+    if(tl===T.PATH||tl===T.BRIDGE)return 2;
+    if(tl===T.SAND)return 3;
+    if(tl===T.GRASS||tl===T.FLOWER||tl===T.TALLGRASS||tl===T.BUSH||tl===T.STUMP||tl===T.TREE)return 0;
+    return-1;
+  };
+  // PASS 1: Organic same-type connections — draw soft blobs between adjacent same-type tiles
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    const tl=m[y][x];const g=tGrp(tl);if(g<0)continue;
+    const cols=tColor(tl);if(!cols)continue;
+    const cx2=x*TL+TL/2,cy2=y*TL+TL/2;
+    // Check each neighbor — if same group, draw connecting blob
+    const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+    for(const[dx2,dy2]of dirs){
+      const nx=x+dx2,ny=y+dy2;
+      if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+      if(tGrp(m[ny][nx])!==g)continue;
+      // Draw organic connecting blob between tile centers
+      const nx2=nx*TL+TL/2,ny2=ny*TL+TL/2;
+      const mx2=(cx2+nx2)/2,my2=(cy2+ny2)/2;
+      // Noise offset for organic feel
+      const nox=hs(x*7+y*13,nx*11+ny*17,42)*8-4;
+      const noy=hs(x*11+y*7,nx*17+ny*11,43)*8-4;
+      const r=TL*0.45+hs(x*3+y*5,nx*5+ny*3,44)*6;
+      c.fillStyle=cols[1];c.globalAlpha=0.3;
+      c.beginPath();c.arc(mx2+nox,my2+noy,r,0,Math.PI*2);c.fill();
+    }
+  }
+  c.globalAlpha=1;
+  // PASS 2: Soft boundary transitions — curved gradient edges between different types
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    const tl=m[y][x];const g=tGrp(tl);if(g<0)continue;
+    const cols=tColor(tl);if(!cols)continue;
+    const px2=x*TL,py2=y*TL;
+    // Check right and bottom neighbors for different terrain
+    for(const[dx2,dy2]of[[1,0],[0,1]]){
+      const nx=x+dx2,ny=y+dy2;
+      if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+      const ng=tGrp(m[ny][nx]);
+      if(ng===g||ng<0)continue;
+      const ncols=tColor(m[ny][nx]);if(!ncols)continue;
+      // Draw 5-7 overlapping soft circles along the border creating curved edge
+      const count=5+((hs(x,y,99)*3)|0);
+      for(let i=0;i<count;i++){
+        const frac=i/(count-1);
+        // Position along the shared edge with noise offset
+        let bx,by;
+        if(dx2===1){// right edge
+          bx=px2+TL;by=py2+frac*TL;
+        }else{// bottom edge
+          bx=px2+frac*TL;by=py2+TL;
+        }
+        // Noise perpendicular to edge
+        const nPerp=(hs(x*13+y*7+i*31,dx2*19+dy2*23,50+i)*12-6);
+        const nAlong=(hs(x*7+y*13+i*37,dx2*23+dy2*19,60+i)*6-3);
+        if(dx2===1){bx+=nPerp;by+=nAlong;}else{bx+=nAlong;by+=nPerp;}
+        const r=4+hs(x*11+y*17+i*41,0,70+i)*5;
+        // Draw blob of current terrain type extending into neighbor
+        c.fillStyle=cols[0];c.globalAlpha=0.25+hs(x,y,80+i)*0.15;
+        c.beginPath();c.arc(bx-dx2*2,by-dy2*2,r,0,Math.PI*2);c.fill();
+        // And neighbor extending back
+        c.fillStyle=ncols[0];c.globalAlpha=0.25+hs(nx,ny,80+i)*0.15;
+        c.beginPath();c.arc(bx+dx2*2,by+dy2*2,r,0,Math.PI*2);c.fill();
+      }
+    }
+  }
+  c.globalAlpha=1;
+  // PASS 3: Organic grass detail — scattered blades and clumps as small curved strokes
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    const tl=m[y][x];
+    if(tl===T.GRASS||tl===T.TALLGRASS){
+      const px2=x*TL,py2=y*TL;
+      const count=3+((hs(x,y,200)*4)|0);
+      for(let i=0;i<count;i++){
+        const gx=px2+hs(x,y,210+i*3)*28+2;
+        const gy=py2+hs(x,y,211+i*3)*24+4;
+        const gh=3+hs(x,y,212+i*3)*4;
+        const sway=Math.sin(t/800+gx/40+gy/30)*1.5;
+        c.strokeStyle=`rgba(60,160,40,${0.3+hs(x,y,213+i*3)*0.3})`;
+        c.lineWidth=1;c.lineCap="round";
+        c.beginPath();c.moveTo(gx,gy+gh);c.quadraticCurveTo(gx+sway,gy+gh/2,gx+sway*1.5,gy);c.stroke();
+      }
+    }
+    // Water surface detail — flowing curves
+    if(tl===T.WATER){
+      const px2=x*TL,py2=y*TL;
+      const w1=Math.sin(t/700+px2/35)*2.5;
+      const w2=Math.sin(t/550+py2/30)*2;
+      c.strokeStyle="rgba(80,160,220,0.2)";c.lineWidth=1.2;c.lineCap="round";
+      c.beginPath();c.moveTo(px2-4,py2+10+w1);
+      c.bezierCurveTo(px2+8,py2+7+w1,px2+20,py2+13+w1,px2+TL+4,py2+10+w1);c.stroke();
+      c.strokeStyle="rgba(60,140,200,0.15)";
+      c.beginPath();c.moveTo(px2-2,py2+22+w2);
+      c.bezierCurveTo(px2+10,py2+19+w2,px2+22,py2+25+w2,px2+TL+2,py2+22+w2);c.stroke();
+      // Shimmer
+      const sh=Math.sin(t/250+px2/18+py2/22)*0.06+0.04;
+      c.fillStyle=`rgba(200,235,255,${sh})`;
+      c.beginPath();c.arc(px2+10+w1*2,py2+6,2.5,0,Math.PI*2);c.fill();
+    }
+    // Path surface detail — pebbles and wear marks
+    if(tl===T.PATH){
+      const px2=x*TL,py2=y*TL;
+      for(let i=0;i<2;i++){
+        c.fillStyle=`rgba(160,140,100,${0.15+hs(x,y,300+i)*0.15})`;
+        const px3=px2+hs(x,y,301+i*5)*24+4,py3=py2+hs(x,y,302+i*5)*24+4;
+        c.beginPath();c.arc(px3,py3,2+hs(x,y,303+i*5)*2,0,Math.PI*2);c.fill();
+      }
+    }
+    // Sand ripple curves
+    if(tl===T.SAND){
+      const px2=x*TL,py2=y*TL;
+      c.strokeStyle="rgba(170,140,60,0.15)";c.lineWidth=0.8;
+      const wr=hs(x,y,400)*6;
+      c.beginPath();c.moveTo(px2-2,py2+11+wr);
+      c.bezierCurveTo(px2+10,py2+8+wr,px2+22,py2+14+wr,px2+TL+2,py2+11+wr);c.stroke();
+      c.beginPath();c.moveTo(px2-2,py2+23+wr*0.5);
+      c.bezierCurveTo(px2+10,py2+20+wr*0.5,px2+22,py2+26+wr*0.5,px2+TL+2,py2+23+wr*0.5);c.stroke();
+    }
+  }
+  c.lineCap="butt";
+}
+
 // ============ GAME ============
 export default function ZeldaGame(){
   const cvR=useRef(null),stR=useRef(null),kyR=useRef(new Set()),anR=useRef(null),ltR=useRef(0);
-  const tcR=useRef({dir:null,atk:false});const[muOn,setMu]=useState(false);const ltRef=useRef(null);
+  const tcR=useRef({dir:null,atk:false});const[muOn,setMu]=useState(true);const ltRef=useRef(null);
   const[customMu,setCustomMu]=useState({...DEFAULT_MUSIC});
   const[showMuPicker,setShowMuPicker]=useState(false);
   const customAuRef=useRef(null);
@@ -828,6 +1011,8 @@ export default function ZeldaGame(){
     roomFlash:0, // room cleared flash
     respawn:{ty:"ow",scr:"1,1",di:-1,x:7*TL,y:9*TL}, // last safe position
     heartContainers:[], // bosses that already gave heart containers
+    finalOpen:false, // whether final dungeon is accessible
+    triMu:false, // triforce music playing (overrides area music)
   }),[]);
 
   useEffect(()=>{stR.current=init();
@@ -846,7 +1031,7 @@ export default function ZeldaGame(){
   useEffect(()=>{
     if(!muOn){stopMu();if(customAuRef.current){customAuRef.current.pause();customAuRef.current=null;}ltRef.current=null;return;}
     const ck=()=>{const s=stR.current;if(!s)return;
-      let th=s.title?"title":(s.loc.ty==="ow"?"overworld":s.dg[s.loc.di].th);
+      let th=s.title?"title":s.triMu?"triforce":(s.loc.ty==="ow"?"overworld":(s.loc.ty==="cave"?"forest":s.dg[s.loc.di].th));
       if(th!==ltRef.current){ltRef.current=th;
         stopMu();if(customAuRef.current){customAuRef.current.pause();customAuRef.current=null;}
         if(customMu[th]){
@@ -858,9 +1043,11 @@ export default function ZeldaGame(){
     ck();const iv=setInterval(ck,500);return()=>{clearInterval(iv);};},[muOn,customMu]);
 
   function le(s){const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
-    if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}else s.en=[];}
+    if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
+    else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
+    else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}}
 
-  function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
+  function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
   function gts(s,ns,tx,ty){let m;if(s.loc.ty==="ow")m=OW[ns];else m=s.dg[s.loc.di].rooms[ns]?.tiles;
     if(!m||ty<0||ty>=RO||tx<0||tx>=CO)return T.WALL;return m[ty][tx];}
@@ -892,16 +1079,28 @@ export default function ZeldaGame(){
 
   function cTr(s){const p=s.p,loc=s.loc;
     if(loc.ty==="ow"){
-      if(s.ec<=0)for(const ent of DE){if(ent.s!==loc.scr)continue;
-        for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
-          loc.ty="dg";loc.di=ent.d;const dg=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg.rooms))if(dg.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
-          s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
-          loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.msg={text:dg.name,t:2000};return;}}}
+      if(s.ec<=0){
+        // Dungeon entries
+        for(const ent of DE){if(ent.s!==loc.scr)continue;
+          if(ent.d===3&&!s.finalOpen)continue; // final dungeon locked
+          for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
+            loc.ty="dg";loc.di=ent.d;const dg=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg.rooms))if(dg.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
+            s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
+            loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.msg={text:dg.name,t:2000};return;}}}
+        // Cave entries
+        for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
+          for(const[tx,ty]of cv.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
+            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
+      }
       const[sx,sy]=loc.scr.split(",").map(Number);
-      if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=W2-PS-8;}else p.x=-4;}
-      if(p.x>W2-PS+4){const ns=`${sx+1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=8;}else p.x=W2-PS+4;}
-      if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){loc.scr=ns;p.y=H2-PS-8;}else p.y=-4;}
-      if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){loc.scr=ns;p.y=8;}else p.y=H2-PS+4;}
+      if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=W2-PS-8;le(s);}else p.x=-4;}
+      if(p.x>W2-PS+4){const ns=`${sx+1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=8;le(s);}else p.x=W2-PS+4;}
+      if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){loc.scr=ns;p.y=H2-PS-8;le(s);}else p.y=-4;}
+      if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){loc.scr=ns;p.y=8;le(s);}else p.y=H2-PS+4;}
+    }else if(loc.ty==="cave"){const m=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
+      if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
+        const cv=CAVES[loc.di];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
+        p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);return;}
     }else{const[rx,ry]=loc.scr.split(",").map(Number),m=gm(s);
       const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
       if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
@@ -922,7 +1121,7 @@ export default function ZeldaGame(){
       if(s.won){stR.current=init();stR.current.title=false;le(stR.current);return;}
       // Respawn: keep keys, triforce, cleared rooms, opened doors, picked items
       const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.tri=[...old.p.tri];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;
-      ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];
+      ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;
       ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
       stR.current=ns;le(ns);}return;}
     // Fade transition
@@ -988,21 +1187,54 @@ export default function ZeldaGame(){
         if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
         else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
         else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.msg={text:"Heart Container! Max HP up!",t:2500};}
+        else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("triforce");s.shake.t=500;s.triMu=false;
+          const tc=p.tri.filter(Boolean).length;
+          if(tc>=3&&!s.finalOpen){s.finalOpen=true;s.msg={text:"The Dark Sanctum has opened!",t:3000};
+            // Open final dungeon entrance at 3,1
+            const fm=OW["3,1"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}
+          }else{s.msg={text:`Triforce piece ${tc}/3!`,t:2000};}
+          s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
         s.drops.splice(i,1);continue;}
       if(d2.t>8000)s.drops.splice(i,1);}
     const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
     for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];e.mt+=dt;if(e.fl>0)e.fl-=dt;
       const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
-      e.stT+=dt;const detectRange=e.type==="boss"?300:180;const loseRange=250;
+      e.stT+=dt;const detectRange=e.type==="boss"?250:120;const loseRange=180;
       if(e.st==="patrol"&&dist<detectRange)e.st="chase";
       if(e.st==="chase"&&dist>loseRange&&e.type!=="boss")e.st="retreat";
       if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-      let es=e.type==="boss"?1.2:e.type==="ghost"?1.8:(e.type==="bat"||e.type==="fire_bat")?1.6:1.3;
+      let es=e.type==="boss"?1.0:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:1.0;
       let moveX=0,moveY=0;
       if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
         if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
-        else if(e.type==="boss"){const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
-        else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
+        else if(e.type==="boss"){
+          const ang=Math.atan2(pcy-ecy,pcx-ecx);
+          if(e.pattern==="charge"){// Forest Guardian — charges then pauses
+            const phase=Math.floor(e.mt/2000)%3;
+            if(phase===2){const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;} // charge!
+            else if(phase===1){moveX=0;moveY=0;} // pause
+            else{const bsp=es*0.6;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;} // stalk
+          }else if(e.pattern==="spawn"){// Flame Wyrm — circles and spawns fire_bats
+            const ca=e.mt/800;moveX=Math.cos(ca)*es*1.2;moveY=Math.sin(ca)*es*1.2;
+            if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)&&s.en.length<8){
+              s.en.push({x:e.x,y:e.y,hp:2,mhp:2,type:"fire_bat",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}
+          }else if(e.pattern==="teleport"){// Shadow Lord — teleports periodically
+            const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
+            if(Math.floor(e.mt/4000)!==Math.floor((e.mt-dt)/4000)){
+              e.x=TL*2+Math.random()*(W2-TL*4);e.y=TL*2+Math.random()*(H2-TL*4);
+              s.pt.push(...Array.from({length:8},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#a0a0ff"})));}
+          }else if(e.pattern==="all"){// Dark King — all patterns combined
+            const phase=Math.floor(e.mt/3000)%4;
+            if(phase===0){const bsp=es*2.5;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;} // charge
+            else if(phase===1){const ca=e.mt/600;moveX=Math.cos(ca)*es*1.5;moveY=Math.sin(ca)*es*1.5;
+              if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)&&s.en.length<6){
+                s.en.push({x:e.x,y:e.y,hp:3,mhp:3,type:"ghost",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}} // spawn
+            else if(phase===2){moveX=0;moveY=0;
+              if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)){
+                e.x=TL*2+Math.random()*(W2-TL*4);e.y=TL*2+Math.random()*(H2-TL*4);}} // teleport
+            else{const bsp=es*(1+Math.sin(e.mt/300)*.5);moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;} // aggressive
+          }else{const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
+        }else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
       }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
       else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
       const nx=e.x+moveX*(dt/16),ny=e.y+moveY*(dt/16);
@@ -1019,10 +1251,16 @@ export default function ZeldaGame(){
         // Enemy drops + boss rewards
         if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;
           s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
-          // Heart container (once per boss)
           const bossId=`${s.loc.di}:${e.name}`;
           if(!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
             s.drops.push({x:ecx,y:ecy-12,vy:-5,ground:ecy,type:"heartcontainer",t:0});}
+          // Triforce drops from sky (dungeons 0-2 only)
+          if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
+            s.drops.push({x:ecx,y:-20,vy:0.5,ground:ecy-8,type:"triforce",t:0});
+            s.triMu=true; // trigger triforce music
+          }
+          // Final boss victory
+          if(s.loc.di===3){s.won=true;s.msg={text:"The Dark King is defeated! Peace restored!",t:99999};}
         }else{sfx("kill");
           if(Math.random()<0.35)s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:Math.random()<0.7?"heart":"bomb",t:0});}
         if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
@@ -1065,30 +1303,20 @@ export default function ZeldaGame(){
     if(p.hp<=2&&p.hp>0&&Math.sin(s.lowHp/200)>0.3){c.fillStyle="rgba(255,50,50,0.15)";c.fillRect(0,0,W2,HH);}
     c.fillStyle="#fd3";c.font="bold 13px monospace";c.fillText(`\ud83d\udd11${p.keys}`,W2-110,21);c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,W2-60,21);
     for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",W2-180+i*20,21);}
-    const iD2=s.loc.ty==="dg";
-    if(iD2){c.fillStyle="#999";c.font="bold 11px monospace";c.fillText(s.dg[s.loc.di].name,p.mhp/2*22+16,21);}
+    const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
+    if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 11px monospace";c.fillText(dgn,p.mhp/2*22+16,21);}
     // ===== GAME AREA (offset by HH) =====
     c.save();c.translate(0,HH);
     // Camera shake
     if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
-    const m=gm(s),loc=s.loc,iD=loc.ty==="dg",dg=iD?s.dg[loc.di]:null;
-    c.fillStyle=iD?dg.color:"#1a1a2e";c.fillRect(0,0,W2,H2);
+    const m=gm(s),loc=s.loc,iD=loc.ty==="dg"||loc.ty==="cave",dg=loc.ty==="dg"?s.dg[loc.di]:(loc.ty==="cave"?{color:"#1a2a18",wc:"#3a5a3a",fc:"#2a3a28",name:"Hidden Cave"}:null);
+    c.fillStyle=iD?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
     if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
       const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
       if((tl===T.KEY||tl===T.HEART||tl===T.TRIFORCE||tl===T.BOMB)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
       if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;dT(c,tl,px,py,iD,dg,t);}
-    // Terrain edge blending
-    if(m&&!iD){
-      const tGrp=(t2)=>t2===T.WATER?1:t2===T.PATH||t2===T.BRIDGE?2:t2===T.SAND?3:t2===T.ROCK?4:(t2===T.GRASS||t2===T.FLOWER||t2===T.TALLGRASS||t2===T.BUSH||t2===T.STUMP||t2===T.TREE)?0:5;
-      const tClr=(g)=>g===0?"#286a1a":g===1?"#163850":g===2?"#9a8058":g===3?"#b8a040":g===4?"#5a5a5a":"#286a1a";
-      for(let y2=0;y2<RO;y2++)for(let x2=0;x2<CO;x2++){
-        const ct=m[y2][x2];const cg=tGrp(ct);const px2=x2*TL,py2=y2*TL;
-        const dirs=[[0,-1,px2+TL/2,py2],[0,1,px2+TL/2,py2+TL],[1,0,px2+TL,py2+TL/2],[-1,0,px2,py2+TL/2]];
-        for(const[dx2,dy2,ex,ey2]of dirs){const nx2=x2+dx2,ny2=y2+dy2;if(nx2<0||nx2>=CO||ny2<0||ny2>=RO)continue;
-          const ng=tGrp(m[ny2][nx2]);if(cg!==ng&&cg<ng){const bc=tClr(cg);
-            for(let i=0;i<4;i++){const spread=TL*0.7,off=(i/3-.5)*spread;
-              const bx=dx2===0?ex+off:ex+dx2*hs(px2,py2,i*7+30)*6;const by=dy2===0?ey2+off:ey2+dy2*hs(px2,py2,i*7+31)*6;
-              c.fillStyle=bc;c.globalAlpha=0.4+hs(px2,py2,i*13+50)*0.3;c.beginPath();c.arc(bx,by,3+hs(px2,py2,i*11+40)*5,0,Math.PI*2);c.fill();}c.globalAlpha=1;}}}}
+    // Organic terrain overlay — curved mesh blending
+    if(!iD)drawTerrainOverlay(c,m,t);
     // Enemies
     for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES,ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
       if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
@@ -1101,6 +1329,10 @@ export default function ZeldaGame(){
         const hcg=Math.sin(t/150)*0.2+0.4;c.fillStyle=`rgba(255,50,50,${hcg})`;c.beginPath();c.arc(d2.x,d2.y+bob2,12,0,Math.PI*2);c.fill();
         c.fillStyle="#ff2222";dH(c,d2.x-8,d2.y-8+bob2,16);c.fillStyle="#ff8888";dH(c,d2.x-4,d2.y-5+bob2,8);
         c.fillStyle="#fff";dH(c,d2.x-2,d2.y-3+bob2,4);}
+      else if(d2.type==="triforce"){
+        const tg2=Math.sin(t/150)*0.3+0.7;c.fillStyle=`rgba(253,211,51,${tg2*0.3})`;c.beginPath();c.arc(d2.x,d2.y+bob2,14,0,Math.PI*2);c.fill();
+        c.fillStyle="#ffd633";c.beginPath();c.moveTo(d2.x,d2.y-8+bob2);c.lineTo(d2.x+10,d2.y+8+bob2);c.lineTo(d2.x-10,d2.y+8+bob2);c.fill();
+        c.fillStyle="#ffe866";c.beginPath();c.moveTo(d2.x,d2.y-5+bob2);c.lineTo(d2.x+6,d2.y+5+bob2);c.lineTo(d2.x-6,d2.y+5+bob2);c.fill();}
       else{c.fillStyle="#444";c.beginPath();c.arc(d2.x,d2.y+bob2,5,0,Math.PI*2);c.fill();c.fillStyle="#666";c.beginPath();c.arc(d2.x,d2.y-1+bob2,4,0,Math.PI*2);c.fill();}}
     // ===== PLAYER (with death animation) =====
     if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
@@ -1116,7 +1348,7 @@ export default function ZeldaGame(){
     if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
     // Vignette (in game space)
     const vig=c.createRadialGradient(W2/2,H2/2,W2*0.35,W2/2,H2/2,W2*0.7);
-    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,0,0.2)");
+    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.3)":"rgba(0,0,0,0.1)");
     c.fillStyle=vig;c.fillRect(0,0,W2,H2);
     // Minimap (in game space, bottom-right)
     if(iD){const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
@@ -1169,10 +1401,10 @@ export default function ZeldaGame(){
   },[]);
 
   return(
-    <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:isFS?"center":"center",minHeight:isFS?"100%":"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:isFS?8:16,userSelect:"none",WebkitUserSelect:"none",width:isFS?"100%":"auto",height:isFS?"100%":"auto"}}>
+    <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:16,userSelect:"none",WebkitUserSelect:"none"}}>
       <h1 style={{fontSize:24,color:"#fd3",margin:"0 0 4px 0",textShadow:"0 0 20px rgba(253,211,51,0.3), 0 2px 4px rgba(0,0,0,0.5)",letterSpacing:6,fontWeight:"900"}}>THE LEGEND OF LINK</h1>
       <p style={{fontSize:11,color:"#666",margin:"0 0 10px 0",textAlign:"center",letterSpacing:1}}>WASD / Arrows · Space attack · B bomb · P pause · M music</p>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();});}if(s&&s.paused)s.paused=false;}} style={{border:isFS?"none":"2px solid #222",borderRadius:isFS?0:6,width:isFS?"100%":W2,height:isFS?"auto":H2+HH,maxWidth:"100%",maxHeight:isFS?"60vh":"none",aspectRatio:`${W2}/${H2+HH}`,boxShadow:isFS?"none":"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();});}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
@@ -1189,8 +1421,7 @@ export default function ZeldaGame(){
             style={{width:36,height:36,borderRadius:6,background:"rgba(100,100,255,0.1)",border:"1px solid rgba(100,100,255,0.2)",color:"#8af",fontSize:10,fontFamily:"monospace",cursor:"pointer",touchAction:"none"}}>BMB</button>
         </div>
       </div>
-      <div style={{display:"flex",gap:16,marginTop:10,fontSize:10,color:"#444",letterSpacing:1,alignItems:"center",flexWrap:"wrap",justifyContent:"center"}}>
-        <span>🏰 3 DUNGEONS</span><span>🗡 COMBAT</span><span>🔑 KEYS</span><span>▲ TRIFORCE</span>
+      <div style={{display:"flex",gap:12,marginTop:10,fontSize:10,color:"#444",letterSpacing:1,alignItems:"center",flexWrap:"wrap",justifyContent:"center"}}>
         <button onClick={()=>{Tone.start().then(()=>{initSfx();});setMu(p=>!p);}}
           style={{background:muOn?"rgba(253,211,51,0.2)":"rgba(255,255,255,0.06)",border:`1px solid ${muOn?"rgba(253,211,51,0.4)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:muOn?"#fd3":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>{muOn?"♪ ON":"♪ OFF"}</button>
         <button onClick={()=>setShowMuPicker(p=>!p)}
@@ -1200,7 +1431,7 @@ export default function ZeldaGame(){
       </div>
       {showMuPicker&&<div style={{background:"rgba(0,0,0,0.85)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:12,marginTop:8,maxWidth:480,width:"100%"}}>
         <div style={{color:"#aaa",fontSize:11,fontFamily:"monospace",marginBottom:8,textAlign:"center"}}>CUSTOM MUSIC — Pick files or paste URLs</div>
-        {[["title","🎬 Title Screen"],["overworld","🌍 Overworld"],["forest","🌲 Forest Temple"],["fire","🔥 Fire Cavern"],["shadow","👻 Shadow Keep"]].map(([key,label])=>
+        {[["title","🎬 Title Screen"],["overworld","🌍 Overworld"],["forest","🌲 Forest Temple"],["fire","🔥 Fire Cavern"],["shadow","👻 Shadow Keep"],["triforce","✨ Triforce Moment"]].map(([key,label])=>
           <div key={key} style={{marginBottom:8,padding:6,background:"rgba(255,255,255,0.02)",borderRadius:4}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
               <span style={{color:"#888",fontSize:10,fontFamily:"monospace",width:100,flexShrink:0}}>{label}</span>
