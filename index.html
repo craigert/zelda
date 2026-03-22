@@ -1294,23 +1294,176 @@ function ZeldaGame(){
     const FH=H2+HH; // full canvas height
     c.setTransform(4,0,0,4,0,0);
     c.fillStyle="#060610";c.fillRect(0,0,W2,FH);
-    // ===== TITLE SCREEN =====
+    // ===== TITLE SCREEN — Anime hero on cliff overlooking the land =====
     if(s.title){
-      for(let i=0;i<40;i++){const stx=((t/20+i*127)%W2),sty=((i*97+Math.sin(t/1000+i)*20)%FH);
-        c.fillStyle=`rgba(255,255,200,${0.3+Math.sin(t/500+i)*0.2})`;c.beginPath();c.arc(stx,sty,0.5+Math.sin(t/300+i*2)*0.3,0,Math.PI*2);c.fill();}
-      c.fillStyle="#0a1a08";c.fillRect(0,FH*0.75,W2,FH*0.25);
-      c.fillStyle="#0c2010";for(let i=0;i<8;i++){c.beginPath();c.arc(i*68-20,FH*0.75,20+Math.sin(i*3)*8,Math.PI,0);c.fill();}
-      const glow=Math.sin(t/400)*0.3+0.7;
-      c.fillStyle=`rgba(253,211,51,${glow*0.15})`;c.font="bold 36px monospace";c.textAlign="center";c.fillText("THE LEGEND OF LINK",W2/2,FH*0.28+2);
-      c.fillStyle="#fd3";c.fillText("THE LEGEND OF LINK",W2/2,FH*0.28);
-      c.fillStyle="#aaa";c.font="13px monospace";c.fillText("Quest for the Triforce",W2/2,FH*0.36);
-      c.fillStyle=`rgba(253,211,51,${glow})`;
-      c.beginPath();c.moveTo(W2/2,FH*0.43);c.lineTo(W2/2+20,FH*0.53);c.lineTo(W2/2-20,FH*0.53);c.fill();
-      c.beginPath();c.moveTo(W2/2-20,FH*0.53);c.lineTo(W2/2,FH*0.63);c.lineTo(W2/2-40,FH*0.63);c.fill();
-      c.beginPath();c.moveTo(W2/2+20,FH*0.53);c.lineTo(W2/2+40,FH*0.63);c.lineTo(W2/2,FH*0.63);c.fill();
-      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 15px monospace";c.fillText("TAP OR PRESS SPACE",W2/2,FH*0.78);}
-      c.fillStyle="#555";c.font="10px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W2/2,FH*0.86);
-      c.textAlign="left";return;}
+      const W=W2,H=FH;
+      // SKY — warm sunset gradient
+      const sky=c.createLinearGradient(0,0,0,H*0.6);
+      sky.addColorStop(0,"#1a1040");sky.addColorStop(0.25,"#3a2060");sky.addColorStop(0.45,"#c05030");
+      sky.addColorStop(0.55,"#e8a040");sky.addColorStop(0.65,"#f0d060");sky.addColorStop(0.75,"#d0a838");sky.addColorStop(1,"#2a5020");
+      c.fillStyle=sky;c.fillRect(0,0,W,H);
+      // SUN — low on horizon
+      const sunY=H*0.52;const sunG=c.createRadialGradient(W*0.35,sunY,5,W*0.35,sunY,80);
+      sunG.addColorStop(0,"rgba(255,240,200,0.9)");sunG.addColorStop(0.3,"rgba(255,200,100,0.5)");sunG.addColorStop(1,"rgba(255,150,50,0)");
+      c.fillStyle=sunG;c.beginPath();c.arc(W*0.35,sunY,80,0,Math.PI*2);c.fill();
+      c.fillStyle="rgba(255,230,180,0.8)";c.beginPath();c.arc(W*0.35,sunY,20,0,Math.PI*2);c.fill();
+      // STARS twinkling in upper sky
+      for(let i=0;i<25;i++){const sx=hs(i,0,1)*W,sy=hs(i,0,2)*H*0.3;
+        const br=Math.sin(t/400+i*2)*0.3+0.4;if(br>0.2){c.fillStyle=`rgba(255,255,220,${br})`;c.beginPath();c.arc(sx,sy,0.8,0,Math.PI*2);c.fill();}}
+      // CLOUDS drifting
+      for(let i=0;i<5;i++){const cx2=((t/40+i*130)%((W+120)))-60,cy2=H*0.15+i*25+Math.sin(i*2)*15;
+        const cg=c.createRadialGradient(cx2,cy2,5,cx2,cy2,35+i*8);
+        cg.addColorStop(0,`rgba(200,150,120,${0.15+i*0.02})`);cg.addColorStop(1,"rgba(200,150,120,0)");
+        c.fillStyle=cg;c.beginPath();c.ellipse(cx2,cy2,40+i*10,15+i*3,0,0,Math.PI*2);c.fill();}
+      // DISTANT MOUNTAINS
+      c.fillStyle="#2a4038";c.beginPath();c.moveTo(0,H*0.55);
+      c.lineTo(W*0.08,H*0.42);c.lineTo(W*0.18,H*0.48);c.lineTo(W*0.28,H*0.38);c.lineTo(W*0.4,H*0.46);
+      c.lineTo(W*0.5,H*0.40);c.lineTo(W*0.58,H*0.44);c.lineTo(W*0.65,H*0.5);c.lineTo(W,H*0.55);
+      c.lineTo(W,H*0.6);c.lineTo(0,H*0.6);c.fill();
+      c.fillStyle="#1a3028";c.beginPath();c.moveTo(0,H*0.55);
+      c.lineTo(W*0.1,H*0.48);c.lineTo(W*0.22,H*0.52);c.lineTo(W*0.35,H*0.46);c.lineTo(W*0.45,H*0.50);
+      c.lineTo(W*0.55,H*0.53);c.lineTo(W*0.62,H*0.56);c.lineTo(W,H*0.58);c.lineTo(W,H*0.62);c.lineTo(0,H*0.62);c.fill();
+      // ROLLING GREEN LAND below
+      const landG=c.createLinearGradient(0,H*0.55,0,H);landG.addColorStop(0,"#3a8830");landG.addColorStop(0.4,"#2a6820");landG.addColorStop(1,"#1a4a14");
+      c.fillStyle=landG;c.beginPath();c.moveTo(0,H*0.58);
+      c.bezierCurveTo(W*0.2,H*0.55,W*0.4,H*0.62,W*0.6,H*0.58);
+      c.bezierCurveTo(W*0.75,H*0.55,W*0.85,H*0.6,W,H*0.56);c.lineTo(W,H);c.lineTo(0,H);c.fill();
+      // Tiny trees on landscape
+      for(let i=0;i<12;i++){const tx2=W*0.05+i*W*0.07+hs(i,0,10)*20,ty2=H*0.56+hs(i,0,11)*H*0.15;
+        const ts=3+hs(i,0,12)*4;c.fillStyle="#1a5010";c.beginPath();c.arc(tx2,ty2,ts,0,Math.PI*2);c.fill();
+        c.fillStyle="#3a2010";c.fillRect(tx2-1,ty2+ts-1,2,ts);}
+      // River winding through landscape
+      c.strokeStyle="rgba(60,140,200,0.4)";c.lineWidth=3;c.beginPath();
+      c.moveTo(W*0.15,H*0.62);c.bezierCurveTo(W*0.25,H*0.65,W*0.3,H*0.60,W*0.45,H*0.67);
+      c.bezierCurveTo(W*0.55,H*0.72,W*0.5,H*0.63,W*0.6,H*0.70);c.stroke();
+      // CLIFF — right side, hero stands on it
+      const cliffX=W*0.62,cliffY=H*0.50;
+      // Cliff face
+      const cliffG=c.createLinearGradient(cliffX,cliffY,cliffX+W*0.4,H);
+      cliffG.addColorStop(0,"#5a5040");cliffG.addColorStop(0.5,"#4a4030");cliffG.addColorStop(1,"#3a3020");
+      c.fillStyle=cliffG;c.beginPath();c.moveTo(cliffX,cliffY);c.lineTo(cliffX+20,cliffY+5);
+      c.lineTo(W,cliffY+30);c.lineTo(W,H);c.lineTo(cliffX-20,H);c.lineTo(cliffX-15,cliffY+40);c.closePath();c.fill();
+      // Cliff top grass
+      c.fillStyle="#3a8830";c.beginPath();c.moveTo(cliffX-18,cliffY+2);
+      c.bezierCurveTo(cliffX,cliffY-5,cliffX+40,cliffY-2,W,cliffY+25);
+      c.lineTo(W,cliffY+35);c.bezierCurveTo(cliffX+40,cliffY+8,cliffX,cliffY+5,cliffX-18,cliffY+12);c.fill();
+      // Additional grass below cliff top
+      c.fillStyle="#2a6820";c.fillRect(cliffX-20,cliffY+10,W-cliffX+20,H-cliffY-10);
+      // Rock texture on cliff
+      c.strokeStyle="rgba(0,0,0,0.1)";c.lineWidth=1;
+      for(let i=0;i<6;i++){c.beginPath();c.moveTo(cliffX-5+i*15,cliffY+20+i*20);c.lineTo(cliffX+10+i*20,cliffY+50+i*25);c.stroke();}
+      // ===== HERO ON CLIFF — anime style =====
+      const hx2=W*0.72,hy2=cliffY-45;
+      const windSway=Math.sin(t/600)*2;const capeSway=Math.sin(t/400)*8;
+      // Shadow under hero
+      c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx2,cliffY-1,14,4,0,0,Math.PI*2);c.fill();
+      // CAPE — flowing behind in wind
+      const capeG=c.createLinearGradient(hx2,hy2+10,hx2-25+capeSway,hy2+50);
+      capeG.addColorStop(0,"#1a6a1a");capeG.addColorStop(1,"#0a4a0a");
+      c.fillStyle=capeG;c.beginPath();c.moveTo(hx2-4,hy2+8);c.bezierCurveTo(hx2-15,hy2+25,hx2-25+capeSway,hy2+40,hx2-20+capeSway*1.2,hy2+52);
+      c.lineTo(hx2-10+capeSway*0.5,hy2+48);c.bezierCurveTo(hx2-8,hy2+35,hx2-2,hy2+20,hx2+2,hy2+10);c.fill();
+      // Cape edge highlight
+      c.strokeStyle="rgba(100,200,80,0.3)";c.lineWidth=1;c.beginPath();
+      c.moveTo(hx2-4,hy2+8);c.bezierCurveTo(hx2-15,hy2+25,hx2-25+capeSway,hy2+40,hx2-20+capeSway*1.2,hy2+52);c.stroke();
+      // BOOTS
+      c.fillStyle="#5a3018";c.beginPath();c.ellipse(hx2-5,cliffY-4,5,4,0,0,Math.PI*2);c.fill();
+      c.beginPath();c.ellipse(hx2+5,cliffY-4,5,4,0,0,Math.PI*2);c.fill();
+      // LEGS
+      c.fillStyle="#c8b080";c.fillRect(hx2-6,hy2+32,5,14);c.fillRect(hx2+1,hy2+32,5,14);
+      // TUNIC body
+      const tunicG=c.createLinearGradient(hx2-10,hy2+10,hx2+10,hy2+34);
+      tunicG.addColorStop(0,"#48bb48");tunicG.addColorStop(1,"#2a8a2a");
+      c.fillStyle=tunicG;c.beginPath();c.moveTo(hx2-10,hy2+12);c.lineTo(hx2+10,hy2+12);
+      c.lineTo(hx2+9,hy2+34);c.lineTo(hx2-9,hy2+34);c.fill();
+      // Belt
+      c.fillStyle="#a87a2a";c.fillRect(hx2-9,hy2+26,18,3);c.fillStyle="#d4b040";c.fillRect(hx2-3,hy2+26,6,3);
+      // ARMS — one forward (looking out)
+      c.fillStyle="#48bb48";c.fillRect(hx2+9,hy2+14,5,12);c.fillRect(hx2-14,hy2+16+windSway,5,10);
+      // Hands
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx2+11,hy2+27,3,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(hx2-12,hy2+27+windSway,3,0,Math.PI*2);c.fill();
+      // SWORD in right hand — gleaming
+      c.strokeStyle="#c0c0d8";c.lineWidth=2.5;c.lineCap="round";
+      c.beginPath();c.moveTo(hx2+12,hy2+25);c.lineTo(hx2+14,hy2+5);c.stroke();
+      c.strokeStyle="#fff";c.lineWidth=1;c.beginPath();c.moveTo(hx2+12,hy2+24);c.lineTo(hx2+14,hy2+8);c.stroke();
+      // Sword guard
+      c.strokeStyle="#b8862a";c.lineWidth=2.5;c.beginPath();c.moveTo(hx2+8,hy2+25);c.lineTo(hx2+16,hy2+25);c.stroke();
+      // Sword glint
+      const glint=Math.sin(t/300)*0.5+0.5;
+      c.fillStyle=`rgba(255,255,220,${glint*0.8})`;c.beginPath();c.arc(hx2+14,hy2+7,2,0,Math.PI*2);c.fill();
+      // HEAD
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx2,hy2+4,9,0,Math.PI*2);c.fill();
+      // HAIR — blonde, windswept
+      const hairG=c.createLinearGradient(hx2-8,hy2-6,hx2+8,hy2+2);
+      hairG.addColorStop(0,"#e8c040");hairG.addColorStop(1,"#c8a030");
+      c.fillStyle=hairG;c.beginPath();c.arc(hx2,hy2+1,9,Math.PI+0.4,Math.PI*2-0.4);c.fill();
+      // Wind-blown hair strands
+      c.fillStyle="#d8b030";c.beginPath();c.moveTo(hx2-7,hy2);
+      c.bezierCurveTo(hx2-14,hy2-2+windSway,hx2-18,hy2+5+windSway,hx2-15,hy2+10+windSway*1.5);
+      c.lineTo(hx2-12,hy2+8+windSway);c.bezierCurveTo(hx2-14,hy2+3+windSway,hx2-10,hy2+1,hx2-6,hy2+2);c.fill();
+      c.fillStyle="#c8a028";c.beginPath();c.moveTo(hx2-5,hy2-2);
+      c.bezierCurveTo(hx2-10,hy2-5+windSway*0.7,hx2-16,hy2+2+windSway,hx2-12,hy2+7+windSway);
+      c.lineTo(hx2-10,hy2+5+windSway);c.bezierCurveTo(hx2-12,hy2,hx2-8,hy2-3,hx2-4,hy2);c.fill();
+      // HAT — pointed, flowing
+      c.fillStyle="#2aaa2a";c.beginPath();c.moveTo(hx2-8,hy2);c.lineTo(hx2,hy2-12);c.lineTo(hx2+8,hy2);
+      c.bezierCurveTo(hx2+4,hy2-2,hx2-4,hy2-2,hx2-8,hy2);c.fill();
+      // Hat tail flowing in wind
+      c.fillStyle="#28992a";c.beginPath();c.moveTo(hx2,hy2-11);
+      c.bezierCurveTo(hx2-8+capeSway*0.6,hy2-14,hx2-15+capeSway*0.8,hy2-8,hx2-18+capeSway,hy2-4);
+      c.lineTo(hx2-14+capeSway*0.7,hy2-6);c.bezierCurveTo(hx2-10+capeSway*0.4,hy2-10,hx2-5,hy2-12,hx2+1,hy2-10);c.fill();
+      // FACE — looking out at landscape (3/4 view left)
+      c.fillStyle="#2244aa";c.beginPath();c.arc(hx2-3,hy2+3,2,0,Math.PI*2);c.fill();
+      c.fillStyle="#fff";c.fillRect(hx2-3.5,hy2+2,1,1);
+      // Determined expression
+      c.strokeStyle="#aa6644";c.lineWidth=0.8;c.beginPath();c.moveTo(hx2-4,hy2+7);c.lineTo(hx2-1,hy2+7.5);c.stroke();
+      // Ear
+      c.fillStyle="#e8c0a0";c.beginPath();c.ellipse(hx2+7,hy2+4,2,3.5,0.2,0,Math.PI*2);c.fill();
+      // ===== TITLE TEXT in sky =====
+      c.textAlign="center";const glow=Math.sin(t/400)*0.3+0.7;
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.4)";c.font="bold 28px monospace";c.fillText("THE LEGEND OF LINK",W/2+1,H*0.14+1);
+      // Glow
+      c.fillStyle=`rgba(253,211,51,${glow*0.2})`;c.font="bold 30px monospace";c.fillText("THE LEGEND OF LINK",W/2,H*0.14);
+      // Main
+      const titleG=c.createLinearGradient(0,H*0.10,0,H*0.18);titleG.addColorStop(0,"#ffd633");titleG.addColorStop(1,"#e8a020");
+      c.fillStyle=titleG;c.font="bold 28px monospace";c.fillText("THE LEGEND OF LINK",W/2,H*0.14);
+      // Subtitle
+      c.fillStyle="rgba(255,220,180,0.7)";c.font="12px monospace";c.fillText("Quest for the Triforce",W/2,H*0.20);
+      // SPINNING TRIFORCE — large, each piece rotates independently
+      const triCX=W/2,triCY=H*0.28,triS=24;
+      const spin1=t/1200,spin2=t/1500+2,spin3=t/1800+4;
+      const drawTriPiece=(cx2,cy2,s2,rot,delay)=>{
+        const hover=Math.sin(t/500+delay)*3;
+        c.save();c.translate(cx2,cy2+hover);c.rotate(Math.sin(rot)*0.15);
+        // Glow
+        const pg=c.createRadialGradient(0,0,s2*0.3,0,0,s2*1.5);
+        pg.addColorStop(0,`rgba(253,211,51,${glow*0.3})`);pg.addColorStop(1,"rgba(253,211,51,0)");
+        c.fillStyle=pg;c.beginPath();c.arc(0,0,s2*1.5,0,Math.PI*2);c.fill();
+        // Triangle
+        c.fillStyle="#ffd633";c.beginPath();c.moveTo(0,-s2);c.lineTo(s2*0.866,s2*0.5);c.lineTo(-s2*0.866,s2*0.5);c.fill();
+        // Inner highlight
+        const is2=s2*0.6;c.fillStyle="#ffe866";c.beginPath();c.moveTo(0,-is2);c.lineTo(is2*0.866,is2*0.5);c.lineTo(-is2*0.866,is2*0.5);c.fill();
+        // Sparkle center
+        c.fillStyle=`rgba(255,255,220,${glow*0.6})`;c.beginPath();c.arc(0,2,3,0,Math.PI*2);c.fill();
+        c.restore();
+      };
+      // Top piece
+      drawTriPiece(triCX,triCY-triS*0.6,triS*0.7,spin1,0);
+      // Bottom-left
+      drawTriPiece(triCX-triS*0.7,triCY+triS*0.4,triS*0.7,spin2,1);
+      // Bottom-right
+      drawTriPiece(triCX+triS*0.7,triCY+triS*0.4,triS*0.7,spin3,2);
+      // Connecting light beams between pieces
+      c.strokeStyle=`rgba(253,220,80,${glow*0.2})`;c.lineWidth=2;
+      c.beginPath();c.moveTo(triCX,triCY-triS*0.6);c.lineTo(triCX-triS*0.7,triCY+triS*0.4);
+      c.lineTo(triCX+triS*0.7,triCY+triS*0.4);c.closePath();c.stroke();
+      // PRESS START
+      // Dark gradient at bottom
+      const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
+      c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
+      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("TAP OR PRESS SPACE",W/2,H*0.92);}
+      c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W/2,H*0.97);
+      c.textAlign="left";c.lineCap="butt";return;}
     // ===== HUD (drawn in top HH pixels, above game) =====
     const p=s.p;
     c.fillStyle="#111";c.fillRect(0,0,W2,HH);
