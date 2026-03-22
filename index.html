@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- zelda.craigboren.com -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +7,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #0a0a12; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: monospace; overflow: hidden; }
-  #root { display: flex; justify-content: center; align-items: center; width: 100%; height: 100vh; }
+  #root { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 100vh; }
 </style>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -20,6 +19,18 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
+
+// ========== CUSTOM DEFAULT MUSIC ==========
+// Paste URLs here to auto-load custom music on startup.
+// Supports any direct audio URL (MP3, OGG, WAV, M4A).
+// Leave as null to use the built-in synthesized theme.
+const DEFAULT_MUSIC = {
+  title: null,     // e.g. "https://example.com/title-theme.mp3"
+  overworld: null,  // e.g. "https://example.com/overworld.mp3"
+  forest: null,     // e.g. "https://example.com/forest-temple.mp3"
+  fire: null,       // e.g. "https://example.com/fire-cavern.mp3"
+  shadow: null,     // e.g. "https://example.com/shadow-keep.mp3"
+};
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
 const MUSIC = {
@@ -97,6 +108,41 @@ const MUSIC = {
     drums: ["K",null,null,null,null,null,null,null,"K",null,null,null,null,null,null,null,
       "K",null,null,null,null,null,null,null,null,null,null,null,"S",null,null,null,
       "K",null,null,null,null,null,null,null,"K",null,null,null,"S",null,"K",null,
+      "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  },
+  // TITLE — Mystical and majestic, slow G major. Sets the tone for adventure.
+  title: { tempo: 80,
+    lead: ["G4",null,null,null,"B4",null,null,null,"D5",null,null,null,"G5",null,null,null,
+      "F#5",null,null,null,"E5",null,null,null,"D5",null,"C5",null,"B4",null,null,null,
+      "C5",null,null,null,"D5",null,null,null,"E5",null,"D5",null,"B4",null,null,null,
+      "A4",null,"B4",null,"G4",null,null,null,null,null,null,null,null,null,null,null,
+      "G4",null,"A4",null,"B4",null,null,null,"D5",null,"E5",null,"D5",null,"B4",null,
+      "C5",null,null,null,"E5",null,null,null,"G5",null,"F#5",null,"E5",null,"D5",null,
+      "E5",null,null,null,"D5",null,null,null,"B4",null,null,null,"A4",null,null,null,
+      "G4",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    pad: ["G3","G3","G3","G3","G3","G3","G3","G3","D3","D3","D3","D3","G3","G3","G3","G3",
+      "A3","A3","A3","A3","C4","C4","C4","C4","G3","G3","G3","G3","G3","G3","G3","G3",
+      "C4","C4","C4","C4","D4","D4","D4","D4","E4","E4","E4","E4","G3","G3","G3","G3",
+      "A3","A3","A3","A3","G3","G3","G3","G3","G3",null,null,null,null,null,null,null,
+      "G3","G3","G3","G3","G3","G3","G3","G3","D4","D4","D4","D4","G3","G3","G3","G3",
+      "C4","C4","C4","C4","E4","E4","E4","E4","G3","G3","G3","G3","D4","D4","D4","D4",
+      "C4","C4","C4","C4","G3","G3","G3","G3","D3","D3","D3","D3","C3","C3","C3","C3",
+      "G3","G3","G3","G3",null,null,null,null,null,null,null,null,null,null,null,null],
+    bass: ["G1",null,null,null,null,null,null,null,"D2",null,null,null,null,null,null,null,
+      "A1",null,null,null,null,null,null,null,"G1",null,null,null,null,null,null,null,
+      "C2",null,null,null,null,null,null,null,"E2",null,null,null,null,null,null,null,
+      "A1",null,null,null,"G1",null,null,null,null,null,null,null,null,null,null,null,
+      "G1",null,null,null,null,null,null,null,"D2",null,null,null,null,null,null,null,
+      "C2",null,null,null,null,null,null,null,"G1",null,null,null,"D2",null,null,null,
+      "C2",null,null,null,"G1",null,null,null,"D2",null,null,null,"C2",null,null,null,
+      "G1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    drums: ["K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,"K",null,null,null,null,null,null,null,
+      "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,"K",null,null,null,"S",null,null,null,
+      "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
       "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
   },
 };
@@ -777,6 +823,10 @@ function dT(c,tl,px,py,iD,dg,t){
 function ZeldaGame(){
   const cvR=useRef(null),stR=useRef(null),kyR=useRef(new Set()),anR=useRef(null),ltR=useRef(0);
   const tcR=useRef({dir:null,atk:false});const[muOn,setMu]=useState(false);const ltRef=useRef(null);
+  const[customMu,setCustomMu]=useState({...DEFAULT_MUSIC});
+  const[showMuPicker,setShowMuPicker]=useState(false);
+  const customAuRef=useRef(null);
+  const wrapRef=useRef(null);const[isFS,setIsFS]=useState(false);
   const trR=useRef({active:false,alpha:0,dir:0}); // screen transition fade
 
   const init=useCallback(()=>({
@@ -812,11 +862,19 @@ function ZeldaGame(){
     return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();};
   },[]);
 
-  useEffect(()=>{if(!muOn){stopMu();ltRef.current=null;return;}
-    const ck=()=>{const s=stR.current;if(!s||s.title)return;let th=s.loc.ty==="ow"?"overworld":s.dg[s.loc.di].th;
+  useEffect(()=>{
+    if(!muOn){stopMu();if(customAuRef.current){customAuRef.current.pause();customAuRef.current=null;}ltRef.current=null;return;}
+    const ck=()=>{const s=stR.current;if(!s)return;
+      let th=s.title?"title":(s.loc.ty==="ow"?"overworld":s.dg[s.loc.di].th);
       if(th!==ltRef.current){ltRef.current=th;
-        Tone.start().then(()=>{if(!au.i)initAu();playTh(th);}).catch(()=>{});}};
-    ck();const iv=setInterval(ck,500);return()=>{clearInterval(iv);};},[muOn]);
+        stopMu();if(customAuRef.current){customAuRef.current.pause();customAuRef.current=null;}
+        if(customMu[th]){
+          const a=new Audio(customMu[th]);a.loop=true;a.volume=0.5;a.play().catch(()=>{});customAuRef.current=a;
+        }else{
+          Tone.start().then(()=>{if(!au.i)initAu();playTh(th);}).catch(()=>{});
+        }
+      }};
+    ck();const iv=setInterval(ck,500);return()=>{clearInterval(iv);};},[muOn,customMu]);
 
   function le(s){const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
     if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}else s.en=[];}
@@ -1050,48 +1108,6 @@ function ZeldaGame(){
             for(let i=0;i<4;i++){const spread=TL*0.7,off=(i/3-.5)*spread;
               const bx=dx2===0?ex+off:ex+dx2*hs(px2,py2,i*7+30)*6;const by=dy2===0?ey2+off:ey2+dy2*hs(px2,py2,i*7+31)*6;
               c.fillStyle=bc;c.globalAlpha=0.4+hs(px2,py2,i*13+50)*0.3;c.beginPath();c.arc(bx,by,3+hs(px2,py2,i*11+40)*5,0,Math.PI*2);c.fill();}c.globalAlpha=1;}}}}
-    // Exit indicators — glowing animated edge portals
-    if(m){const[sx2,sy2]=loc.scr.split(",").map(Number);const pulse=Math.sin(t/300)*.5+.5;
-      const drawExit=(side)=>{
-        let hasExit=false,adjScr;
-        if(iD){const dg2=s.dg[loc.di];const[rx,ry]=loc.scr.split(",").map(Number);
-          if(side==="N")adjScr=dg2.rooms[`${rx},${ry-1}`];if(side==="S")adjScr=dg2.rooms[`${rx},${ry+1}`];
-          if(side==="W")adjScr=dg2.rooms[`${rx-1},${ry}`];if(side==="E")adjScr=dg2.rooms[`${rx+1},${ry}`];
-        }else{if(side==="N")adjScr=OW[`${sx2},${sy2-1}`];if(side==="S")adjScr=OW[`${sx2},${sy2+1}`];
-          if(side==="W")adjScr=OW[`${sx2-1},${sy2}`];if(side==="E")adjScr=OW[`${sx2+1},${sy2}`];}
-        if(!adjScr)return;
-        // Check if edge tiles are open
-        const openTiles=[];
-        if(side==="N")for(let cc=0;cc<CO;cc++){if(!SOLID.has(m[0][cc])&&m[0][cc]!==T.DOOR&&m[0][cc]!==T.BOSS_DOOR)openTiles.push([cc,0]);}
-        if(side==="S")for(let cc=0;cc<CO;cc++){if(!SOLID.has(m[RO-1][cc])&&m[RO-1][cc]!==T.DOOR&&m[RO-1][cc]!==T.BOSS_DOOR)openTiles.push([cc,RO-1]);}
-        if(side==="W")for(let rr=0;rr<RO;rr++){if(!SOLID.has(m[rr][0])&&m[rr][0]!==T.DOOR&&m[rr][0]!==T.BOSS_DOOR)openTiles.push([0,rr]);}
-        if(side==="E")for(let rr=0;rr<RO;rr++){if(!SOLID.has(m[rr][CO-1])&&m[rr][CO-1]!==T.DOOR&&m[rr][CO-1]!==T.BOSS_DOOR)openTiles.push([CO-1,rr]);}
-        if(openTiles.length===0)return;
-        // Draw glowing strip along open edge tiles
-        for(const[ox,oy]of openTiles){
-          const px2=ox*TL,py2=oy*TL;
-          const glow=c.createRadialGradient(px2+TL/2,py2+TL/2,0,px2+TL/2,py2+TL/2,TL);
-          glow.addColorStop(0,`rgba(255,220,80,${pulse*0.25})`);glow.addColorStop(1,"rgba(255,220,80,0)");
-          c.fillStyle=glow;c.fillRect(px2-TL/2,py2-TL/2,TL*2,TL*2);
-          // Bright edge line
-          c.fillStyle=`rgba(255,230,100,${pulse*0.5})`;
-          if(side==="N")c.fillRect(px2,py2,TL,3);
-          if(side==="S")c.fillRect(px2,py2+TL-3,TL,3);
-          if(side==="W")c.fillRect(px2,py2,3,TL);
-          if(side==="E")c.fillRect(px2+TL-3,py2,3,TL);
-        }
-        // Animated chevron arrow
-        const mid=openTiles[Math.floor(openTiles.length/2)];const mx=mid[0]*TL+TL/2,my=mid[1]*TL+TL/2;
-        const bounce=Math.sin(t/250)*4;
-        c.fillStyle=`rgba(255,240,120,${pulse*0.8})`;c.font="bold 20px monospace";c.textAlign="center";
-        if(side==="N")c.fillText("\u25b2",mx,my+14+bounce);
-        if(side==="S")c.fillText("\u25bc",mx,my-6-bounce);
-        if(side==="W")c.fillText("\u25c0",mx+14+bounce,my+7);
-        if(side==="E")c.fillText("\u25b6",mx-10-bounce,my+7);
-        c.textAlign="left";
-      };
-      drawExit("N");drawExit("S");drawExit("W");drawExit("E");
-    }
     // Enemies
     for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES,ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
       if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
@@ -1160,11 +1176,22 @@ function ZeldaGame(){
     if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("All Triforce pieces collected!",W2/2,FH2/2+10);c.fillText("Press R to play again",W2/2,FH2/2+35);c.textAlign="left";}}
 
   const dp=d=>{tcR.current.dir=d},de=()=>{tcR.current.dir=null},at=()=>{tcR.current.atk=true};
+  const toggleFS=useCallback(()=>{
+    const el=wrapRef.current;if(!el)return;
+    if(!document.fullscreenElement){el.requestFullscreen?.().catch(()=>{el.webkitRequestFullscreen?.();});}
+    else{document.exitFullscreen?.().catch(()=>{document.webkitExitFullscreen?.();});}
+  },[]);
+  useEffect(()=>{
+    const h=()=>setIsFS(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange",h);document.addEventListener("webkitfullscreenchange",h);
+    return()=>{document.removeEventListener("fullscreenchange",h);document.removeEventListener("webkitfullscreenchange",h);};
+  },[]);
+
   return(
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:16,userSelect:"none",WebkitUserSelect:"none"}}>
+    <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:isFS?"center":"center",minHeight:isFS?"100%":"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:isFS?8:16,userSelect:"none",WebkitUserSelect:"none",width:isFS?"100%":"auto",height:isFS?"100%":"auto"}}>
       <h1 style={{fontSize:24,color:"#fd3",margin:"0 0 4px 0",textShadow:"0 0 20px rgba(253,211,51,0.3), 0 2px 4px rgba(0,0,0,0.5)",letterSpacing:6,fontWeight:"900"}}>THE LEGEND OF LINK</h1>
       <p style={{fontSize:11,color:"#666",margin:"0 0 10px 0",textAlign:"center",letterSpacing:1}}>WASD / Arrows · Space attack · B bomb · P pause · M music</p>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();});}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();});}if(s&&s.paused)s.paused=false;}} style={{border:isFS?"none":"2px solid #222",borderRadius:isFS?0:6,width:isFS?"100%":W2,height:isFS?"auto":H2+HH,maxWidth:"100%",maxHeight:isFS?"60vh":"none",aspectRatio:`${W2}/${H2+HH}`,boxShadow:isFS?"none":"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
@@ -1185,7 +1212,35 @@ function ZeldaGame(){
         <span>🏰 3 DUNGEONS</span><span>🗡 COMBAT</span><span>🔑 KEYS</span><span>▲ TRIFORCE</span>
         <button onClick={()=>{Tone.start().then(()=>{initSfx();});setMu(p=>!p);}}
           style={{background:muOn?"rgba(253,211,51,0.2)":"rgba(255,255,255,0.06)",border:`1px solid ${muOn?"rgba(253,211,51,0.4)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:muOn?"#fd3":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>{muOn?"♪ ON":"♪ OFF"}</button>
+        <button onClick={()=>setShowMuPicker(p=>!p)}
+          style={{background:showMuPicker?"rgba(100,200,255,0.15)":"rgba(255,255,255,0.06)",border:`1px solid ${showMuPicker?"rgba(100,200,255,0.3)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:showMuPicker?"#8cf":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>🎵 MP3</button>
+        <button onClick={toggleFS}
+          style={{background:isFS?"rgba(100,255,100,0.15)":"rgba(255,255,255,0.06)",border:`1px solid ${isFS?"rgba(100,255,100,0.3)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:isFS?"#8f8":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>{isFS?"⛶ EXIT":"⛶ FULL"}</button>
       </div>
+      {showMuPicker&&<div style={{background:"rgba(0,0,0,0.85)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:8,padding:12,marginTop:8,maxWidth:480,width:"100%"}}>
+        <div style={{color:"#aaa",fontSize:11,fontFamily:"monospace",marginBottom:8,textAlign:"center"}}>CUSTOM MUSIC — Pick files or paste URLs</div>
+        {[["title","🎬 Title Screen"],["overworld","🌍 Overworld"],["forest","🌲 Forest Temple"],["fire","🔥 Fire Cavern"],["shadow","👻 Shadow Keep"]].map(([key,label])=>
+          <div key={key} style={{marginBottom:8,padding:6,background:"rgba(255,255,255,0.02)",borderRadius:4}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+              <span style={{color:"#888",fontSize:10,fontFamily:"monospace",width:100,flexShrink:0}}>{label}</span>
+              {customMu[key]&&<span style={{color:"#4a4",fontSize:9,fontFamily:"monospace"}}>✓ loaded</span>}
+              {customMu[key]&&<button onClick={()=>{
+                if(customMu[key]?.startsWith("blob:"))URL.revokeObjectURL(customMu[key]);
+                setCustomMu(prev=>({...prev,[key]:null}));ltRef.current=null;
+              }} style={{background:"rgba(255,50,50,0.15)",border:"1px solid rgba(255,50,50,0.3)",borderRadius:3,color:"#f66",fontSize:9,padding:"1px 6px",cursor:"pointer",fontFamily:"monospace",marginLeft:"auto"}}>✕ clear</button>}
+            </div>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <label style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:3,color:"#888",fontSize:9,padding:"3px 8px",cursor:"pointer",fontFamily:"monospace",flexShrink:0}}>
+                📁 File<input type="file" accept="audio/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f){
+                  const url=URL.createObjectURL(f);setCustomMu(prev=>({...prev,[key]:url}));ltRef.current=null;}}}/>
+              </label>
+              <input type="text" placeholder="or paste audio URL..." onKeyDown={e=>{if(e.key==="Enter"&&e.target.value.trim()){
+                setCustomMu(prev=>({...prev,[key]:e.target.value.trim()}));ltRef.current=null;e.target.value="";}}}
+                style={{flex:1,minWidth:0,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:3,color:"#aaa",fontSize:9,padding:"3px 6px",fontFamily:"monospace",outline:"none"}}/>
+            </div>
+          </div>)}
+        <div style={{color:"#555",fontSize:9,fontFamily:"monospace",textAlign:"center",marginTop:4}}>Files loop automatically · Press Enter to load URLs · Turn music ON to hear</div>
+      </div>}
     </div>);
 }
 
