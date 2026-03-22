@@ -25,11 +25,11 @@ const { useState, useEffect, useRef, useCallback } = React;
 // Supports any direct audio URL (MP3, OGG, WAV, M4A).
 // Leave as null to use the built-in synthesized theme.
 const DEFAULT_MUSIC = {
-  title: null,     // e.g. "https://example.com/title-theme.mp3"
-  overworld: null,  // e.g. "https://example.com/overworld.mp3"
-  forest: null,     // e.g. "https://example.com/forest-temple.mp3"
-  fire: null,       // e.g. "https://example.com/fire-cavern.mp3"
-  shadow: null,     // e.g. "https://example.com/shadow-keep.mp3"
+  title: "music/title.mp3",
+  overworld: "music/overworld.mp3",
+  forest: "music/forest.mp3",
+  fire: "music/fire.mp3",
+  shadow: "music/shadow.mp3",
 };
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
