@@ -627,10 +627,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");
-        // Spawn reward chest at center of room
-        const chx=W2/2-12,chy=H2/2-12;
-        const rw=Math.random();const reward=rw<0.35?"heart":rw<0.55?"bomb":rw<0.75?"rupee_blue":"rupee_green";
-        s.chest={x:chx,y:chy,state:"closed",t:0,reward};}
+        // Spawn reward chest only if room has treasure tiles
+        const rm2=gm(s);const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART||tl===T.BOMB||tl===T.RUPEE||tl===T.HEART_PIECE||tl===T.MASTER_KEY));
+        if(hasTreasure){const chx=W2/2-12,chy=H2/2-12;
+          const rw=Math.random();const reward=rw<0.35?"heart":rw<0.55?"bomb":rw<0.75?"rupee_blue":"rupee_green";
+          s.chest={x:chx,y:chy,state:"closed",t:0,reward};}}
       continue;}
     if(p.ifr<=0&&dist<(PS+ES)*0.38){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
       const hkb=8,hka=Math.atan2(pcy-ecy,pcx-ecx);if(tm(p.x+Math.cos(hka)*hkb,p.y+Math.sin(hka)*hkb)){p.x+=Math.cos(hka)*hkb;p.y+=Math.sin(hka)*hkb;}
