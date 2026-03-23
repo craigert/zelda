@@ -813,13 +813,14 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else{c.fillStyle="#444";dH(c,hx,hy,hsz);}}
   if(p.hp<=2&&p.hp>0&&Math.sin(s.lowHp/200)>0.3){c.fillStyle="rgba(255,50,50,0.15)";c.fillRect(0,0,W2,HH);}
   // Items — right side, spaced to avoid triforce overlap
-  const iR=W2-60;// rightmost item position
-  c.font="bold 13px monospace";
-  c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,iR-0,21);
-  c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,iR-50,21);
-  c.fillStyle="#4f4";c.fillText(`\ud83d\udc8e${p.rupees}`,iR-105,21);
-  c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",iR-130,21);c.font="bold 13px monospace";
-  if(s.loc.ty==="dg"&&s.loc.di>=0){c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",iR+50,21);}
+  const iR=W2-10;// rightmost item edge
+  c.font="bold 12px monospace";
+  let ix=iR;
+  if(s.loc.ty==="dg"&&s.loc.di>=0){ix-=18;c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);}
+  ix-=35;c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);
+  ix-=35;c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);
+  ix-=40;c.fillStyle="#4f4";c.fillText(`\ud83d\udc8e${p.rupees}`,ix,21);
+  ix-=18;c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",ix,21);c.font="bold 12px monospace";
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   let sx2=p.mhp/2*22+16;if(iD2)sx2+=80;
   if(p.burn>0){c.fillStyle="#f80";c.font="bold 10px monospace";c.fillText("\ud83d\udd25BURN",sx2,20);sx2+=55;}
