@@ -243,9 +243,10 @@ function hasSave() {
 
 // --- Game logic functions ---
 function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
-  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
-  else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
-  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}}
+  const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
+  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
+  else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
+  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
@@ -550,7 +551,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     }
     if(b.exploded&&b.t>=b.fuse+400)s.activeBombs.splice(i,1);}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
-  for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];e.mt+=dt;if(e.fl>0)e.fl-=dt;
+  for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];
+    if(e.spawnT>0){e.spawnT-=dt;continue;}
+    e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
     e.stT+=dt;const detectRange=e.type==="boss"?250:120;const loseRange=180;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
@@ -911,7 +914,25 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}}
   if(iD){for(let i=0;i<15;i++){const dx2=hs(i,3,77)*W2,dy2=(hs(i,7,88)*H2+t/20)%H2;
     const da=0.15+Math.sin(t/600+i*2)*0.1;c.fillStyle=`rgba(200,180,140,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i)*8,dy2,0.8+hs(i,1,99)*0.8,0,Math.PI*2);c.fill();}}
-  for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES,ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
+  for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES;
+    if(e.spawnT>0){
+      // Spawn animation — smoke puff and scale-in
+      const sp=e.spawnT/400,ease=1-sp;const cx3=e.x+ES/2,cy3=e.y+ES/2;
+      // Smoke puffs
+      for(let j=0;j<5;j++){const sa=j*Math.PI*2/5+sp*3,sr=12*(1-ease*0.5);
+        const ga=0.4*sp;c.fillStyle=`rgba(200,200,200,${ga})`;
+        c.beginPath();c.arc(cx3+Math.cos(sa)*sr,cy3+Math.sin(sa)*sr,5+sp*4,0,Math.PI*2);c.fill();}
+      // Enemy scaling in
+      c.save();c.translate(cx3,cy3);c.scale(ease,ease);c.globalAlpha=ease;c.translate(-cx3,-cy3);
+      const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
+      if(e.type==="ghost")dGh(c,ex,ey,sz,false,t);else if(e.type==="boss")dBo(c,ex,ey,sz,false,t,e.hp,e.mhp,loc.di);
+      else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,false,t,e.type==="fire_bat");
+      else if(e.type==="archer")dAr(c,ex,ey,sz,false,t);
+      else if(e.type==="mage")dMg(c,ex,ey,sz,false,t);
+      else if(e.type==="knight")dKn(c,ex,ey,sz,false,t);
+      else dSk(c,ex,ey,sz,false,t);
+      c.globalAlpha=1;c.restore();continue;}
+    const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+3,e.y+ES-1,sz/2+1,4,0.1,0,Math.PI*2);c.fill();
     if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
     else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,fl,t,e.type==="fire_bat");
