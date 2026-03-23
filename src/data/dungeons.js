@@ -381,11 +381,24 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[3][7]=T.KEY;
   }),enemies:[]},
 
-  // North depth — scattered pits with ghosts
+  // North depth — scattered pits with ghosts (crack east to master sword)
   "0,-2":{tiles:mr(m=>{ae(m,["S","W","N"]);
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)if((x+y)%3===0)m[y][x]=T.PIT;
     m[5][7]=T.HEART;m[5][8]=T.HEART;m[2][3]=T.TORCH;m[9][12]=T.TORCH;
+    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
+
+  // Hidden master sword room — hard ghost gauntlet
+  "1,-2":{tiles:mr(m=>{
+    m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
+    for(let y=2;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
+    m[5][4]=T.FLOOR;m[6][4]=T.FLOOR;m[5][11]=T.FLOOR;m[6][11]=T.FLOOR;
+    m[3][6]=T.SPIKE;m[3][9]=T.SPIKE;m[8][6]=T.SPIKE;m[8][9]=T.SPIKE;
+    m[4][5]=T.PIT;m[4][10]=T.PIT;m[7][5]=T.PIT;m[7][10]=T.PIT;
+    m[5][7]=T.MASTER_SWORD;
+    m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
+    m[3][7]=T.TORCH;m[8][7]=T.TORCH;
+  }),enemies:[{x:6*TL,y:3*TL,hp:7,type:"ghost"},{x:9*TL,y:3*TL,hp:7,type:"ghost"},{x:6*TL,y:8*TL,hp:7,type:"ghost"},{x:9*TL,y:8*TL,hp:7,type:"ghost"},{x:7*TL,y:5*TL,hp:6,type:"skeleton"},{x:8*TL,y:6*TL,hp:6,type:"skeleton"}]},
 
   // West of depth — spike+ghost gauntlet leading to master key
   "-1,-2":{tiles:mr(m=>{ae(m,["E"]);
