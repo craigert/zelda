@@ -296,7 +296,8 @@ function cTr(s){const p=s.p,loc=s.loc;
           s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
           loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.dgTitle={text:dg.name,t:3000};return;}}}
       for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
-        for(const[tx,ty]of cv.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
+        const owm=OW[loc.scr];
+        for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
     }
     const[sx,sy]=loc.scr.split(",").map(Number);
