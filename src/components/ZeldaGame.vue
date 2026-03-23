@@ -901,7 +901,13 @@ let _cleanup = null;
 onMounted(() => {
   stR.value = init();
   let unlocked = false;
-  const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu(); ltRef.value = null; }); };
+  const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu(); ltRef.value = null;
+    // Force music to start now that audio is unlocked
+    const s = stR.value; if (!s || !muOn.value) return;
+    const th = s.title ? "title" : s.triMu ? "triforce" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { ltRef.value = th; customAuRef.value = a; }).catch(() => {}); }
+    else { playTh(th); ltRef.value = th; }
+  }); };
   const kd = e => {
     kyR.value.add(e.key.toLowerCase());
     if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase())) e.preventDefault();
