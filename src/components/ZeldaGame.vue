@@ -653,15 +653,20 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(p.hp>=i*2+1){c.save();c.beginPath();c.rect(hx,hy,8,16);c.clip();c.fillStyle="#ee3333";dH(c,hx,hy,16);c.restore();c.save();c.beginPath();c.rect(hx+8,hy,8,16);c.clip();c.fillStyle="#444";dH(c,hx,hy,16);c.restore();}
     else{c.fillStyle="#444";dH(c,hx,hy,16);}}
   if(p.hp<=2&&p.hp>0&&Math.sin(s.lowHp/200)>0.3){c.fillStyle="rgba(255,50,50,0.15)";c.fillRect(0,0,W2,HH);}
-  c.fillStyle="#4f4";c.font="bold 13px monospace";c.fillText(`\ud83d\udc8e${p.rupees}`,W2-210,21);c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,W2-160,21);c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,W2-110,21);
-  if(s.loc.ty==="dg"&&s.loc.di>=0){c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",W2-55,21);}
-  // FIX: moved iD2 definition BEFORE its usage to avoid TDZ error in strict mode
+  // Items — right side, spaced to avoid triforce overlap
+  const iR=W2-60;// rightmost item position
+  c.font="bold 13px monospace";
+  c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,iR-0,21);
+  c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,iR-50,21);
+  c.fillStyle="#4f4";c.fillText(`\ud83d\udc8e${p.rupees}`,iR-105,21);
+  if(s.loc.ty==="dg"&&s.loc.di>=0){c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",iR+50,21);}
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   let sx2=p.mhp/2*22+16;if(iD2)sx2+=80;
   if(p.burn>0){c.fillStyle="#f80";c.font="bold 10px monospace";c.fillText("\ud83d\udd25BURN",sx2,20);sx2+=55;}
   if(p.freeze>0){c.fillStyle="#8cf";c.font="bold 10px monospace";c.fillText("\u2744\ufe0fFREEZE",sx2,20);sx2+=65;}
   if(p.poison>0){c.fillStyle="#4a4";c.font="bold 10px monospace";c.fillText("\u2620\ufe0fPOISON",sx2,20);sx2+=65;}
-  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",W2-180+i*20,21);}
+  // Triforce pieces — after hearts, before items
+  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",p.mhp/2*22+20+i*18,21);}
   if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 11px monospace";c.fillText(dgn,p.mhp/2*22+16,21);}
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
