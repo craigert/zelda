@@ -969,7 +969,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
   if(iD){
     // Simple minimap — always show when in dungeon or cave
-    const dgRooms=dg&&dg.rooms?Object.keys(dg.rooms):[];
+    const dgRooms=dg&&dg.rooms?Object.keys(dg.rooms).filter(k=>{const p2=k.split(",");return p2.length===2&&!isNaN(+p2[0])&&!isNaN(+p2[1]);}):[];
     if(dgRooms.length>0){
       const cds=dgRooms.map(k=>k.split(",").map(Number));
       const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
