@@ -1207,7 +1207,7 @@ export default function ZeldaGame(){
   const[customMu,setCustomMu]=useState({...DEFAULT_MUSIC});
   const[showMuPicker,setShowMuPicker]=useState(false);
   const customAuRef=useRef(null);
-  const wrapRef=useRef(null);const[isFS,setIsFS]=useState(false);
+  const wrapRef=useRef(null);const[isFS,setIsFS]=useState(false);const muBtnRef=useRef(null);
   const trR=useRef({active:false,alpha:0,dir:0}); // screen transition fade
 
   const init=useCallback(()=>({
@@ -1235,6 +1235,7 @@ export default function ZeldaGame(){
   }),[]);
 
   useEffect(()=>{stR.current=init();
+    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},100);
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       const s=stR.current;
       if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
@@ -1769,7 +1770,7 @@ export default function ZeldaGame(){
       // Dark gradient at bottom
       const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
       c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
-      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText(muOn?"TAP OR PRESS SPACE":"ENABLE MUSIC TO BEGIN \u266a",W/2,H*0.92);}
+      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("TAP OR PRESS SPACE",W/2,H*0.92);}
       c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W/2,H*0.97);
       c.textAlign="left";c.lineCap="butt";return;}
     // ===== HUD (drawn in top HH pixels, above game) =====
@@ -1943,7 +1944,7 @@ export default function ZeldaGame(){
         </div>
       </div>
       <div style={{display:"flex",gap:12,marginTop:10,fontSize:10,color:"#444",letterSpacing:1,alignItems:"center",flexWrap:"wrap",justifyContent:"center"}}>
-        <button onClick={()=>{Tone.start().then(()=>{initSfx();});setMu(p=>!p);}}
+        <button ref={muBtnRef} onClick={()=>{Tone.start().then(()=>{initSfx();});setMu(p=>!p);}}
           style={{background:muOn?"rgba(253,211,51,0.2)":"rgba(255,255,255,0.06)",border:`1px solid ${muOn?"rgba(253,211,51,0.4)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:muOn?"#fd3":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>{muOn?"♪ ON":"♪ OFF"}</button>
         <button onClick={()=>setShowMuPicker(p=>!p)}
           style={{background:showMuPicker?"rgba(100,200,255,0.15)":"rgba(255,255,255,0.06)",border:`1px solid ${showMuPicker?"rgba(100,200,255,0.3)":"rgba(255,255,255,0.12)"}`,borderRadius:4,color:showMuPicker?"#8cf":"#666",fontSize:11,padding:"3px 10px",cursor:"pointer",fontFamily:"monospace",letterSpacing:1}}>🎵 MP3</button>
