@@ -13,23 +13,23 @@ export const OW_EN={
   "1,2":[{x:6*TL,y:4*TL,hp:1,type:"bat"},{x:9*TL,y:8*TL,hp:1,type:"bat"}],
   // Middle ring
   "3,0":[{x:6*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
-  "3,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"}],
+  "3,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:8*TL,y:5*TL,hp:4,type:"knight"}],
   "0,2":[{x:4*TL,y:5*TL,hp:2,type:"skeleton"},{x:11*TL,y:6*TL,hp:3,type:"skeleton"}],
   "2,2":[{x:5*TL,y:5*TL,hp:2,type:"bat"},{x:10*TL,y:7*TL,hp:2,type:"skeleton"}],
   "0,-1":[{x:5*TL,y:5*TL,hp:2,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
   "1,-1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"}],
   // Outer ring
-  "-1,0":[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"skeleton"},{x:7*TL,y:3*TL,hp:2,type:"bat"}],
+  "-1,0":[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"archer"},{x:7*TL,y:3*TL,hp:2,type:"bat"}],
   "-1,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}],
   "-1,-1":[{x:6*TL,y:5*TL,hp:3,type:"ghost"},{x:9*TL,y:8*TL,hp:4,type:"skeleton"}],
-  "2,-1":[{x:5*TL,y:4*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:3,type:"fire_bat"}],
+  "2,-1":[{x:5*TL,y:4*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:3,type:"fire_bat"},{x:7*TL,y:5*TL,hp:2,type:"archer"}],
   "3,-1":[{x:4*TL,y:5*TL,hp:3,type:"fire_bat"},{x:11*TL,y:7*TL,hp:3,type:"ghost"}],
   "4,-1":[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:8*TL,hp:4,type:"ghost"}],
-  "4,0":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:7*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
+  "4,0":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:7*TL,hp:3,type:"mage"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
   "4,1":[{x:4*TL,y:4*TL,hp:3,type:"fire_bat"},{x:11*TL,y:8*TL,hp:4,type:"fire_bat"}],
-  "-1,2":[{x:5*TL,y:4*TL,hp:4,type:"ghost"},{x:10*TL,y:7*TL,hp:4,type:"ghost"},{x:7*TL,y:9*TL,hp:3,type:"fire_bat"}],
+  "-1,2":[{x:5*TL,y:4*TL,hp:4,type:"knight"},{x:10*TL,y:7*TL,hp:4,type:"mage"},{x:7*TL,y:9*TL,hp:3,type:"fire_bat"}],
   "3,2":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}],
-  "4,2":[{x:4*TL,y:4*TL,hp:4,type:"fire_bat"},{x:11*TL,y:7*TL,hp:4,type:"ghost"},{x:7*TL,y:9*TL,hp:4,type:"fire_bat"}],
+  "4,2":[{x:4*TL,y:4*TL,hp:4,type:"fire_bat"},{x:11*TL,y:7*TL,hp:5,type:"knight"},{x:7*TL,y:9*TL,hp:4,type:"fire_bat"}],
 };
 
 export const OW={
