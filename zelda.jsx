@@ -1362,11 +1362,11 @@ export default function ZeldaGame(){
       sunG.addColorStop(0,"rgba(255,240,200,0.9)");sunG.addColorStop(0.3,"rgba(255,200,100,0.5)");sunG.addColorStop(1,"rgba(255,150,50,0)");
       c.fillStyle=sunG;c.beginPath();c.arc(W*0.35,sunY,80,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(255,230,180,0.8)";c.beginPath();c.arc(W*0.35,sunY,20,0,Math.PI*2);c.fill();
-      // STARS — dense starfield across upper sky
+      // STARS — scattered across upper sky, away from edges
       for(let i=0;i<200;i++){
         // Use varied hash inputs to avoid clustering
-        const sx=hs(i*7+3,i*13+5,101)*W;
-        const sy=hs(i*11+7,i*17+3,202)*H*0.5;
+        const sx=W*0.08+hs(i*7+3,i*13+5,101)*W*0.84;
+        const sy=H*0.03+hs(i*11+7,i*17+3,202)*H*0.42;
         const rate=400+hs(i*3+1,i*9+2,303)*800;
         const blink=Math.sin(t/rate+i*1.7)*0.35;
         const baseBr=0.4+hs(i*5+2,i*7+1,404)*0.5;
