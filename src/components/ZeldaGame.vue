@@ -671,7 +671,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
     const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
     if((tl===T.KEY||tl===T.MASTER_KEY||tl===T.HEART||tl===T.HEART_PIECE||tl===T.TRIFORCE||tl===T.BOMB||tl===T.RUPEE)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
-    if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;dT(c,tl,px,py,iD,dg,t);}
+    if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;
+    let ei=null;
+    if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
+    dT(c,tl,px,py,iD,dg,t,ei);}
   if(!iD)drawTerrainOverlay(c,m,t);
   if(iD&&m){const torches=[];for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH)torches.push([x*TL+16,y*TL+16]);
     if(torches.length>0){for(const[tx2,ty2]of torches){
@@ -793,20 +796,41 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-100,28,200,1);
     const mapY=40,mapH=160;
     if(s.loc.ty==="ow"||s.loc.ty==="cave"){
-      const owKeys=Object.keys(OW);const owC=owKeys.map(k=>k.split(",").map(Number));
-      const onX=Math.min(...owC.map(c2=>c2[0])),oxX=Math.max(...owC.map(c2=>c2[0])),onY=Math.min(...owC.map(c2=>c2[1])),oxY=Math.max(...owC.map(c2=>c2[1]));
-      const os=30,op=8,oW=(oxX-onX+1)*os+op*2,oH=(oxY-onY+1)*os+op*2;
+      const owKeys=Object.keys(OW);
+      const onX=-1,oxX=4,onY=-1,oxY=2;
+      const cW=32,cH=24,op=8,gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
+      const oW=gW+op*2,oH=gH+op*2;
       const omX=W2/2-oW/2,omY=mapY+10;
-      c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-2,omY-2,oW+4,oH+4);
+      c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(omX-2,omY-2,oW+4,oH+4);
       c.strokeStyle="rgba(253,211,51,0.3)";c.strokeRect(omX-2,omY-2,oW+4,oH+4);
-      const biomes={"-1,-1":"\ud83c\udf33","-1,0":"\ud83c\udf33","-1,1":"\ud83e\udeb9","-1,2":"\ud83d\udc7b","0,-1":"\ud83c\udf32","0,0":"\ud83c\udf32","0,1":"\ud83c\udf32","0,2":"\ud83c\udf32","1,-1":"\u26f0\ufe0f","1,0":"\ud83c\udf3f","1,1":"\ud83c\udfe0","1,2":"\ud83c\udf3f","2,-1":"\ud83c\udfd4\ufe0f","2,0":"\ud83c\udfdc\ufe0f","2,1":"\ud83c\udf0a","2,2":"\ud83c\udfd6\ufe0f","3,-1":"\u2744\ufe0f","3,0":"\ud83c\udfdc\ufe0f","3,1":"\ud83c\udfdb\ufe0f","3,2":"\ud83c\udf0b","4,-1":"\u2744\ufe0f","4,0":"\ud83c\udfdc\ufe0f","4,1":"\ud83d\udd25","4,2":"\ud83c\udf0b"};
-      for(const ok of owKeys){const[cx2,cy2]=ok.split(",").map(Number);
-        const rx=omX+op+(cx2-onX)*os,ry=omY+op+(cy2-onY)*os;
-        let col=ok===s.loc.scr?"rgba(253,211,51,0.4)":"rgba(60,100,60,0.3)";
-        c.fillStyle=col;c.fillRect(rx+1,ry+1,os-2,os-2);
-        if(ok===s.loc.scr){c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(rx,ry,os,os);c.lineWidth=1;}
-        for(const de2 of DE){if(de2.s===ok){c.fillStyle=de2.d===3?(s.finalOpen?"#f0f":"#444"):"#ff4";c.beginPath();c.arc(rx+os/2,ry+os/2,4,0,Math.PI*2);c.fill();}}
-        c.font="10px monospace";c.fillStyle="#aaa";c.fillText(biomes[ok]||"",rx+os/2,ry+os/2+4);
+      const tCols={[T.GRASS]:"#4aaa3a",[T.WATER]:"#2266aa",[T.TREE]:"#1a5a1a",[T.SAND]:"#d4b060",[T.PATH]:"#a08050",[T.ROCK]:"#777",[T.FLOWER]:"#4aaa3a",[T.BUSH]:"#2a7a2a",[T.TALLGRASS]:"#3a9a3a",[T.BRIDGE]:"#8b6914",[T.ICE]:"#aaddff",[T.ENTRANCE]:"#fd3",[T.WALL]:"#555",[T.CRACK]:"#666",[T.EMPTY]:"#222",[T.STUMP]:"#5a3a1a",[T.FLOOR]:"#555"};
+      for(const ok of owKeys){
+        const[cx2,cy2]=ok.split(",").map(Number);
+        const rx=omX+op+(cx2-onX)*cW,ry=omY+op+(cy2-onY)*cH;
+        const tiles=OW[ok];
+        if(tiles){
+          for(let ty2=0;ty2<12;ty2++)for(let tx2=0;tx2<16;tx2++){
+            const tv=tiles[ty2]?.[tx2]??0;
+            c.fillStyle=tCols[tv]||"#333";
+            c.fillRect(rx+tx2*2,ry+ty2*2,2,2);
+            if(tv===T.FLOWER){c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";c.fillRect(rx+tx2*2,ry+ty2*2,1,1);}
+          }
+        }else{c.fillStyle="#222";c.fillRect(rx,ry,cW,cH);}
+        if(ok===s.loc.scr){c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(rx-1,ry-1,cW+2,cH+2);c.lineWidth=1;}
+      }
+      c.strokeStyle="rgba(253,211,51,0.12)";c.lineWidth=1;
+      for(let gx=0;gx<=oxX-onX+1;gx++){const lx=omX+op+gx*cW;c.beginPath();c.moveTo(lx,omY+op);c.lineTo(lx,omY+op+gH);c.stroke();}
+      for(let gy=0;gy<=oxY-onY+1;gy++){const ly=omY+op+gy*cH;c.beginPath();c.moveTo(omX+op,ly);c.lineTo(omX+op+gW,ly);c.stroke();}
+      for(const de2 of DE){const[dx,dy]=de2.s.split(",").map(Number);
+        const ex=omX+op+(dx-onX)*cW+cW/2,ey=omY+op+(dy-onY)*cH+cH/2;
+        c.fillStyle=de2.d===3?(s.finalOpen?"#f0f":"#444"):"#ff4";
+        c.beginPath();c.arc(ex,ey,3,0,Math.PI*2);c.fill();}
+      if(s.loc.ty==="ow"){
+        const[px,py]=s.loc.scr.split(",").map(Number);
+        const prx=omX+op+(px-onX)*cW+(s.p.x/(CO*TL))*cW;
+        const pry=omY+op+(py-onY)*cH+(s.p.y/(RO*TL))*cH;
+        const blink=Math.floor(Date.now()/300)%2===0;
+        if(blink){c.fillStyle="#fff";c.beginPath();c.arc(prx,pry,2,0,Math.PI*2);c.fill();}
       }
       c.fillStyle="#aaa";c.font="10px monospace";c.fillText("OVERWORLD",W2/2,omY+oH+14);
     }else if(s.loc.ty==="dg"){

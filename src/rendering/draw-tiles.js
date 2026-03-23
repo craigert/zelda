@@ -2,7 +2,7 @@ import { T, TL, CO, RO } from '../constants.js';
 import { hs } from '../utils/helpers.js';
 import { dH } from './draw-hud.js';
 
-export function dT(c,tl,px,py,iD,dg,t){
+export function dT(c,tl,px,py,iD,dg,t,ei){
   switch(tl){
     case T.GRASS:{
       // Lush multi-shade grass with sun-dappled look
@@ -163,171 +163,559 @@ export function dT(c,tl,px,py,iD,dg,t){
       c.fillRect(px+16,py,1,8);c.fillRect(px+8,py+8,1,8);c.fillRect(px+24,py+16,1,8);
       c.fillStyle="rgba(255,255,255,0.1)";c.fillRect(px,py,TL,2);break;}
     case T.ENTRANCE:{
-      const eVar=hs(px,py,999);
-      if(eVar<0.25){
-        // Style A: Forest entrance — mossy stone archway with vines
-        // Deep dark interior
-        const eg=c.createRadialGradient(px+16,py+20,1,px+16,py+18,16);
-        eg.addColorStop(0,"#020804");eg.addColorStop(0.5,"#010603");eg.addColorStop(1,"#000400");
-        c.fillStyle=eg;c.fillRect(px,py,TL,TL);
-        // Descending stairs
-        c.fillStyle="#0a120a";c.fillRect(px+5,py+6,22,4);
-        c.fillStyle="#060e06";c.fillRect(px+5,py+12,22,4);
-        c.fillStyle="#040a04";c.fillRect(px+5,py+18,22,4);
-        c.fillStyle="#020602";c.fillRect(px+5,py+24,22,4);
-        // Mossy stone pillars
-        const plg=c.createLinearGradient(px,py,px+6,py);plg.addColorStop(0,"#5a6a58");plg.addColorStop(1,"#3a4a38");
-        c.fillStyle=plg;c.fillRect(px,py,6,TL);
-        const prg=c.createLinearGradient(px+TL-6,py,px+TL,py);prg.addColorStop(0,"#3a4a38");prg.addColorStop(1,"#5a6a58");
-        c.fillStyle=prg;c.fillRect(px+TL-6,py,6,TL);
-        // Moss patches on pillars
-        c.fillStyle="rgba(60,120,40,0.5)";
-        c.fillRect(px+1,py+8,3,4);c.fillRect(px,py+20,4,5);
-        c.fillRect(px+TL-4,py+10,3,5);c.fillRect(px+TL-5,py+24,4,4);
-        // Stone lintel with moss
-        const lg=c.createLinearGradient(px,py,px,py+5);lg.addColorStop(0,"#6a7a68");lg.addColorStop(1,"#4a5a48");
-        c.fillStyle=lg;c.fillRect(px,py,TL,5);
-        c.fillStyle="rgba(50,110,35,0.4)";c.fillRect(px+3,py,8,3);c.fillRect(px+18,py+1,10,2);
-        // Hanging vines from top
-        c.strokeStyle="rgba(40,100,30,0.7)";c.lineWidth=1.5;c.lineCap="round";
-        const vs=Math.sin(t/900)*1.5;
-        c.beginPath();c.moveTo(px+8,py+5);c.quadraticCurveTo(px+7+vs,py+14,px+9+vs,py+20);c.stroke();
-        c.beginPath();c.moveTo(px+24,py+5);c.quadraticCurveTo(px+25+vs*0.7,py+12,px+23+vs*0.7,py+18);c.stroke();
-        c.strokeStyle="rgba(50,120,40,0.5)";c.lineWidth=1;
-        c.beginPath();c.moveTo(px+12,py+4);c.quadraticCurveTo(px+11+vs*0.5,py+9,px+13+vs*0.5,py+13);c.stroke();
-        c.lineCap="butt";
-        // Tree root frame
-        c.fillStyle="#3a2810";
-        c.beginPath();c.moveTo(px,py+TL);c.quadraticCurveTo(px+4,py+26,px+6,py+TL);c.fill();
-        c.beginPath();c.moveTo(px+TL,py+TL);c.quadraticCurveTo(px+TL-4,py+26,px+TL-6,py+TL);c.fill();
-        // Eerie green glow from within
-        const glowPulse=Math.sin(t/500)*.15+.22;
-        const ig=c.createRadialGradient(px+16,py+16,0,px+16,py+16,14);
-        ig.addColorStop(0,`rgba(40,180,60,${glowPulse})`);ig.addColorStop(1,"rgba(0,0,0,0)");
-        c.fillStyle=ig;c.fillRect(px+5,py+4,TL-10,TL-8);
-      }else if(eVar<0.5){
-        // Style B: Fire entrance — charred stone with lava cracks
-        const eg=c.createRadialGradient(px+16,py+20,1,px+16,py+18,16);
-        eg.addColorStop(0,"#100200");eg.addColorStop(0.5,"#080100");eg.addColorStop(1,"#040000");
-        c.fillStyle=eg;c.fillRect(px,py,TL,TL);
-        // Charred stairs
-        c.fillStyle="#1a0808";c.fillRect(px+5,py+6,22,4);
-        c.fillStyle="#140606";c.fillRect(px+5,py+12,22,4);
-        c.fillStyle="#0e0404";c.fillRect(px+5,py+18,22,4);
-        c.fillStyle="#080202";c.fillRect(px+5,py+24,22,4);
-        // Blackened stone pillars
-        const plg=c.createLinearGradient(px,py,px+6,py);plg.addColorStop(0,"#3a2a2a");plg.addColorStop(1,"#2a1a1a");
-        c.fillStyle=plg;c.fillRect(px,py,6,TL);
-        const prg=c.createLinearGradient(px+TL-6,py,px+TL,py);prg.addColorStop(0,"#2a1a1a");prg.addColorStop(1,"#3a2a2a");
-        c.fillStyle=prg;c.fillRect(px+TL-6,py,6,TL);
-        // Lava cracks on pillars
-        c.strokeStyle="rgba(255,120,20,0.6)";c.lineWidth=1;
-        c.beginPath();c.moveTo(px+2,py+8);c.lineTo(px+4,py+14);c.lineTo(px+2,py+20);c.stroke();
-        c.beginPath();c.moveTo(px+TL-3,py+10);c.lineTo(px+TL-5,py+16);c.lineTo(px+TL-2,py+24);c.stroke();
-        // Charred lintel
-        c.fillStyle="#2a1a1a";c.fillRect(px,py,TL,5);
-        // Skull carved in lintel
-        c.fillStyle="rgba(180,160,140,0.6)";
-        c.beginPath();c.arc(px+16,py+2,3,0,Math.PI*2);c.fill();
-        c.fillStyle="rgba(0,0,0,0.8)";c.fillRect(px+14,py+1,2,2);c.fillRect(px+17,py+1,2,2);
-        c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(px+15,py+3,1,1);c.fillRect(px+17,py+3,1,1);
-        // Ember particles
-        const ep1=Math.sin(t/200+px)*0.5+0.5;
-        const ep2=Math.sin(t/170+py)*0.5+0.5;
-        c.fillStyle=`rgba(255,160,30,${ep1*0.7})`;c.beginPath();c.arc(px+8,py+8-ep1*4,1,0,Math.PI*2);c.fill();
-        c.fillStyle=`rgba(255,100,20,${ep2*0.6})`;c.beginPath();c.arc(px+22,py+12-ep2*5,0.8,0,Math.PI*2);c.fill();
-        c.fillStyle=`rgba(255,200,50,${ep1*0.5})`;c.beginPath();c.arc(px+14,py+6-ep2*3,0.6,0,Math.PI*2);c.fill();
-        // Hellish red glow
-        const glowPulse=Math.sin(t/400)*.18+.25;
-        const ig=c.createRadialGradient(px+16,py+16,0,px+16,py+16,14);
-        ig.addColorStop(0,`rgba(255,60,10,${glowPulse})`);ig.addColorStop(0.5,`rgba(200,30,0,${glowPulse*0.5})`);ig.addColorStop(1,"rgba(0,0,0,0)");
-        c.fillStyle=ig;c.fillRect(px+5,py+4,TL-10,TL-8);
-      }else if(eVar<0.75){
-        // Style C: Shadow entrance — obsidian pillars with purple runes
-        const eg=c.createRadialGradient(px+16,py+20,1,px+16,py+18,16);
-        eg.addColorStop(0,"#060010");eg.addColorStop(0.5,"#030008");eg.addColorStop(1,"#010004");
-        c.fillStyle=eg;c.fillRect(px,py,TL,TL);
-        // Dark stairs
-        c.fillStyle="#0a0818";c.fillRect(px+5,py+6,22,4);
-        c.fillStyle="#080614";c.fillRect(px+5,py+12,22,4);
-        c.fillStyle="#060410";c.fillRect(px+5,py+18,22,4);
-        c.fillStyle="#04020c";c.fillRect(px+5,py+24,22,4);
-        // Obsidian pillars (very dark with sheen)
-        const plg=c.createLinearGradient(px,py,px+6,py);plg.addColorStop(0,"#1a1030");plg.addColorStop(0.5,"#100820");plg.addColorStop(1,"#0a0618");
-        c.fillStyle=plg;c.fillRect(px,py,6,TL);
-        const prg=c.createLinearGradient(px+TL-6,py,px+TL,py);prg.addColorStop(0,"#0a0618");prg.addColorStop(0.5,"#100820");prg.addColorStop(1,"#1a1030");
-        c.fillStyle=prg;c.fillRect(px+TL-6,py,6,TL);
-        // Glowing purple runes on pillars
-        const rp=Math.sin(t/350)*0.3+0.5;
-        c.fillStyle=`rgba(160,80,255,${rp*0.7})`;
-        // Left pillar runes
-        c.fillRect(px+1,py+8,3,2);c.fillRect(px+2,py+10,1,3);
-        c.fillRect(px+1,py+18,3,1);c.fillRect(px+2,py+19,2,2);
-        c.fillRect(px+1,py+26,2,2);
-        // Right pillar runes
-        c.fillRect(px+TL-4,py+7,3,2);c.fillRect(px+TL-3,py+9,1,3);
-        c.fillRect(px+TL-4,py+16,3,1);c.fillRect(px+TL-3,py+17,2,2);
-        c.fillRect(px+TL-4,py+24,2,2);
-        // Dark lintel
-        c.fillStyle="#100820";c.fillRect(px,py,TL,5);
-        // Rune on lintel
-        c.fillStyle=`rgba(140,60,240,${rp*0.6})`;
-        c.beginPath();c.arc(px+16,py+2,2.5,0,Math.PI*2);c.stroke();
-        c.fillRect(px+12,py+1,2,1);c.fillRect(px+19,py+1,2,1);
-        // Floating shadow wisps
-        const ws1=Math.sin(t/600)*3,ws2=Math.cos(t/500)*2.5;
-        c.fillStyle=`rgba(100,40,180,${0.15+Math.sin(t/300)*0.1})`;
-        c.beginPath();c.arc(px+10+ws1,py+14+ws2*0.5,2,0,Math.PI*2);c.fill();
-        c.beginPath();c.arc(px+22-ws1*0.7,py+20-ws2*0.7,1.5,0,Math.PI*2);c.fill();
-        // Violet glow from within
-        const glowPulse=Math.sin(t/450)*.17+.23;
-        const ig=c.createRadialGradient(px+16,py+16,0,px+16,py+16,14);
-        ig.addColorStop(0,`rgba(130,50,220,${glowPulse})`);ig.addColorStop(0.6,`rgba(80,20,160,${glowPulse*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
-        c.fillStyle=ig;c.fillRect(px+5,py+4,TL-10,TL-8);
+      const di=ei?ei.di:-1,qx=ei?ei.qx:0,qy=ei?ei.qy:0;
+      if(di===0){
+        // D0: Forest Temple — ancient overgrown stone temple with stairs
+        if(qy===0){
+          if(qx===0){
+            // Top-left: left pillar + left half of archway
+            // Stone wall background
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#5a6a55");bg.addColorStop(1,"#3a4a35");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left stone pillar — thick, weathered
+            const plg=c.createLinearGradient(px,py,px+14,py);plg.addColorStop(0,"#6a7a65");plg.addColorStop(0.5,"#5a6a55");plg.addColorStop(1,"#4a5a45");
+            c.fillStyle=plg;c.fillRect(px,py,14,TL);
+            // Pillar cap stone
+            c.fillStyle="#7a8a75";c.fillRect(px,py,16,5);
+            c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+5,16,1);
+            // Weathered stone lines on pillar
+            c.fillStyle="rgba(0,0,0,0.1)";c.fillRect(px+2,py+10,10,1);c.fillRect(px+2,py+18,10,1);c.fillRect(px+2,py+26,10,1);
+            c.fillStyle="rgba(255,255,255,0.06)";c.fillRect(px+2,py+11,10,1);c.fillRect(px+2,py+19,10,1);
+            // Moss on pillar
+            c.fillStyle="rgba(50,130,35,0.55)";
+            c.fillRect(px+1,py+7,5,4);c.fillRect(px,py+20,6,5);c.fillRect(px+3,py+28,4,3);
+            c.fillStyle="rgba(70,150,50,0.4)";
+            c.fillRect(px+2,py+14,4,3);c.fillRect(px+5,py+22,5,3);
+            // Dark archway opening — left half
+            const ag=c.createRadialGradient(px+TL,py+20,2,px+TL,py+18,22);
+            ag.addColorStop(0,"#010401");ag.addColorStop(0.6,"#020803");ag.addColorStop(1,"#0a140a");
+            c.fillStyle=ag;c.fillRect(px+14,py+5,TL-14,TL-5);
+            // Archway stone top — curved lintel left portion
+            c.fillStyle="#6a7a65";c.fillRect(px+14,py,TL-14,7);
+            const alg=c.createLinearGradient(px+14,py,px+14,py+10);alg.addColorStop(0,"#7a8a78");alg.addColorStop(1,"#4a5a48");
+            c.fillStyle=alg;
+            c.beginPath();c.moveTo(px+14,py+7);c.quadraticCurveTo(px+22,py+4,px+TL,py+3);c.lineTo(px+TL,py+7);c.lineTo(px+14,py+7);c.fill();
+            // Moss on lintel
+            c.fillStyle="rgba(50,120,35,0.5)";c.fillRect(px+16,py+1,8,3);c.fillRect(px+20,py,6,2);
+            // Hanging vines from archway
+            const vs=Math.sin(t/900)*2;
+            c.strokeStyle="rgba(35,100,25,0.75)";c.lineWidth=2;c.lineCap="round";
+            c.beginPath();c.moveTo(px+18,py+7);c.quadraticCurveTo(px+17+vs,py+16,px+19+vs,py+24);c.stroke();
+            c.strokeStyle="rgba(45,110,35,0.55)";c.lineWidth=1.5;
+            c.beginPath();c.moveTo(px+25,py+5);c.quadraticCurveTo(px+26+vs*0.6,py+12,px+24+vs*0.6,py+18);c.stroke();
+            c.lineCap="butt";
+            // Vine leaves
+            c.fillStyle="rgba(60,140,40,0.6)";
+            c.beginPath();c.arc(px+19+vs,py+24,2,0,Math.PI*2);c.fill();
+            c.beginPath();c.arc(px+17+vs*0.8,py+18,1.5,0,Math.PI*2);c.fill();
+            // Green glow from within
+            const gp=Math.sin(t/500)*.12+.18;
+            const ig=c.createRadialGradient(px+TL,py+20,0,px+TL,py+18,20);
+            ig.addColorStop(0,`rgba(40,180,60,${gp})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px+14,py+5,TL-14,TL-5);
+          }else{
+            // Top-right: right half of archway + right pillar
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#3a4a35");bg.addColorStop(1,"#5a6a55");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right stone pillar
+            const prg=c.createLinearGradient(px+TL-14,py,px+TL,py);prg.addColorStop(0,"#4a5a45");prg.addColorStop(0.5,"#5a6a55");prg.addColorStop(1,"#6a7a65");
+            c.fillStyle=prg;c.fillRect(px+TL-14,py,14,TL);
+            // Pillar cap
+            c.fillStyle="#7a8a75";c.fillRect(px+TL-16,py,16,5);
+            c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px+TL-16,py+5,16,1);
+            // Weathered lines
+            c.fillStyle="rgba(0,0,0,0.1)";c.fillRect(px+TL-12,py+10,10,1);c.fillRect(px+TL-12,py+18,10,1);c.fillRect(px+TL-12,py+26,10,1);
+            c.fillStyle="rgba(255,255,255,0.06)";c.fillRect(px+TL-12,py+11,10,1);c.fillRect(px+TL-12,py+19,10,1);
+            // Moss on right pillar
+            c.fillStyle="rgba(50,130,35,0.55)";
+            c.fillRect(px+TL-6,py+9,5,4);c.fillRect(px+TL-7,py+22,6,5);c.fillRect(px+TL-5,py+30,4,2);
+            c.fillStyle="rgba(70,150,50,0.4)";
+            c.fillRect(px+TL-8,py+15,5,3);
+            // Dark archway — right half
+            const ag=c.createRadialGradient(px,py+20,2,px,py+18,22);
+            ag.addColorStop(0,"#010401");ag.addColorStop(0.6,"#020803");ag.addColorStop(1,"#0a140a");
+            c.fillStyle=ag;c.fillRect(px,py+5,TL-14,TL-5);
+            // Archway stone top right
+            c.fillStyle="#6a7a65";c.fillRect(px,py,TL-14,7);
+            const alg=c.createLinearGradient(px,py,px,py+10);alg.addColorStop(0,"#7a8a78");alg.addColorStop(1,"#4a5a48");
+            c.fillStyle=alg;
+            c.beginPath();c.moveTo(px,py+3);c.quadraticCurveTo(px+10,py+4,px+TL-14,py+7);c.lineTo(px,py+7);c.fill();
+            // Moss on lintel
+            c.fillStyle="rgba(50,120,35,0.5)";c.fillRect(px+2,py,8,3);c.fillRect(px+8,py+1,6,2);
+            // Hanging vines
+            const vs=Math.sin(t/900)*2;
+            c.strokeStyle="rgba(35,100,25,0.75)";c.lineWidth=2;c.lineCap="round";
+            c.beginPath();c.moveTo(px+12,py+6);c.quadraticCurveTo(px+13+vs*0.8,py+14,px+11+vs*0.8,py+22);c.stroke();
+            c.strokeStyle="rgba(45,110,35,0.55)";c.lineWidth=1.5;
+            c.beginPath();c.moveTo(px+5,py+5);c.quadraticCurveTo(px+4+vs*0.5,py+10,px+6+vs*0.5,py+16);c.stroke();
+            c.lineCap="butt";
+            // Vine leaves
+            c.fillStyle="rgba(60,140,40,0.6)";
+            c.beginPath();c.arc(px+11+vs*0.8,py+22,2,0,Math.PI*2);c.fill();
+            // Green glow
+            const gp=Math.sin(t/500)*.12+.18;
+            const ig=c.createRadialGradient(px,py+20,0,px,py+18,20);
+            ig.addColorStop(0,`rgba(40,180,60,${gp})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px,py+5,TL-14,TL-5);
+          }
+        }else{
+          if(qx===0){
+            // Bottom-left: left pillar base + stone stairs left half
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#3a4a35");bg.addColorStop(1,"#4a6040");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left pillar base continues
+            const plg=c.createLinearGradient(px,py,px+14,py);plg.addColorStop(0,"#6a7a65");plg.addColorStop(0.5,"#5a6a55");plg.addColorStop(1,"#4a5a45");
+            c.fillStyle=plg;c.fillRect(px,py,14,TL);
+            // Pillar base stone (wider)
+            c.fillStyle="#7a8a75";c.fillRect(px,py+TL-6,16,6);
+            c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px,py+TL-7,16,1);
+            // Moss on lower pillar
+            c.fillStyle="rgba(50,130,35,0.5)";
+            c.fillRect(px+1,py+4,5,4);c.fillRect(px,py+14,6,5);c.fillRect(px+2,py+22,4,3);
+            // Stone stairs — left half, ascending
+            c.fillStyle="#5a6a58";c.fillRect(px+14,py,TL-14,8);
+            c.fillStyle="#4a5a48";c.fillRect(px+14,py+8,TL-14,8);
+            c.fillStyle="#3a4a38";c.fillRect(px+14,py+16,TL-14,8);
+            c.fillStyle="#2a3a28";c.fillRect(px+14,py+24,TL-14,8);
+            // Stair edges (light highlight on top of each step)
+            c.fillStyle="rgba(255,255,255,0.1)";
+            c.fillRect(px+14,py,TL-14,1);c.fillRect(px+14,py+8,TL-14,1);c.fillRect(px+14,py+16,TL-14,1);c.fillRect(px+14,py+24,TL-14,1);
+            c.fillStyle="rgba(0,0,0,0.15)";
+            c.fillRect(px+14,py+7,TL-14,1);c.fillRect(px+14,py+15,TL-14,1);c.fillRect(px+14,py+23,TL-14,1);c.fillRect(px+14,py+31,TL-14,1);
+            // Grass creeping on stairs
+            c.fillStyle="rgba(60,140,40,0.45)";
+            c.fillRect(px+14,py+6,4,3);c.fillRect(px+14,py+22,5,3);c.fillRect(px+14,py+14,3,2);
+            // Tree roots at base
+            c.fillStyle="#3a2810";c.strokeStyle="#3a2810";c.lineWidth=2;
+            c.beginPath();c.moveTo(px+14,py+TL);c.quadraticCurveTo(px+16,py+26,px+20,py+TL);c.fill();
+          }else{
+            // Bottom-right: right pillar base + stone stairs right half
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#3a4a35");bg.addColorStop(1,"#4a6040");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right pillar base
+            const prg=c.createLinearGradient(px+TL-14,py,px+TL,py);prg.addColorStop(0,"#4a5a45");prg.addColorStop(0.5,"#5a6a55");prg.addColorStop(1,"#6a7a65");
+            c.fillStyle=prg;c.fillRect(px+TL-14,py,14,TL);
+            // Pillar base stone
+            c.fillStyle="#7a8a75";c.fillRect(px+TL-16,py+TL-6,16,6);
+            c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px+TL-16,py+TL-7,16,1);
+            // Moss on lower right pillar
+            c.fillStyle="rgba(50,130,35,0.5)";
+            c.fillRect(px+TL-6,py+6,5,4);c.fillRect(px+TL-7,py+16,6,4);c.fillRect(px+TL-5,py+24,4,3);
+            // Stone stairs — right half
+            c.fillStyle="#5a6a58";c.fillRect(px,py,TL-14,8);
+            c.fillStyle="#4a5a48";c.fillRect(px,py+8,TL-14,8);
+            c.fillStyle="#3a4a38";c.fillRect(px,py+16,TL-14,8);
+            c.fillStyle="#2a3a28";c.fillRect(px,py+24,TL-14,8);
+            // Stair edge highlights
+            c.fillStyle="rgba(255,255,255,0.1)";
+            c.fillRect(px,py,TL-14,1);c.fillRect(px,py+8,TL-14,1);c.fillRect(px,py+16,TL-14,1);c.fillRect(px,py+24,TL-14,1);
+            c.fillStyle="rgba(0,0,0,0.15)";
+            c.fillRect(px,py+7,TL-14,1);c.fillRect(px,py+15,TL-14,1);c.fillRect(px,py+23,TL-14,1);c.fillRect(px,py+31,TL-14,1);
+            // Grass creeping on stairs
+            c.fillStyle="rgba(60,140,40,0.45)";
+            c.fillRect(px+TL-18,py+6,4,3);c.fillRect(px+TL-18,py+20,5,3);c.fillRect(px+TL-17,py+14,3,2);
+            // Tree roots at base
+            c.fillStyle="#3a2810";
+            c.beginPath();c.moveTo(px+TL-14,py+TL);c.quadraticCurveTo(px+TL-16,py+26,px+TL-20,py+TL);c.fill();
+          }
+        }
+      }else if(di===1){
+        // D1: Fire Cavern — jagged rocky cave mouth with warm glow
+        if(qy===0){
+          if(qx===0){
+            // Top-left: left rocky wall + cave opening with stalactites
+            // Rocky mountain backdrop
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#5a4a3a");bg.addColorStop(1,"#3a2a1a");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left jagged rock wall
+            c.fillStyle="#4a3a2a";
+            c.beginPath();c.moveTo(px,py);c.lineTo(px+16,py);c.lineTo(px+14,py+6);c.lineTo(px+18,py+12);c.lineTo(px+12,py+18);c.lineTo(px+16,py+24);c.lineTo(px+14,py+TL);c.lineTo(px,py+TL);c.fill();
+            // Rock texture
+            c.fillStyle="rgba(90,70,50,0.5)";
+            c.fillRect(px+2,py+5,6,3);c.fillRect(px+4,py+15,5,2);c.fillRect(px+1,py+24,7,3);
+            c.fillStyle="rgba(0,0,0,0.15)";
+            c.fillRect(px+3,py+9,4,1);c.fillRect(px+2,py+20,5,1);
+            // Dark cave opening — left half
+            const cg=c.createRadialGradient(px+TL,py+22,3,px+TL,py+20,24);
+            cg.addColorStop(0,"#080200");cg.addColorStop(0.5,"#0c0400");cg.addColorStop(1,"#1a0a04");
+            c.fillStyle=cg;c.fillRect(px+12,py+6,TL-12,TL-6);
+            // Stalactites hanging from top
+            c.fillStyle="#4a3a28";
+            c.beginPath();c.moveTo(px+14,py);c.lineTo(px+16,py+10);c.lineTo(px+18,py);c.fill();
+            c.beginPath();c.moveTo(px+22,py);c.lineTo(px+23,py+7);c.lineTo(px+25,py);c.fill();
+            c.beginPath();c.moveTo(px+28,py);c.lineTo(px+30,py+12);c.lineTo(px+TL,py);c.fill();
+            c.fillStyle="#3a2a18";
+            c.beginPath();c.moveTo(px+19,py);c.lineTo(px+20,py+5);c.lineTo(px+21,py);c.fill();
+            // Warm orange glow from within
+            const gp=Math.sin(t/400)*.15+.25;
+            const ig=c.createRadialGradient(px+TL,py+24,2,px+TL,py+22,28);
+            ig.addColorStop(0,`rgba(255,120,20,${gp})`);ig.addColorStop(0.5,`rgba(200,60,10,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px+12,py+6,TL-12,TL-6);
+            // Ember particles
+            const ep1=(Math.sin(t/200+1)*0.5+0.5);
+            const ep2=(Math.sin(t/170+2)*0.5+0.5);
+            c.fillStyle=`rgba(255,180,40,${ep1*0.7})`;c.beginPath();c.arc(px+20,py+14-ep1*3,1.2,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(255,100,20,${ep2*0.5})`;c.beginPath();c.arc(px+28,py+10-ep2*4,0.8,0,Math.PI*2);c.fill();
+          }else{
+            // Top-right: cave opening + right rocky wall
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#3a2a1a");bg.addColorStop(1,"#5a4a3a");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right jagged rock wall
+            c.fillStyle="#4a3a2a";
+            c.beginPath();c.moveTo(px+TL,py);c.lineTo(px+TL-16,py);c.lineTo(px+TL-14,py+8);c.lineTo(px+TL-18,py+14);c.lineTo(px+TL-12,py+20);c.lineTo(px+TL-16,py+26);c.lineTo(px+TL-14,py+TL);c.lineTo(px+TL,py+TL);c.fill();
+            // Rock texture
+            c.fillStyle="rgba(90,70,50,0.5)";
+            c.fillRect(px+TL-8,py+6,6,3);c.fillRect(px+TL-7,py+17,5,2);c.fillRect(px+TL-9,py+26,7,3);
+            c.fillStyle="rgba(0,0,0,0.15)";
+            c.fillRect(px+TL-7,py+11,4,1);c.fillRect(px+TL-6,py+22,5,1);
+            // Cave opening — right half
+            const cg=c.createRadialGradient(px,py+22,3,px,py+20,24);
+            cg.addColorStop(0,"#080200");cg.addColorStop(0.5,"#0c0400");cg.addColorStop(1,"#1a0a04");
+            c.fillStyle=cg;c.fillRect(px,py+6,TL-12,TL-6);
+            // Stalactites
+            c.fillStyle="#4a3a28";
+            c.beginPath();c.moveTo(px,py);c.lineTo(px+2,py+11);c.lineTo(px+4,py);c.fill();
+            c.beginPath();c.moveTo(px+7,py);c.lineTo(px+8,py+6);c.lineTo(px+10,py);c.fill();
+            c.beginPath();c.moveTo(px+14,py);c.lineTo(px+16,py+9);c.lineTo(px+18,py);c.fill();
+            c.fillStyle="#3a2a18";
+            c.beginPath();c.moveTo(px+11,py);c.lineTo(px+12,py+4);c.lineTo(px+13,py);c.fill();
+            // Warm glow
+            const gp=Math.sin(t/400)*.15+.25;
+            const ig=c.createRadialGradient(px,py+24,2,px,py+22,28);
+            ig.addColorStop(0,`rgba(255,120,20,${gp})`);ig.addColorStop(0.5,`rgba(200,60,10,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px,py+6,TL-12,TL-6);
+            // Embers
+            const ep1=(Math.sin(t/200+3)*0.5+0.5);
+            const ep2=(Math.sin(t/170+4)*0.5+0.5);
+            c.fillStyle=`rgba(255,180,40,${ep1*0.6})`;c.beginPath();c.arc(px+6,py+12-ep1*3,1,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(255,100,20,${ep2*0.5})`;c.beginPath();c.arc(px+14,py+16-ep2*4,0.8,0,Math.PI*2);c.fill();
+          }
+        }else{
+          if(qx===0){
+            // Bottom-left: rocky ground + boulders, left side
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#3a2a1a");bg.addColorStop(1,"#4a3a28");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left rock wall continues down
+            c.fillStyle="#4a3a2a";
+            c.beginPath();c.moveTo(px,py);c.lineTo(px+14,py);c.lineTo(px+16,py+8);c.lineTo(px+12,py+16);c.lineTo(px+14,py+TL);c.lineTo(px,py+TL);c.fill();
+            // Rocky ground / boulders
+            c.fillStyle="#5a4a38";
+            c.beginPath();c.arc(px+22,py+24,5,0,Math.PI*2);c.fill();
+            c.fillStyle="#4a3a28";
+            c.beginPath();c.arc(px+28,py+20,3.5,0,Math.PI*2);c.fill();
+            c.fillStyle="#6a5a48";
+            c.beginPath();c.arc(px+18,py+28,4,0,Math.PI*2);c.fill();
+            // Rough ground texture
+            c.fillStyle="rgba(0,0,0,0.12)";
+            for(let i=0;i<6;i++){const bx=px+14+hs(px,py,i+20)*18,by=py+hs(px,py,i+30)*TL;c.fillRect(bx,by,3,1);}
+            // Warm glow on ground
+            const gp=Math.sin(t/400)*.1+.15;
+            const ig=c.createRadialGradient(px+TL,py,2,px+TL,py+4,20);
+            ig.addColorStop(0,`rgba(255,100,20,${gp})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px+14,py,TL-14,TL);
+            // Scattered small rocks
+            c.fillStyle="#5a4838";c.fillRect(px+20,py+8,3,2);c.fillRect(px+26,py+12,2,2);
+          }else{
+            // Bottom-right: rocky ground + boulders, right side
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#3a2a1a");bg.addColorStop(1,"#4a3a28");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right rock wall continues down
+            c.fillStyle="#4a3a2a";
+            c.beginPath();c.moveTo(px+TL,py);c.lineTo(px+TL-14,py);c.lineTo(px+TL-16,py+10);c.lineTo(px+TL-12,py+18);c.lineTo(px+TL-14,py+TL);c.lineTo(px+TL,py+TL);c.fill();
+            // Boulders
+            c.fillStyle="#5a4a38";
+            c.beginPath();c.arc(px+10,py+22,5,0,Math.PI*2);c.fill();
+            c.fillStyle="#4a3a28";
+            c.beginPath();c.arc(px+4,py+18,3,0,Math.PI*2);c.fill();
+            c.fillStyle="#6a5a48";
+            c.beginPath();c.arc(px+14,py+28,4,0,Math.PI*2);c.fill();
+            // Ground texture
+            c.fillStyle="rgba(0,0,0,0.12)";
+            for(let i=0;i<6;i++){const bx=px+hs(px,py,i+40)*18,by=py+hs(px,py,i+50)*TL;c.fillRect(bx,by,3,1);}
+            // Warm glow on ground
+            const gp=Math.sin(t/400)*.1+.15;
+            const ig=c.createRadialGradient(px,py,2,px,py+4,20);
+            ig.addColorStop(0,`rgba(255,100,20,${gp})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px,py,TL-14,TL);
+            // Scattered small rocks
+            c.fillStyle="#5a4838";c.fillRect(px+6,py+10,3,2);c.fillRect(px+2,py+6,2,2);
+          }
+        }
+      }else if(di===2){
+        // D2: Shadow Keep — crumbling gothic ruins with purple energy
+        if(qy===0){
+          if(qx===0){
+            // Top-left: broken left pillar + dark archway left half
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#2a2030");bg.addColorStop(1,"#1a1020");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Cracked left pillar
+            const plg=c.createLinearGradient(px,py,px+12,py);plg.addColorStop(0,"#3a3040");plg.addColorStop(0.5,"#2a2030");plg.addColorStop(1,"#1a1020");
+            c.fillStyle=plg;c.fillRect(px,py,12,TL);
+            // Pillar cap — broken/chipped
+            c.fillStyle="#4a4050";c.fillRect(px,py,14,4);
+            c.fillStyle="#3a3040";
+            c.beginPath();c.moveTo(px+12,py);c.lineTo(px+14,py+4);c.lineTo(px+10,py+4);c.fill(); // chip
+            // Cracks in pillar
+            c.strokeStyle="rgba(0,0,0,0.4)";c.lineWidth=1;
+            c.beginPath();c.moveTo(px+4,py+8);c.lineTo(px+6,py+14);c.lineTo(px+3,py+20);c.stroke();
+            c.beginPath();c.moveTo(px+8,py+16);c.lineTo(px+6,py+22);c.lineTo(px+9,py+28);c.stroke();
+            // Dark archway opening — left half
+            const ag=c.createRadialGradient(px+TL,py+20,2,px+TL,py+18,24);
+            ag.addColorStop(0,"#020008");ag.addColorStop(0.5,"#040010");ag.addColorStop(1,"#0a0618");
+            c.fillStyle=ag;c.fillRect(px+12,py+4,TL-12,TL-4);
+            // Gothic archway top — pointed arch left half
+            c.fillStyle="#3a3040";
+            c.beginPath();c.moveTo(px+12,py+8);c.quadraticCurveTo(px+20,py-2,px+TL,py-4);c.lineTo(px+TL,py+8);c.lineTo(px+12,py+8);c.fill();
+            c.fillStyle="#2a2030";c.fillRect(px+12,py+6,TL-12,3);
+            // Purple energy wisps floating
+            const wp=Math.sin(t/350)*0.3+0.5;
+            const ws1=Math.sin(t/600)*4,ws2=Math.cos(t/500)*3;
+            c.fillStyle=`rgba(140,50,220,${wp*0.5})`;
+            c.beginPath();c.arc(px+20+ws1,py+14+ws2*0.5,2.5,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(180,80,255,${wp*0.35})`;
+            c.beginPath();c.arc(px+26-ws1*0.6,py+22-ws2*0.6,1.8,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(120,40,200,${wp*0.25})`;
+            c.beginPath();c.arc(px+18+ws2,py+28+ws1*0.3,1.5,0,Math.PI*2);c.fill();
+            // Violet glow from within
+            const gp=Math.sin(t/450)*.15+.2;
+            const ig=c.createRadialGradient(px+TL,py+20,0,px+TL,py+18,22);
+            ig.addColorStop(0,`rgba(130,50,220,${gp})`);ig.addColorStop(0.6,`rgba(80,20,160,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px+12,py+4,TL-12,TL-4);
+          }else{
+            // Top-right: dark archway right half + broken right pillar
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#1a1020");bg.addColorStop(1,"#2a2030");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Cracked right pillar
+            const prg=c.createLinearGradient(px+TL-12,py,px+TL,py);prg.addColorStop(0,"#1a1020");prg.addColorStop(0.5,"#2a2030");prg.addColorStop(1,"#3a3040");
+            c.fillStyle=prg;c.fillRect(px+TL-12,py,12,TL);
+            // Broken pillar cap — more damaged
+            c.fillStyle="#4a4050";c.fillRect(px+TL-14,py,14,4);
+            // Missing chunk from top of pillar
+            c.fillStyle="#1a1020";c.fillRect(px+TL-12,py,4,6);
+            // Cracks
+            c.strokeStyle="rgba(0,0,0,0.4)";c.lineWidth=1;
+            c.beginPath();c.moveTo(px+TL-5,py+10);c.lineTo(px+TL-7,py+16);c.lineTo(px+TL-4,py+22);c.stroke();
+            c.beginPath();c.moveTo(px+TL-9,py+18);c.lineTo(px+TL-7,py+24);c.lineTo(px+TL-10,py+30);c.stroke();
+            // Dark archway — right half
+            const ag=c.createRadialGradient(px,py+20,2,px,py+18,24);
+            ag.addColorStop(0,"#020008");ag.addColorStop(0.5,"#040010");ag.addColorStop(1,"#0a0618");
+            c.fillStyle=ag;c.fillRect(px,py+4,TL-12,TL-4);
+            // Gothic arch right half
+            c.fillStyle="#3a3040";
+            c.beginPath();c.moveTo(px,py-4);c.quadraticCurveTo(px+12,py-2,px+TL-12,py+8);c.lineTo(px,py+8);c.fill();
+            c.fillStyle="#2a2030";c.fillRect(px,py+6,TL-12,3);
+            // Purple energy wisps
+            const wp=Math.sin(t/350)*0.3+0.5;
+            const ws1=Math.sin(t/600)*4,ws2=Math.cos(t/500)*3;
+            c.fillStyle=`rgba(140,50,220,${wp*0.45})`;
+            c.beginPath();c.arc(px+8-ws1*0.7,py+16+ws2*0.4,2,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(180,80,255,${wp*0.3})`;
+            c.beginPath();c.arc(px+14+ws1*0.5,py+24-ws2*0.5,1.5,0,Math.PI*2);c.fill();
+            // Violet glow
+            const gp=Math.sin(t/450)*.15+.2;
+            const ig=c.createRadialGradient(px,py+20,0,px,py+18,22);
+            ig.addColorStop(0,`rgba(130,50,220,${gp})`);ig.addColorStop(0.6,`rgba(80,20,160,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px,py+4,TL-12,TL-4);
+          }
+        }else{
+          if(qx===0){
+            // Bottom-left: rubble + cracked stone floor left
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#1a1020");bg.addColorStop(1,"#222030");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left pillar base — crumbled
+            c.fillStyle="#3a3040";c.fillRect(px,py,12,TL);
+            c.fillStyle="#4a4050";c.fillRect(px,py+TL-5,14,5);
+            // Rubble pieces scattered
+            c.fillStyle="#4a4050";
+            c.beginPath();c.moveTo(px+14,py+20);c.lineTo(px+18,py+18);c.lineTo(px+20,py+22);c.lineTo(px+16,py+24);c.fill();
+            c.fillStyle="#3a3040";
+            c.beginPath();c.arc(px+24,py+26,3,0,Math.PI*2);c.fill();
+            c.fillStyle="#5a5060";
+            c.fillRect(px+16,py+28,4,3);c.fillRect(px+22,py+22,3,2);
+            // Cracked stone floor
+            c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.8;
+            c.beginPath();c.moveTo(px+14,py+14);c.lineTo(px+20,py+18);c.lineTo(px+TL,py+16);c.stroke();
+            c.beginPath();c.moveTo(px+18,py+6);c.lineTo(px+22,py+10);c.lineTo(px+28,py+8);c.stroke();
+            // Purple energy on ground
+            const gp=Math.sin(t/450)*.12+.15;
+            c.fillStyle=`rgba(100,40,180,${gp})`;
+            c.beginPath();c.arc(px+22,py+12,6,0,Math.PI*2);c.fill();
+          }else{
+            // Bottom-right: rubble + cracked stone floor right
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#1a1020");bg.addColorStop(1,"#222030");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right pillar base — crumbled
+            c.fillStyle="#3a3040";c.fillRect(px+TL-12,py,12,TL);
+            c.fillStyle="#4a4050";c.fillRect(px+TL-14,py+TL-5,14,5);
+            // Rubble
+            c.fillStyle="#4a4050";
+            c.beginPath();c.moveTo(px+TL-20,py+22);c.lineTo(px+TL-16,py+18);c.lineTo(px+TL-14,py+22);c.lineTo(px+TL-18,py+26);c.fill();
+            c.fillStyle="#3a3040";
+            c.beginPath();c.arc(px+8,py+28,3,0,Math.PI*2);c.fill();
+            c.fillStyle="#5a5060";
+            c.fillRect(px+10,py+24,4,3);c.fillRect(px+4,py+20,3,2);
+            // Cracked stone floor
+            c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.8;
+            c.beginPath();c.moveTo(px,py+14);c.lineTo(px+8,py+18);c.lineTo(px+TL-14,py+16);c.stroke();
+            c.beginPath();c.moveTo(px+4,py+8);c.lineTo(px+10,py+12);c.lineTo(px+16,py+6);c.stroke();
+            // Purple energy on ground
+            const gp=Math.sin(t/450)*.12+.15;
+            c.fillStyle=`rgba(100,40,180,${gp})`;
+            c.beginPath();c.arc(px+10,py+10,6,0,Math.PI*2);c.fill();
+          }
+        }
+      }else if(di===3){
+        // D3: Dark Sanctum — volcanic temple with lava veins and flame braziers
+        if(qy===0){
+          if(qx===0){
+            // Top-left: left basalt pillar + imposing doorway left half with brazier
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#2a2020");bg.addColorStop(1,"#1a0c0c");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left basalt pillar — dark, massive
+            const plg=c.createLinearGradient(px,py,px+14,py);plg.addColorStop(0,"#3a2828");plg.addColorStop(0.5,"#2a1a1a");plg.addColorStop(1,"#1a0c0c");
+            c.fillStyle=plg;c.fillRect(px,py,14,TL);
+            // Pillar cap with carved pattern
+            c.fillStyle="#4a3030";c.fillRect(px,py,16,5);
+            c.fillStyle="#3a2020";c.fillRect(px+2,py+1,3,2);c.fillRect(px+8,py+1,3,2);
+            // Lava veins in pillar
+            const lp=Math.sin(t/300)*.2+.6;
+            c.strokeStyle=`rgba(255,80,10,${lp})`;c.lineWidth=1.2;
+            c.beginPath();c.moveTo(px+5,py+8);c.lineTo(px+7,py+16);c.lineTo(px+4,py+24);c.lineTo(px+6,py+30);c.stroke();
+            c.strokeStyle=`rgba(255,160,30,${lp*0.6})`;c.lineWidth=0.8;
+            c.beginPath();c.moveTo(px+9,py+12);c.lineTo(px+8,py+18);c.lineTo(px+10,py+22);c.stroke();
+            // Dark doorway — left half
+            const dg2=c.createRadialGradient(px+TL,py+20,2,px+TL,py+18,24);
+            dg2.addColorStop(0,"#080000");dg2.addColorStop(0.5,"#0c0200");dg2.addColorStop(1,"#1a0804");
+            c.fillStyle=dg2;c.fillRect(px+14,py+5,TL-14,TL-5);
+            // Imposing doorway lintel left half
+            c.fillStyle="#3a2020";c.fillRect(px+14,py,TL-14,7);
+            c.fillStyle="#4a2828";c.fillRect(px+14,py,TL-14,3);
+            // Flame brazier on left pillar top
+            const fp=Math.sin(t/150)*0.15+0.85;
+            // Brazier bowl
+            c.fillStyle="#4a3020";
+            c.beginPath();c.moveTo(px+3,py+5);c.lineTo(px+11,py+5);c.lineTo(px+10,py+9);c.lineTo(px+4,py+9);c.fill();
+            // Flame
+            const fh=Math.sin(t/120)*2;
+            c.fillStyle=`rgba(255,160,30,${fp})`;
+            c.beginPath();c.moveTo(px+7,py-2+fh);c.quadraticCurveTo(px+4,py+2,px+5,py+5);c.lineTo(px+9,py+5);c.quadraticCurveTo(px+10,py+2,px+7,py-2+fh);c.fill();
+            c.fillStyle=`rgba(255,220,80,${fp*0.7})`;
+            c.beginPath();c.moveTo(px+7,py+fh);c.quadraticCurveTo(px+5,py+3,px+6,py+5);c.lineTo(px+8,py+5);c.quadraticCurveTo(px+9,py+3,px+7,py+fh);c.fill();
+            // Fire glow
+            const fg=c.createRadialGradient(px+7,py+2,1,px+7,py+4,12);
+            fg.addColorStop(0,`rgba(255,120,20,${fp*0.3})`);fg.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=fg;c.fillRect(px,py-4,16,16);
+            // Red glow from within
+            const gp=Math.sin(t/400)*.12+.2;
+            const ig=c.createRadialGradient(px+TL,py+22,2,px+TL,py+20,24);
+            ig.addColorStop(0,`rgba(255,50,10,${gp})`);ig.addColorStop(0.5,`rgba(200,20,0,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px+14,py+5,TL-14,TL-5);
+          }else{
+            // Top-right: imposing doorway right half + right basalt pillar with brazier
+            const bg=c.createLinearGradient(px,py,px+TL,py+TL);bg.addColorStop(0,"#1a0c0c");bg.addColorStop(1,"#2a2020");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right basalt pillar
+            const prg=c.createLinearGradient(px+TL-14,py,px+TL,py);prg.addColorStop(0,"#1a0c0c");prg.addColorStop(0.5,"#2a1a1a");prg.addColorStop(1,"#3a2828");
+            c.fillStyle=prg;c.fillRect(px+TL-14,py,14,TL);
+            // Pillar cap
+            c.fillStyle="#4a3030";c.fillRect(px+TL-16,py,16,5);
+            c.fillStyle="#3a2020";c.fillRect(px+TL-13,py+1,3,2);c.fillRect(px+TL-7,py+1,3,2);
+            // Lava veins
+            const lp=Math.sin(t/300)*.2+.6;
+            c.strokeStyle=`rgba(255,80,10,${lp})`;c.lineWidth=1.2;
+            c.beginPath();c.moveTo(px+TL-6,py+10);c.lineTo(px+TL-8,py+18);c.lineTo(px+TL-5,py+26);c.lineTo(px+TL-7,py+32);c.stroke();
+            c.strokeStyle=`rgba(255,160,30,${lp*0.6})`;c.lineWidth=0.8;
+            c.beginPath();c.moveTo(px+TL-10,py+14);c.lineTo(px+TL-9,py+20);c.lineTo(px+TL-11,py+24);c.stroke();
+            // Dark doorway — right half
+            const dg2=c.createRadialGradient(px,py+20,2,px,py+18,24);
+            dg2.addColorStop(0,"#080000");dg2.addColorStop(0.5,"#0c0200");dg2.addColorStop(1,"#1a0804");
+            c.fillStyle=dg2;c.fillRect(px,py+5,TL-14,TL-5);
+            // Doorway lintel right half
+            c.fillStyle="#3a2020";c.fillRect(px,py,TL-14,7);
+            c.fillStyle="#4a2828";c.fillRect(px,py,TL-14,3);
+            // Flame brazier on right pillar top
+            const fp=Math.sin(t/150+1)*0.15+0.85;
+            c.fillStyle="#4a3020";
+            c.beginPath();c.moveTo(px+TL-11,py+5);c.lineTo(px+TL-3,py+5);c.lineTo(px+TL-4,py+9);c.lineTo(px+TL-10,py+9);c.fill();
+            const fh=Math.sin(t/120+1)*2;
+            c.fillStyle=`rgba(255,160,30,${fp})`;
+            c.beginPath();c.moveTo(px+TL-7,py-2+fh);c.quadraticCurveTo(px+TL-10,py+2,px+TL-9,py+5);c.lineTo(px+TL-5,py+5);c.quadraticCurveTo(px+TL-4,py+2,px+TL-7,py-2+fh);c.fill();
+            c.fillStyle=`rgba(255,220,80,${fp*0.7})`;
+            c.beginPath();c.moveTo(px+TL-7,py+fh);c.quadraticCurveTo(px+TL-9,py+3,px+TL-8,py+5);c.lineTo(px+TL-6,py+5);c.quadraticCurveTo(px+TL-5,py+3,px+TL-7,py+fh);c.fill();
+            // Fire glow
+            const fg=c.createRadialGradient(px+TL-7,py+2,1,px+TL-7,py+4,12);
+            fg.addColorStop(0,`rgba(255,120,20,${fp*0.3})`);fg.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=fg;c.fillRect(px+TL-16,py-4,16,16);
+            // Red glow
+            const gp=Math.sin(t/400)*.12+.2;
+            const ig=c.createRadialGradient(px,py+22,2,px,py+20,24);
+            ig.addColorStop(0,`rgba(255,50,10,${gp})`);ig.addColorStop(0.5,`rgba(200,20,0,${gp*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+            c.fillStyle=ig;c.fillRect(px,py+5,TL-14,TL-5);
+          }
+        }else{
+          if(qx===0){
+            // Bottom-left: dark stone stairs left half with lava veins
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#1a0c0c");bg.addColorStop(1,"#2a1818");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Left pillar base
+            c.fillStyle="#2a1a1a";c.fillRect(px,py,14,TL);
+            c.fillStyle="#3a2828";c.fillRect(px,py+TL-5,16,5);
+            // Dark basalt stairs left half
+            c.fillStyle="#2a1818";c.fillRect(px+14,py,TL-14,8);
+            c.fillStyle="#221414";c.fillRect(px+14,py+8,TL-14,8);
+            c.fillStyle="#1a0c0c";c.fillRect(px+14,py+16,TL-14,8);
+            c.fillStyle="#140808";c.fillRect(px+14,py+24,TL-14,8);
+            // Step edge highlights
+            c.fillStyle="rgba(255,255,255,0.06)";
+            c.fillRect(px+14,py,TL-14,1);c.fillRect(px+14,py+8,TL-14,1);c.fillRect(px+14,py+16,TL-14,1);c.fillRect(px+14,py+24,TL-14,1);
+            // Lava veins across stairs
+            const lp=Math.sin(t/300)*.2+.6;
+            c.strokeStyle=`rgba(255,60,10,${lp})`;c.lineWidth=1;
+            c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+22,py+10);c.lineTo(px+18,py+18);c.lineTo(px+24,py+26);c.stroke();
+            c.strokeStyle=`rgba(255,140,20,${lp*0.5})`;c.lineWidth=0.6;
+            c.beginPath();c.moveTo(px+26,py+2);c.lineTo(px+28,py+8);c.lineTo(px+24,py+14);c.stroke();
+            // Lava glow on pillar base
+            const pg=Math.sin(t/300+1)*.1+.12;
+            c.fillStyle=`rgba(255,60,10,${pg})`;c.fillRect(px+10,py+10,4,12);
+          }else{
+            // Bottom-right: dark stone stairs right half with lava veins
+            const bg=c.createLinearGradient(px,py,px,py+TL);bg.addColorStop(0,"#1a0c0c");bg.addColorStop(1,"#2a1818");
+            c.fillStyle=bg;c.fillRect(px,py,TL,TL);
+            // Right pillar base
+            c.fillStyle="#2a1a1a";c.fillRect(px+TL-14,py,14,TL);
+            c.fillStyle="#3a2828";c.fillRect(px+TL-16,py+TL-5,16,5);
+            // Dark basalt stairs right half
+            c.fillStyle="#2a1818";c.fillRect(px,py,TL-14,8);
+            c.fillStyle="#221414";c.fillRect(px,py+8,TL-14,8);
+            c.fillStyle="#1a0c0c";c.fillRect(px,py+16,TL-14,8);
+            c.fillStyle="#140808";c.fillRect(px,py+24,TL-14,8);
+            // Step edge highlights
+            c.fillStyle="rgba(255,255,255,0.06)";
+            c.fillRect(px,py,TL-14,1);c.fillRect(px,py+8,TL-14,1);c.fillRect(px,py+16,TL-14,1);c.fillRect(px,py+24,TL-14,1);
+            // Lava veins
+            const lp=Math.sin(t/300)*.2+.6;
+            c.strokeStyle=`rgba(255,60,10,${lp})`;c.lineWidth=1;
+            c.beginPath();c.moveTo(px+TL-18,py+2);c.lineTo(px+TL-22,py+12);c.lineTo(px+TL-16,py+20);c.lineTo(px+TL-20,py+28);c.stroke();
+            c.strokeStyle=`rgba(255,140,20,${lp*0.5})`;c.lineWidth=0.6;
+            c.beginPath();c.moveTo(px+4,py+6);c.lineTo(px+8,py+14);c.lineTo(px+4,py+22);c.stroke();
+            // Lava glow on pillar base
+            const pg=Math.sin(t/300+2)*.1+.12;
+            c.fillStyle=`rgba(255,60,10,${pg})`;c.fillRect(px+TL-14,py+10,4,12);
+          }
+        }
       }else{
-        // Style D: Final/grand entrance — golden ornate archway with Triforce
+        // Fallback: generic dark entrance (no ei or unknown dungeon)
         const eg=c.createRadialGradient(px+16,py+20,1,px+16,py+18,16);
-        eg.addColorStop(0,"#0a0804");eg.addColorStop(0.5,"#060402");eg.addColorStop(1,"#020200");
+        eg.addColorStop(0,"#040404");eg.addColorStop(0.5,"#020202");eg.addColorStop(1,"#000000");
         c.fillStyle=eg;c.fillRect(px,py,TL,TL);
-        // Golden stairs
-        c.fillStyle="#1a1810";c.fillRect(px+5,py+6,22,4);
-        c.fillStyle="#14120c";c.fillRect(px+5,py+12,22,4);
-        c.fillStyle="#0e0c08";c.fillRect(px+5,py+18,22,4);
-        c.fillStyle="#080604";c.fillRect(px+5,py+24,22,4);
-        // Grand golden pillars
-        const plg=c.createLinearGradient(px,py,px+7,py);plg.addColorStop(0,"#c8a830");plg.addColorStop(0.5,"#a08020");plg.addColorStop(1,"#887018");
-        c.fillStyle=plg;c.fillRect(px,py,7,TL);
-        const prg=c.createLinearGradient(px+TL-7,py,px+TL,py);prg.addColorStop(0,"#887018");prg.addColorStop(0.5,"#a08020");prg.addColorStop(1,"#c8a830");
-        c.fillStyle=prg;c.fillRect(px+TL-7,py,7,TL);
-        // Gemstones in pillars
-        c.fillStyle="#e04040";c.beginPath();c.arc(px+3,py+10,2,0,Math.PI*2);c.fill();
-        c.fillStyle="#ff6060";c.beginPath();c.arc(px+2.5,py+9.5,1,0,Math.PI*2);c.fill();
-        c.fillStyle="#4040e0";c.beginPath();c.arc(px+3,py+22,2,0,Math.PI*2);c.fill();
-        c.fillStyle="#6060ff";c.beginPath();c.arc(px+2.5,py+21.5,1,0,Math.PI*2);c.fill();
-        c.fillStyle="#40c040";c.beginPath();c.arc(px+TL-3,py+10,2,0,Math.PI*2);c.fill();
-        c.fillStyle="#60e060";c.beginPath();c.arc(px+TL-3.5,py+9.5,1,0,Math.PI*2);c.fill();
-        c.fillStyle="#c040c0";c.beginPath();c.arc(px+TL-3,py+22,2,0,Math.PI*2);c.fill();
-        c.fillStyle="#e060e0";c.beginPath();c.arc(px+TL-3.5,py+21.5,1,0,Math.PI*2);c.fill();
-        // Ornate golden lintel
-        const lg=c.createLinearGradient(px,py,px,py+6);lg.addColorStop(0,"#e8c840");lg.addColorStop(1,"#b09020");
-        c.fillStyle=lg;c.fillRect(px,py,TL,6);
-        // Triforce symbol above door
-        const tp=Math.sin(t/350)*0.15+0.85;
-        c.fillStyle=`rgba(255,220,50,${tp})`;
-        // Top triangle
-        c.beginPath();c.moveTo(px+16,py-2);c.lineTo(px+19,py+3);c.lineTo(px+13,py+3);c.fill();
-        // Bottom-left triangle
-        c.beginPath();c.moveTo(px+13,py+3);c.lineTo(px+16,py+8);c.lineTo(px+10,py+8);c.fill();
-        // Bottom-right triangle (outline only for triforce gap)
-        c.beginPath();c.moveTo(px+19,py+3);c.lineTo(px+22,py+8);c.lineTo(px+16,py+8);c.fill();
-        // Pillar caps
-        c.fillStyle="#d4b030";
-        c.fillRect(px-1,py+TL-4,8,4);c.fillRect(px+TL-7,py+TL-4,8,4);
-        // White-gold glow
-        const glowPulse=Math.sin(t/500)*.12+.2;
-        const ig=c.createRadialGradient(px+16,py+16,0,px+16,py+16,14);
-        ig.addColorStop(0,`rgba(255,240,180,${glowPulse})`);ig.addColorStop(0.5,`rgba(255,200,80,${glowPulse*0.4})`);ig.addColorStop(1,"rgba(0,0,0,0)");
-        c.fillStyle=ig;c.fillRect(px+6,py+5,TL-12,TL-8);
+        // Simple stone frame
+        c.fillStyle="#4a4a4a";c.fillRect(px,py,5,TL);c.fillRect(px+TL-5,py,5,TL);c.fillRect(px,py,TL,5);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+5,py+5,TL-10,TL-5);
+        // Subtle glow
+        const gp=Math.sin(t/500)*.1+.15;
+        const ig=c.createRadialGradient(px+16,py+16,0,px+16,py+16,12);
+        ig.addColorStop(0,`rgba(200,200,200,${gp})`);ig.addColorStop(1,"rgba(0,0,0,0)");
+        c.fillStyle=ig;c.fillRect(px+5,py+5,TL-10,TL-5);
       }
       break;}
     case T.FLOOR:{const fc2=iD?(dg.fc||dg.color):"#8b7355";c.fillStyle=fc2;c.fillRect(px,py,TL,TL);
