@@ -967,19 +967,24 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
   vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
-  if(iD&&dg&&dg.rooms){const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
-    const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
-    const ms=20,mp=8,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2,mmX=W2-mW-6,mmY=6;
-    // Background
-    c.fillStyle="rgba(0,0,0,0.9)";c.fillRect(mmX-3,mmY-3,mW+6,mH+6);
-    c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(mmX-3,mmY-3,mW+6,mH+6);
-    // Dungeon name
-    c.fillStyle="#fd3";c.font="bold 8px monospace";c.textAlign="center";c.fillText(dg.name,mmX+mW/2,mmY+mH+12);c.textAlign="left";
-    // Rooms
-    for(const rk of rks){const[cx,cy]=rk.split(",").map(Number);
-      const rx=mmX+mp+(cx-nX)*ms+1,ry=mmY+mp+(cy-nY)*ms+1,rw=ms-2,rh=ms-2;
-      if(rk===loc.scr){c.fillStyle="#fd3";c.fillRect(rx,ry,rw,rh);c.strokeStyle="#fff";c.lineWidth=2;c.strokeRect(rx-1,ry-1,rw+2,rh+2);}
-      else{c.fillStyle=s.cl.has(`dg:${loc.di}:${rk}`)?"#5a8a5a":"#336";c.fillRect(rx,ry,rw,rh);c.strokeStyle="rgba(255,255,255,0.2)";c.lineWidth=1;c.strokeRect(rx,ry,rw,rh);}}}
+  if(iD){
+    // Simple minimap — always show when in dungeon or cave
+    const dgRooms=dg&&dg.rooms?Object.keys(dg.rooms):[];
+    if(dgRooms.length>0){
+      const cds=dgRooms.map(k=>k.split(",").map(Number));
+      const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
+      const ms=18,mp=6,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2;
+      const mmX=W2-mW-4,mmY=4;
+      c.globalAlpha=0.9;
+      c.fillStyle="#000";c.fillRect(mmX-2,mmY-2,mW+4,mH+4);
+      c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(mmX-2,mmY-2,mW+4,mH+4);
+      for(const rk of dgRooms){const[cx,cy]=rk.split(",").map(Number);
+        const rx=mmX+mp+(cx-nX)*ms,ry=mmY+mp+(cy-nY)*ms;
+        if(rk===loc.scr){c.fillStyle="#fd3";c.fillRect(rx+1,ry+1,ms-2,ms-2);}
+        else{c.fillStyle="#335";c.fillRect(rx+1,ry+1,ms-2,ms-2);}
+        c.strokeStyle="rgba(255,255,255,0.15)";c.lineWidth=1;c.strokeRect(rx+1,ry+1,ms-2,ms-2);}
+      c.globalAlpha=1;
+    }}
   if(!iD){const owKeys=Object.keys(OW);const owC=owKeys.map(k=>k.split(",").map(Number));
     const onX=Math.min(...owC.map(c2=>c2[0])),oxX=Math.max(...owC.map(c2=>c2[0])),onY=Math.min(...owC.map(c2=>c2[1])),oxY=Math.max(...owC.map(c2=>c2[1]));
     const os=14,op=4,oW=(oxX-onX+1)*os+op*2,oH=(oxY-onY+1)*os+op*2,omX=W2-oW-8,omY=H2-oH-8;
