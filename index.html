@@ -226,9 +226,9 @@ function sfx(name,note){if(!sfxReady)return;try{
 
 // ============ TILES ============
 const T={EMPTY:0,WALL:1,GRASS:2,WATER:3,TREE:4,ENTRANCE:5,FLOOR:6,DOOR:7,KEY:8,HEART:9,BOSS_DOOR:10,
-  STAIRS_UP:13,SAND:14,BRIDGE:15,FLOWER:16,PATH:17,ROCK:18,TRIFORCE:20,BUSH:21,TALLGRASS:22,STUMP:23,TORCH:24,CRACK:25,BOMB:26,PUSH:27,LEVER:28,PLATE:29};
+  STAIRS_UP:13,SAND:14,BRIDGE:15,FLOWER:16,PATH:17,ROCK:18,TRIFORCE:20,BUSH:21,TALLGRASS:22,STUMP:23,TORCH:24,CRACK:25,BOMB:26,PUSH:27,LEVER:28,PLATE:29,PIT:30,SPIKE:31};
 const TL=32,CO=16,RO=12,W2=CO*TL,H2=RO*TL,HH=32,PS=24,ES=24,SR=30,SD=250,IFR=800;
-const SOLID=new Set([T.WALL,T.WATER,T.TREE,T.ROCK,T.BUSH,T.CRACK,T.PUSH]);
+const SOLID=new Set([T.WALL,T.WATER,T.TREE,T.ROCK,T.BUSH,T.CRACK,T.PUSH,T.PIT]);
 
 function mr(cb){const m=Array.from({length:RO},()=>Array(CO).fill(T.FLOOR));for(let i=0;i<CO;i++){m[0][i]=T.WALL;m[RO-1][i]=T.WALL;}for(let i=0;i<RO;i++){m[i][0]=T.WALL;m[i][CO-1]=T.WALL;}cb?.(m);return m;}
 function ae(m,exits){for(const ex of exits){const tp=ex.includes("D")?T.DOOR:ex.includes("B")?T.BOSS_DOOR:T.FLOOR;
@@ -396,33 +396,151 @@ const CAVES=[
 
 // ============ DUNGEONS — 3 temples + final dungeon ============
 const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"forest",rooms:{
-  "0,0":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][3]=T.TORCH;m[5][12]=T.TORCH;m[5][7]=T.PUSH;m[6][7]=T.PLATE;}),enemies:[{x:6*TL,y:4*TL,hp:2,type:"skeleton"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
-  "1,0":{tiles:mr(m=>{ae(m,["W"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.HEART;}),enemies:[{x:7*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"},{x:4*TL,y:5*TL,hp:2,type:"bat"},{x:11*TL,y:5*TL,hp:2,type:"bat"}]},
-  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[5][6]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[7][3]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[9][12]=T.LEVER;}),enemies:[{x:10*TL,y:4*TL,hp:2,type:"skeleton"},{x:3*TL,y:8*TL,hp:2,type:"bat"},{x:12*TL,y:8*TL,hp:2,type:"bat"}]},
-  "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][3]=T.WALL;m[4][3]=T.WALL;m[5][3]=T.WALL;m[3][12]=T.WALL;m[4][12]=T.WALL;m[5][12]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[7][9]=T.WALL;m[7][10]=T.WALL;m[5][7]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:3,type:"bat"},{x:9*TL,y:5*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  // Entry hall — narrow corridor widens into room
+  "0,0":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;
+    // Narrow entry widens
+    for(let y=8;y<11;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
+    m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;
+    m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
+    m[5][3]=T.TORCH;m[5][12]=T.TORCH;m[5][7]=T.PUSH;m[6][7]=T.PLATE;}),enemies:[{x:6*TL,y:4*TL,hp:2,type:"skeleton"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
+  // East wing — L-shaped with spike corridor
+  "1,0":{tiles:mr(m=>{ae(m,["W"]);
+    // L-shape: wall blocks upper-right
+    for(let x=8;x<=12;x++){m[2][x]=T.WALL;m[3][x]=T.WALL;}
+    for(let y=2;y<=6;y++)m[y][8]=T.WALL;
+    // Spike hallway along bottom
+    m[8][4]=T.SPIKE;m[8][5]=T.SPIKE;m[8][6]=T.SPIKE;m[8][9]=T.SPIKE;m[8][10]=T.SPIKE;m[8][11]=T.SPIKE;
+    m[5][4]=T.KEY;m[9][12]=T.HEART;m[4][2]=T.TORCH;m[7][13]=T.TORCH;}),enemies:[{x:4*TL,y:5*TL,hp:3,type:"skeleton"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
+  // Narrow bridge over pits
+  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
+    // Pit field with narrow walkway
+    for(let y=3;y<=8;y++)for(let x=2;x<=13;x++)m[y][x]=T.PIT;
+    // Bridge path through pits
+    for(let y=3;y<=8;y++){m[y][5]=T.FLOOR;m[y][10]=T.FLOOR;}
+    m[5][5]=T.FLOOR;m[5][6]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[5][9]=T.FLOOR;m[5][10]=T.FLOOR;
+    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[9][12]=T.LEVER;}),enemies:[{x:5*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:4*TL,hp:2,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"skeleton"}]},
+  // Push block puzzle room
+  "1,-1":{tiles:mr(m=>{ae(m,["W"]);
+    // Narrow corridors
+    for(let y=2;y<=4;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
+    for(let y=7;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
+    m[5][6]=T.PUSH;m[5][9]=T.PUSH;m[6][7]=T.PLATE;m[6][8]=T.PLATE;
+    m[3][7]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:3*TL,hp:3,type:"bat"},{x:9*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  // Secret treasure room
   "2,-1":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[5][6]=T.HEART;m[5][7]=T.HEART;m[5][8]=T.BOMB;m[5][9]=T.BOMB;m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;}),enemies:[]},
-  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[0][7]=T.BOSS_DOOR;m[0][8]=T.BOSS_DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[5][5]=T.WALL;m[5][6]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[9][7]=T.HEART;m[2][3]=T.TORCH;m[2][12]=T.TORCH;}),enemies:[{x:12*TL,y:4*TL,hp:3,type:"bat"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:12*TL,y:8*TL,hp:3,type:"bat"}]},
-  "0,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;m[7][11]=T.WALL;m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[6][7]=T.TORCH;m[6][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:10,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
+  // Pre-boss gauntlet — spike-lined narrow hall
+  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[0][7]=T.BOSS_DOOR;m[0][8]=T.BOSS_DOOR;
+    // Narrow center corridor with spike walls
+    for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;m[y][5]=T.SPIKE;m[y][10]=T.SPIKE;}
+    m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
+    m[9][7]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;}),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}]},
+  // Boss arena
+  "0,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;
+    // Pillar layout
+    m[3][4]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;
+    m[5][3]=T.PIT;m[6][3]=T.PIT;m[5][12]=T.PIT;m[6][12]=T.PIT;
+    m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:10,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
 const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire",rooms:{
-  "0,1":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[4][4]=T.WALL;m[4][5]=T.WALL;m[4][10]=T.WALL;m[4][11]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;m[7][11]=T.WALL;m[3][2]=T.TORCH;m[3][13]=T.TORCH;}),enemies:[{x:3*TL,y:5*TL,hp:3,type:"fire_bat"},{x:12*TL,y:5*TL,hp:3,type:"fire_bat"}]},
-  "1,1":{tiles:mr(m=>{ae(m,["W"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[4][3]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;m[4][12]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;m[5][7]=T.KEY;}),enemies:[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:5*TL,hp:3,type:"fire_bat"},{x:7*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
-  "0,0":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][6]=T.WALL;m[3][7]=T.WALL;m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;m[8][9]=T.WALL;m[5][4]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;m[6][7]=T.PUSH;m[6][8]=T.PUSH;m[7][7]=T.PLATE;m[7][8]=T.PLATE;}),enemies:[{x:3*TL,y:3*TL,hp:3,type:"skeleton"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
-  "1,0":{tiles:mr(m=>{ae(m,["W"]);m[2][4]=T.WALL;m[3][4]=T.WALL;m[4][4]=T.WALL;m[5][4]=T.WALL;m[6][4]=T.WALL;m[7][4]=T.WALL;m[8][4]=T.WALL;m[9][4]=T.WALL;m[2][11]=T.WALL;m[3][11]=T.WALL;m[4][11]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;m[7][11]=T.WALL;m[8][11]=T.WALL;m[9][11]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;m[6][7]=T.WALL;m[6][8]=T.WALL;m[3][7]=T.HEART;m[8][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  // Entry — lava pits flanking narrow bridge
+  "0,1":{tiles:mr(m=>{ae(m,["N","E"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;
+    for(let y=3;y<=8;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
+    m[5][6]=T.SPIKE;m[5][9]=T.SPIKE;m[6][6]=T.SPIKE;m[6][9]=T.SPIKE;
+    m[3][2]=T.TORCH;m[3][13]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;}),enemies:[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:5*TL,hp:3,type:"fire_bat"}]},
+  // East: winding corridor with spikes
+  "1,1":{tiles:mr(m=>{ae(m,["W"]);
+    // Zigzag walls
+    for(let x=3;x<=7;x++)m[3][x]=T.WALL;for(let x=8;x<=12;x++)m[5][x]=T.WALL;
+    for(let x=3;x<=7;x++)m[7][x]=T.WALL;for(let x=8;x<=12;x++)m[9][x]=T.WALL;
+    m[4][6]=T.SPIKE;m[4][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][10]=T.SPIKE;m[8][6]=T.SPIKE;m[8][7]=T.SPIKE;
+    m[4][10]=T.KEY;}),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:3,type:"fire_bat"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  // Central hub — push blocks over pits
+  "0,0":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
+    m[4][5]=T.PIT;m[4][6]=T.PIT;m[4][9]=T.PIT;m[4][10]=T.PIT;
+    m[7][5]=T.PIT;m[7][6]=T.PIT;m[7][9]=T.PIT;m[7][10]=T.PIT;
+    m[5][4]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;
+    m[5][7]=T.PUSH;m[6][8]=T.PUSH;m[3][7]=T.PLATE;m[8][8]=T.PLATE;
+    m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;}),enemies:[{x:3*TL,y:3*TL,hp:3,type:"skeleton"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
+  // East: narrow double-corridor
+  "1,0":{tiles:mr(m=>{ae(m,["W"]);
+    // Two narrow hallways split by center wall
+    for(let y=2;y<=9;y++){m[y][5]=T.WALL;m[y][10]=T.WALL;}
+    m[5][5]=T.FLOOR;m[6][5]=T.FLOOR;m[5][10]=T.FLOOR;m[6][10]=T.FLOOR;// gaps to cross
+    m[3][3]=T.SPIKE;m[3][12]=T.SPIKE;m[8][3]=T.SPIKE;m[8][12]=T.SPIKE;
+    m[3][7]=T.HEART;m[8][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  // Secret room
   "2,0":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[4][7]=T.HEART;m[5][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;m[5][8]=T.KEY;}),enemies:[]},
-  "-1,0":{tiles:mr(m=>{ae(m,["E"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[5][7]=T.HEART;m[6][8]=T.HEART;}),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}]},
-  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WB"]);m[3][4]=T.WALL;m[4][4]=T.WALL;m[3][10]=T.WALL;m[4][11]=T.WALL;m[8][4]=T.WALL;m[7][4]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[7][11]=T.WALL;}),enemies:[{x:7*TL,y:4*TL,hp:3,type:"skeleton"},{x:4*TL,y:6*TL,hp:3,type:"fire_bat"},{x:11*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
-  "-1,-1":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[7][9]=T.WALL;m[7][10]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Flame Wyrm",pattern:"spawn"}]},
+  // West wing — spike gauntlet
+  "-1,0":{tiles:mr(m=>{ae(m,["E"]);
+    // Spike path
+    m[3][3]=T.SPIKE;m[3][6]=T.SPIKE;m[3][9]=T.SPIKE;m[3][12]=T.SPIKE;
+    m[5][4]=T.SPIKE;m[5][7]=T.SPIKE;m[5][10]=T.SPIKE;
+    m[7][3]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;m[7][12]=T.SPIKE;
+    m[5][13]=T.HEART;m[8][7]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;}),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}]},
+  // Pre-boss — narrow bridge over pit
+  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WB"]);
+    // Pit field with winding path
+    for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)m[y][x]=T.PIT;
+    for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
+    m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
+    m[4][4]=T.SPIKE;m[7][11]=T.SPIKE;}),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
+  // Boss arena — pillared arena with pit border
+  "-1,-1":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;
+    for(let x=2;x<=13;x++){m[2][x]=T.PIT;m[9][x]=T.PIT;}
+    for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][13]=T.PIT;}
+    m[4][5]=T.WALL;m[4][10]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;
+    m[3][7]=T.TORCH;m[3][8]=T.TORCH;m[8][7]=T.TORCH;m[8][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Flame Wyrm",pattern:"spawn"}]},
 }};
 const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shadow",rooms:{
-  "0,0":{tiles:mr(m=>{ae(m,["N","W"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[3][3]=T.WALL;m[3][12]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][12]=T.WALL;m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:3*TL,y:6*TL,hp:3,type:"ghost"},{x:12*TL,y:6*TL,hp:3,type:"ghost"}]},
-  "-1,0":{tiles:mr(m=>{ae(m,["E"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][6]=T.WALL;m[5][3]=T.WALL;m[6][3]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;m[8][9]=T.WALL;m[4][12]=T.KEY;m[7][2]=T.HEART;}),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:12*TL,y:7*TL,hp:3,type:"ghost"},{x:3*TL,y:9*TL,hp:3,type:"skeleton"}]},
-  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;m[3][3]=T.WALL;m[3][4]=T.WALL;m[5][8]=T.WALL;m[5][9]=T.WALL;m[5][10]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[7][3]=T.WALL;m[7][4]=T.WALL;m[7][5]=T.WALL;m[7][6]=T.WALL;m[9][8]=T.WALL;m[9][9]=T.WALL;m[9][10]=T.WALL;m[4][7]=T.PUSH;m[6][10]=T.PUSH;m[8][12]=T.LEVER;}),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:3*TL,y:6*TL,hp:3,type:"skeleton"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
-  "1,-1":{tiles:mr(m=>{ae(m,["W"]);m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[5][3]=T.WALL;m[5][12]=T.WALL;m[6][3]=T.WALL;m[6][12]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.KEY;m[6][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:5*TL,hp:4,type:"ghost"},{x:7*TL,y:7*TL,hp:4,type:"skeleton"}]},
+  // Entry — maze-like with narrow passages
+  "0,0":{tiles:mr(m=>{ae(m,["N","W"]);m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;
+    // Maze walls
+    for(let x=3;x<=6;x++)m[3][x]=T.WALL;for(let x=9;x<=12;x++)m[3][x]=T.WALL;
+    for(let y=3;y<=6;y++)m[y][6]=T.WALL;for(let y=5;y<=8;y++)m[y][9]=T.WALL;
+    m[6][3]=T.WALL;m[6][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;
+    m[2][7]=T.TORCH;m[9][7]=T.TORCH;}),enemies:[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:11*TL,y:4*TL,hp:3,type:"ghost"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  // West: ghost corridor with pits
+  "-1,0":{tiles:mr(m=>{ae(m,["E"]);
+    // Narrow center with pit sides
+    for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
+    m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
+    m[4][7]=T.KEY;m[7][8]=T.HEART;m[2][5]=T.TORCH;m[2][10]=T.TORCH;}),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
+  // North: lever puzzle with push blocks
+  "0,-1":{tiles:mr(m=>{ae(m,["S","E"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
+    // Asymmetric walls creating chambers
+    for(let y=3;y<=5;y++)m[y][5]=T.WALL;for(let y=6;y<=8;y++)m[y][10]=T.WALL;
+    m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;
+    m[4][3]=T.PIT;m[7][12]=T.PIT;
+    m[5][7]=T.PUSH;m[6][8]=T.PUSH;m[4][11]=T.LEVER;m[7][4]=T.PLATE;}),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"ghost"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  // East: trap hallway
+  "1,-1":{tiles:mr(m=>{ae(m,["W"]);
+    // Long narrow room with spike patterns
+    for(let y=2;y<=3;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
+    for(let y=8;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
+    // Spike zigzag in the corridor
+    m[5][4]=T.SPIKE;m[5][6]=T.SPIKE;m[5][8]=T.SPIKE;m[5][10]=T.SPIKE;m[5][12]=T.SPIKE;
+    m[6][3]=T.SPIKE;m[6][5]=T.SPIKE;m[6][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][11]=T.SPIKE;
+    m[4][7]=T.KEY;m[7][8]=T.KEY;m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;}),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}]},
+  // Secret room
   "2,-1":{tiles:mr(m=>{m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;m[5][7]=T.BOMB;m[5][8]=T.BOMB;m[6][7]=T.HEART;m[6][8]=T.HEART;m[4][5]=T.TORCH;m[4][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;m[3][7]=T.KEY;}),enemies:[]},
-  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WD"]);m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;m[5][7]=T.HEART;m[5][8]=T.HEART;}),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
-  "-1,-2":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;ae(m,["NB"]);m[3][5]=T.WALL;m[3][6]=T.WALL;m[3][9]=T.WALL;m[3][10]=T.WALL;m[5][3]=T.WALL;m[5][4]=T.WALL;m[6][3]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[5][12]=T.WALL;m[6][11]=T.WALL;m[6][12]=T.WALL;m[8][5]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;m[8][10]=T.WALL;}),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:3*TL,y:8*TL,hp:4,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"}]},
-  "-1,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;m[3][4]=T.WALL;m[3][11]=T.WALL;m[4][4]=T.WALL;m[4][11]=T.WALL;m[7][4]=T.WALL;m[7][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;}),enemies:[{x:7.5*TL,y:5*TL,hp:14,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
+  // Pre-boss: pit maze
+  "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["WD"]);
+    // Checkerboard pits — must navigate carefully
+    for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)if((x+y)%3===0)m[y][x]=T.PIT;
+    m[5][7]=T.HEART;m[5][8]=T.HEART;m[2][3]=T.TORCH;m[9][12]=T.TORCH;}),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
+  // Boss key room
+  "-1,-2":{tiles:mr(m=>{m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;ae(m,["NB"]);
+    // Four-pillar room
+    m[3][4]=T.WALL;m[3][5]=T.WALL;m[4][4]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[4][11]=T.WALL;
+    m[7][4]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[7][11]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;
+    m[5][7]=T.SPIKE;m[5][8]=T.SPIKE;m[6][7]=T.SPIKE;m[6][8]=T.SPIKE;}),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:3*TL,y:8*TL,hp:4,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  // Boss arena — open with pit border
+  "-1,-3":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;
+    // Pit border
+    for(let x=2;x<=13;x++){m[2][x]=T.PIT;m[9][x]=T.PIT;}
+    for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][13]=T.PIT;}
+    m[4][5]=T.WALL;m[4][10]=T.WALL;m[7][5]=T.WALL;m[7][10]=T.WALL;
+    m[3][7]=T.TORCH;m[3][8]=T.TORCH;m[8][7]=T.TORCH;m[8][8]=T.TORCH;}),enemies:[{x:7.5*TL,y:5*TL,hp:14,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
 }};
 // FINAL DUNGEON — Opens when all 3 triforce pieces collected
 const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shadow",rooms:{
@@ -973,6 +1091,30 @@ function dT(c,tl,px,py,iD,dg,t){
       c.fillStyle="#777";c.fillRect(px+8,py+8,TL-16,TL-16);
       const pp=Math.sin(t/500)*0.2+0.3;c.fillStyle=`rgba(255,200,50,${pp})`;c.fillRect(px+10,py+10,TL-20,TL-20);
       break;}
+    case T.PIT:{// Bottomless pit
+      c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
+      // Dark gradient edges to show depth
+      const pg=c.createRadialGradient(px+16,py+16,2,px+16,py+16,18);
+      pg.addColorStop(0,"#000004");pg.addColorStop(0.7,"#080810");pg.addColorStop(1,iD?(dg.fc||"#1a1a2a"):"#2a3a28");
+      c.fillStyle=pg;c.fillRect(px,py,TL,TL);
+      // Inner shadow ring
+      c.strokeStyle="rgba(0,0,0,0.5)";c.lineWidth=2;c.strokeRect(px+3,py+3,TL-6,TL-6);
+      break;}
+    case T.SPIKE:{// Spike trap — toggles on/off
+      c.fillStyle=iD?(dg.fc||dg.color):"#38982e";c.fillRect(px,py,TL,TL);
+      if(iD){c.strokeStyle="rgba(255,255,255,0.03)";c.strokeRect(px+1,py+1,TL-2,TL-2);}
+      const spUp=Math.sin(t/750)>0;
+      if(spUp){// Spikes extended
+        c.fillStyle="#888";
+        for(let sx2=0;sx2<3;sx2++)for(let sy2=0;sy2<3;sy2++){const spx=px+5+sx2*10,spy=py+5+sy2*10;
+          c.beginPath();c.moveTo(spx,spy+6);c.lineTo(spx+3,spy);c.lineTo(spx+6,spy+6);c.fill();}
+        c.fillStyle="rgba(200,200,200,0.3)";
+        for(let sx2=0;sx2<3;sx2++)for(let sy2=0;sy2<3;sy2++){const spx=px+5+sx2*10,spy=py+5+sy2*10;
+          c.beginPath();c.moveTo(spx+1,spy+4);c.lineTo(spx+3,spy);c.lineTo(spx+3,spy+4);c.fill();}
+      }else{// Spikes retracted — just holes
+        c.fillStyle="rgba(0,0,0,0.3)";
+        for(let sx2=0;sx2<3;sx2++)for(let sy2=0;sy2<3;sy2++){c.beginPath();c.arc(px+8+sx2*10,py+8+sy2*10,2,0,Math.PI*2);c.fill();}}
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }
@@ -1148,22 +1290,28 @@ function ZeldaGame(){
   }),[]);
 
   useEffect(()=>{stR.current=init();
+    // Try to autoplay title music immediately
+    const tryTitleMusic=()=>{if(ltRef.current==="title")return;
+      if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;
+        a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}
+      else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}};
+    tryTitleMusic();
+    // If autoplay was blocked, start music on first user interaction
+    const unlock=()=>{Tone.start().then(()=>{initSfx();initAu();});tryTitleMusic();
+      window.removeEventListener("click",unlock);window.removeEventListener("keydown",unlock);window.removeEventListener("touchstart",unlock);};
+    window.addEventListener("click",unlock,{once:true});window.addEventListener("keydown",unlock,{once:true});window.addEventListener("touchstart",unlock,{once:true});
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
-      // Title screen dismiss
+      // Title screen dismiss — single press
       const s=stR.current;if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
-        if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();});
-          // Play title music directly from user gesture so browser allows it
-          if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}
-          else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}
-          return;}
-        s.title=false;s.titleReady=false;le(s);ltRef.current=null;}
+        s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});}
       if(e.key.toLowerCase()==="p"&&s&&!s.title&&!s.go&&!s.won){s.paused=!s.paused;}
       if(e.key.toLowerCase()==="m"){Tone.start().then(()=>{initSfx();});setMu(p=>!p);}};
     const ku=e=>kyR.current.delete(e.key.toLowerCase());
     window.addEventListener("keydown",kd);window.addEventListener("keyup",ku);
     const lp=t=>{const dt=Math.min(t-ltR.current,33);ltR.current=t;upd(dt);drw(t);anR.current=requestAnimationFrame(lp);};
     anR.current=requestAnimationFrame(lp);
-    return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();};
+    return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();
+      window.removeEventListener("click",unlock);window.removeEventListener("keydown",unlock);window.removeEventListener("touchstart",unlock);};
   },[]);
 
   useEffect(()=>{
@@ -1343,6 +1491,13 @@ function ZeldaGame(){
           const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);opened=true;
           s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
         if(!opened){m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}
+    // Spike trap damage
+    {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
+      if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.SPIKE){
+        // Spikes toggle on/off every 1.5s
+        if(Math.sin(t/750)>0&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
+          s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#888"})));
+          if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
     // Footstep dust on path/sand
     if(moved&&Math.random()<0.15){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
       if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){const ft=m2[pty][ptx];
@@ -1511,7 +1666,7 @@ function ZeldaGame(){
       // STARS — randomly scattered across upper sky
       // Seeded pseudo-random for stable positions each frame
       {let seed=12345;const sr=()=>{seed=(seed*16807+0)%2147483647;return(seed&0xffff)/0xffff;};
-      for(let i=0;i<150;i++){
+      for(let i=0;i<40;i++){
         const sx=W*0.05+sr()*W*0.9;
         const sy=sr()*H*0.45;
         const rate=400+sr()*800;
@@ -1680,7 +1835,7 @@ function ZeldaGame(){
       // Dark gradient at bottom
       const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
       c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
-      const s2=stR.current;if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText(s2&&s2.titleReady?"PRESS AGAIN TO START":"TAP OR PRESS SPACE",W/2,H*0.92);}
+      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("TAP OR PRESS SPACE",W/2,H*0.92);}
       c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W/2,H*0.97);
       c.textAlign="left";c.lineCap="butt";return;}
     // ===== HUD (drawn in top HH pixels, above game) =====
@@ -1841,7 +1996,7 @@ function ZeldaGame(){
 
   return(
     <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#060608",fontFamily:"monospace",color:"#ccc",padding:0,width:"100%",height:"100vh",overflow:"hidden",userSelect:"none",WebkitUserSelect:"none"}}>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();});if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}return;}s.title=false;s.titleReady=false;le(s);ltRef.current=null;return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
