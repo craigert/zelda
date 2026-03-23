@@ -213,7 +213,7 @@ function sfx(name,note){if(!sfxReady)return;try{
 const T={EMPTY:0,WALL:1,GRASS:2,WATER:3,TREE:4,ENTRANCE:5,FLOOR:6,DOOR:7,KEY:8,HEART:9,BOSS_DOOR:10,
   STAIRS_UP:13,SAND:14,BRIDGE:15,FLOWER:16,PATH:17,ROCK:18,TRIFORCE:20,BUSH:21,TALLGRASS:22,STUMP:23,TORCH:24,CRACK:25,BOMB:26,PUSH:27,LEVER:28,PLATE:29,PIT:30,SPIKE:31};
 const TL=32,CO=16,RO=12,W2=CO*TL,H2=RO*TL,HH=32,PS=24,ES=24,SR=30,SD=250,IFR=800;
-const SOLID=new Set([T.WALL,T.WATER,T.TREE,T.ROCK,T.BUSH,T.CRACK,T.PUSH,T.PIT]);
+const SOLID=new Set([T.WALL,T.WATER,T.TREE,T.ROCK,T.BUSH,T.CRACK,T.PUSH]);
 
 function mr(cb){const m=Array.from({length:RO},()=>Array(CO).fill(T.FLOOR));for(let i=0;i<CO;i++){m[0][i]=T.WALL;m[RO-1][i]=T.WALL;}for(let i=0;i<RO;i++){m[i][0]=T.WALL;m[i][CO-1]=T.WALL;}cb?.(m);return m;}
 function ae(m,exits){for(const ex of exits){const tp=ex.includes("D")?T.DOOR:ex.includes("B")?T.BOSS_DOOR:T.FLOOR;
@@ -1231,6 +1231,7 @@ export default function ZeldaGame(){
     finalOpen:false, // whether final dungeon is accessible
     triMu:false, // triforce music playing (overrides area music)
     bProj:[], // boss projectiles
+    gt:0, // game time for spike timing
   }),[]);
 
   useEffect(()=>{stR.current=init();
@@ -1323,7 +1324,7 @@ export default function ZeldaGame(){
         // Cave entries
         for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
           for(const[tx,ty]of cv.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
-            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
+            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
       }
       const[sx,sy]=loc.scr.split(",").map(Number);
       if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=W2-PS-8;le(s);}else p.x=-4;}
@@ -1345,7 +1346,7 @@ export default function ZeldaGame(){
       if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){loc.scr=ns;p.x=W2-PS-8;le(s);}else p.x=-4;}
       if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){loc.scr=ns;p.x=8;le(s);}else p.x=W2-PS+4;}}}
 
-  function upd(dt){const s=stR.current;if(!s||s.title||s.paused)return;
+  function upd(dt){const s=stR.current;if(!s||s.title||s.paused)return;s.gt+=dt;
     // Freeze frame (boss kill pause)
     if(s.freeze>0){s.freeze-=dt;return;}
     // Death animation
@@ -1433,11 +1434,18 @@ export default function ZeldaGame(){
           const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);opened=true;
           s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
         if(!opened){m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}
-    // Spike trap damage
+    // Spike trap damage — spikes toggle on/off every 1.5s
     {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
-      if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.SPIKE){
-        if(Math.sin(t/750)>0&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
+      if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){
+        if(m2[pty][ptx]===T.SPIKE&&Math.sin(s.gt/750)>0&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
           s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#888"})));
+          if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
+        // Pit fall — take damage and teleport to room entrance
+        if(m2[pty][ptx]===T.PIT&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=400;
+          s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#444"})));
+          let ex=7*TL,ey=9*TL;
+          for(let ty2=RO-1;ty2>=0;ty2--)for(let tx2=0;tx2<CO;tx2++){if(m2[ty2][tx2]===T.STAIRS_UP||m2[ty2][tx2]===T.FLOOR&&ty2>8){ex=tx2*TL;ey=ty2*TL;ty2=-1;break;}}
+          p.x=ex;p.y=ey;s.msg={text:"Fell into a pit!",t:1000};
           if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
     // Footstep dust on path/sand
     if(moved&&Math.random()<0.15){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
