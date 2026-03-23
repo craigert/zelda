@@ -54,8 +54,8 @@ export const OW={
   m[3][4]=T.PATH;m[3][5]=T.PATH;m[4][5]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;
   m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[5][8]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
   m[5][3]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[4][4]=T.TALLGRASS;
-  // Heart piece hidden deep in the trees
-  m[5][4]=T.HEART_PIECE;
+  // Cracked earth hides a cave with a heart piece
+  m[5][4]=T.CRACK;
   m[7][7]=T.FLOWER;m[7][8]=T.FLOWER;m[3][7]=T.STUMP;
   oe(m,"E");oe(m,"S");return m;})(),
 
