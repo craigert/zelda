@@ -93,7 +93,7 @@ const trR = ref({active:false,alpha:0,dir:0});
 // --- Init ---
 function init() {
   return {
-    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:3,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false},
+    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:3,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
@@ -195,7 +195,7 @@ function saveGame(s) {
   try {
     const data = {
       v: 1,
-      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri] },
+      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces },
       loc: { ...s.loc },
       pk: [...s.pk],
       dr: [...s.dr],
@@ -221,7 +221,7 @@ function applySave(s, save) {
   s.p.x = save.p.x; s.p.y = save.p.y; s.p.dir = save.p.dir;
   s.p.hp = save.p.hp; s.p.mhp = save.p.mhp; s.p.keys = save.p.keys;
   s.p.bombs = save.p.bombs; s.p.rupees = save.p.rupees;
-  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri];
+  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0;
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.heartContainers = [...save.heartContainers];
@@ -279,8 +279,10 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
       s.pt.push(...Array.from({length:12},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#ffd633"})));}
     else if(tl===T.KEY){s.pk.add(pk);p.keys++;s.msg={text:"Got a key!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
     else if(tl===T.BOMB){s.pk.add(pk);p.bombs+=3;s.msg={text:"Got bombs!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#88f"})));}
-    else if(tl===T.HEART_PIECE){s.pk.add(pk);p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece! Max HP up!",t:2500};
-      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
+    else if(tl===T.HEART_PIECE){s.pk.add(pk);p.heartPieces++;sfx("pickup");
+      if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
+      else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
+      s.pt.push(...Array.from({length:10},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
     else if(tl===T.TRIFORCE){s.pk.add(pk);p.tri[s.loc.di]=true;const c2=p.tri.filter(Boolean).length;sfx("triforce");
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:1000,c:"#fd3"})));
@@ -341,7 +343,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(s.death.a){s.death.t+=dt;s.death.spin+=dt*0.015;if(s.death.t>1500&&!s.go){s.go=true;s.msg={text:"Tap to respawn",t:99999};}if(!s.go)return;}
   if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
     if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
-    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;
+    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     stR.value=ns;le(ns);saveGame(ns);}return;}

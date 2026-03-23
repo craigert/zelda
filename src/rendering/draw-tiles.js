@@ -731,14 +731,20 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#d090ff";c.fillRect(px+12,py+11,5,15);c.fillRect(px+12,py+22,9,3);c.fillRect(px+12,py+17,7,3);c.fillRect(px+12,py+13,7,3);
       c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+1);c.lineTo(px+19,py+5);c.lineTo(px+13,py+5);c.fill();break;}
     case T.HEART_PIECE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
-      const hpg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(255,80,120,${hpg})`;c.beginPath();c.arc(px+16,py+14,12,0,Math.PI*2);c.fill();
-      c.fillStyle=`rgba(255,200,220,${hpg*0.6})`;c.beginPath();c.arc(px+16,py+14,15,0,Math.PI*2);c.fill();
-      c.fillStyle="#ff3366";c.beginPath();c.moveTo(px+16,py+6);c.lineTo(px+10,py+12);c.lineTo(px+16,py+26);c.lineTo(px+22,py+12);c.closePath();c.fill();
-      c.fillStyle="#ff6699";c.beginPath();c.moveTo(px+16,py+9);c.lineTo(px+13,py+14);c.lineTo(px+16,py+22);c.lineTo(px+19,py+14);c.closePath();c.fill();
-      c.fillStyle="#ffd633";const spk=Math.sin(t/150)*2;
-      c.beginPath();c.arc(px+8+spk,py+6,2,0,Math.PI*2);c.fill();
-      c.beginPath();c.arc(px+24-spk,py+8,1.5,0,Math.PI*2);c.fill();
-      c.beginPath();c.arc(px+12,py+4+spk,1.5,0,Math.PI*2);c.fill();break;}
+      const hpb=Math.sin(t/400)*1.5;
+      // Glow
+      const hpg=Math.sin(t/300)*.15+.2;c.fillStyle=`rgba(255,80,120,${hpg})`;c.beginPath();c.arc(px+16,py+16,11,0,Math.PI*2);c.fill();
+      // Draw full heart then clip to bottom-left quarter
+      c.save();c.beginPath();c.rect(px,py+14,16,18);c.clip();
+      c.fillStyle="#ee3333";dH(c,px+6,py+6,20);
+      c.fillStyle="#ff6666";dH(c,px+9,py+8,12);
+      c.restore();
+      // Dashed heart outline showing the missing 3/4
+      c.save();c.strokeStyle="rgba(255,100,100,0.35)";c.fillStyle="rgba(0,0,0,0)";c.lineWidth=1;c.setLineDash([2,2]);
+      const hx=px+6,hy=py+6,hs=20;c.beginPath();c.moveTo(hx+hs/2,hy+hs*.85);c.bezierCurveTo(hx,hy+hs*.5,hx,hy,hx+hs/2,hy+hs*.2);c.bezierCurveTo(hx+hs,hy,hx+hs,hy+hs*.5,hx+hs/2,hy+hs*.85);c.stroke();c.setLineDash([]);c.restore();
+      // Sparkle
+      c.fillStyle="#ffd633";c.beginPath();c.arc(px+10,py+8+hpb,1.5,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(px+22,py+10-hpb,1.5,0,Math.PI*2);c.fill();break;}
     case T.HEART:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const hg=Math.sin(t/400)*.15+.2;c.fillStyle=`rgba(255,50,50,${hg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();c.fillStyle="#ee3333";dH(c,px+6,py+6,20);c.fillStyle="#ff6666";dH(c,px+9,py+8,12);break;}
     case T.TRIFORCE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const tg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(253,211,51,${tg})`;c.beginPath();c.arc(px+16,py+16,14,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+27,py+26);c.lineTo(px+5,py+26);c.fill();c.fillStyle="#ffe866";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+23,py+22);c.lineTo(px+9,py+22);c.fill();break;}
     case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);for(let i=0;i<4;i++){c.fillStyle=`rgb(${80+i*20},${80+i*20},${80+i*20})`;c.fillRect(px+3,py+3+i*7,TL-6,5);}c.fillStyle="#6c6";c.font="bold 9px monospace";c.fillText("EXIT",px+5,py+20);break;}
