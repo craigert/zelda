@@ -121,6 +121,7 @@ function init() {
     pArrows:[],
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
+    activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
   };
 }
 
@@ -241,7 +242,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}}
@@ -480,19 +481,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       for(const npc of npcs){if(Math.abs(ftx2-npc.tx)<=1&&Math.abs(fty2-npc.ty)<=1){
         s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;break;}}}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");}}if(tc.atk)tc.atk=false;
-  if(ky.has("b")&&p.hasBombs&&p.bombs>0&&!s.bombCd){
+  if(ky.has("b")&&p.hasBombs&&p.bombs>0&&!s.bombCd&&s.activeBombs.length<2){
     const ftx=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
     const fty=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
-    const mp2=gm(s);
-    if(mp2&&fty>=0&&fty<RO&&ftx>=0&&ftx<CO&&mp2[fty][ftx]===T.CRACK){
-      p.bombs--;s.bombCd=true;setTimeout(()=>{if(stR.value)stR.value.bombCd=false;},500);
-      sfx("bomb");s.shake.t=400;
-      let isCave=false;
-      if(s.loc.ty==="ow"){for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){isCave=true;break;}}if(isCave)break;}}}
-      mp2[fty][ftx]=isCave?T.ENTRANCE:T.FLOOR;
-      s.msg={text:isCave?"A hidden cave!":(s.loc.ty==="dg"?"Bombed a wall! Secret passage!":"Secret passage!"),t:2000};
-      s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:700,c:["#fa3","#f83","#ff3","#aaa"][Math.random()*4|0]})));
-    }
+    p.bombs--;s.bombCd=true;setTimeout(()=>{if(stR.value)stR.value.bombCd=false;},800);
+    s.activeBombs.push({x:ftx*TL+TL/2,y:fty*TL+TL/2,t:0,fuse:1500,exploded:false});sfx("pickup");
   }
   if((ky.has("c"))&&p.hasBow&&!s.bowCd&&p.rupees>0&&s.pArrows.length<3){
     p.rupees--;s.bowCd=true;setTimeout(()=>{if(stR.value)stR.value.bowCd=false;},400);
@@ -532,6 +525,30 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(ch.reward){s.drops.push({x:ch.x+12,y:ch.y-8,vy:-4,ground:ch.y,type:ch.reward,t:0});}
       s.msg={text:"Treasure!",t:1500};}
     else if(ch.state==="open"&&ch.t>2000)s.chest=null;}
+  // Active bombs update
+  for(let i=s.activeBombs.length-1;i>=0;i--){const b=s.activeBombs[i];b.t+=dt;
+    if(b.t>=b.fuse&&!b.exploded){b.exploded=true;sfx("bomb");s.shake.t=500;
+      // Explosion particles
+      s.pt.push(...Array.from({length:25},()=>({x:b.x,y:b.y,dx:(Math.random()-.5)*8,dy:(Math.random()-.5)*8,l:800,c:["#fa3","#f83","#ff3","#fff","#aaa"][Math.random()*5|0]})));
+      // Break nearby crack walls (2 tile radius)
+      const mp2=gm(s),bx2=Math.floor(b.x/TL),by2=Math.floor(b.y/TL);
+      for(let dy2=-2;dy2<=2;dy2++)for(let dx2=-2;dx2<=2;dx2++){const cx2=bx2+dx2,cy2=by2+dy2;
+        if(mp2&&cy2>=0&&cy2<RO&&cx2>=0&&cx2<CO&&mp2[cy2][cx2]===T.CRACK){
+          let isCave=false;
+          if(s.loc.ty==="ow"){for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cvx,cvy]of cv.t){if(cvx===cx2&&cvy===cy2){isCave=true;break;}}if(isCave)break;}}}
+          mp2[cy2][cx2]=isCave?T.ENTRANCE:T.FLOOR;
+          s.msg={text:isCave?"A hidden cave!":(s.loc.ty==="dg"?"Bombed a wall! Secret passage!":"Secret passage!"),t:2000};}}
+      // Damage nearby enemies (3 tile radius)
+      const blastR=TL*3;
+      for(const e of s.en){const ed=Math.hypot(e.x+ES/2-b.x,e.y+ES/2-b.y);
+        if(ed<blastR){const bdmg=ed<TL?3:2;e.hp-=bdmg;e.fl=400;
+          const ka=Math.atan2(e.y+ES/2-b.y,e.x+ES/2-b.x);e.x+=Math.cos(ka)*20;e.y+=Math.sin(ka)*20;
+          s.dmgNums.push({x:e.x+ES/2,y:e.y-8,t:600,val:bdmg,c:"#f80"});}}
+      // Hurt player if too close
+      const pd=Math.hypot(p.x+PS/2-b.x,p.y+PS/2-b.y);
+      if(pd<TL*1.5&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;}
+    }
+    if(b.exploded&&b.t>=b.fuse+400)s.activeBombs.splice(i,1);}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
@@ -943,6 +960,41 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#fff";c.beginPath();c.moveTo(8,0);c.lineTo(5,-3);c.lineTo(5,3);c.fill();
     c.fillStyle="rgba(253,211,51,0.3)";c.beginPath();c.moveTo(-10,0);c.lineTo(-18,3);c.lineTo(-18,-3);c.fill();
     c.restore();}
+  // Draw active bombs
+  for(const ab of s.activeBombs){const prog=ab.t/ab.fuse;
+    if(!ab.exploded){
+      // Bomb body — grows slightly as fuse burns
+      const sc=1+prog*0.3,bsz=8*sc;
+      const flash=prog>0.7&&Math.sin(ab.t/(prog>0.9?40:80))>0;
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.3)";c.beginPath();c.ellipse(ab.x+1,ab.y+bsz+2,bsz*0.8,3,0,0,Math.PI*2);c.fill();
+      // Body
+      c.fillStyle=flash?"#fff":"#333";c.beginPath();c.arc(ab.x,ab.y,bsz,0,Math.PI*2);c.fill();
+      if(!flash){c.fillStyle="#444";c.beginPath();c.arc(ab.x-bsz*0.2,ab.y-bsz*0.2,bsz*0.6,0,Math.PI*2);c.fill();}
+      // Fuse
+      const fuseLen=8*(1-prog);
+      c.strokeStyle="#8B6B3A";c.lineWidth=2;c.beginPath();c.moveTo(ab.x,ab.y-bsz);
+      c.quadraticCurveTo(ab.x+4,ab.y-bsz-fuseLen*0.5,ab.x+2,ab.y-bsz-fuseLen);c.stroke();
+      // Spark at fuse tip
+      const spSz=2+Math.sin(ab.t/30)*1.5;
+      c.fillStyle="#fd3";c.beginPath();c.arc(ab.x+2,ab.y-bsz-fuseLen,spSz,0,Math.PI*2);c.fill();
+      c.fillStyle="#fff";c.beginPath();c.arc(ab.x+2,ab.y-bsz-fuseLen,spSz*0.4,0,Math.PI*2);c.fill();
+      // Smoke wisps from fuse
+      if(prog>0.2){const sm=Math.sin(ab.t/100)*3;
+        c.fillStyle="rgba(180,180,180,0.3)";c.beginPath();c.arc(ab.x+2+sm,ab.y-bsz-fuseLen-6,3+prog*2,0,Math.PI*2);c.fill();}
+      // Warning ring when about to explode
+      if(prog>0.8){const ra=((prog-0.8)/0.2)*0.6;
+        c.strokeStyle=`rgba(255,100,0,${ra})`;c.lineWidth=2;c.setLineDash([4,4]);
+        c.beginPath();c.arc(ab.x,ab.y,TL*3,0,Math.PI*2);c.stroke();c.setLineDash([]);}
+    }else{
+      // Explosion flash
+      const et=ab.t-ab.fuse,ep=Math.min(1,et/400);
+      const er=TL*3*(0.5+ep*0.5);
+      c.globalAlpha=1-ep;
+      c.fillStyle="#fff";c.beginPath();c.arc(ab.x,ab.y,er*0.3*(1-ep*0.5),0,Math.PI*2);c.fill();
+      c.fillStyle=`rgba(255,150,0,${0.6*(1-ep)})`;c.beginPath();c.arc(ab.x,ab.y,er*0.6,0,Math.PI*2);c.fill();
+      c.fillStyle=`rgba(255,80,0,${0.3*(1-ep)})`;c.beginPath();c.arc(ab.x,ab.y,er,0,Math.PI*2);c.fill();
+      c.globalAlpha=1;}}
   // Draw chest
   if(s.chest){const ch=s.chest,cx2=ch.x,cy2=ch.y;
     if(ch.state==="closed"){
