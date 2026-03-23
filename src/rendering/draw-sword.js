@@ -1,4 +1,4 @@
-import { SR, SD } from '../constants.js';
+import { PS, SR, SD } from '../constants.js';
 
 export function dSw(c,px,py,d,tm){
   const p2=1-tm/SD; // 0→1 over swing duration
