@@ -973,11 +973,11 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(dgRooms.length>0){
       const cds=dgRooms.map(k=>k.split(",").map(Number));
       const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
-      const ms=18,mp=6,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2;
+      const ms=12,mp=4,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2;
       const mmX=W2-mW-4,mmY=4;
-      c.globalAlpha=0.9;
-      c.fillStyle="#000";c.fillRect(mmX-2,mmY-2,mW+4,mH+4);
-      c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(mmX-2,mmY-2,mW+4,mH+4);
+      c.globalAlpha=0.6;
+      c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(mmX-2,mmY-2,mW+4,mH+4);
+      c.strokeStyle="rgba(253,211,51,0.5)";c.lineWidth=1;c.strokeRect(mmX-2,mmY-2,mW+4,mH+4);
       for(const rk of dgRooms){const[cx,cy]=rk.split(",").map(Number);
         const rx=mmX+mp+(cx-nX)*ms,ry=mmY+mp+(cy-nY)*ms;
         if(rk===loc.scr){c.fillStyle="#fd3";c.fillRect(rx+1,ry+1,ms-2,ms-2);}
