@@ -1,0 +1,409 @@
+import { T, TL, CO, RO } from '../constants.js';
+import { oe } from '../utils/map-helpers.js';
+
+// Overworld enemy definitions per screen
+export const OW_EN={
+  // Inner ring (hub area)
+  "1,1":[],
+  "0,0":[{x:3*TL,y:3*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"bat"}],
+  "1,0":[{x:4*TL,y:6*TL,hp:1,type:"bat"},{x:11*TL,y:4*TL,hp:1,type:"bat"}],
+  "2,0":[{x:5*TL,y:4*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"skeleton"}],
+  "0,1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:7*TL,hp:2,type:"skeleton"}],
+  "2,1":[{x:3*TL,y:5*TL,hp:1,type:"bat"},{x:12*TL,y:7*TL,hp:1,type:"bat"}],
+  "1,2":[{x:6*TL,y:4*TL,hp:1,type:"bat"},{x:9*TL,y:8*TL,hp:1,type:"bat"}],
+  // Middle ring
+  "3,0":[{x:6*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
+  "3,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"}],
+  "0,2":[{x:4*TL,y:5*TL,hp:2,type:"skeleton"},{x:11*TL,y:6*TL,hp:3,type:"skeleton"}],
+  "2,2":[{x:5*TL,y:5*TL,hp:2,type:"bat"},{x:10*TL,y:7*TL,hp:2,type:"skeleton"}],
+  "0,-1":[{x:5*TL,y:5*TL,hp:2,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
+  "1,-1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"}],
+  // Outer ring
+  "-1,0":[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"skeleton"},{x:7*TL,y:3*TL,hp:2,type:"bat"}],
+  "-1,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}],
+  "-1,-1":[{x:6*TL,y:5*TL,hp:3,type:"ghost"},{x:9*TL,y:8*TL,hp:4,type:"skeleton"}],
+  "2,-1":[{x:5*TL,y:4*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:3,type:"fire_bat"}],
+  "3,-1":[{x:4*TL,y:5*TL,hp:3,type:"fire_bat"},{x:11*TL,y:7*TL,hp:3,type:"ghost"}],
+  "4,-1":[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:8*TL,hp:4,type:"ghost"}],
+  "4,0":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:7*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
+  "4,1":[{x:4*TL,y:4*TL,hp:3,type:"fire_bat"},{x:11*TL,y:8*TL,hp:4,type:"fire_bat"}],
+  "-1,2":[{x:5*TL,y:4*TL,hp:4,type:"ghost"},{x:10*TL,y:7*TL,hp:4,type:"ghost"},{x:7*TL,y:9*TL,hp:3,type:"fire_bat"}],
+  "3,2":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}],
+  "4,2":[{x:4*TL,y:4*TL,hp:4,type:"fire_bat"},{x:11*TL,y:7*TL,hp:4,type:"ghost"},{x:7*TL,y:9*TL,hp:4,type:"fire_bat"}],
+};
+
+export const OW={
+
+// ===== ROW y=-1 (Northern highlands) =====
+
+// Deep forest northwest — HEART_PIECE hidden among dense trees
+"-1,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  // Dense forest interior
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][10]=T.TREE;m[2][11]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][10]=T.TREE;m[3][11]=T.TREE;m[3][12]=T.TREE;m[3][13]=T.TREE;
+  m[4][1]=T.TREE;m[4][2]=T.TREE;m[4][10]=T.TREE;m[4][11]=T.TREE;m[4][12]=T.TREE;
+  m[5][1]=T.TREE;m[5][2]=T.TREE;m[5][10]=T.TREE;m[5][11]=T.TREE;
+  m[6][1]=T.TREE;m[6][2]=T.TREE;m[6][10]=T.TREE;m[6][11]=T.TREE;
+  m[7][1]=T.TREE;m[7][2]=T.TREE;m[7][3]=T.TREE;m[7][10]=T.TREE;m[7][11]=T.TREE;m[7][12]=T.TREE;
+  m[8][1]=T.TREE;m[8][2]=T.TREE;m[8][3]=T.TREE;m[8][4]=T.TREE;m[8][10]=T.TREE;m[8][11]=T.TREE;m[8][12]=T.TREE;m[8][13]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][11]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;
+  // Narrow winding path to heart piece
+  m[3][4]=T.PATH;m[3][5]=T.PATH;m[4][5]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;
+  m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[5][8]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
+  m[5][3]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[4][4]=T.TALLGRASS;
+  // Heart piece hidden deep in the trees
+  m[5][4]=T.HEART_PIECE;
+  m[7][7]=T.FLOWER;m[7][8]=T.FLOWER;m[3][7]=T.STUMP;
+  oe(m,"E");oe(m,"S");return m;})(),
+
+// Northern forest clearing
+"0,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[10][1]=T.TREE;m[10][14]=T.TREE;m[2][14]=T.TREE;
+  // Forest clearing with stumps
+  m[4][4]=T.STUMP;m[4][11]=T.STUMP;m[7][4]=T.STUMP;m[7][11]=T.STUMP;
+  m[3][6]=T.TALLGRASS;m[3][7]=T.TALLGRASS;m[3][8]=T.TALLGRASS;m[3][9]=T.TALLGRASS;
+  m[8][6]=T.TALLGRASS;m[8][7]=T.TALLGRASS;m[8][8]=T.TALLGRASS;m[8][9]=T.TALLGRASS;
+  m[5][5]=T.FLOWER;m[5][6]=T.FLOWER;m[6][5]=T.FLOWER;m[6][6]=T.FLOWER;
+  m[5][9]=T.BUSH;m[5][10]=T.BUSH;m[6][9]=T.BUSH;m[6][10]=T.BUSH;
+  m[9][3]=T.TREE;m[9][12]=T.TREE;
+  oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
+
+// Mountain foothills
+"1,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Rocky terrain mixed with grass
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[10][1]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  m[3][3]=T.ROCK;m[3][4]=T.ROCK;m[8][3]=T.ROCK;m[8][12]=T.ROCK;
+  // Central rocky path
+  for(let c=5;c<=10;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  m[3][7]=T.ROCK;m[3][8]=T.ROCK;m[8][7]=T.ROCK;m[8][8]=T.ROCK;
+  m[4][5]=T.TALLGRASS;m[4][10]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][10]=T.TALLGRASS;
+  m[2][7]=T.BUSH;m[9][7]=T.BUSH;m[9][8]=T.BUSH;
+  oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
+
+// Mountain peak — HEART_PIECE surrounded by rocks
+"2,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Heavy rock coverage
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][4]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][3]=T.ROCK;m[2][12]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Rocky ring around heart piece
+  m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
+  m[5][6]=T.ROCK;m[5][9]=T.ROCK;
+  m[6][6]=T.ROCK;m[6][9]=T.ROCK;
+  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[7][9]=T.ROCK;
+  // Heart piece at the peak, one gap to reach it
+  m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
+  // Path to the gap
+  m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+  m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
+  oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
+
+// Snowy highland approach
+"3,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Ice fields with rock clusters
+  m[3][3]=T.ROCK;m[3][4]=T.ROCK;m[4][3]=T.ROCK;
+  m[3][11]=T.ROCK;m[3][12]=T.ROCK;m[4][12]=T.ROCK;
+  m[8][3]=T.ROCK;m[8][4]=T.ROCK;m[8][11]=T.ROCK;m[8][12]=T.ROCK;
+  // Central path through ice
+  for(let c=5;c<=10;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  m[5][4]=T.PATH;m[6][4]=T.PATH;
+  m[2][7]=T.ROCK;m[2][8]=T.ROCK;m[9][7]=T.ROCK;m[9][8]=T.ROCK;
+  m[4][7]=T.STUMP;m[7][7]=T.STUMP;
+  oe(m,"W",T.ICE);oe(m,"E",T.ICE);oe(m,"S",T.ICE);return m;})(),
+
+// Icy peak — HEART_PIECE hidden near edge
+"4,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Heavy rock borders — icy wasteland
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][4]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][3]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][4]=T.ROCK;m[10][11]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Frozen lake
+  m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;m[4][8]=T.WATER;m[4][9]=T.WATER;m[4][10]=T.WATER;
+  m[5][5]=T.WATER;m[5][6]=T.WATER;m[5][7]=T.WATER;m[5][8]=T.WATER;m[5][9]=T.WATER;m[5][10]=T.WATER;
+  m[6][5]=T.WATER;m[6][6]=T.WATER;m[6][7]=T.WATER;m[6][8]=T.WATER;m[6][9]=T.WATER;m[6][10]=T.WATER;
+  // Narrow ice path to heart piece
+  m[7][10]=T.PATH;m[7][11]=T.PATH;m[7][12]=T.PATH;
+  m[8][12]=T.HEART_PIECE;
+  m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
+  m[9][7]=T.STUMP;m[3][7]=T.STUMP;
+  oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
+
+// ===== ROW y=0 (Main upper row) =====
+
+// Deep forest west
+"-1,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  // Dense trees with clearings
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][13]=T.TREE;
+  m[8][1]=T.TREE;m[8][2]=T.TREE;m[8][13]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Small pond
+  m[4][4]=T.WATER;m[4][5]=T.WATER;m[5][4]=T.WATER;m[5][5]=T.WATER;
+  // Winding path through forest
+  m[5][6]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  m[4][7]=T.TALLGRASS;m[4][8]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][6]=T.TALLGRASS;
+  m[6][4]=T.FLOWER;m[7][4]=T.FLOWER;m[3][9]=T.BUSH;m[3][10]=T.BUSH;
+  m[7][10]=T.STUMP;m[8][10]=T.STUMP;
+  oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+
+// Forest Temple screen — D0 entrance
+"0,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][13]=T.TREE;m[2][1]=T.TREE;m[10][1]=T.TREE;m[10][2]=T.TREE;m[2][14]=T.TREE;
+  m[2][5]=T.TREE;m[2][6]=T.TREE;m[3][3]=T.TREE;m[3][4]=T.TREE;m[8][3]=T.TREE;m[9][4]=T.TREE;
+  m[2][10]=T.TREE;m[3][11]=T.TREE;m[3][12]=T.TREE;m[8][12]=T.TREE;m[9][10]=T.TREE;
+  m[3][6]=T.WATER;m[3][7]=T.WATER;m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;
+  // D0 Forest Temple entrance
+  m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
+  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
+  m[6][3]=T.FLOWER;m[6][4]=T.FLOWER;m[7][11]=T.TALLGRASS;m[8][5]=T.TALLGRASS;
+  oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
+
+// Meadow with crack cave
+"1,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
+  m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
+  m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
+  // Crack cave entrance
+  m[2][2]=T.TREE;m[2][3]=T.CRACK;
+  oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
+
+// Desert border — sand meets grass
+"2,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][5]=T.ROCK;m[1][10]=T.ROCK;m[9][4]=T.ROCK;m[9][11]=T.ROCK;
+  m[3][3]=T.ROCK;m[4][3]=T.ROCK;m[3][12]=T.ROCK;m[8][12]=T.ROCK;
+  m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[6][10]=T.BUSH;m[6][11]=T.TALLGRASS;
+  // Central oasis path
+  m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
+  m[4][7]=T.PATH;m[4][8]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;
+  oe(m,"W",T.SAND);oe(m,"E",T.SAND);oe(m,"N",T.SAND);oe(m,"S",T.SAND);return m;})(),
+
+// Desert ruins with crack cave
+"3,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[2][3]=T.ROCK;m[2][4]=T.ROCK;m[3][3]=T.ROCK;m[2][11]=T.ROCK;m[2][12]=T.ROCK;m[3][12]=T.ROCK;
+  m[8][3]=T.ROCK;m[8][4]=T.ROCK;m[9][3]=T.ROCK;m[8][11]=T.ROCK;m[8][12]=T.ROCK;m[9][12]=T.ROCK;
+  m[5][6]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;m[5][9]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;
+  // Crack cave
+  m[4][10]=T.CRACK;m[3][10]=T.ROCK;
+  m[2][7]=T.STUMP;m[9][7]=T.STUMP;
+  oe(m,"W",T.SAND);oe(m,"E",T.SAND);oe(m,"N",T.SAND);oe(m,"S",T.SAND);return m;})(),
+
+// Far east desert outpost
+"4,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Ruined walls
+  m[3][4]=T.ROCK;m[3][5]=T.ROCK;m[3][6]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
+  m[8][4]=T.ROCK;m[8][5]=T.ROCK;m[8][10]=T.ROCK;m[8][11]=T.ROCK;
+  m[4][4]=T.ROCK;m[7][4]=T.ROCK;m[4][11]=T.ROCK;m[7][11]=T.ROCK;
+  // Sandy courtyard
+  m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
+  m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;
+  m[2][7]=T.STUMP;m[9][8]=T.BUSH;
+  oe(m,"W",T.SAND);oe(m,"S",T.SAND);oe(m,"N",T.SAND);return m;})(),
+
+// ===== ROW y=1 (Main middle row) =====
+
+// Deep forest swamp edge — HEART_PIECE behind crack
+"-1,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Swampy water patches
+  m[3][3]=T.WATER;m[3][4]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;m[4][5]=T.WATER;
+  m[7][9]=T.WATER;m[7][10]=T.WATER;m[8][9]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;
+  // Crack wall hiding heart piece
+  m[3][10]=T.CRACK;m[3][11]=T.TREE;m[2][10]=T.TREE;m[2][11]=T.TREE;m[2][12]=T.TREE;
+  m[4][11]=T.TREE;m[4][12]=T.TREE;
+  m[3][12]=T.HEART_PIECE;
+  // Paths
+  m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
+  m[5][9]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][6]=T.TALLGRASS;
+  m[5][3]=T.FLOWER;m[3][7]=T.BUSH;
+  oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+
+// Western forest hub
+"0,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
+  m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;
+  m[3][2]=T.TREE;m[3][13]=T.TREE;m[4][2]=T.TREE;m[4][12]=T.TREE;
+  m[7][2]=T.TREE;m[7][13]=T.TREE;m[8][2]=T.TREE;m[8][13]=T.TREE;
+  m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;
+  m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;
+  // Central clearing with paths
+  m[3][5]=T.PATH;m[3][6]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[3][9]=T.PATH;m[3][10]=T.PATH;
+  m[5][4]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][4]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
+  m[8][5]=T.PATH;m[8][6]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;
+  m[5][7]=T.FLOWER;m[5][8]=T.FLOWER;m[6][7]=T.BUSH;m[6][8]=T.BUSH;
+  m[4][4]=T.TALLGRASS;m[7][10]=T.TALLGRASS;m[2][7]=T.BUSH;m[9][7]=T.BUSH;
+  oe(m,"W");oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+
+// Central hub — peaceful crossroads
+"1,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  for(let c=2;c<=13;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  for(let r=1;r<=10;r++){m[r][7]=T.PATH;m[r][8]=T.PATH;}
+  m[5][7]=T.WATER;m[5][8]=T.WATER;m[6][7]=T.WATER;m[6][8]=T.WATER;
+  m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[5][6]=T.ROCK;m[6][6]=T.ROCK;m[5][9]=T.ROCK;m[6][9]=T.ROCK;
+  m[2][3]=T.FLOWER;m[2][4]=T.FLOWER;m[3][3]=T.FLOWER;m[3][12]=T.FLOWER;m[2][11]=T.FLOWER;m[2][12]=T.FLOWER;
+  m[8][3]=T.BUSH;m[8][12]=T.BUSH;m[9][4]=T.STUMP;m[9][11]=T.STUMP;
+  m[1][4]=T.TREE;m[1][11]=T.TREE;m[10][4]=T.TREE;m[10][11]=T.TREE;
+  oe(m,"W");oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
+
+// Lake crossing
+"2,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  for(let r=2;r<=9;r++)for(let c=5;c<=11;c++)m[r][c]=T.WATER;
+  m[5][5]=T.BRIDGE;m[5][6]=T.BRIDGE;m[5][7]=T.BRIDGE;m[5][8]=T.BRIDGE;m[5][9]=T.BRIDGE;m[5][10]=T.BRIDGE;m[5][11]=T.BRIDGE;
+  m[6][5]=T.BRIDGE;m[6][6]=T.BRIDGE;m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[6][9]=T.BRIDGE;m[6][10]=T.BRIDGE;m[6][11]=T.BRIDGE;
+  m[2][3]=T.TALLGRASS;m[9][3]=T.TALLGRASS;m[2][12]=T.BUSH;m[9][12]=T.BUSH;
+  m[4][3]=T.FLOWER;m[7][12]=T.FLOWER;
+  oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
+
+// Eastern ruins
+"3,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[3][4]=T.ROCK;m[3][5]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
+  m[8][4]=T.ROCK;m[8][5]=T.ROCK;m[8][10]=T.ROCK;m[8][11]=T.ROCK;
+  m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[7][4]=T.ROCK;m[7][11]=T.ROCK;
+  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
+  m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
+  m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
+  m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+  oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
+
+// D1 Fire Cavern — desert dungeon
+"4,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // D1 Fire Cavern entrance
+  m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
+  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
+  // Lava-like decoration
+  m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
+  m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+  // Path leading to entrance
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+  m[4][7]=T.PATH;m[4][8]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;
+  oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"S",T.SAND);return m;})(),
+
+// ===== ROW y=2 (Southern row) =====
+
+// D2 Shadow Keep — dark swamp dungeon
+"-1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Swamp water everywhere
+  m[3][3]=T.WATER;m[3][4]=T.WATER;m[3][5]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;
+  m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;
+  m[3][10]=T.WATER;m[3][11]=T.WATER;m[4][11]=T.WATER;
+  // D2 Shadow Keep entrance
+  m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
+  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
+  m[4][7]=T.PATH;m[4][8]=T.PATH;
+  m[6][4]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[5][11]=T.TALLGRASS;
+  m[2][7]=T.TORCH;m[2][8]=T.TORCH;
+  oe(m,"N");oe(m,"E");return m;})(),
+
+// Southern forest — crack cave
+"0,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  m[1][3]=T.TREE;m[1][4]=T.TREE;m[2][2]=T.TREE;m[3][2]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
+  m[9][2]=T.TREE;m[9][3]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;
+  m[5][5]=T.TALLGRASS;m[5][6]=T.TALLGRASS;m[6][9]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
+  // Crack cave
+  m[8][8]=T.CRACK;m[7][8]=T.BUSH;
+  m[3][7]=T.FLOWER;m[3][8]=T.FLOWER;m[4][9]=T.STUMP;m[7][4]=T.STUMP;
+  oe(m,"W");oe(m,"N");oe(m,"E");return m;})(),
+
+// Southern path — crack cave
+"1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  for(let c=3;c<=12;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
+  m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
+  m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
+  // Crack cave
+  m[9][3]=T.CRACK;m[8][3]=T.ROCK;
+  oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
+
+// Beach — sand and water coast
+"2,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Coastal water on south and east
+  for(let r=7;r<=10;r++)for(let c=1;c<=14;c++)m[r][c]=T.WATER;
+  // Beach sand strip
+  for(let c=1;c<=14;c++){m[6][c]=T.SAND;}
+  // Bridge across water
+  m[7][7]=T.BRIDGE;m[7][8]=T.BRIDGE;m[8][7]=T.BRIDGE;m[8][8]=T.BRIDGE;
+  m[3][9]=T.TALLGRASS;m[4][6]=T.FLOWER;m[5][4]=T.BUSH;m[5][11]=T.STUMP;
+  m[2][7]=T.PATH;m[2][8]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;
+  oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"E",T.SAND);return m;})(),
+
+// D3 Dark Sanctum — final gate (ROCK blocks entrance, opened by game code)
+"3,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Dark terrain accents
+  m[3][3]=T.ROCK;m[4][3]=T.ROCK;m[3][12]=T.ROCK;m[4][12]=T.ROCK;
+  m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[8][12]=T.ROCK;m[9][12]=T.ROCK;
+  // D3 blocked entrance — ROCK at entrance position, game code swaps to ENTRANCE
+  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
+  m[4][6]=T.TORCH;m[4][9]=T.TORCH;m[7][6]=T.TORCH;m[7][9]=T.TORCH;
+  // Path leading up to the sealed gate
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+  m[4][7]=T.PATH;m[4][8]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;
+  m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
+  oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"E",T.SAND);return m;})(),
+
+// Volcanic southeast
+"4,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Lava pools (water tiles used as lava visually)
+  m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;m[5][5]=T.WATER;m[5][6]=T.WATER;
+  m[7][9]=T.WATER;m[7][10]=T.WATER;m[8][9]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;
+  // Paths between lava
+  m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  m[7][7]=T.PATH;m[7][8]=T.PATH;
+  m[3][8]=T.TORCH;m[3][9]=T.TORCH;m[9][5]=T.TORCH;m[9][6]=T.TORCH;
+  m[3][4]=T.ROCK;m[8][4]=T.ROCK;m[3][11]=T.ROCK;
+  oe(m,"W",T.SAND);oe(m,"N",T.SAND);return m;})(),
+
+};
