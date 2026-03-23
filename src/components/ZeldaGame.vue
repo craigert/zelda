@@ -968,12 +968,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
   if(iD&&dg&&dg.rooms){const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
     const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
-    const ms=20,mp=8,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2,mmX=W2-mW-6,mmY=H2-mH-6;
+    const ms=20,mp=8,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2,mmX=W2-mW-6,mmY=6;
     // Background
     c.fillStyle="rgba(0,0,0,0.9)";c.fillRect(mmX-3,mmY-3,mW+6,mH+6);
     c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(mmX-3,mmY-3,mW+6,mH+6);
     // Dungeon name
-    c.fillStyle="#fd3";c.font="bold 8px monospace";c.textAlign="center";c.fillText(dg.name,mmX+mW/2,mmY-6);c.textAlign="left";
+    c.fillStyle="#fd3";c.font="bold 8px monospace";c.textAlign="center";c.fillText(dg.name,mmX+mW/2,mmY+mH+12);c.textAlign="left";
     // Rooms
     for(const rk of rks){const[cx,cy]=rk.split(",").map(Number);
       const rx=mmX+mp+(cx-nX)*ms+1,ry=mmY+mp+(cy-nY)*ms+1,rw=ms-2,rh=ms-2;
