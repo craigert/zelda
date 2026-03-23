@@ -806,10 +806,11 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const p=s.p;
   c.fillStyle="#111";c.fillRect(0,0,W2,HH);
   c.fillStyle="rgba(60,60,60,0.5)";c.fillRect(0,HH-1,W2,1);
-  for(let i=0;i<p.mhp/2;i++){const hx=8+i*22,hy=8;
-    if(p.hp>=(i+1)*2){c.fillStyle="#ee3333";dH(c,hx,hy,16);}
-    else if(p.hp>=i*2+1){c.save();c.beginPath();c.rect(hx,hy,8,16);c.clip();c.fillStyle="#ee3333";dH(c,hx,hy,16);c.restore();c.save();c.beginPath();c.rect(hx+8,hy,8,16);c.clip();c.fillStyle="#444";dH(c,hx,hy,16);c.restore();}
-    else{c.fillStyle="#444";dH(c,hx,hy,16);}}
+  const hc=p.mhp/2,hsz=hc>6?12:16,hsp=hc>6?16:22;
+  for(let i=0;i<hc;i++){const hx=8+i*hsp,hy=hc>6?10:8;
+    if(p.hp>=(i+1)*2){c.fillStyle="#ee3333";dH(c,hx,hy,hsz);}
+    else if(p.hp>=i*2+1){c.save();c.beginPath();c.rect(hx,hy,hsz/2,hsz);c.clip();c.fillStyle="#ee3333";dH(c,hx,hy,hsz);c.restore();c.save();c.beginPath();c.rect(hx+hsz/2,hy,hsz/2,hsz);c.clip();c.fillStyle="#444";dH(c,hx,hy,hsz);c.restore();}
+    else{c.fillStyle="#444";dH(c,hx,hy,hsz);}}
   if(p.hp<=2&&p.hp>0&&Math.sin(s.lowHp/200)>0.3){c.fillStyle="rgba(255,50,50,0.15)";c.fillRect(0,0,W2,HH);}
   // Items — right side, spaced to avoid triforce overlap
   const iR=W2-60;// rightmost item position
@@ -825,7 +826,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(p.freeze>0){c.fillStyle="#8cf";c.font="bold 10px monospace";c.fillText("\u2744\ufe0fFREEZE",sx2,20);sx2+=65;}
   if(p.poison>0){c.fillStyle="#4a4";c.font="bold 10px monospace";c.fillText("\u2620\ufe0fPOISON",sx2,20);sx2+=65;}
   // Triforce pieces — after hearts, before items
-  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",p.mhp/2*22+20+i*18,21);}
+  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",hc*hsp+20+i*18,21);}
   if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 11px monospace";c.fillText(dgn,p.mhp/2*22+16,21);}
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
