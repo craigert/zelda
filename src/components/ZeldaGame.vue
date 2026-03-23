@@ -120,6 +120,7 @@ function init() {
     npcTalk:null,
     pArrows:[],
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
+    slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
   };
 }
 
@@ -310,10 +311,10 @@ function cTr(s){const p=s.p,loc=s.loc;
           loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
     }
     const[sx,sy]=loc.scr.split(",").map(Number);
-    if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=W2-PS-8;le(s);}else p.x=-4;}
-    if(p.x>W2-PS+4){const ns=`${sx+1},${sy}`;if(OW[ns]){loc.scr=ns;p.x=8;le(s);}else p.x=W2-PS+4;}
-    if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){loc.scr=ns;p.y=H2-PS-8;le(s);}else p.y=-4;}
-    if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){loc.scr=ns;p.y=8;le(s);}else p.y=H2-PS+4;}
+    if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-PS-8;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
+    if(p.x>W2-PS+4){const ns=`${sx+1},${sy}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.x=8;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}
+    if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-PS-8;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
+    if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=8;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
   }else if(loc.ty==="cave"){const m=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const cv=CAVES[loc.di];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
@@ -324,10 +325,10 @@ function cTr(s){const p=s.p,loc=s.loc;
       const ent=DE[loc.di];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
       const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);return;}
     const dg=s.dg[loc.di];
-    if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){loc.scr=ns;p.y=H2-TL-PS-4;le(s);}else p.y=-4;}
-    if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(dg.rooms[ns]){loc.scr=ns;p.y=TL+4;le(s);}else p.y=H2-PS+4;}
-    if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){loc.scr=ns;p.x=W2-TL-PS-4;le(s);}else p.x=-4;}
-    if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){loc.scr=ns;p.x=TL+4;le(s);}else p.x=W2-PS+4;}}
+    if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
+    if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=TL+4;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
+    if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-TL-PS-4;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
+    if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=TL+4;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}}
   saveGame(s);}
 
 function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
@@ -357,6 +358,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(s.fade.a){s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/250);
     if(s.fade.alpha>=1&&s.fade.cb){s.fade.cb();s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
     if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/250);if(s.fade.alpha<=0)s.fade.a=false;}return;}
+  if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur)s.slide.a=false;return;}
   if(s.shake.t>0){s.shake.t-=dt;const intensity=s.shake.t/300*4;s.shake.x=(Math.random()-.5)*intensity;s.shake.y=(Math.random()-.5)*intensity;}
   else{s.shake.x=0;s.shake.y=0;}
   if(s.p.hp<=2)s.lowHp+=dt;else s.lowHp=0;
@@ -857,6 +859,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
   const m=gm(s),loc=s.loc,iD=loc.ty==="dg"||loc.ty==="cave",dg=loc.ty==="dg"?s.dg[loc.di]:(loc.ty==="cave"?{color:"#1a2a18",wc:"#3a5a3a",fc:"#2a3a28",name:"Hidden Cave"}:null);
+  // Clip game area for slide transitions
+  c.save();c.beginPath();c.rect(0,0,W2,H2);c.clip();
+  // Slide: render old screen sliding out
+  if(s.slide.a&&s.slide.prevScr){const sl=s.slide,prog=Math.min(1,sl.t/sl.dur);
+    const ease=1-(1-prog)*(1-prog); // ease-out
+    const oldM=loc.ty==="ow"?OW[sl.prevScr]:(loc.ty==="dg"?s.dg[loc.di].rooms[sl.prevScr]?.tiles:null);
+    if(oldM){const ox=-ease*W2*sl.dx,oy=-ease*H2*sl.dy;
+      c.save();c.translate(ox,oy);
+      c.fillStyle=iD&&dg?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
+      for(let y2=0;y2<RO;y2++)for(let x2=0;x2<CO;x2++){let tl2=oldM[y2]?oldM[y2][x2]:T.EMPTY;
+        const opk=`${loc.ty}:${loc.di}:${sl.prevScr}:${x2},${y2}`;
+        if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
+        if((tl2===T.DOOR||tl2===T.BOSS_DOOR)&&s.dr.has(opk))tl2=T.FLOOR;
+        dT(c,tl2,x2*TL,y2*TL,iD,dg,t,null);}
+      c.restore();}
+    // Offset new screen
+    c.translate((1-ease)*W2*sl.dx,(1-ease)*H2*sl.dy);}
   c.fillStyle=iD?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
   if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
     const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
@@ -1104,7 +1123,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(dlg.charIdx>=line.length){const blink2=Math.sin(t/300)>0;
       if(blink2){c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("\u25bc",bx2+bw2/2,by2+bh2-8);}}
     c.textAlign="left";}
-  c.restore();
+  c.restore(); // end clip
+  c.restore(); // end game area offset
   const FH2=H2+HH;
   // Dungeon title overlay — fades in then out over 3 seconds
   if(s.dgTitle.t>0){const dt2=3000-s.dgTitle.t;// time elapsed
