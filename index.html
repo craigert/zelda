@@ -1841,7 +1841,14 @@ function ZeldaGame(){
       // Dark gradient at bottom
       const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
       c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
-      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("TAP OR PRESS SPACE",W/2,H*0.92);}
+      if(ltRef.current==="title"){
+        // Music playing — show Start button
+        const bw=120,bh=30,bx=W/2-bw/2,by=H*0.88;
+        const hover=Math.sin(t/300)*0.1+0.9;
+        c.fillStyle=`rgba(253,211,51,${hover*0.25})`;c.strokeStyle=`rgba(253,211,51,${hover})`;c.lineWidth=2;
+        c.beginPath();c.moveTo(bx+8,by);c.lineTo(bx+bw-8,by);c.quadraticCurveTo(bx+bw,by,bx+bw,by+8);c.lineTo(bx+bw,by+bh-8);c.quadraticCurveTo(bx+bw,by+bh,bx+bw-8,by+bh);c.lineTo(bx+8,by+bh);c.quadraticCurveTo(bx,by+bh,bx,by+bh-8);c.lineTo(bx,by+8);c.quadraticCurveTo(bx,by,bx+8,by);c.fill();c.stroke();
+        c.fillStyle="#fff";c.font="bold 16px monospace";c.fillText("START",W/2,by+bh/2+6);
+      }else if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("PRESS SPACE OR CLICK",W/2,H*0.92);}
       c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W/2,H*0.97);
       c.textAlign="left";c.lineCap="butt";return;}
     // ===== HUD (drawn in top HH pixels, above game) =====
