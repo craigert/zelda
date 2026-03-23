@@ -1203,7 +1203,7 @@ function drawTerrainOverlay(c,m,t){
 // ============ GAME ============
 export default function ZeldaGame(){
   const cvR=useRef(null),stR=useRef(null),kyR=useRef(new Set()),anR=useRef(null),ltR=useRef(0);
-  const tcR=useRef({dir:null,atk:false});const[muOn,setMu]=useState(false);const ltRef=useRef(null);
+  const tcR=useRef({dir:null,atk:false});const[muOn,setMu]=useState(true);const ltRef=useRef(null);
   const[customMu,setCustomMu]=useState({...DEFAULT_MUSIC});
   const[showMuPicker,setShowMuPicker]=useState(false);
   const customAuRef=useRef(null);
@@ -1235,18 +1235,24 @@ export default function ZeldaGame(){
   }),[]);
 
   useEffect(()=>{stR.current=init();
-    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},500);
+    let unlocked=false;
+    const doUnlock=()=>{if(unlocked)return;unlocked=true;Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});};
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       const s=stR.current;
+      doUnlock();
       if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
-        s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});}
+        if(ltRef.current==="title"){s.title=false;le(s);ltRef.current=null;}
+        return;}
       if(e.key.toLowerCase()==="p"&&s&&!s.title&&!s.go&&!s.won){s.paused=!s.paused;}
       if(e.key.toLowerCase()==="m"){Tone.start().then(()=>{initSfx();});setMu(p=>!p);}};
     const ku=e=>kyR.current.delete(e.key.toLowerCase());
+    const clickUnlock=()=>{doUnlock();};
     window.addEventListener("keydown",kd);window.addEventListener("keyup",ku);
+    window.addEventListener("click",clickUnlock);window.addEventListener("touchstart",clickUnlock);
     const lp=t=>{const dt=Math.min(t-ltR.current,33);ltR.current=t;upd(dt);drw(t);anR.current=requestAnimationFrame(lp);};
     anR.current=requestAnimationFrame(lp);
-    return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();};
+    return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();
+      window.removeEventListener("click",clickUnlock);window.removeEventListener("touchstart",clickUnlock);};
   },[]);
 
   useEffect(()=>{
@@ -1926,7 +1932,7 @@ export default function ZeldaGame(){
     <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:16,userSelect:"none",WebkitUserSelect:"none"}}>
       <h1 style={{fontSize:24,color:"#fd3",margin:"0 0 4px 0",textShadow:"0 0 20px rgba(253,211,51,0.3), 0 2px 4px rgba(0,0,0,0.5)",letterSpacing:6,fontWeight:"900"}}>THE LEGEND OF LINK</h1>
       <p style={{fontSize:11,color:"#666",margin:"0 0 10px 0",textAlign:"center",letterSpacing:1}}>WASD / Arrows · Space attack · B bomb · P pause · M music</p>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(ltRef.current==="title"){s.title=false;le(s);ltRef.current=null;}return;}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
