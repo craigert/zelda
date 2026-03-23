@@ -1235,7 +1235,7 @@ export default function ZeldaGame(){
   }),[]);
 
   useEffect(()=>{stR.current=init();
-    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},100);
+    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},500);
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       const s=stR.current;
       if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){

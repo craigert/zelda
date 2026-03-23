@@ -1292,7 +1292,7 @@ function ZeldaGame(){
 
   useEffect(()=>{stR.current=init();
     // Auto-click the music button to start audio
-    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},100);
+    setTimeout(()=>{if(muBtnRef.current)muBtnRef.current.click();},500);
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       const s=stR.current;
       // Title screen dismiss
