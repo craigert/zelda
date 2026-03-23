@@ -709,6 +709,7 @@ function dT(c,tl,px,py,iD,dg,t){
       const sh=Math.sin(t/250+px/15+py/20)*.08+.06;
       c.fillStyle=`rgba(200,230,255,${sh})`;c.beginPath();c.arc(px+10+w,py+6,3,0,Math.PI*2);c.fill();
       c.fillStyle=`rgba(180,210,245,${sh*.7})`;c.beginPath();c.arc(px+22-w2,py+24,2.5,0,Math.PI*2);c.fill();
+      const sp2=Math.sin(t/180+px*0.3+py*0.2);if(sp2>0.7){c.fillStyle=`rgba(255,255,255,${(sp2-0.7)*2})`;c.beginPath();c.arc(px+16+w,py+14+w2,1,0,Math.PI*2);c.fill();}
       break;}
     case T.TREE:{c.fillStyle="#38982e";c.fillRect(px,py,TL,TL);
       const tv=((Math.floor(px/TL)*13+Math.floor(py/TL)*7)&3); // 4 tree varieties
@@ -1651,8 +1652,20 @@ export default function ZeldaGame(){
       if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;dT(c,tl,px,py,iD,dg,t);}
     // Organic terrain overlay — curved mesh blending
     if(!iD)drawTerrainOverlay(c,m,t);
-    // Enemies
+    // Dynamic torch lighting in dungeons
+    if(iD&&m){const torches=[];for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH)torches.push([x*TL+16,y*TL+16]);
+      if(torches.length>0){for(const[tx2,ty2]of torches){
+        const flk=Math.sin(t/200+tx2)*0.08+Math.sin(t/130+ty2)*0.05;
+        const r2=90+Math.sin(t/180+tx2*0.1)*15;
+        const tg=c.createRadialGradient(tx2,ty2,4,tx2,ty2,r2);
+        tg.addColorStop(0,`rgba(255,200,100,${0.18+flk})`);tg.addColorStop(0.5,`rgba(255,150,50,${0.06+flk*0.3})`);tg.addColorStop(1,"rgba(255,100,30,0)");
+        c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}}
+    // Dungeon dust motes
+    if(iD){for(let i=0;i<15;i++){const dx2=hs(i,3,77)*W2,dy2=(hs(i,7,88)*H2+t/20)%H2;
+      const da=0.15+Math.sin(t/600+i*2)*0.1;c.fillStyle=`rgba(200,180,140,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i)*8,dy2,0.8+hs(i,1,99)*0.8,0,Math.PI*2);c.fill();}}
+    // Enemies with enhanced shadows
     for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES,ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
+      c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+3,e.y+ES-1,sz/2+1,4,0.1,0,Math.PI*2);c.fill();
       if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
       else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,fl,t,e.type==="fire_bat");else dSk(c,ex,ey,sz,fl,t);}
     // ===== BOSS PROJECTILES =====
@@ -1683,17 +1696,35 @@ export default function ZeldaGame(){
     if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
       c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
       dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
-    }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;if(vis)dP(c,p.x,p.y,p.dir,t);}
+    }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;
+      if(vis){
+        c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,10,3,0.08,0,Math.PI*2);c.fill();
+        dP(c,p.x,p.y,p.dir,t);
+        if(m&&!iD){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
+          for(let dy2=-1;dy2<=1;dy2++)for(let dx2=-1;dx2<=1;dx2++){const gx=ptx+dx2,gy=pty+dy2;
+            if(gx>=0&&gx<CO&&gy>=0&&gy<RO&&(m[gy][gx]===T.TALLGRASS||m[gy][gx]===T.GRASS)){
+              const dist=Math.hypot(p.x+PS/2-gx*TL-16,p.y+PS/2-gy*TL-16);
+              if(dist<30){const sway=Math.sin(t/100+gx*3)*3*(1-dist/30);
+                c.fillStyle=m[gy][gx]===T.TALLGRASS?"rgba(80,180,50,0.4)":"rgba(60,160,40,0.2)";
+                c.beginPath();c.moveTo(gx*TL+8+sway,gy*TL+4);c.lineTo(gx*TL+16,gy*TL+TL-4);c.lineTo(gx*TL+24+sway,gy*TL+4);c.fill();}}}}
+      }}
     if(s.sw.a)dSw(c,p.x,p.y,p.dir,s.sw.t);
-    // Particles (now circles)
-    for(const pt of s.pt){c.globalAlpha=Math.min(1,pt.l/500);c.fillStyle=pt.c;c.beginPath();c.arc(pt.x,pt.y,1.5,0,Math.PI*2);c.fill();}c.globalAlpha=1;
+    // Enhanced particles with glow
+    for(const pt of s.pt){const pa=Math.min(1,pt.l/500);c.globalAlpha=pa;
+      const psz=1+pt.l/800;
+      c.fillStyle=pt.c;c.globalAlpha=pa*0.3;c.beginPath();c.arc(pt.x,pt.y,psz*2.5,0,Math.PI*2);c.fill();
+      c.globalAlpha=pa;c.beginPath();c.arc(pt.x,pt.y,psz,0,Math.PI*2);c.fill();
+      c.fillStyle="#fff";c.globalAlpha=pa*0.5;c.beginPath();c.arc(pt.x,pt.y,psz*0.4,0,Math.PI*2);c.fill();}c.globalAlpha=1;
     // Damage numbers
     for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
     // Room clear flash
     if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
-    // Vignette (in game space)
-    const vig=c.createRadialGradient(W2/2,H2/2,W2*0.35,W2/2,H2/2,W2*0.7);
-    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.3)":"rgba(0,0,0,0.1)");
+    // Ambient outdoor light
+    if(!iD){const amb=Math.sin(t/15000)*0.03;
+      c.fillStyle=amb>0?`rgba(255,200,100,${amb})`:`rgba(100,150,255,${-amb})`;c.fillRect(0,0,W2,H2);}
+    // Enhanced vignette
+    const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
+    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
     c.fillStyle=vig;c.fillRect(0,0,W2,H2);
     // Minimap (in game space, bottom-right)
     if(iD){const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
