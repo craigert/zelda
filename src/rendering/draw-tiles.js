@@ -758,6 +758,19 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#aaa";c.beginPath();c.moveTo(px+26,py+16);c.lineTo(px+23,py+14);c.lineTo(px+23,py+18);c.fill();
       // Fletching
       c.fillStyle="#fd3";c.beginPath();c.moveTo(px+10,py+16);c.lineTo(px+13,py+14);c.lineTo(px+13,py+18);c.fill();break;}
+    case T.BOMB_BAG:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      const bbg=Math.sin(t/300)*.15+.25;c.fillStyle=`rgba(100,100,255,${bbg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      // Bag body
+      c.fillStyle="#8B6B3A";c.beginPath();c.moveTo(px+10,py+10);c.lineTo(px+8,py+24);c.lineTo(px+24,py+24);c.lineTo(px+22,py+10);c.closePath();c.fill();
+      // Bag tie
+      c.fillStyle="#a07840";c.beginPath();c.moveTo(px+12,py+10);c.lineTo(px+11,py+7);c.lineTo(px+16,py+5);c.lineTo(px+21,py+7);c.lineTo(px+20,py+10);c.closePath();c.fill();
+      c.strokeStyle="#6a4a2a";c.lineWidth=1;c.beginPath();c.moveTo(px+12,py+10);c.lineTo(px+20,py+10);c.stroke();
+      // Bomb icon on bag
+      c.fillStyle="#333";c.beginPath();c.arc(px+16,py+18,5,0,Math.PI*2);c.fill();
+      c.fillStyle="#555";c.beginPath();c.arc(px+16,py+17,4,0,Math.PI*2);c.fill();
+      // Fuse
+      c.strokeStyle="#f80";c.lineWidth=1.5;c.beginPath();c.moveTo(px+16,py+13);c.lineTo(px+18,py+10);c.stroke();
+      const spk2=Math.sin(t/100);c.fillStyle=spk2>0?"#f80":"#fd3";c.beginPath();c.arc(px+18,py+9,2,0,Math.PI*2);c.fill();break;}
     case T.HEART:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const hg=Math.sin(t/400)*.15+.2;c.fillStyle=`rgba(255,50,50,${hg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();c.fillStyle="#ee3333";dH(c,px+6,py+6,20);c.fillStyle="#ff6666";dH(c,px+9,py+8,12);break;}
     case T.TRIFORCE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const tg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(253,211,51,${tg})`;c.beginPath();c.arc(px+16,py+16,14,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+27,py+26);c.lineTo(px+5,py+26);c.fill();c.fillStyle="#ffe866";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+23,py+22);c.lineTo(px+9,py+22);c.fill();break;}
     case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);for(let i=0;i<4;i++){c.fillStyle=`rgb(${80+i*20},${80+i*20},${80+i*20})`;c.fillRect(px+3,py+3+i*7,TL-6,5);}c.fillStyle="#6c6";c.font="bold 9px monospace";c.fillText("EXIT",px+5,py+20);break;}

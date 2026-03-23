@@ -235,14 +235,27 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[4][3]=T.RUPEE;m[4][12]=T.RUPEE;
   }),enemies:[{x:7*TL,y:3*TL,hp:4,type:"fire_bat"},{x:7*TL,y:8*TL,hp:4,type:"fire_bat"}]},
 
-  // North door — lava crossing
+  // North door — lava crossing (crack west to bomb room)
   "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E"]);
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)m[y][x]=T.PIT;
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
     m[4][4]=T.SPIKE;m[7][11]=T.SPIKE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
+    m[5][0]=T.CRACK;m[6][0]=T.CRACK;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
+
+  // Hidden bomb room — hard enemies guard the bomb bag
+  "-1,-1":{tiles:mr(m=>{
+    m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;
+    for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
+    m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
+    m[3][5]=T.PIT;m[3][10]=T.PIT;m[8][5]=T.PIT;m[8][10]=T.PIT;
+    m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
+    m[5][7]=T.BOMB_BAG;
+    m[2][4]=T.TORCH;m[2][11]=T.TORCH;m[9][4]=T.TORCH;m[9][11]=T.TORCH;
+    m[3][7]=T.RUPEE;m[8][7]=T.RUPEE;m[3][8]=T.RUPEE;m[8][8]=T.RUPEE;
+  }),enemies:[{x:5*TL,y:4*TL,hp:6,type:"fire_bat"},{x:10*TL,y:4*TL,hp:6,type:"fire_bat"},{x:5*TL,y:7*TL,hp:6,type:"skeleton"},{x:10*TL,y:7*TL,hp:6,type:"skeleton"},{x:7*TL,y:5*TL,hp:5,type:"fire_bat"}]},
 
   // East of lava crossing — timed switch & ice
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);
