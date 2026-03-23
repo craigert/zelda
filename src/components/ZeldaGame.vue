@@ -964,7 +964,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
   vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
-  if(iD&&dg&&dg.rooms){const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
+  if(iD&&dg&&dg.rooms){
+    // DEBUG: bright marker to confirm minimap renders
+    c.fillStyle="#f00";c.fillRect(W2-30,H2-30,20,20);
+    const rks=Object.keys(dg.rooms),cds=rks.map(k=>k.split(",").map(Number));
     const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
     const ms=16,mp=6,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2,mmX=W2-mW-8,mmY=H2-mH-8;
     c.fillStyle="rgba(0,0,0,0.85)";c.fillRect(mmX-2,mmY-2,mW+4,mH+4);
