@@ -119,6 +119,7 @@ function init() {
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,
     pArrows:[],
+    chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
   };
 }
 
@@ -239,7 +240,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(e=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y})):[];}}
@@ -514,6 +515,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000)s.drops.splice(i,1);}
+  // Chest update
+  if(s.chest){const ch=s.chest;ch.t+=dt;
+    if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
+      if(Math.abs(cdx)<20&&Math.abs(cdy)<20){ch.state="opening";ch.t=0;sfx("door");s.shake.t=200;}}
+    else if(ch.state==="opening"&&ch.t>=600){ch.state="open";ch.t=0;sfx("triforce");
+      s.pt.push(...Array.from({length:12},()=>({x:ch.x+12,y:ch.y+8,dx:(Math.random()-.5)*5,dy:-Math.random()*4-1,l:600,c:"#fd3"})));
+      if(ch.reward){s.drops.push({x:ch.x+12,y:ch.y-8,vy:-4,ground:ch.y,type:ch.reward,t:0});}
+      s.msg={text:"Treasure!",t:1500};}
+    else if(ch.state==="open"&&ch.t>2000)s.chest=null;}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
@@ -616,7 +626,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         if(dr2<0.40){const dt2=Math.random();
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
-      if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");}
+      if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");
+        // Spawn reward chest at center of room
+        const chx=W2/2-12,chy=H2/2-12;
+        const rw=Math.random();const reward=rw<0.35?"heart":rw<0.55?"bomb":rw<0.75?"rupee_blue":"rupee_green";
+        s.chest={x:chx,y:chy,state:"closed",t:0,reward};}
       continue;}
     if(p.ifr<=0&&dist<(PS+ES)*0.38){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
       const hkb=8,hka=Math.atan2(pcy-ecy,pcx-ecx);if(tm(p.x+Math.cos(hka)*hkb,p.y+Math.sin(hka)*hkb)){p.x+=Math.cos(hka)*hkb;p.y+=Math.sin(hka)*hkb;}
@@ -903,6 +917,52 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#fff";c.beginPath();c.moveTo(8,0);c.lineTo(5,-3);c.lineTo(5,3);c.fill();
     c.fillStyle="rgba(253,211,51,0.3)";c.beginPath();c.moveTo(-10,0);c.lineTo(-18,3);c.lineTo(-18,-3);c.fill();
     c.restore();}
+  // Draw chest
+  if(s.chest){const ch=s.chest,cx2=ch.x,cy2=ch.y;
+    if(ch.state==="closed"){
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.25)";c.beginPath();c.ellipse(cx2+12,cy2+24,14,4,0,0,Math.PI*2);c.fill();
+      // Chest body
+      c.fillStyle="#8B5A2B";c.fillRect(cx2,cy2+8,24,16);
+      c.fillStyle="#6B3A1B";c.fillRect(cx2,cy2+8,24,3);
+      // Lid
+      c.fillStyle="#A0682C";c.fillRect(cx2-1,cy2+2,26,8);c.fillRect(cx2,cy2,24,4);
+      // Metal trim
+      c.fillStyle="#ffd633";c.fillRect(cx2+10,cy2+12,4,8);c.fillRect(cx2+9,cy2+13,6,3);
+      // Highlight
+      c.fillStyle="rgba(255,255,255,0.12)";c.fillRect(cx2+2,cy2+4,20,2);
+      // Glow pulse
+      const cgl=Math.sin(t/300)*0.15+0.2;c.fillStyle=`rgba(253,211,51,${cgl})`;c.beginPath();c.arc(cx2+12,cy2+12,16,0,Math.PI*2);c.fill();
+    }else if(ch.state==="opening"){
+      const p2=Math.min(1,ch.t/600),ease=1-(1-p2)*(1-p2);
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.25)";c.beginPath();c.ellipse(cx2+12,cy2+24,14,4,0,0,Math.PI*2);c.fill();
+      // Chest body
+      c.fillStyle="#8B5A2B";c.fillRect(cx2,cy2+8,24,16);
+      c.fillStyle="#6B3A1B";c.fillRect(cx2,cy2+8,24,3);
+      // Lid opening — rotates up
+      c.save();c.translate(cx2,cy2+10);c.rotate(-ease*Math.PI*0.4);c.translate(-cx2,-(cy2+10));
+      c.fillStyle="#A0682C";c.fillRect(cx2-1,cy2+2,26,8);c.fillRect(cx2,cy2,24,4);
+      c.fillStyle="rgba(255,255,255,0.12)";c.fillRect(cx2+2,cy2+4,20,2);
+      c.restore();
+      // Metal trim
+      c.fillStyle="#ffd633";c.fillRect(cx2+10,cy2+12,4,8);c.fillRect(cx2+9,cy2+13,6,3);
+      // Glow burst growing as it opens
+      const bg=ease*0.6;c.fillStyle=`rgba(253,211,51,${bg})`;c.beginPath();c.arc(cx2+12,cy2+4,8+ease*12,0,Math.PI*2);c.fill();
+      // Light rays
+      for(let r=0;r<6;r++){const ra=r*Math.PI/3+t/500;const rl=ease*20;
+        c.strokeStyle=`rgba(253,211,51,${ease*0.4})`;c.lineWidth=2;
+        c.beginPath();c.moveTo(cx2+12,cy2+4);c.lineTo(cx2+12+Math.cos(ra)*rl,cy2+4+Math.sin(ra)*rl);c.stroke();}
+    }else{
+      // Open chest
+      c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(cx2+12,cy2+24,14,4,0,0,Math.PI*2);c.fill();
+      // Body
+      c.fillStyle="#7A4A1B";c.fillRect(cx2,cy2+8,24,16);
+      c.fillStyle="#5B2A0B";c.fillRect(cx2+2,cy2+10,20,12);
+      // Lid fully open (behind)
+      c.fillStyle="#8A582C";c.fillRect(cx2-1,cy2-2,26,6);
+      // Trim
+      c.fillStyle="#cc9922";c.fillRect(cx2+10,cy2+12,4,6);}}
   for(const d2 of s.drops){const bob2=Math.sin(t/200)*2;
     if(d2.type==="heart"){c.fillStyle="#ee3333";dH(c,d2.x-6,d2.y-6+bob2,12);c.fillStyle="#ff8888";dH(c,d2.x-3,d2.y-4+bob2,6);}
     else if(d2.type==="heartcontainer"){
