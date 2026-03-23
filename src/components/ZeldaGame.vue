@@ -1135,12 +1135,14 @@ let _cleanup = null;
 onMounted(() => {
   stR.value = init();
   let unlocked = false;
-  const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu(); ltRef.value = null;
+  const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
     // Force music to start now that audio is unlocked
     const s = stR.value; if (!s || !muOn.value) return;
     const th = s.title ? "title" : s.triMu ? "triforce" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
-    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { ltRef.value = th; customAuRef.value = a; }).catch(() => {}); }
-    else { playTh(th); ltRef.value = th; }
+    stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
+    ltRef.value = th;
+    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
+    else { playTh(th); }
   }); };
   const kd = e => {
     kyR.value.add(e.key.toLowerCase());
@@ -1222,11 +1224,12 @@ watch([muOn, customMu], () => {
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
+      ltRef.value = th; // set immediately to prevent duplicate plays from next ck() tick
       if (customMu.value[th]) {
         const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5;
-        a.play().then(() => { ltRef.value = th; customAuRef.value = a; }).catch(() => {});
+        a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); // reset on failure so ck() retries
       } else {
-        Tone.start().then(() => { if (!au.i) initAu(); playTh(th); ltRef.value = th; }).catch(() => {});
+        Tone.start().then(() => { if (!au.i) initAu(); playTh(th); }).catch(() => { ltRef.value = null; });
       }
     }
   };
