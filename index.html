@@ -1061,7 +1061,11 @@ function ZeldaGame(){
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       // Title screen dismiss
       const s=stR.current;if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
-        if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}
+        if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();});
+          // Play title music directly from user gesture so browser allows it
+          if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}
+          else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}
+          return;}
         s.title=false;s.titleReady=false;le(s);ltRef.current=null;}
       if(e.key.toLowerCase()==="p"&&s&&!s.title&&!s.go&&!s.won){s.paused=!s.paused;}
       if(e.key.toLowerCase()==="m"){Tone.start().then(()=>{initSfx();});setMu(p=>!p);}};
@@ -1189,10 +1193,19 @@ function ZeldaGame(){
     if(tc.dir==="up"){dy=-1;p.dir=0;}if(tc.dir==="down"){dy=1;p.dir=2;}
     if(tc.dir==="left"){dx=-1;p.dir=3;}if(tc.dir==="right"){dx=1;p.dir=1;}
     if(dx&&dy){dx*=.707;dy*=.707;}const sp=p.spd*(dt/16);
-    const tm=(px2,py2)=>{const mg=2,l=Math.floor((px2+mg)/TL),r=Math.floor((px2+PS-mg-1)/TL),t2=Math.floor((py2+mg)/TL),b=Math.floor((py2+PS-mg-1)/TL);
+    // Collision uses a narrower hitbox (inset 6px sides, 4px top, feet at bottom)
+    const HB={x:6,y:4,w:PS-12,h:PS-4};
+    const tm=(px2,py2)=>{const l=Math.floor((px2+HB.x)/TL),r=Math.floor((px2+HB.x+HB.w-1)/TL),t2=Math.floor((py2+HB.y)/TL),b=Math.floor((py2+HB.y+HB.h-1)/TL);
       for(let ty=t2;ty<=b;ty++)for(let tx=l;tx<=r;tx++)if(iS(s,tx,ty))return false;return true;};
     const moved=dx!==0||dy!==0;
-    if(tm(p.x+dx*sp,p.y))p.x+=dx*sp;if(tm(p.x,p.y+dy*sp))p.y+=dy*sp;
+    // Try full movement, then each axis separately for wall sliding
+    if(tm(p.x+dx*sp,p.y+dy*sp)){p.x+=dx*sp;p.y+=dy*sp;}
+    else{if(tm(p.x+dx*sp,p.y))p.x+=dx*sp;if(tm(p.x,p.y+dy*sp))p.y+=dy*sp;}
+    // Corner nudging — if blocked on one axis and near a tile edge, nudge to slide around
+    if(moved&&dx!==0&&!tm(p.x+dx*sp*2,p.y)){const cy=p.y+HB.y+HB.h/2,tcy=Math.round(cy/TL)*TL;const off=cy-tcy;
+      if(Math.abs(off)<10&&tm(p.x+dx*sp,p.y-Math.sign(off)*2))p.y-=Math.sign(off)*1.5*(dt/16);}
+    if(moved&&dy!==0&&!tm(p.x,p.y+dy*sp*2)){const cx=p.x+HB.x+HB.w/2,tcx=Math.round(cx/TL)*TL;const off=cx-tcx;
+      if(Math.abs(off)<10&&tm(p.x-Math.sign(off)*2,p.y+dy*sp))p.x-=Math.sign(off)*1.5*(dt/16);}
     // Proximity door opening — check tile player is facing
     {const m2=gm(s);if(m2){
       const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
@@ -1329,11 +1342,14 @@ function ZeldaGame(){
       }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
       else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
       const nx=e.x+moveX*(dt/16),ny=e.y+moveY*(dt/16);
-      if(!eSolid(s,Math.floor((nx+ES/2)/TL),Math.floor((e.y+ES/2)/TL)))e.x=nx;
-      if(!eSolid(s,Math.floor((e.x+ES/2)/TL),Math.floor((ny+ES/2)/TL)))e.y=ny;
+      const em=4; // enemy hitbox margin
+      const eCanX=!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+ES-em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+ES-em)/TL));
+      const eCanY=!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+ES-em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+ES-em)/TL));
+      if(eCanX)e.x=nx;if(eCanY)e.y=ny;
       e.x=Math.max(TL,Math.min(W2-TL-ES,e.x));e.y=Math.max(TL,Math.min(H2-TL-ES,e.y));
-      if(s.sw.a){let sx2=p.x+PS/2,sy2=p.y+PS/2;if(p.dir===0)sy2-=SR;if(p.dir===2)sy2+=SR;if(p.dir===3)sx2-=SR;if(p.dir===1)sx2+=SR;
-        if(Math.abs(sx2-ecx)<SR&&Math.abs(sy2-ecy)<SR&&e.fl<=0){e.hp--;e.fl=300;const kb=e.type==="boss"?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
+      if(s.sw.a){const sOff=SR*0.7,sR=SR*0.85;let sx2=p.x+PS/2,sy2=p.y+PS/2;if(p.dir===0)sy2-=sOff;if(p.dir===2)sy2+=sOff;if(p.dir===3)sx2-=sOff;if(p.dir===1)sx2+=sOff;
+        const sDist=Math.hypot(sx2-ecx,sy2-ecy);
+        if(sDist<sR+ES*0.4&&e.fl<=0){e.hp--;e.fl=300;const kb=e.type==="boss"?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
           sfx("hit",e.type==="boss"?"E2":"C3");
           s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:1,c:e.type==="boss"?"#ff4":"#fff"});
           s.pt.push(...Array.from({length:5},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#fff"})));}}
@@ -1357,7 +1373,9 @@ function ZeldaGame(){
         if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
         if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");}
         continue;}
-      if(p.ifr<=0&&Math.abs(pcx-ecx)<(PS+ES)/2&&Math.abs(pcy-ecy)<(PS+ES)/2){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
+      if(p.ifr<=0&&dist<(PS+ES)*0.38){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
+        // Knockback player away from enemy
+        const hkb=8,hka=Math.atan2(pcy-ecy,pcx-ecx);if(tm(p.x+Math.cos(hka)*hkb,p.y+Math.sin(hka)*hkb)){p.x+=Math.cos(hka)*hkb;p.y+=Math.sin(hka)*hkb;}
         s.pt.push(...Array.from({length:4},()=>({x:pcx,y:pcy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:300,c:"#f44"})));
         if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
     cPk(s);cTr(s);if(s.msg.t>0)s.msg.t-=dt;if(s.ec>0)s.ec-=dt;}
@@ -1379,19 +1397,20 @@ function ZeldaGame(){
       sunG.addColorStop(0,"rgba(255,240,200,0.9)");sunG.addColorStop(0.3,"rgba(255,200,100,0.5)");sunG.addColorStop(1,"rgba(255,150,50,0)");
       c.fillStyle=sunG;c.beginPath();c.arc(W*0.35,sunY,80,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(255,230,180,0.8)";c.beginPath();c.arc(W*0.35,sunY,20,0,Math.PI*2);c.fill();
-      // STARS — scattered across upper sky, away from edges
-      for(let i=0;i<200;i++){
-        // Use varied hash inputs to avoid clustering
-        const sx=W*0.08+hs(i*7+3,i*13+5,101)*W*0.84;
-        const sy=H*0.03+hs(i*11+7,i*17+3,202)*H*0.42;
-        const rate=400+hs(i*3+1,i*9+2,303)*800;
+      // STARS — randomly scattered across upper sky
+      // Seeded pseudo-random for stable positions each frame
+      {let seed=12345;const sr=()=>{seed=(seed*16807+0)%2147483647;return(seed&0xffff)/0xffff;};
+      for(let i=0;i<150;i++){
+        const sx=W*0.05+sr()*W*0.9;
+        const sy=sr()*H*0.45;
+        const rate=400+sr()*800;
         const blink=Math.sin(t/rate+i*1.7)*0.35;
-        const baseBr=0.4+hs(i*5+2,i*7+1,404)*0.5;
+        const baseBr=0.3+sr()*0.6;
         const br=Math.min(1,baseBr+blink);
-        const sz=0.8+hs(i*9+4,i*3+6,505)*1.8;
-        c.fillStyle=`rgba(255,255,${210+(hs(i*2+8,i*5+9,606)*45|0)},${br})`;c.beginPath();c.arc(sx,sy,sz,0,Math.PI*2);c.fill();
-        if(br>0.75&&sz>1.5){c.strokeStyle=`rgba(255,255,255,${(br-0.6)*1.5})`;c.lineWidth=0.5;
-          c.beginPath();c.moveTo(sx-4,sy);c.lineTo(sx+4,sy);c.stroke();c.beginPath();c.moveTo(sx,sy-4);c.lineTo(sx,sy+4);c.stroke();}}
+        const sz=0.5+sr()*1.5;
+        c.fillStyle=`rgba(255,255,${210+(sr()*45|0)},${br})`;c.beginPath();c.arc(sx,sy,sz,0,Math.PI*2);c.fill();
+        if(br>0.75&&sz>1.2){c.strokeStyle=`rgba(255,255,255,${(br-0.6)*1.2})`;c.lineWidth=0.3;
+          c.beginPath();c.moveTo(sx-3,sy);c.lineTo(sx+3,sy);c.stroke();c.beginPath();c.moveTo(sx,sy-3);c.lineTo(sx,sy+3);c.stroke();}}}
       // SHOOTING STAR — streaks across every ~8 seconds
       {const cycle=8000,phase=(t%cycle)/cycle;
         if(phase<0.15){const p2=phase/0.15; // 0→1 over streak duration
@@ -1663,7 +1682,7 @@ function ZeldaGame(){
 
   return(
     <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#060608",fontFamily:"monospace",color:"#ccc",padding:0,width:"100%",height:"100vh",overflow:"hidden",userSelect:"none",WebkitUserSelect:"none"}}>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}s.title=false;s.titleReady=false;le(s);ltRef.current=null;return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();});if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}return;}s.title=false;s.titleReady=false;le(s);ltRef.current=null;return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
