@@ -1263,7 +1263,7 @@ function ZeldaGame(){
   const[customMu,setCustomMu]=useState({...DEFAULT_MUSIC});
   const[showMuPicker,setShowMuPicker]=useState(false);
   const customAuRef=useRef(null);
-  const wrapRef=useRef(null);const[isFS,setIsFS]=useState(false);
+  const wrapRef=useRef(null);const[isFS,setIsFS]=useState(false);const auUnlockRef=useRef(false);
   const trR=useRef({active:false,alpha:0,dir:0}); // screen transition fade
 
   const init=useCallback(()=>({
@@ -1291,28 +1291,32 @@ function ZeldaGame(){
   }),[]);
 
   useEffect(()=>{stR.current=init();
-    // Try to autoplay title music immediately
-    const tryTitleMusic=()=>{if(ltRef.current==="title")return;
+    auUnlockRef.current=false;
+    const playTitleMu=()=>{if(ltRef.current==="title")return;
       if(customMu.title){const a=new Audio(customMu.title);a.loop=true;a.volume=0.5;
         a.play().then(()=>{ltRef.current="title";customAuRef.current=a;}).catch(()=>{});}
       else{Tone.start().then(()=>{if(!au.i)initAu();playTh("title");ltRef.current="title";}).catch(()=>{});}};
-    tryTitleMusic();
-    // If autoplay was blocked, start music on first user interaction
-    const unlock=()=>{Tone.start().then(()=>{initSfx();initAu();});tryTitleMusic();
-      window.removeEventListener("click",unlock);window.removeEventListener("keydown",unlock);window.removeEventListener("touchstart",unlock);};
-    window.addEventListener("click",unlock,{once:true});window.addEventListener("keydown",unlock,{once:true});window.addEventListener("touchstart",unlock,{once:true});
+    // Try autoplay immediately (works if browser allows)
+    playTitleMu();
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
-      // Title screen dismiss — single press
-      const s=stR.current;if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
-        s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});}
+      const s=stR.current;
+      // First interaction: unlock audio and play title music, don't dismiss
+      if(!auUnlockRef.current){auUnlockRef.current=true;Tone.start().then(()=>{initSfx();initAu();});playTitleMu();
+        if(s&&s.title)return;/* don't dismiss title on the unlock press */}
+      // Title screen dismiss — only after title music is playing
+      if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")&&ltRef.current==="title"){
+        s.title=false;le(s);ltRef.current=null;}
       if(e.key.toLowerCase()==="p"&&s&&!s.title&&!s.go&&!s.won){s.paused=!s.paused;}
       if(e.key.toLowerCase()==="m"){Tone.start().then(()=>{initSfx();});setMu(p=>!p);}};
     const ku=e=>kyR.current.delete(e.key.toLowerCase());
+    // Also unlock on click/touch for mobile
+    const unlockClick=()=>{if(!auUnlockRef.current){auUnlockRef.current=true;Tone.start().then(()=>{initSfx();initAu();});playTitleMu();}};
     window.addEventListener("keydown",kd);window.addEventListener("keyup",ku);
+    window.addEventListener("click",unlockClick);window.addEventListener("touchstart",unlockClick);
     const lp=t=>{const dt=Math.min(t-ltR.current,33);ltR.current=t;upd(dt);drw(t);anR.current=requestAnimationFrame(lp);};
     anR.current=requestAnimationFrame(lp);
     return()=>{window.removeEventListener("keydown",kd);window.removeEventListener("keyup",ku);cancelAnimationFrame(anR.current);stopMu();
-      window.removeEventListener("click",unlock);window.removeEventListener("keydown",unlock);window.removeEventListener("touchstart",unlock);};
+      window.removeEventListener("click",unlockClick);window.removeEventListener("touchstart",unlockClick);};
   },[]);
 
   useEffect(()=>{
@@ -2004,7 +2008,7 @@ function ZeldaGame(){
 
   return(
     <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#060608",fontFamily:"monospace",color:"#ccc",padding:0,width:"100%",height:"100vh",overflow:"hidden",userSelect:"none",WebkitUserSelect:"none"}}>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(ltRef.current!=="title")return;/* wait for title music to be playing */s.title=false;le(s);ltRef.current=null;return;}if(s&&s.paused)s.paused=false;}} style={{border:"none",width:"100%",maxHeight:"70vh",aspectRatio:`${W2}/${H2+HH}`}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
