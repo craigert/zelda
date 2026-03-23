@@ -1045,7 +1045,9 @@ export default function ZeldaGame(){
   useEffect(()=>{stR.current=init();
     const kd=e=>{kyR.current.add(e.key.toLowerCase());if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
       // Title screen dismiss
-      const s=stR.current;if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;}); /* force music reload */}
+      const s=stR.current;if(s&&s.title&&(e.key===" "||e.key==="Enter"||e.key==="z")){
+        if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}
+        s.title=false;s.titleReady=false;le(s);ltRef.current=null;}
       if(e.key.toLowerCase()==="p"&&s&&!s.title&&!s.go&&!s.won){s.paused=!s.paused;}
       if(e.key.toLowerCase()==="m"){Tone.start().then(()=>{initSfx();});setMu(p=>!p);}};
     const ku=e=>kyR.current.delete(e.key.toLowerCase());
@@ -1533,7 +1535,7 @@ export default function ZeldaGame(){
       // Dark gradient at bottom
       const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
       c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
-      if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("TAP OR PRESS SPACE",W/2,H*0.92);}
+      const s2=stR.current;if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText(s2&&s2.titleReady?"PRESS AGAIN TO START":"TAP OR PRESS SPACE",W/2,H*0.92);}
       c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space attack \u00b7 B bomb \u00b7 M music",W/2,H*0.97);
       c.textAlign="left";c.lineCap="butt";return;}
     // ===== HUD (drawn in top HH pixels, above game) =====
@@ -1648,7 +1650,7 @@ export default function ZeldaGame(){
     <div ref={wrapRef} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"linear-gradient(180deg,#060608 0%,#0a0c10 100%)",fontFamily:"monospace",color:"#ccc",padding:16,userSelect:"none",WebkitUserSelect:"none"}}>
       <h1 style={{fontSize:24,color:"#fd3",margin:"0 0 4px 0",textShadow:"0 0 20px rgba(253,211,51,0.3), 0 2px 4px rgba(0,0,0,0.5)",letterSpacing:6,fontWeight:"900"}}>THE LEGEND OF LINK</h1>
       <p style={{fontSize:11,color:"#666",margin:"0 0 10px 0",textAlign:"center",letterSpacing:1}}>WASD / Arrows · Space attack · B bomb · P pause · M music</p>
-      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){s.title=false;le(s);Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
+      <canvas ref={cvR} width={W2*4} height={(H2+HH)*4} onClick={()=>{const s=stR.current;if(s&&s.title){if(!s.titleReady){s.titleReady=true;Tone.start().then(()=>{initSfx();initAu();ltRef.current=null;});return;}s.title=false;s.titleReady=false;le(s);ltRef.current=null;return;}if(s&&s.paused)s.paused=false;}} style={{border:"2px solid #222",borderRadius:6,width:W2,height:H2+HH,maxWidth:"100%",boxShadow:"0 0 60px rgba(0,0,0,0.9), 0 0 10px rgba(253,211,51,0.05)"}}/>
       <div style={{display:"flex",gap:48,marginTop:14,alignItems:"center"}}>
         <div style={{position:"relative",width:104,height:104}}>
           {[["up",36,0,"▲"],["down",36,70,"▼"],["left",0,35,"◀"],["right",70,35,"▶"]].map(([d,l,tt,ch])=>(
