@@ -113,6 +113,7 @@ function init() {
     triMu:false,
     bProj:[],
     gt:0,
+    dgTitle:{text:"",t:0}, // dungeon title overlay
     mapOpen:false,
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
@@ -293,7 +294,7 @@ function cTr(s){const p=s.p,loc=s.loc;
         for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           loc.ty="dg";loc.di=ent.d;const dg=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg.rooms))if(dg.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
           s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
-          loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.msg={text:dg.name,t:2000};return;}}}
+          loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.dgTitle={text:dg.name,t:3000};return;}}}
       for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
         for(const[tx,ty]of cv.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};sfx("door");return;}}}
@@ -652,7 +653,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.dmgNums.push({x:e.x+ES/2,y:e.y-8,t:600,val:2,c:"#fd3"});
         s.pt.push(...Array.from({length:5},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#fd3"})));
         s.pArrows.splice(i,1);break;}}}
-  cPk(s);cTr(s);if(s.msg.t>0)s.msg.t-=dt;if(s.ec>0)s.ec-=dt;}
+  cPk(s);cTr(s);if(s.msg.t>0)s.msg.t-=dt;if(s.dgTitle.t>0)s.dgTitle.t-=dt;if(s.ec>0)s.ec-=dt;}
 
 function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");const s=stR.value;if(!s)return;
   const FH=H2+HH;
@@ -1028,6 +1029,20 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.textAlign="left";}
   c.restore();
   const FH2=H2+HH;
+  // Dungeon title overlay — fades in then out over 3 seconds
+  if(s.dgTitle.t>0){const dt2=3000-s.dgTitle.t;// time elapsed
+    let alpha=1;if(dt2<400)alpha=dt2/400;// fade in
+    else if(s.dgTitle.t<800)alpha=s.dgTitle.t/800;// fade out
+    // Dark backdrop
+    c.fillStyle=`rgba(0,0,0,${alpha*0.5})`;c.fillRect(0,FH2*0.35,W2,FH2*0.3);
+    // Title text
+    c.globalAlpha=alpha;c.textAlign="center";
+    c.fillStyle="#fd3";c.font="bold 28px monospace";c.fillText(s.dgTitle.text,W2/2,FH2/2);
+    // Decorative line
+    const lw=Math.min(c.measureText(s.dgTitle.text).width+40,W2-40);
+    c.strokeStyle="rgba(253,211,51,0.5)";c.lineWidth=1;
+    c.beginPath();c.moveTo(W2/2-lw/2,FH2/2+12);c.lineTo(W2/2+lw/2,FH2/2+12);c.stroke();
+    c.textAlign="left";c.globalAlpha=1;}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(0,0,W2,FH2);
     c.fillStyle="#fff";c.font="bold 28px monospace";c.textAlign="center";c.fillText("PAUSED",W2/2,FH2/2-10);
