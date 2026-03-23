@@ -860,10 +860,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.font="bold 12px monospace";
   let ix=iR;
   if(s.loc.ty==="dg"&&s.loc.di>=0){ix-=18;c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);}
-  ix-=35;c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);
+  if(p.hasBombs){ix-=35;c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);}
   ix-=35;c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);
   ix-=40;c.fillStyle="#4f4";c.fillText(`\ud83d\udc8e${p.rupees}`,ix,21);
-  ix-=18;c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",ix,21);c.font="bold 12px monospace";
+  if(p.hasBow){ix-=18;c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",ix,21);c.font="bold 12px monospace";}
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   let sx2=p.mhp/2*22+16;if(iD2)sx2+=80;
   if(p.burn>0){c.fillStyle="#f80";c.font="bold 10px monospace";c.fillText("\ud83d\udd25BURN",sx2,20);sx2+=55;}
@@ -1261,9 +1261,11 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const items=[
       {icon:"\ud83d\udd11",label:"Keys",val:p.keys,col:"#fd3"},
       {icon:"\ud83d\udddd\ufe0f",label:"Master Keys",val:p.masterKey.filter(Boolean).length+"/4",col:"#c070ff"},
-      {icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"},
+      ...(p.hasBombs?[{icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"}]:[]),
       {icon:"\ud83d\udc8e",label:"Rupees",val:p.rupees,col:"#4f4"},
       {icon:"\u2764\ufe0f",label:"HP",val:`${p.hp}/${p.mhp}`,col:"#f44"},
+      ...(p.hasBow?[{icon:"\ud83c\udff9",label:"Bow",val:"C",col:"#fd3"}]:[]),
+      ...(p.hasMasterSword?[{icon:"\u2694\ufe0f",label:"M.Sword",val:"2x",col:"#8af"}]:[]),
     ];
     const iw=90,ix=W2/2-(items.length*iw)/2;
     for(let i=0;i<items.length;i++){const it=items[i];
