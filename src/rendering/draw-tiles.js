@@ -745,6 +745,19 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Sparkle
       c.fillStyle="#ffd633";c.beginPath();c.arc(px+10,py+8+hpb,1.5,0,Math.PI*2);c.fill();
       c.beginPath();c.arc(px+22,py+10-hpb,1.5,0,Math.PI*2);c.fill();break;}
+    case T.BOW:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      const bg2=Math.sin(t/300)*.15+.25;c.fillStyle=`rgba(253,211,51,${bg2})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      // Bow body (arc)
+      c.strokeStyle="#8B5A2B";c.lineWidth=2.5;c.beginPath();c.arc(px+14,py+16,10,-Math.PI*0.4,Math.PI*0.4);c.stroke();
+      // Bowstring
+      c.strokeStyle="#ddd";c.lineWidth=1;c.beginPath();
+      c.moveTo(px+14+Math.cos(-Math.PI*0.4)*10,py+16+Math.sin(-Math.PI*0.4)*10);
+      c.lineTo(px+14+Math.cos(Math.PI*0.4)*10,py+16+Math.sin(Math.PI*0.4)*10);c.stroke();
+      // Arrow
+      c.strokeStyle="#a06820";c.lineWidth=1.5;c.beginPath();c.moveTo(px+10,py+16);c.lineTo(px+26,py+16);c.stroke();
+      c.fillStyle="#aaa";c.beginPath();c.moveTo(px+26,py+16);c.lineTo(px+23,py+14);c.lineTo(px+23,py+18);c.fill();
+      // Fletching
+      c.fillStyle="#fd3";c.beginPath();c.moveTo(px+10,py+16);c.lineTo(px+13,py+14);c.lineTo(px+13,py+18);c.fill();break;}
     case T.HEART:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const hg=Math.sin(t/400)*.15+.2;c.fillStyle=`rgba(255,50,50,${hg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();c.fillStyle="#ee3333";dH(c,px+6,py+6,20);c.fillStyle="#ff6666";dH(c,px+9,py+8,12);break;}
     case T.TRIFORCE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const tg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(253,211,51,${tg})`;c.beginPath();c.arc(px+16,py+16,14,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+27,py+26);c.lineTo(px+5,py+26);c.fill();c.fillStyle="#ffe866";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+23,py+22);c.lineTo(px+9,py+22);c.fill();break;}
     case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);for(let i=0;i<4;i++){c.fillStyle=`rgb(${80+i*20},${80+i*20},${80+i*20})`;c.fillRect(px+3,py+3+i*7,TL-6,5);}c.fillStyle="#6c6";c.font="bold 9px monospace";c.fillText("EXIT",px+5,py+20);break;}
