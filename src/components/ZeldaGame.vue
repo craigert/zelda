@@ -330,14 +330,14 @@ function cTr(s){const p=s.p,loc=s.loc;
       for(const ent of DE){if(ent.s!==loc.scr)continue;
         if(ent.d===3&&!s.finalOpen)continue;
         for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
-          s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+          s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="dg";loc.di=ent.d;const dg2=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg2.rooms))if(dg2.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
             s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
             loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.dgTitle={text:dg2.name,t:3000};}};sfx("door");return;}}}
       for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
         const owm=OW[loc.scr];
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
-          s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+          s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};}};sfx("door");return;}}}
     }
     const[sx,sy]=loc.scr.split(",").map(Number);
@@ -347,13 +347,13 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=8;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
   }else if(loc.ty==="cave"){const m=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
-      const ci2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+      const ci2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const cv=CAVES[ci2];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
         p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
   }else{const[rx,ry]=loc.scr.split(",").map(Number),m=gm(s);
     const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
-      const di2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+      const di2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const ent=DE[di2];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
         const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
     const dg=s.dg[loc.di];
@@ -403,9 +403,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     stR.value=ns;le(ns);saveGame(ns);}return;}
-  if(s.fade.a){s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/250);
+  if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
     if(s.fade.alpha>=1&&s.fade.cb){s.fade.cb();s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
-    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/250);if(s.fade.alpha<=0)s.fade.a=false;}return;}
+    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
   if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur)s.slide.a=false;return;}
   if(s.shake.t>0){s.shake.t-=dt;const intensity=s.shake.t/300*4;s.shake.x=(Math.random()-.5)*intensity;s.shake.y=(Math.random()-.5)*intensity;}
   else{s.shake.x=0;s.shake.y=0;}
