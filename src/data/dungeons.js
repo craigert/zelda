@@ -76,14 +76,15 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[9][12]=T.HEART;
   }),enemies:[{x:5*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
-  // North corridor — spiked hallway
+  // North corridor — spiked hallway with blade traps
   "0,-2":{tiles:mr(m=>{ae(m,["S","N","W","E"]);
     for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
     m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
     m[9][7]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}]},
+  }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
+  traps:[{x:4,y:3,dir:"h",range:6},{x:4,y:8,dir:"h",range:6}]},
 
   // West wing — dark room with torches
   "-1,-2":{tiles:mr(m=>{ae(m,["E","N"]);
@@ -220,14 +221,15 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"fire_bat"},{x:11*TL,y:5*TL,hp:4,type:"fire_bat"}]},
 
-  // West branch — first locked door
+  // West branch — first locked door with blade traps
   "-1,0":{tiles:mr(m=>{ae(m,["E","WD"]);
     m[3][3]=T.SPIKE;m[3][6]=T.SPIKE;m[3][9]=T.SPIKE;m[3][12]=T.SPIKE;
     m[5][4]=T.SPIKE;m[5][7]=T.SPIKE;m[5][10]=T.SPIKE;
     m[7][3]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;m[7][12]=T.SPIKE;
     m[5][13]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;
     m[8][7]=T.KEY;
-  }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}]},
+  }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
+  traps:[{x:2,y:4,dir:"h",range:10},{x:2,y:6,dir:"h",range:10}]},
 
   // MASTER_KEY room — behind second locked door, timed switch puzzle
   "-2,0":{tiles:mr(m=>{
@@ -382,7 +384,8 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[6][3]=T.SPIKE;m[6][5]=T.SPIKE;m[6][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][11]=T.SPIKE;
     m[4][7]=T.KEY;m[7][8]=T.KEY;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
+  traps:[{x:3,y:5,dir:"h",range:8},{x:12,y:6,dir:"h",range:8}]},
 
   // Secret room east of spike corridor — bombs and supplies
   "2,-1":{tiles:mr(m=>{
@@ -569,7 +572,8 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;
     m[8][7]=T.KEY;m[8][8]=T.BOMB;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-  }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"}]},
+  }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"}],
+  traps:[{x:3,y:2,dir:"v",range:7},{x:12,y:2,dir:"v",range:7}]},
 
   // Northwest — ghost patrol
   "-1,-2":{tiles:mr(m=>{ae(m,["E","N","S"]);
@@ -596,7 +600,8 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
     m[5][7]=T.LEVER;m[9][7]=T.BOMB;m[9][8]=T.BOMB;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:6,type:"ghost"},{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:5*TL,y:8*TL,hp:5,type:"skeleton"}]},
+  }),enemies:[{x:7*TL,y:4*TL,hp:6,type:"ghost"},{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:5*TL,y:8*TL,hp:5,type:"skeleton"}],
+  traps:[{x:4,y:2,dir:"v",range:7},{x:11,y:2,dir:"v",range:7}]},
 
   // Far west — ghost treasure room with pit moat (west of -1,-3)
   "-2,-3":{tiles:mr(m=>{ae(m,["E"]);

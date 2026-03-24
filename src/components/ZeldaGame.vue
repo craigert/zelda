@@ -122,6 +122,7 @@ function init() {
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
+    bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
     combatLock:false, // true when room has enemies and exits are sealed
   };
 }
@@ -251,7 +252,11 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`$
   // Combat lock — seal exits in dungeons/caves when enemies present
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
   if(isDg&&s.en.length>0){s.combatLock=true;sfx("door");s.shake.t=200;}
-  else{s.combatLock=false;}}
+  else{s.combatLock=false;}
+  // Load blade traps from room data
+  s.bladeTraps=[];
+  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];
+    if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
@@ -585,6 +590,28 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(pd<TL*1.5&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;}
     }
     if(b.exploded&&b.t>=b.fuse+400)s.activeBombs.splice(i,1);}
+  // Blade traps update
+  for(const bt of s.bladeTraps){const pcx=p.x+PS/2,pcy=p.y+PS/2,bcx=bt.x+TL/2,bcy=bt.y+TL/2;
+    if(bt.st==="idle"){bt.wait-=dt;if(bt.wait>0)continue;
+      // Detect player in line of sight (same row or column, within range)
+      if(bt.dir==="h"){if(Math.abs(pcy-bcy)<TL*0.8){
+        const dx2=pcx-bcx;if(Math.abs(dx2)<bt.range+TL){bt.st="lunge";bt.vel=dx2>0?7:-7;}}}
+      else{if(Math.abs(pcx-bcx)<TL*0.8){
+        const dy2=pcy-bcy;if(Math.abs(dy2)<bt.range+TL){bt.st="lunge";bt.vel=dy2>0?7:-7;}}}}
+    else if(bt.st==="lunge"){
+      if(bt.dir==="h"){bt.x+=bt.vel*(dt/16);
+        const d2=bt.x-bt.hx;if(Math.abs(d2)>=bt.range){bt.x=bt.hx+(d2>0?bt.range:-bt.range);bt.st="retract";bt.vel=0;}}
+      else{bt.y+=bt.vel*(dt/16);
+        const d2=bt.y-bt.hy;if(Math.abs(d2)>=bt.range){bt.y=bt.hy+(d2>0?bt.range:-bt.range);bt.st="retract";bt.vel=0;}}}
+    else if(bt.st==="retract"){
+      const dx3=bt.hx-bt.x,dy3=bt.hy-bt.y,dd=Math.hypot(dx3,dy3);
+      if(dd<1){bt.x=bt.hx;bt.y=bt.hy;bt.st="idle";bt.wait=500;}
+      else{const rsp=1.2*(dt/16);bt.x+=dx3/dd*rsp;bt.y+=dy3/dd*rsp;}}
+    // Player collision
+    if(p.ifr<=0&&Math.abs(pcx-bt.x-TL/2)<TL*0.7&&Math.abs(pcy-bt.y-TL/2)<TL*0.7){
+      p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
+      const ka=Math.atan2(pcy-bcy,pcx-bcx);if(tm(p.x+Math.cos(ka)*12,p.y+Math.sin(ka)*12)){p.x+=Math.cos(ka)*12;p.y+=Math.sin(ka)*12;}
+      if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];
     if(e.spawnT>0){e.spawnT-=dt;continue;}
@@ -998,6 +1025,24 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="mage")dMg(c,ex,ey,sz,fl,t);
     else if(e.type==="knight")dKn(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
+  // Draw blade traps
+  for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.3)";c.beginPath();c.ellipse(bx+TL/2+2,by+TL-2,TL/2,4,0,0,Math.PI*2);c.fill();
+    // Metal body
+    c.fillStyle=lunging?"#888":"#666";c.fillRect(bx+2,by+2,TL-4,TL-4);
+    c.fillStyle=lunging?"#999":"#777";c.fillRect(bx+4,by+4,TL-8,TL-8);
+    // Cross pattern
+    c.fillStyle=lunging?"#aaa":"#555";c.fillRect(bx+TL/2-2,by+4,4,TL-8);c.fillRect(bx+4,by+TL/2-2,TL-8,4);
+    // Spikes on edges
+    c.fillStyle=lunging?"#ccc":"#888";
+    const sp2=[[TL/2,1],[TL/2,TL-3],[1,TL/2],[TL-3,TL/2],[4,4],[TL-6,4],[4,TL-6],[TL-6,TL-6]];
+    for(const[sx2,sy2]of sp2){c.beginPath();c.arc(bx+sx2,by+sy2,2.5,0,Math.PI*2);c.fill();}
+    // Red eye when lunging
+    if(lunging){c.fillStyle="#f33";c.beginPath();c.arc(bx+TL/2,by+TL/2,3,0,Math.PI*2);c.fill();
+      c.fillStyle="#fff";c.beginPath();c.arc(bx+TL/2-1,by+TL/2-1,1,0,Math.PI*2);c.fill();}
+    // Border
+    c.strokeStyle=lunging?"#aaa":"#555";c.lineWidth=1.5;c.strokeRect(bx+2,by+2,TL-4,TL-4);}
   // Draw NPCs
   if(!iD){const npcs=NPC_DATA[loc.scr];if(npcs){for(const npc of npcs){
     const nx=npc.tx*TL,ny=npc.ty*TL;
