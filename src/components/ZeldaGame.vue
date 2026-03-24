@@ -123,6 +123,7 @@ function init() {
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
+    ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
   };
@@ -273,6 +274,14 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   if(ty<0){return SOLID.has(gts(s,`${sx},${sy-1}`,tx,RO+ty));}
   if(ty>=RO){return SOLID.has(gts(s,`${sx},${sy+1}`,tx,ty-RO));}
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
+  // Ledge tiles — one-way passage (solid from wrong direction)
+  if(tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W){
+    const md=s._moveDir||0;// 0=up,1=right,2=down,3=left
+    if(tl===T.LEDGE_S&&md!==2)return true;// can only pass going south (down)
+    if(tl===T.LEDGE_N&&md!==0)return true;// can only pass going north (up)
+    if(tl===T.LEDGE_E&&md!==1)return true;// can only pass going east (right)
+    if(tl===T.LEDGE_W&&md!==3)return true;// can only pass going west (left)
+  }
   // Combat lock — exits act as walls
   if(s.combatLock&&tl===T.FLOOR&&((ty===0&&(tx===7||tx===8))||(ty===RO-1&&(tx===7||tx===8))||(tx===0&&(ty===5||ty===6))||(tx===CO-1&&(ty===5||ty===6))))return true;
   if(s.loc.ty==="ow"){const npcs=NPC_DATA[s.loc.scr];if(npcs){for(const npc of npcs){if(tx===npc.tx&&ty===npc.ty)return true;}}}
@@ -285,7 +294,7 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
       s.pt.push(...Array.from({length:8},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));return false;}return true;}
   return false;}
 
-function eSolid(s,tx,ty){const m=gm(s);if(!m||tx<0||tx>=CO||ty<0||ty>=RO)return true;return SOLID.has(m[ty][tx])||m[ty][tx]===T.DOOR||m[ty][tx]===T.BOSS_DOOR;}
+function eSolid(s,tx,ty){const m=gm(s);if(!m||tx<0||tx>=CO||ty<0||ty>=RO)return true;const tl=m[ty][tx];return SOLID.has(tl)||tl===T.DOOR||tl===T.BOSS_DOOR||tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W;}
 
 function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const tx=ptx+dx,ty=pty+dy;if(ty<0||ty>=RO||tx<0||tx>=CO)continue;
@@ -406,12 +415,21 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(!tm(p.x,p.y)){const cx=Math.floor((p.x+PS/2)/TL)*TL+TL/2-PS/2,cy=Math.floor((p.y+PS/2)/TL)*TL+TL/2-PS/2;
     for(let r=1;r<=3;r++){for(const[ox,oy]of[[0,-1],[0,1],[-1,0],[1,0]]){if(tm(cx+ox*TL*r,cy+oy*TL*r)){p.x=cx+ox*TL*r;p.y=cy+oy*TL*r;break;}}if(tm(p.x,p.y))break;}}
   const moved=dx!==0||dy!==0;
+  // Set move direction for ledge collision checks
+  s._moveDir=dy<0?0:dy>0?2:dx>0?1:dx<0?3:p.dir;
   if(tm(p.x+dx*sp,p.y+dy*sp)){p.x+=dx*sp;p.y+=dy*sp;}
-  else{if(tm(p.x+dx*sp,p.y))p.x+=dx*sp;if(tm(p.x,p.y+dy*sp))p.y+=dy*sp;}
+  else{if(dx!==0){s._moveDir=dx>0?1:3;}if(tm(p.x+dx*sp,p.y))p.x+=dx*sp;if(dy!==0){s._moveDir=dy>0?2:0;}if(tm(p.x,p.y+dy*sp))p.y+=dy*sp;}
   if(moved&&dx!==0&&!tm(p.x+dx*sp*2,p.y)){const cy=p.y+HB.y+HB.h/2,tcy=Math.round(cy/TL)*TL;const off=cy-tcy;
     if(Math.abs(off)<10&&tm(p.x+dx*sp,p.y-Math.sign(off)*2))p.y-=Math.sign(off)*1.5*(dt/16);}
   if(moved&&dy!==0&&!tm(p.x,p.y+dy*sp*2)){const cx=p.x+HB.x+HB.w/2,tcx=Math.round(cx/TL)*TL;const off=cx-tcx;
     if(Math.abs(off)<10&&tm(p.x-Math.sign(off)*2,p.y+dy*sp))p.x-=Math.sign(off)*1.5*(dt/16);}
+  // Ledge hop detection
+  if(s.ledgeHop>0)s.ledgeHop-=dt;
+  if(moved){const ptx3=Math.floor((p.x+PS/2)/TL),pty3=Math.floor((p.y+PS/2)/TL),m4=gm(s);
+    if(m4&&pty3>=0&&pty3<RO&&ptx3>=0&&ptx3<CO){const ft2=m4[pty3][ptx3];
+      if(ft2===T.LEDGE_S||ft2===T.LEDGE_N||ft2===T.LEDGE_E||ft2===T.LEDGE_W){
+        if(s.ledgeHop<=0){s.ledgeHop=250;sfx("door");
+          s.pt.push(...Array.from({length:4},()=>({x:p.x+PS/2,y:p.y+PS,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:300,c:"#aaa"})));}}}}
   // Footstep particles by terrain
   if(moved&&s.gt%6<2){const ftx2=Math.floor((p.x+PS/2)/TL),fty2=Math.floor((p.y+PS-2)/TL),mp3=gm(s);
     if(mp3&&fty2>=0&&fty2<RO&&ftx2>=0&&ftx2<CO){const ft=mp3[fty2][ftx2],fx=p.x+PS/2+(Math.random()-.5)*6,fy=p.y+PS-2;
@@ -1371,8 +1389,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
   }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;
     if(vis){
+      const hopY=s.ledgeHop>0?-Math.sin(s.ledgeHop/250*Math.PI)*8:0;
       c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,10,3,0.08,0,Math.PI*2);c.fill();
-      dP(c,p.x,p.y,p.dir,t);
+      dP(c,p.x,p.y+hopY,p.dir,t);
       if(s.p.shield){
         const sx=p.x+PS/2,sy=p.y+PS/2;
         const sd=p.dir,so=12;

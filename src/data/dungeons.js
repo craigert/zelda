@@ -82,6 +82,8 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
     m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
+    // One-way ledge — can drop south but not climb back north
+    for(let x2=5;x2<=10;x2++)m[6][x2]=T.LEDGE_S;
     m[9][7]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
   traps:[{x:4,y:3,dir:"h",range:6},{x:4,y:8,dir:"h",range:6}]},
@@ -249,6 +251,8 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
     m[4][4]=T.SPIKE;m[7][11]=T.SPIKE;
+    // One-way ledge drop — shortcut south
+    m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     m[5][0]=T.CRACK;m[6][0]=T.CRACK;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
@@ -443,10 +447,12 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:10*TL,y:5*TL,hp:4,type:"ghost"},{x:5*TL,y:7*TL,hp:4,type:"ghost"}]},
 
-  // Pre-boss — west from ice room
+  // Pre-boss — west from ice room (ledge drop shortcut)
   "-1,-3":{tiles:mr(m=>{ae(m,["E","NB"]);
     m[3][4]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
+    // One-way ledge — drop east to reach boss door faster
+    m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;
     m[5][7]=T.HEART;m[5][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"skeleton"}]},

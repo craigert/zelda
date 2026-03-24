@@ -1163,6 +1163,23 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#4f4";c.beginPath();c.moveTo(px+16,py+6);c.lineTo(px+22,py+14);c.lineTo(px+16,py+26);c.lineTo(px+10,py+14);c.closePath();c.fill();
       c.fillStyle="#8f8";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+20,py+14);c.lineTo(px+16,py+14);c.closePath();c.fill();
       break;}
+    case T.LEDGE_S:case T.LEDGE_N:case T.LEDGE_E:case T.LEDGE_W:{
+      // Floor base
+      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      // Ledge edge — dark raised cliff face
+      c.fillStyle=iD?"rgba(0,0,0,0.3)":"rgba(0,0,0,0.2)";
+      if(tl===T.LEDGE_S){c.fillRect(px,py,TL,5);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+5,TL,3);}
+      else if(tl===T.LEDGE_N){c.fillRect(px,py+TL-5,TL,5);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+TL-8,TL,3);}
+      else if(tl===T.LEDGE_E){c.fillRect(px,py,5,TL);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px+5,py,3,TL);}
+      else{c.fillRect(px+TL-5,py,5,TL);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px+TL-8,py,3,TL);}
+      // Directional arrow hint
+      c.fillStyle="rgba(255,255,255,0.08)";
+      const cx=px+TL/2,cy=py+TL/2;
+      if(tl===T.LEDGE_S){c.beginPath();c.moveTo(cx,cy+4);c.lineTo(cx-5,cy-3);c.lineTo(cx+5,cy-3);c.fill();}
+      else if(tl===T.LEDGE_N){c.beginPath();c.moveTo(cx,cy-4);c.lineTo(cx-5,cy+3);c.lineTo(cx+5,cy+3);c.fill();}
+      else if(tl===T.LEDGE_E){c.beginPath();c.moveTo(cx+4,cy);c.lineTo(cx-3,cy-5);c.lineTo(cx-3,cy+5);c.fill();}
+      else{c.beginPath();c.moveTo(cx-4,cy);c.lineTo(cx+3,cy-5);c.lineTo(cx+3,cy+5);c.fill();}
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }
