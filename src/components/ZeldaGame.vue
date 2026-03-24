@@ -123,6 +123,7 @@ function init() {
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
+    litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
   };
 }
@@ -244,7 +245,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
@@ -513,7 +514,25 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const ftx2=pcx2+(p.dir===1?1:p.dir===3?-1:0),fty2=pcy2+(p.dir===0?-1:p.dir===2?1:0);
       for(const npc of npcs){if(Math.abs(ftx2-npc.tx)<=1&&Math.abs(fty2-npc.ty)<=1){
         s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;break;}}}}
-    if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");}}if(tc.atk)tc.atk=false;
+    if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
+      // Light torches with sword
+      if(s.loc.ty==="dg"||s.loc.ty==="cave"){const m2=gm(s);
+        const ftx3=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
+        const fty3=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
+        const tk=`${ftx3},${fty3}`;
+        if(m2&&fty3>=0&&fty3<RO&&ftx3>=0&&ftx3<CO&&m2[fty3][ftx3]===T.TORCH&&!s.litTorches.has(tk)){
+          s.litTorches.add(tk);sfx("pickup");
+          s.pt.push(...Array.from({length:8},()=>({x:ftx3*TL+16,y:fty3*TL+16,dx:(Math.random()-.5)*3,dy:-Math.random()*3,l:500,c:Math.random()>.5?"#f80":"#fd3"})));
+          // Check if all torches are now lit
+          let allLit=true,totalT=0;
+          for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.TORCH){totalT++;if(!s.litTorches.has(`${xx},${yy}`))allLit=false;}
+          if(allLit&&totalT>0){sfx("triforce");s.shake.t=300;s.roomFlash=500;s.msg={text:"All torches lit!",t:1500};
+            // Open any locked doors in the room
+            for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.DOOR){
+              const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
+              s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
+        }}
+    }}if(tc.atk)tc.atk=false;
   if(ky.has("b")&&p.hasBombs&&p.bombs>0&&!s.bombCd&&s.activeBombs.length<2){
     const ftx=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
     const fty=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
@@ -1021,13 +1040,25 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)drawBars(0,5*TL,TL,TL*2,true);
     if(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)drawBars((CO-1)*TL,5*TL,TL,TL*2,true);}
   if(!iD)drawTerrainOverlay(c,m,t);
-  if(iD&&m){const torches=[];for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH)torches.push([x*TL+16,y*TL+16]);
-    if(torches.length>0){for(const[tx2,ty2]of torches){
+  if(iD&&m){
+    // Darken unlit torches
+    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){if(m[y][x]===T.TORCH&&!s.litTorches.has(`${x},${y}`)){
+      // Draw dark overlay to make the flame look extinguished
+      c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(x*TL+10,y*TL+2,12,14);
+      c.fillStyle="#333";c.fillRect(x*TL+12,y*TL+4,8,8);
+      // Subtle smoke wisp
+      const sw2=Math.sin(t/300+x*7)*3;c.fillStyle="rgba(120,120,120,0.3)";
+      c.beginPath();c.arc(x*TL+16+sw2,y*TL+2-Math.sin(t/400+y)*3,2.5,0,Math.PI*2);c.fill();}}
+    // Collect torch positions and lit state
+    const torches=[];let totalTorches=0;
+    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalTorches++;const lit=s.litTorches.has(`${x},${y}`);torches.push([x*TL+16,y*TL+16,lit]);}
+    // Lit torches glow
+    for(const[tx2,ty2,lit]of torches){if(!lit)continue;
       const flk=Math.sin(t/200+tx2)*0.08+Math.sin(t/130+ty2)*0.05;
       const r2=90+Math.sin(t/180+tx2*0.1)*15;
       const tg=c.createRadialGradient(tx2,ty2,4,tx2,ty2,r2);
       tg.addColorStop(0,`rgba(255,200,100,${0.18+flk})`);tg.addColorStop(0.5,`rgba(255,150,50,${0.06+flk*0.3})`);tg.addColorStop(1,"rgba(255,100,30,0)");
-      c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}}
+      c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}
   if(iD){for(let i=0;i<15;i++){const dx2=hs(i,3,77)*W2,dy2=(hs(i,7,88)*H2+t/20)%H2;
     const da=0.15+Math.sin(t/600+i*2)*0.1;c.fillStyle=`rgba(200,180,140,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i)*8,dy2,0.8+hs(i,1,99)*0.8,0,Math.PI*2);c.fill();}}
   for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES;
@@ -1287,6 +1318,26 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#fff";c.globalAlpha=pa*0.5;c.beginPath();c.arc(pt.x,pt.y,psz*0.4,0,Math.PI*2);c.fill();}c.globalAlpha=1;
   for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
   if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
+  // Dungeon darkness — dark until torches are lit
+  if(iD&&m){let totalT2=0,litT2=0;
+    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalT2++;if(s.litTorches.has(`${x},${y}`))litT2++;}
+    if(totalT2>0){const darkPct=1-litT2/totalT2;const darkness=darkPct*0.55;
+      if(darkness>0.01){
+        // Draw darkness layer
+        c.fillStyle=`rgba(0,0,0,${darkness})`;c.fillRect(0,0,W2,H2);
+        // Cut light circles around player and lit torches
+        c.save();c.globalCompositeOperation="destination-out";
+        // Player light (small personal glow)
+        const plr=40+litT2*8;const pg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plr);
+        pg.addColorStop(0,`rgba(0,0,0,${darkness*0.9})`);pg.addColorStop(0.7,`rgba(0,0,0,${darkness*0.4})`);pg.addColorStop(1,"rgba(0,0,0,0)");
+        c.fillStyle=pg;c.fillRect(p.x+PS/2-plr,p.y+PS/2-plr,plr*2,plr*2);
+        // Lit torch lights
+        for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){if(m[y][x]===T.TORCH&&s.litTorches.has(`${x},${y}`)){
+          const tx3=x*TL+16,ty3=y*TL+16,tr=80+Math.sin(t/200+x)*10;
+          const tgg=c.createRadialGradient(tx3,ty3,0,tx3,ty3,tr);
+          tgg.addColorStop(0,`rgba(0,0,0,${darkness})`);tgg.addColorStop(0.6,`rgba(0,0,0,${darkness*0.5})`);tgg.addColorStop(1,"rgba(0,0,0,0)");
+          c.fillStyle=tgg;c.fillRect(tx3-tr,ty3-tr,tr*2,tr*2);}}
+        c.restore();}}}
   if(!iD){const amb=Math.sin(t/15000)*0.03;
     c.fillStyle=amb>0?`rgba(255,200,100,${amb})`:`rgba(100,150,255,${-amb})`;c.fillRect(0,0,W2,H2);}
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
