@@ -408,7 +408,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.ICE){
       if(!s.iceSlide.active&&(dx!==0||dy!==0)){s.iceSlide={active:true,dx:dx>0?1:dx<0?-1:0,dy:dy>0?1:dy<0?-1:0};}
-      if(s.iceSlide.active){const isp=sp*1.5;const nx=p.x+s.iceSlide.dx*isp,ny=p.y+s.iceSlide.dy*isp;
+      if(s.iceSlide.active){const isp=sp*1.1;const nx=p.x+s.iceSlide.dx*isp,ny=p.y+s.iceSlide.dy*isp;
         if(tm(nx,ny)){p.x=nx;p.y=ny;}else{s.iceSlide.active=false;s.iceSlide.dx=0;s.iceSlide.dy=0;}}
     }else{s.iceSlide.active=false;s.iceSlide.dx=0;s.iceSlide.dy=0;}}
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
@@ -664,8 +664,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");
-        // Spawn reward chest only if room has treasure tiles
-        const rm2=gm(s);const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART||tl===T.BOMB||tl===T.RUPEE||tl===T.HEART_PIECE||tl===T.MASTER_KEY));
+        // Spawn reward chest only if room has key items or dungeon treasures
+        const rm2=gm(s);const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.MASTER_KEY||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.HEART_PIECE));
         if(hasTreasure){const chx=W2/2-12,chy=H2/2-12;
           const rw=Math.random();const reward=rw<0.35?"heart":rw<0.55?"bomb":rw<0.75?"rupee_blue":"rupee_green";
           s.chest={x:chx,y:chy,state:"closed",t:0,reward};}}
