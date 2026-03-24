@@ -636,11 +636,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(e.spawnT>0){e.spawnT-=dt;continue;}
     e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
-    e.stT+=dt;const detectRange=e.type==="boss"?250:120;const loseRange=180;
+    e.stT+=dt;const isBossLike=e.type==="boss"||e.type==="miniboss";
+    const detectRange=isBossLike?250:120;const loseRange=180;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
-    if(e.st==="chase"&&dist>loseRange&&e.type!=="boss")e.st="retreat";
+    if(e.st==="chase"&&dist>loseRange&&!isBossLike)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-    let es=e.type==="boss"?1.0:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:1.0;
+    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:1.0;
     let moveX=0,moveY=0;
     if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
       if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
@@ -696,6 +697,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         const phase=Math.floor(e.mt/2500)%3;
         if(phase===2){const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
         else{const ca=e.mt/800+Math.PI/2;moveX=Math.cos(ang+ca*0.3)*es*0.4;moveY=Math.sin(ang+ca*0.3)*es*0.4;}
+      }else if(e.type==="miniboss"){
+        // Mini-boss: charge pattern — circle, then lunge
+        const mbPhase=Math.floor(e.mt/2500)%3;
+        if(mbPhase===2){const bsp=es*2.8;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
+        else if(mbPhase===1){moveX=0;moveY=0;
+          if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)){sfx("door");s.shake.t=150;}}
+        else{const ca=e.mt/600;moveX=Math.cos(ang+Math.sin(ca)*0.8)*es*0.7;moveY=Math.sin(ang+Math.sin(ca)*0.8)*es*0.7;}
       }else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
     }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
     else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
@@ -715,7 +723,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
             s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#aaf"})));
             s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"BLOCK",c:"#88f"});
             continue;}}
-        const sdmg=p.hasMasterSword?2:1;e.hp-=sdmg;e.fl=300;const kb=e.type==="boss"?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
+        const sdmg=p.hasMasterSword?2:1;e.hp-=sdmg;e.fl=300;const kb=isBossLike?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
         sfx("hit",e.type==="boss"?"E2":"C3");
         s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:sdmg,c:p.hasMasterSword?"#8af":e.type==="boss"?"#ff4":"#fff"});
         s.pt.push(...Array.from({length:p.hasMasterSword?8:5},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:p.hasMasterSword?"#8af":"#fff"})));}}
@@ -730,6 +738,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
         if(s.loc.di===3){s.won=true;s.msg={text:"The Dark King is defeated! Peace restored!",t:99999};}
+      }else if(e.type==="miniboss"){sfx("bossdeath");s.shake.t=400;s.freeze=300;
+        s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0});
+        s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
       }else{sfx("kill");
         const dr2=Math.random();
         if(dr2<0.40){const dt2=Math.random();
@@ -1041,8 +1052,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)drawBars((CO-1)*TL,5*TL,TL,TL*2,true);}
   if(!iD)drawTerrainOverlay(c,m,t);
   if(iD&&m){
-    // Darken unlit torches
-    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){if(m[y][x]===T.TORCH&&!s.litTorches.has(`${x},${y}`)){
+    // Darken unlit torches (only in dark rooms)
+    const isDkRm=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;
+    if(isDkRm)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){if(m[y][x]===T.TORCH&&!s.litTorches.has(`${x},${y}`)){
       // Draw dark overlay to make the flame look extinguished
       c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(x*TL+10,y*TL+2,12,14);
       c.fillStyle="#333";c.fillRect(x*TL+12,y*TL+4,8,8);
@@ -1051,7 +1063,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.beginPath();c.arc(x*TL+16+sw2,y*TL+2-Math.sin(t/400+y)*3,2.5,0,Math.PI*2);c.fill();}}
     // Collect torch positions and lit state
     const torches=[];let totalTorches=0;
-    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalTorches++;const lit=s.litTorches.has(`${x},${y}`);torches.push([x*TL+16,y*TL+16,lit]);}
+    for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalTorches++;const lit=isDkRm?s.litTorches.has(`${x},${y}`):true;torches.push([x*TL+16,y*TL+16,lit]);}
     // Lit torches glow
     for(const[tx2,ty2,lit]of torches){if(!lit)continue;
       const flk=Math.sin(t/200+tx2)*0.08+Math.sin(t/130+ty2)*0.05;
@@ -1061,7 +1073,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}
   if(iD){for(let i=0;i<15;i++){const dx2=hs(i,3,77)*W2,dy2=(hs(i,7,88)*H2+t/20)%H2;
     const da=0.15+Math.sin(t/600+i*2)*0.1;c.fillStyle=`rgba(200,180,140,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i)*8,dy2,0.8+hs(i,1,99)*0.8,0,Math.PI*2);c.fill();}}
-  for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:ES;
+  for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:e.type==="miniboss"?ES*1.3:ES;
     if(e.spawnT>0){
       // Spawn animation — smoke puff and scale-in
       const sp=e.spawnT/400,ease=1-sp;const cx3=e.x+ES/2,cy3=e.y+ES/2;
@@ -1073,6 +1085,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.save();c.translate(cx3,cy3);c.scale(ease,ease);c.globalAlpha=ease;c.translate(-cx3,-cy3);
       const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
       if(e.type==="ghost")dGh(c,ex,ey,sz,false,t);else if(e.type==="boss")dBo(c,ex,ey,sz,false,t,e.hp,e.mhp,loc.di);
+      else if(e.type==="miniboss")dSk(c,ex,ey,sz,false,t);
       else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,false,t,e.type==="fire_bat");
       else if(e.type==="archer")dAr(c,ex,ey,sz,false,t);
       else if(e.type==="mage")dMg(c,ex,ey,sz,false,t);
@@ -1082,6 +1095,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+3,e.y+ES-1,sz/2+1,4,0.1,0,Math.PI*2);c.fill();
     if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
+    else if(e.type==="miniboss"){
+      // Draw miniboss — armored skeleton, larger, with HP bar and aura
+      const mbPh=Math.floor(e.mt/2500)%3;const charging=mbPh===2;
+      const auraA=charging?0.25:0.1+Math.sin(t/300)*0.05;
+      c.fillStyle=`rgba(200,50,50,${auraA})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
+      dSk(c,ex,ey,sz,fl,t);
+      // Armor overlay
+      c.fillStyle=fl?"#fff":"#8a4a2a";c.fillRect(ex+sz*0.15,ey+sz*0.3,sz*0.7,sz*0.25);
+      c.fillStyle=fl?"#fff":"#666";c.fillRect(ex+sz*0.35,ey+sz*0.05,sz*0.3,sz*0.15);
+      // Glowing eyes
+      if(!fl){c.fillStyle=charging?"#f33":"#fa3";c.beginPath();c.arc(ex+sz*0.35,ey+sz*0.18,2,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(ex+sz*0.65,ey+sz*0.18,2,0,Math.PI*2);c.fill();}
+      // HP bar
+      const hbw=sz+6,hbx=ex-3,hby=ey-8;c.fillStyle="#000";c.fillRect(hbx,hby,hbw,4);
+      c.fillStyle=e.hp>e.mhp*0.3?"#f80":"#f22";c.fillRect(hbx+1,hby+1,Math.max(0,(hbw-2)*e.hp/e.mhp),2);
+    }
     else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,fl,t,e.type==="fire_bat");
     else if(e.type==="archer")dAr(c,ex,ey,sz,fl,t);
     else if(e.type==="mage")dMg(c,ex,ey,sz,fl,t);
@@ -1319,7 +1348,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
   if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
   // Dungeon darkness — dark until torches are lit
-  if(iD&&m){let totalT2=0,litT2=0;
+  // Only dark rooms flagged with dark:true in room data
+  const isDarkRoom=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;
+  if(iD&&m&&isDarkRoom){let totalT2=0,litT2=0;
     for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalT2++;if(s.litTorches.has(`${x},${y}`))litT2++;}
     if(totalT2>0){const darkPct=1-litT2/totalT2;const darkness=darkPct*0.55;
       if(darkness>0.01){
