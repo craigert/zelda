@@ -517,10 +517,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
   for(let i=s.dmgNums.length-1;i>=0;i--){const dn=s.dmgNums[i];dn.y-=1.2*(dt/16);dn.t-=dt;if(dn.t<=0)s.dmgNums.splice(i,1);}
   if(s.roomFlash>0)s.roomFlash-=dt;
-  for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;d2.y+=d2.vy*(dt/16);d2.vy+=0.15*(dt/16);
-    if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}
+  for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
+    if(d2.type==="triforce"){
+      // Slow descent with gentle gravity cap
+      d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);
+      if(d2.spin!=null)d2.spin+=2.5*(dt/16);
+      if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}
+      // Trailing sparkles during fall
+      if(d2.y<d2.ground&&d2.t%3<1)s.pt.push({x:d2.x+(Math.random()-.5)*10,y:d2.y+8,dx:(Math.random()-.5)*1.5,dy:Math.random()*0.5,l:400,c:Math.random()>.5?"#fd3":"#fff"});
+    }else{d2.y+=d2.vy*(dt/16);d2.vy+=0.15*(dt/16);
+    if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
-    if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
+    if(d2.type==="triforce"&&d2.y<d2.ground){/* no magnet pull while falling */}
+    else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
       else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
@@ -665,7 +674,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         if(!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
           s.drops.push({x:ecx,y:ecy-12,vy:-5,ground:ecy,type:"heartcontainer",t:0});}
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
-          s.drops.push({x:ecx,y:-20,vy:0.5,ground:ecy-8,type:"triforce",t:0});
+          s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
         if(s.loc.di===3){s.won=true;s.msg={text:"The Dark King is defeated! Peace restored!",t:99999};}
       }else{sfx("kill");
@@ -1110,10 +1119,21 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const hcg=Math.sin(t/150)*0.2+0.4;c.fillStyle=`rgba(255,50,50,${hcg})`;c.beginPath();c.arc(d2.x,d2.y+bob2,12,0,Math.PI*2);c.fill();
       c.fillStyle="#ff2222";dH(c,d2.x-8,d2.y-8+bob2,16);c.fillStyle="#ff8888";dH(c,d2.x-4,d2.y-5+bob2,8);
       c.fillStyle="#fff";dH(c,d2.x-2,d2.y-3+bob2,4);}
-    else if(d2.type==="triforce"){
-      const tg2=Math.sin(t/150)*0.3+0.7;c.fillStyle=`rgba(253,211,51,${tg2*0.3})`;c.beginPath();c.arc(d2.x,d2.y+bob2,14,0,Math.PI*2);c.fill();
-      c.fillStyle="#ffd633";c.beginPath();c.moveTo(d2.x,d2.y-8+bob2);c.lineTo(d2.x+10,d2.y+8+bob2);c.lineTo(d2.x-10,d2.y+8+bob2);c.fill();
-      c.fillStyle="#ffe866";c.beginPath();c.moveTo(d2.x,d2.y-5+bob2);c.lineTo(d2.x+6,d2.y+5+bob2);c.lineTo(d2.x-6,d2.y+5+bob2);c.fill();}
+    else if(d2.type==="triforce"){const falling=d2.y<d2.ground;
+      const tg2=Math.sin(t/150)*0.3+0.7;
+      // Light beam from above while falling
+      if(falling){c.fillStyle=`rgba(253,211,51,${0.08+Math.sin(t/200)*0.03})`;
+        c.beginPath();c.moveTo(d2.x-6,-10);c.lineTo(d2.x+6,-10);c.lineTo(d2.x+14,d2.y+10);c.lineTo(d2.x-14,d2.y+10);c.fill();}
+      // Larger glow
+      const gr=falling?20:14;c.fillStyle=`rgba(253,211,51,${tg2*0.3})`;c.beginPath();c.arc(d2.x,d2.y+bob2,gr,0,Math.PI*2);c.fill();
+      if(falling){c.fillStyle=`rgba(255,255,200,${0.15})`;c.beginPath();c.arc(d2.x,d2.y+bob2,gr+8,0,Math.PI*2);c.fill();}
+      // Spinning triangle
+      c.save();c.translate(d2.x,d2.y+bob2);
+      if(d2.spin!=null&&falling)c.rotate(d2.spin*Math.PI/180);
+      c.fillStyle="#ffd633";c.beginPath();c.moveTo(0,-10);c.lineTo(12,10);c.lineTo(-12,10);c.fill();
+      c.fillStyle="#ffe866";c.beginPath();c.moveTo(0,-6);c.lineTo(7,6);c.lineTo(-7,6);c.fill();
+      c.fillStyle="#fff";c.globalAlpha=0.4;c.beginPath();c.moveTo(0,-4);c.lineTo(3,2);c.lineTo(-3,2);c.fill();c.globalAlpha=1;
+      c.restore();}
     else if(d2.type==="rupee_green"||d2.type==="rupee_blue"||d2.type==="rupee_red"){
       const rc=d2.type==="rupee_green"?"#4f4":d2.type==="rupee_blue"?"#44f":"#f44";
       const rg=Math.sin(t/200)*0.2+0.3;c.fillStyle=rc.replace("4","8").replace("f","a");c.globalAlpha=rg;c.beginPath();c.arc(d2.x,d2.y+bob2,8,0,Math.PI*2);c.fill();c.globalAlpha=1;
