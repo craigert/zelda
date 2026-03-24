@@ -1765,8 +1765,9 @@ onMounted(() => {
     if (s && s.title && e.key.toLowerCase() === "n") {
       if (ltRef.value === "title") {
         try { localStorage.removeItem('zelda_save'); } catch(e2) {}
-        s.title = false; le(s); ltRef.value = null;
-        s.msg = { text: "New game started!", t: 1500 };
+        const ns = init(); ns.title = false;
+        stR.value = ns; le(ns); ltRef.value = null;
+        ns.msg = { text: "New game started!", t: 1500 };
       }
       return;
     }
