@@ -371,7 +371,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
       if(s.chest.reward){s.drops.push({x:s.chest.x+12,y:s.chest.y-(s.chest.itemY||0),vy:-1,ground:s.chest.y,type:s.chest.reward,t:0});}
-      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
+      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
       s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
     // Still update particles during freeze
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
@@ -471,14 +471,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const tk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:tswitch`;
       if(!s.timedDoors.find(td=>td.key===tk)){
         sfx("pickup");s.msg={text:"Timed switch! Hurry!",t:1500};s.shake.t=200;
-        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-          const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
-          s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}}
-        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty});}}}
+        // Open walls temporarily (not locked doors) — creates timed passages
+        const openedWalls=[];
+        for(let yy=1;yy<RO-1;yy++)for(let xx=1;xx<CO-1;xx++){if(m2[yy][xx]===T.WALL){
+          // Only open walls adjacent to floor on both sides (passageway walls)
+          const adjFloor=(yy>0&&m2[yy-1]&&m2[yy-1][xx]===T.FLOOR)||(yy<RO-1&&m2[yy+1]&&m2[yy+1][xx]===T.FLOOR)||(xx>0&&m2[yy][xx-1]===T.FLOOR)||(xx<CO-1&&m2[yy][xx+1]===T.FLOOR);
+          const adjFloor2=(yy>0&&m2[yy-1]&&(m2[yy-1][xx]===T.FLOOR||m2[yy-1][xx]===T.SPIKE))&&(yy<RO-1&&m2[yy+1]&&(m2[yy+1][xx]===T.FLOOR||m2[yy+1][xx]===T.SPIKE))||
+            ((xx>0&&(m2[yy][xx-1]===T.FLOOR||m2[yy][xx-1]===T.SPIKE))&&(xx<CO-1&&(m2[yy][xx+1]===T.FLOOR||m2[yy][xx+1]===T.SPIKE)));
+          if(adjFloor&&adjFloor2){m2[yy][xx]=T.FLOOR;openedWalls.push([xx,yy]);
+            s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}}}
+        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,walls:openedWalls});}}}
   for(let i=s.timedDoors.length-1;i>=0;i--){const td=s.timedDoors[i];td.t-=dt;
     if(td.t<=0){const m2=td.ty==="dg"?s.dg[td.di]?.rooms[td.scr]?.tiles:null;
-      if(m2){for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-        const dk=`${td.ty}:${td.di}:${td.scr}:${xx},${yy}`;s.dr.delete(dk);}}}
+      if(m2&&td.walls){for(const[wx,wy]of td.walls)m2[wy][wx]=T.WALL;}
       s.timedDoors.splice(i,1);sfx("door");}}
   {const m2=gm(s);if(m2){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
@@ -502,25 +507,20 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         m2[by][bx]=T.PUSH;m2[fty][ftx]=T.FLOOR;
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
-        if(wasPlate){sfx("pickup");s.msg={text:"Something opened!",t:1500};s.shake.t=200;
-          let opened=false;
-          for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-            const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);opened=true;
-            s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
-          if(!opened){m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}
+        if(wasPlate){sfx("pickup");s.msg={text:"A key appeared!",t:1500};s.shake.t=200;
+          // Plates spawn a key — never open locked doors directly
+          m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
       }}}}
   if(s.sw.a&&s.sw.t>SD*0.5){const m2=gm(s);if(m2&&!s.leverCd){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
     const ftx=pcx+(p.dir===1?1:p.dir===3?-1:0),fty=pcy+(p.dir===0?-1:p.dir===2?1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO&&m2[fty][ftx]===T.LEVER){
       m2[fty][ftx]=T.FLOOR;s.leverCd=true;setTimeout(()=>{if(stR.value)stR.value.leverCd=false;},1000);
-      sfx("pickup");s.msg={text:"Lever pulled!",t:1500};s.shake.t=200;
+      sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};s.shake.t=200;
       s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#f88"})));
-      let opened=false;
-      for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-        const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);opened=true;
-        s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
-      if(!opened){m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}
+      // Levers spawn a key — never open locked doors directly
+      m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}
+
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){
       if(m2[pty][ptx]===T.SPIKE&&Math.sin(s.gt/750)>0&&p.ifr<=0){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
@@ -546,8 +546,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       for(const npc of npcs){if(Math.abs(ftx2-npc.tx)<=1&&Math.abs(fty2-npc.ty)<=1){
         s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;break;}}}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
-      // Light torches with sword
-      if(s.loc.ty==="dg"||s.loc.ty==="cave"){const m2=gm(s);
+      // Light torches with sword — only in dark rooms
+      const isDkRoom=s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark;
+      if(isDkRoom){const m2=gm(s);
         const ftx3=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
         const fty3=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
         const tk=`${ftx3},${fty3}`;
@@ -557,11 +558,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           // Check if all torches are now lit
           let allLit=true,totalT=0;
           for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.TORCH){totalT++;if(!s.litTorches.has(`${xx},${yy}`))allLit=false;}
-          if(allLit&&totalT>0){sfx("triforce");s.shake.t=300;s.roomFlash=500;s.msg={text:"All torches lit!",t:1500};
-            // Open any locked doors in the room
-            for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.DOOR){
-              const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
-              s.pt.push(...Array.from({length:6},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}
+          if(allLit&&totalT>0){sfx("triforce");s.shake.t=300;s.roomFlash=500;s.msg={text:"All torches lit! A chest appeared!",t:2000};
+            // Spawn a chest as reward for lighting all torches
+            s.chest={x:W2/2-12,y:H2/2-12,state:"closed",t:0,reward:"rupee_blue"};}
         }}
     }}if(tc.atk)tc.atk=false;
   if(ky.has("b")&&p.hasBombs&&p.bombs>0&&!s.bombCd&&s.activeBombs.length<2){
@@ -605,6 +604,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
       else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
+      else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("triforce");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
+        s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
       else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.msg={text:"Heart Container! Max HP up!",t:2500};}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("triforce");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
@@ -802,7 +803,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         }else{sfx("pickup");}
         // Spawn reward chest only if room has key items or dungeon treasures
         const rm2=gm(s);let specialItem=null;
-        if(rm2){for(const row of rm2)for(const tl of row){if(tl===T.BOW)specialItem="bow";else if(tl===T.BOMB_BAG)specialItem="bomb_bag";else if(tl===T.MASTER_SWORD)specialItem="master_sword";}}
+        if(rm2){for(const row of rm2)for(const tl of row){if(tl===T.BOW)specialItem="bow";else if(tl===T.BOMB_BAG)specialItem="bomb_bag";else if(tl===T.MASTER_SWORD)specialItem="master_sword";else if(tl===T.MASTER_KEY)specialItem="master_key";}}
         const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.MASTER_KEY||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.HEART_PIECE));
         if(hasTreasure){const chx=W2/2-12,chy=H2/2-12;
           const reward=specialItem||(Math.random()<0.5?"heart":"rupee_blue");
@@ -1369,6 +1370,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       else if(ch.reward==="master_sword"){// Sword icon
         c.fillStyle="#c0d8ff";c.beginPath();c.moveTo(rix,riy-8+bob3);c.lineTo(rix-2,riy+3+bob3);c.lineTo(rix+2,riy+3+bob3);c.fill();
         c.fillStyle="#fd3";c.fillRect(rix-5,riy+2+bob3,10,2);c.fillStyle="#6a4a2a";c.fillRect(rix-1,riy+4+bob3,2,4);}
+      else if(ch.reward==="master_key"){// Ornate key icon
+        c.fillStyle="#c070ff";c.beginPath();c.arc(rix,riy-3+bob3,4,0,Math.PI*2);c.fill();
+        c.fillStyle="#a050dd";c.fillRect(rix-1,riy+1+bob3,2,8);
+        c.fillRect(rix,riy+5+bob3,4,2);c.fillRect(rix,riy+7+bob3,3,2);}
       else{c.fillStyle="#fd3";c.beginPath();c.arc(rix,riy+bob3,6,0,Math.PI*2);c.fill();}
     }else{
       // Open chest (empty)

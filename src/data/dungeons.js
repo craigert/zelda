@@ -30,20 +30,18 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=7;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][6]=T.PUSH;m[5][9]=T.PUSH;m[6][7]=T.PLATE;m[6][8]=T.PLATE;
     m[3][7]=T.KEY;
-    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;m[9][2]=T.TORCH;m[9][13]=T.TORCH;
   }),enemies:[{x:6*TL,y:3*TL,hp:3,type:"bat"},{x:9*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
-  // Secret room — MASTER_KEY (bomb crack wall from 1,-1 east)
-  "2,-1":{tiles:mr(m=>{
-    m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
+  // Master key vault — guarded by tough enemies (east of 1,-1)
+  "2,-1":{tiles:mr(m=>{ae(m,["W"]);
     for(let y=3;y<=8;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][4]=T.FLOOR;m[6][4]=T.FLOOR;m[5][11]=T.FLOOR;m[6][11]=T.FLOOR;
     m[5][7]=T.MASTER_KEY;
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;m[3][5]=T.TORCH;m[3][10]=T.TORCH;
     m[8][5]=T.TORCH;m[8][10]=T.TORCH;
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
-  }),enemies:[]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:7*TL,hp:4,type:"bat"}]},
 
   // East far room — icy push-block puzzle (east of 1,0)
   "2,0":{tiles:mr(m=>{ae(m,["W"]);
