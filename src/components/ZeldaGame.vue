@@ -122,6 +122,7 @@ function init() {
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
+    combatLock:false, // true when room has enemies and exits are sealed
   };
 }
 
@@ -242,11 +243,15 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
-  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}}
+  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
+  // Combat lock — seal exits in dungeons/caves when enemies present
+  const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
+  if(isDg&&s.en.length>0){s.combatLock=true;sfx("door");s.shake.t=200;}
+  else{s.combatLock=false;}}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
@@ -262,6 +267,8 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   if(ty<0){return SOLID.has(gts(s,`${sx},${sy-1}`,tx,RO+ty));}
   if(ty>=RO){return SOLID.has(gts(s,`${sx},${sy+1}`,tx,ty-RO));}
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
+  // Combat lock — exits act as walls
+  if(s.combatLock&&tl===T.FLOOR&&((ty===0&&(tx===7||tx===8))||(ty===RO-1&&(tx===7||tx===8))||(tx===0&&(ty===5||ty===6))||(tx===CO-1&&(ty===5||ty===6))))return true;
   if(s.loc.ty==="ow"){const npcs=NPC_DATA[s.loc.scr];if(npcs){for(const npc of npcs){if(tx===npc.tx&&ty===npc.ty)return true;}}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
     if(s.dr.has(dk))return false;
@@ -318,19 +325,22 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-PS-8;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=8;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
   }else if(loc.ty==="cave"){const m=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
-    if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
+    if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const cv=CAVES[loc.di];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
       p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);return;}
   }else{const[rx,ry]=loc.scr.split(",").map(Number),m=gm(s);
     const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
-    if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
+    if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const ent=DE[loc.di];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
       const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);return;}
     const dg=s.dg[loc.di];
+    if(s.combatLock){// Block exits during combat lock
+      if(p.y<2)p.y=2;if(p.y>H2-PS-2)p.y=H2-PS-2;if(p.x<2)p.x=2;if(p.x>W2-PS-2)p.x=W2-PS-2;
+    }else{
     if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=TL+4;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
     if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-TL-PS-4;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
-    if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=TL+4;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}}
+    if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=TL+4;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}}}
   saveGame(s);}
 
 function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
@@ -663,7 +673,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         if(dr2<0.40){const dt2=Math.random();
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
-      if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;sfx("pickup");
+      if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
+        // Combat unlock — open exits with fanfare
+        if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;
+          // Particles at all exit positions
+          const m3=gm(s);if(m3){
+            const exits=[[7,0],[8,0],[7,RO-1],[8,RO-1],[0,5],[0,6],[CO-1,5],[CO-1,6]];
+            for(const[ex,ey]of exits){if(m3[ey]&&(m3[ey][ex]===T.FLOOR||m3[ey][ex]===T.DOOR||m3[ey][ex]===T.BOSS_DOOR))
+              s.pt.push(...Array.from({length:4},()=>({x:ex*TL+16,y:ey*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:500,c:"#fd3"})));}}
+        }else{sfx("pickup");}
         // Spawn reward chest only if room has key items or dungeon treasures
         const rm2=gm(s);const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.MASTER_KEY||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.HEART_PIECE));
         if(hasTreasure){const chx=W2/2-12,chy=H2/2-12;
@@ -913,6 +931,21 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
     dT(c,tl,px,py,iD,dg,t,ei);}
+  // Combat lock bars — iron gates over exits
+  if(s.combatLock&&m){
+    const drawBars=(bx,by,bw,bh,vert)=>{
+      c.fillStyle="#444";c.fillRect(bx,by,bw,bh);
+      c.fillStyle="#555";const bars=vert?4:5;
+      for(let i=0;i<bars;i++){
+        if(vert){const yy=by+4+i*(bh-8)/(bars-1);c.fillRect(bx+2,yy-1,bw-4,3);}
+        else{const xx=bx+4+i*(bw-8)/(bars-1);c.fillRect(xx-1,by+2,3,bh-4);}}
+      c.fillStyle="#333";c.fillRect(bx,by,bw,2);c.fillRect(bx,by,2,bh);
+      c.fillStyle="#666";c.fillRect(bx+bw-2,by,2,bh);c.fillRect(bx,by+bh-2,bw,2);};
+    // Check which exits exist and draw bars
+    if(m[0][7]===T.FLOOR||m[0][7]===T.DOOR)drawBars(7*TL,0,TL*2,TL,false);
+    if(m[RO-1][7]===T.FLOOR||m[RO-1][7]===T.DOOR)drawBars(7*TL,(RO-1)*TL,TL*2,TL,false);
+    if(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)drawBars(0,5*TL,TL,TL*2,true);
+    if(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)drawBars((CO-1)*TL,5*TL,TL,TL*2,true);}
   if(!iD)drawTerrainOverlay(c,m,t);
   if(iD&&m){const torches=[];for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH)torches.push([x*TL+16,y*TL+16]);
     if(torches.length>0){for(const[tx2,ty2]of torches){
