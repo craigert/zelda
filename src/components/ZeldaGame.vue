@@ -103,7 +103,7 @@ function init() {
     drops:[],
     death:{a:false,t:0,spin:0},
     lowHp:0,
-    paused:false,
+    paused:false,pauseSel:0,volume:80,
     dmgNums:[],
     freeze:0,
     roomFlash:0,
@@ -1223,9 +1223,39 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.beginPath();c.moveTo(W2/2-lw/2,FH2/2+12);c.lineTo(W2/2+lw/2,FH2/2+12);c.stroke();
     c.textAlign="left";c.globalAlpha=1;}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
-  if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(0,0,W2,FH2);
-    c.fillStyle="#fff";c.font="bold 28px monospace";c.textAlign="center";c.fillText("PAUSED",W2/2,FH2/2-10);
-    c.fillStyle="#aaa";c.font="13px monospace";c.fillText("Press P to resume",W2/2,FH2/2+20);c.textAlign="left";}
+  if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
+    c.textAlign="center";
+    // Title
+    c.fillStyle="#fd3";c.font="bold 24px monospace";c.fillText("PAUSED",W2/2,FH2/2-90);
+    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-80,FH2/2-82,160,1);
+    // Menu items
+    const mi=["Volume","Music","Save Game","Save & Quit"];
+    const my=FH2/2-50;
+    for(let i=0;i<mi.length;i++){const iy=my+i*32,sel=s.pauseSel===i;
+      // Selection highlight
+      if(sel){c.fillStyle="rgba(253,211,51,0.1)";c.fillRect(W2/2-120,iy-12,240,26);
+        c.fillStyle="#fd3";c.font="bold 13px monospace";c.fillText("\u25b6",W2/2-110,iy+5);}
+      c.fillStyle=sel?"#fff":"#888";c.font=sel?"bold 13px monospace":"13px monospace";
+      if(i===0){
+        // Volume slider
+        c.fillText("Volume",W2/2-40,iy+5);
+        const bx=W2/2+10,bw=80,by2=iy-3,bh2=10;
+        c.fillStyle="#333";c.fillRect(bx,by2,bw,bh2);
+        c.fillStyle=sel?"#fd3":"#666";c.fillRect(bx,by2,bw*s.volume/100,bh2);
+        c.strokeStyle=sel?"#fd3":"#555";c.lineWidth=1;c.strokeRect(bx,by2,bw,bh2);
+        c.fillStyle=sel?"#fff":"#888";c.font="10px monospace";c.fillText(`${s.volume}%`,bx+bw+16,iy+5);
+        if(sel){c.fillStyle="#888";c.font="9px monospace";c.fillText("\u25c0 \u25b6",W2/2+60,iy+20);}
+      }else if(i===1){c.fillText(`Music: ${muOn.value?"ON":"OFF"}`,W2/2,iy+5);
+      }else{c.fillText(mi[i],W2/2,iy+5);}}
+    // Controls reference
+    const cy2=my+mi.length*32+16;
+    c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(W2/2-120,cy2,240,1);
+    c.fillStyle="#666";c.font="10px monospace";
+    c.fillText("CONTROLS",W2/2,cy2+16);
+    c.fillStyle="#555";c.font="9px monospace";
+    const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","X / Shift \u2014 Shield","Tab \u2014 Map & Inventory","P \u2014 Pause","M \u2014 Toggle Music"];
+    for(let i=0;i<ctrls.length;i++)c.fillText(ctrls[i],W2/2,cy2+30+i*13);
+    c.textAlign="left";}
   if(s.mapOpen){c.fillStyle="rgba(0,0,10,0.92)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
     c.fillStyle="#fd3";c.font="bold 18px monospace";c.fillText("MAP & INVENTORY",W2/2,24);
@@ -1367,7 +1397,20 @@ onMounted(() => {
       }
       return;
     }
-    if (e.key.toLowerCase() === "p" && s && !s.title && !s.go && !s.won) { s.paused = !s.paused; }
+    if (e.key.toLowerCase() === "p" && s && !s.title && !s.go && !s.won) { s.paused = !s.paused; if(s.paused)s.pauseSel=0; }
+    if (s && s.paused && !s.mapOpen) {
+      const k = e.key.toLowerCase();
+      if (k === "arrowup" || k === "w") { s.pauseSel = (s.pauseSel - 1 + 4) % 4; e.preventDefault(); }
+      if (k === "arrowdown" || k === "s") { s.pauseSel = (s.pauseSel + 1) % 4; e.preventDefault(); }
+      if (k === "arrowleft" || k === "a") { if (s.pauseSel === 0) { s.volume = Math.max(0, s.volume - 10); try{Tone.getDestination().volume.value=s.volume<=0?-Infinity:-30+s.volume*0.3;}catch(e2){} } }
+      if (k === "arrowright" || k === "d") { if (s.pauseSel === 0) { s.volume = Math.min(100, s.volume + 10); try{Tone.getDestination().volume.value=-30+s.volume*0.3;}catch(e2){} } }
+      if (k === " " || k === "enter") {
+        if (s.pauseSel === 1) { muOn.value = !muOn.value; }
+        else if (s.pauseSel === 2) { saveGame(s); s.msg = { text: "Game saved!", t: 1500 }; s.paused = false; }
+        else if (s.pauseSel === 3) { saveGame(s); s.paused = false; s.title = true; s.msg = { text: "", t: 0 }; }
+        e.preventDefault();
+      }
+    }
     if (e.key === "Tab" && s && !s.title && !s.go && !s.won) { e.preventDefault(); s.mapOpen = !s.mapOpen; s.paused = s.mapOpen; }
     if (e.key.toLowerCase() === "m") { Tone.start().then(() => { initSfx(); }); muOn.value = !muOn.value; }
   };
