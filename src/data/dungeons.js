@@ -37,11 +37,10 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
   "2,-1":{tiles:mr(m=>{ae(m,["W"]);
     for(let y=3;y<=8;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][4]=T.FLOOR;m[6][4]=T.FLOOR;m[5][11]=T.FLOOR;m[6][11]=T.FLOOR;
-    m[5][7]=T.MASTER_KEY;
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;m[3][5]=T.TORCH;m[3][10]=T.TORCH;
     m[8][5]=T.TORCH;m[8][10]=T.TORCH;
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
-  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:7*TL,hp:4,type:"bat"}]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:7*TL,hp:4,type:"bat"}],reward:"master_key"},
 
   // East far room — icy push-block puzzle (east of 1,0)
   "2,0":{tiles:mr(m=>{ae(m,["W"]);
@@ -108,9 +107,8 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;
     m[5][6]=T.PUSH;m[5][9]=T.PUSH;
     m[4][7]=T.PLATE;m[4][8]=T.PLATE;
-    m[5][7]=T.BOW;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:6*TL,hp:8,type:"miniboss",name:"Vine Guardian"},{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:4*TL,hp:2,type:"bat"}]},
+  }),enemies:[{x:7*TL,y:6*TL,hp:8,type:"miniboss",name:"Vine Guardian"},{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:4*TL,hp:2,type:"bat"}],reward:"bow"},
 
   // North chamber — key guarded by enemies
   "0,-3":{tiles:mr(m=>{ae(m,["S","NB","E"]);
@@ -236,11 +234,10 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[3][3]=T.TSWITCH;m[3][12]=T.TSWITCH;
     for(let x=4;x<=11;x++){m[5][x]=T.SPIKE;m[6][x]=T.SPIKE;}
     m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;
-    m[8][7]=T.MASTER_KEY;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
     m[9][4]=T.TORCH;m[9][11]=T.TORCH;
     m[4][3]=T.RUPEE;m[4][12]=T.RUPEE;
-  }),enemies:[{x:7*TL,y:3*TL,hp:4,type:"fire_bat"},{x:7*TL,y:8*TL,hp:4,type:"fire_bat"}]},
+  }),enemies:[{x:7*TL,y:3*TL,hp:4,type:"fire_bat"},{x:7*TL,y:8*TL,hp:4,type:"fire_bat"}],reward:"master_key"},
 
   // North door — lava crossing (crack west to bomb room)
   "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E"]);
@@ -261,10 +258,9 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[3][5]=T.PIT;m[3][10]=T.PIT;m[8][5]=T.PIT;m[8][10]=T.PIT;
     m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
-    m[5][7]=T.BOMB_BAG;
     m[2][4]=T.TORCH;m[2][11]=T.TORCH;m[9][4]=T.TORCH;m[9][11]=T.TORCH;
     m[3][7]=T.RUPEE;m[8][7]=T.RUPEE;m[3][8]=T.RUPEE;m[8][8]=T.RUPEE;
-  }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:10,type:"miniboss",name:"Flame Sentinel"}]},
+  }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:10,type:"miniboss",name:"Flame Sentinel"}],reward:"bomb_bag"},
 
   // East of lava crossing — timed switch & ice
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);
@@ -410,10 +406,9 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][4]=T.FLOOR;m[6][4]=T.FLOOR;m[5][11]=T.FLOOR;m[6][11]=T.FLOOR;
     m[3][6]=T.SPIKE;m[3][9]=T.SPIKE;m[8][6]=T.SPIKE;m[8][9]=T.SPIKE;
     m[4][5]=T.PIT;m[4][10]=T.PIT;m[7][5]=T.PIT;m[7][10]=T.PIT;
-    m[5][7]=T.MASTER_SWORD;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;
-  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:12,type:"miniboss",name:"Shadow Knight"}]},
+  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:12,type:"miniboss",name:"Shadow Knight"}],reward:"master_sword"},
 
   // West of depth — spike+ghost gauntlet leading to master key
   "-1,-2":{tiles:mr(m=>{ae(m,["E"]);
@@ -429,10 +424,9 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;
     for(let x=3;x<=12;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
-    m[5][7]=T.MASTER_KEY;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
     m[7][4]=T.TORCH;m[7][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:7*TL,y:7*TL,hp:5,type:"ghost"}]},
+  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:7*TL,y:7*TL,hp:5,type:"ghost"}],reward:"master_key"},
 
   // Deep north — ice room
   "0,-3":{tiles:mr(m=>{ae(m,["S","W"]);
@@ -523,10 +517,9 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
     for(let x=4;x<=11;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
     m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;
-    m[5][7]=T.MASTER_KEY;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
     m[7][4]=T.TORCH;m[7][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:8,type:"ghost"},{x:7*TL,y:7*TL,hp:8,type:"ghost"},{x:4*TL,y:5*TL,hp:6,type:"ghost"}]},
+  }),enemies:[{x:7*TL,y:4*TL,hp:8,type:"ghost"},{x:7*TL,y:7*TL,hp:8,type:"ghost"},{x:4*TL,y:5*TL,hp:6,type:"ghost"}],reward:"master_key"},
 
   // North room — lever & push puzzle
   "0,-1":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;

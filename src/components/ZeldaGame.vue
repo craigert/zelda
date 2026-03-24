@@ -801,10 +801,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
             for(const[ex,ey]of exits){if(m3[ey]&&(m3[ey][ex]===T.FLOOR||m3[ey][ex]===T.DOOR||m3[ey][ex]===T.BOSS_DOOR))
               s.pt.push(...Array.from({length:4},()=>({x:ex*TL+16,y:ey*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:500,c:"#fd3"})));}}
         }else{sfx("pickup");}
-        // Spawn reward chest only if room has key items or dungeon treasures
-        const rm2=gm(s);let specialItem=null;
-        if(rm2){for(const row of rm2)for(const tl of row){if(tl===T.BOW)specialItem="bow";else if(tl===T.BOMB_BAG)specialItem="bomb_bag";else if(tl===T.MASTER_SWORD)specialItem="master_sword";else if(tl===T.MASTER_KEY)specialItem="master_key";}}
-        const hasTreasure=rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.MASTER_KEY||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.HEART_PIECE));
+        // Spawn reward chest — room reward property or detect key/heart_piece tiles
+        const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
+        const specialItem=roomData?.reward||null;
+        const hasTreasure=specialItem||rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART_PIECE));
         if(hasTreasure){const chx=W2/2-12,chy=H2/2-12;
           const reward=specialItem||(Math.random()<0.5?"heart":"rupee_blue");
           s.chest={x:chx,y:chy,state:"closed",t:0,reward};}}
