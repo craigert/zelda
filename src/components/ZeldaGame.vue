@@ -123,6 +123,7 @@ function init() {
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
+    bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -253,8 +254,11 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Combat lock — seal exits in dungeons/caves when enemies present
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
-  if(isDg&&s.en.length>0){s.combatLock=true;sfx("door");s.shake.t=200;}
-  else{s.combatLock=false;}
+  if(isDg&&s.en.length>0){s.combatLock=true;sfx("door");s.shake.t=200;
+    // Boss intro — cinematic sequence if room has a boss
+    const boss=s.en.find(e=>e.type==="boss");
+    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
+  }else{s.combatLock=false;}
   // Load blade traps from room data
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];
@@ -367,6 +371,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
     // Still update particles during freeze
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    return;}
+  // Boss intro sequence — freeze gameplay, animate camera
+  if(s.bossIntro){s.bossIntro.t+=dt;
+    if(s.bossIntro.t>=s.bossIntro.dur){s.bossIntro=null;}
     return;}
   if(s.npcTalk){
     s.npcTalk.timer+=dt;
@@ -1542,6 +1550,39 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.strokeStyle="rgba(253,211,51,0.5)";c.lineWidth=1;
     c.beginPath();c.moveTo(W2/2-lw/2,FH2/2+12);c.lineTo(W2/2+lw/2,FH2/2+12);c.stroke();
     c.textAlign="left";c.globalAlpha=1;}
+  // Boss intro cinematic overlay
+  if(s.bossIntro){const bi=s.bossIntro,bp=bi.t/bi.dur;
+    // Cinematic letterbox bars (slide in then out)
+    const barH=bp<0.15?bp/0.15*40:bp>0.85?(1-(bp-0.85)/0.15)*40:40;
+    c.fillStyle="#000";c.fillRect(0,0,W2,barH);c.fillRect(0,FH2-barH,W2,barH);
+    // Darkened edges
+    c.fillStyle=`rgba(0,0,0,${bp<0.1?bp/0.1*0.4:bp>0.8?(1-(bp-0.8)/0.2)*0.4:0.4})`;
+    c.fillRect(0,0,W2,FH2);
+    // Camera spotlight on boss — bright circle
+    if(bp>0.1&&bp<0.85){const sa=Math.min(1,(bp-0.1)/0.2);
+      c.save();c.globalCompositeOperation="destination-out";
+      const sr=60+sa*40;const sg=c.createRadialGradient(bi.bx,bi.by+HH,0,bi.bx,bi.by+HH,sr);
+      sg.addColorStop(0,"rgba(0,0,0,0.4)");sg.addColorStop(0.7,"rgba(0,0,0,0.2)");sg.addColorStop(1,"rgba(0,0,0,0)");
+      c.fillStyle=sg;c.fillRect(bi.bx-sr,bi.by+HH-sr,sr*2,sr*2);c.restore();}
+    // Boss name text — dramatic fade in
+    if(bp>0.2&&bp<0.85){const ta=bp<0.35?(bp-0.2)/0.15:bp>0.7?(0.85-bp)/0.15:1;
+      c.textAlign="center";c.globalAlpha=ta;
+      // Name shadow
+      c.fillStyle="#000";c.font="bold 22px monospace";
+      c.fillText(bi.name.toUpperCase(),W2/2+2,FH2/2+2);
+      // Name text
+      c.fillStyle="#fd3";c.fillText(bi.name.toUpperCase(),W2/2,FH2/2);
+      // Subtitle
+      c.fillStyle="#c88";c.font="bold 11px monospace";
+      c.fillText("- DUNGEON BOSS -",W2/2,FH2/2+18);
+      // Decorative lines
+      const lw2=c.measureText(bi.name.toUpperCase()).width+30;
+      c.strokeStyle=`rgba(253,211,51,${ta*0.5})`;c.lineWidth=1;
+      c.beginPath();c.moveTo(W2/2-lw2/2,FH2/2-12);c.lineTo(W2/2+lw2/2,FH2/2-12);c.stroke();
+      c.beginPath();c.moveTo(W2/2-lw2/2,FH2/2+24);c.lineTo(W2/2+lw2/2,FH2/2+24);c.stroke();
+      c.textAlign="left";c.globalAlpha=1;}
+    // Screen shake on initial slam
+    if(bi.t<200){const si=1-bi.t/200;c.save();c.translate((Math.random()-.5)*si*6,(Math.random()-.5)*si*6);c.restore();}}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
