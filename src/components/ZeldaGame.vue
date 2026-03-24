@@ -652,13 +652,21 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         const dy2=pcy-bcy;if(Math.abs(dy2)<bt.range+TL){bt.st="lunge";bt.vel=dy2>0?7:-7;}}}}
     else if(bt.st==="lunge"){
       if(bt.dir==="h"){bt.x+=bt.vel*(dt/16);
+        bt.x=Math.max(TL,Math.min(W2-TL*2,bt.x));
+        // Stop if hitting a wall
+        const btx=Math.floor((bt.x+(bt.vel>0?TL:0))/TL),bty2=Math.floor((bt.y+TL/2)/TL);
+        if(eSolid(s,btx,bty2)){bt.x=bt.vel>0?(btx-1)*TL:btx*TL+TL;bt.st="retract";bt.vel=0;}
         const d2=bt.x-bt.hx;if(Math.abs(d2)>=bt.range){bt.x=bt.hx+(d2>0?bt.range:-bt.range);bt.st="retract";bt.vel=0;}}
       else{bt.y+=bt.vel*(dt/16);
+        bt.y=Math.max(TL,Math.min(H2-TL*2,bt.y));
+        const btx2=Math.floor((bt.x+TL/2)/TL),bty3=Math.floor((bt.y+(bt.vel>0?TL:0))/TL);
+        if(eSolid(s,btx2,bty3)){bt.y=bt.vel>0?(bty3-1)*TL:bty3*TL+TL;bt.st="retract";bt.vel=0;}
         const d2=bt.y-bt.hy;if(Math.abs(d2)>=bt.range){bt.y=bt.hy+(d2>0?bt.range:-bt.range);bt.st="retract";bt.vel=0;}}}
     else if(bt.st==="retract"){
       const dx3=bt.hx-bt.x,dy3=bt.hy-bt.y,dd=Math.hypot(dx3,dy3);
       if(dd<1){bt.x=bt.hx;bt.y=bt.hy;bt.st="idle";bt.wait=500;}
-      else{const rsp=1.2*(dt/16);bt.x+=dx3/dd*rsp;bt.y+=dy3/dd*rsp;}}
+      else{const rsp=1.2*(dt/16);bt.x+=dx3/dd*rsp;bt.y+=dy3/dd*rsp;
+        bt.x=Math.max(TL,Math.min(W2-TL*2,bt.x));bt.y=Math.max(TL,Math.min(H2-TL*2,bt.y));}}
     // Player collision
     if(p.ifr<=0&&Math.abs(pcx-bt.x-TL/2)<TL*0.7&&Math.abs(pcy-bt.y-TL/2)<TL*0.7){
       p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
