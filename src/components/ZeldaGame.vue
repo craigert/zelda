@@ -974,6 +974,37 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
     dT(c,tl,px,py,iD,dg,t,ei);}
+  // Ambient dungeon decorations — purely visual, deterministic per tile
+  if(iD&&m){for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
+    const tl2=m[y][x];if(tl2!==T.FLOOR)continue;
+    const h1=hs(x,y,42),h2=hs(x,y,73),h3=hs(x,y,101),px2=x*TL,py2=y*TL;
+    if(h1<0.06){// Skull
+      c.fillStyle="rgba(180,170,150,0.35)";c.beginPath();c.arc(px2+10+h2*12,py2+10+h3*12,4,0,Math.PI*2);c.fill();
+      c.fillStyle="rgba(40,30,30,0.4)";c.beginPath();c.arc(px2+8+h2*12,py2+9+h3*12,1.2,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(px2+12+h2*12,py2+9+h3*12,1.2,0,Math.PI*2);c.fill();
+    }else if(h1<0.15){// Cracked floor
+      c.strokeStyle="rgba(0,0,0,0.15)";c.lineWidth=0.8;c.beginPath();
+      c.moveTo(px2+6+h2*20,py2+4+h3*8);c.lineTo(px2+12+h2*8,py2+14+h3*8);c.lineTo(px2+20+h2*6,py2+10+h3*10);c.stroke();
+      c.beginPath();c.moveTo(px2+12+h2*8,py2+14+h3*8);c.lineTo(px2+8+h2*10,py2+24+h3*4);c.stroke();
+    }else if(h1<0.22){// Moss patch
+      const mc=dg?.th==="fire"?"rgba(80,50,30,0.2)":"rgba(40,80,30,0.25)";
+      c.fillStyle=mc;c.beginPath();c.arc(px2+8+h2*16,py2+20+h3*8,3+h2*3,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(px2+12+h2*12,py2+22+h3*6,2+h3*2,0,Math.PI*2);c.fill();
+    }else if(h1<0.28){// Puddle
+      const pc2=dg?.th==="fire"?"rgba(120,40,20,0.15)":"rgba(60,80,120,0.2)";
+      c.fillStyle=pc2;c.beginPath();c.ellipse(px2+16+h2*6-3,py2+20+h3*6,5+h2*3,2+h3*2,h2*0.5,0,Math.PI*2);c.fill();
+    }else if(h1<0.32){// Broken pot shards
+      c.fillStyle="rgba(140,100,60,0.3)";
+      c.fillRect(px2+6+h2*14,py2+18+h3*6,4,3);c.fillRect(px2+10+h2*10,py2+20+h3*4,3,4);
+      c.fillRect(px2+4+h2*16,py2+22+h3*4,3,2);
+    }
+    // Wall decorations: chains on wall-adjacent floor tiles
+    if(h1>0.85&&y>0&&m[y-1][x]===T.WALL){
+      c.strokeStyle="rgba(150,150,150,0.25)";c.lineWidth=1.5;
+      const cx3=px2+8+h2*16;c.beginPath();
+      for(let i=0;i<4;i++){const cy3=py2+2+i*5;c.moveTo(cx3-2,cy3);c.arc(cx3,cy3+2,2,Math.PI,0,i%2===0);}
+      c.stroke();
+    }}}
   // Combat lock bars — iron gates over exits
   if(s.combatLock&&m){
     const drawBars=(bx,by,bw,bh,vert)=>{
