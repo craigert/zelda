@@ -61,9 +61,8 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][5]=T.FLOOR;m[5][6]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[5][9]=T.FLOOR;m[5][10]=T.FLOOR;
     m[6][5]=T.FLOOR;m[6][6]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;m[6][9]=T.FLOOR;m[6][10]=T.FLOOR;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-    m[5][7]=T.BOW;m[5][8]=T.FLOOR;
     m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;
-  }),enemies:[{x:5*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:4*TL,hp:2,type:"bat"},{x:7*TL,y:6*TL,hp:8,type:"miniboss",name:"Vine Guardian"}]},
+  }),enemies:[{x:5*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:4*TL,hp:2,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"skeleton"}]},
 
   // East of north corridor — lever and plate room with U-shaped walkway (east of 0,-2)
   "1,-2":{tiles:mr(m=>{ae(m,["W"]);
@@ -106,14 +105,14 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[6][7]=T.HEART;m[6][8]=T.HEART;
   }),enemies:[]},
 
-  // Northwest passage — push block puzzle
+  // Northwest passage — Vine Guardian mini-boss guards the Bow
   "-1,-3":{tiles:mr(m=>{ae(m,["S"]);
     m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;
-    m[5][6]=T.PUSH;m[5][9]=T.PUSH;m[7][7]=T.PUSH;
-    m[4][7]=T.PLATE;m[4][8]=T.PLATE;m[8][7]=T.PLATE;
-    m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-    m[9][3]=T.BOMB;m[9][4]=T.BOMB;m[9][12]=T.HEART;
-  }),enemies:[{x:5*TL,y:6*TL,hp:3,type:"skeleton"},{x:10*TL,y:6*TL,hp:3,type:"skeleton"}]},
+    m[5][6]=T.PUSH;m[5][9]=T.PUSH;
+    m[4][7]=T.PLATE;m[4][8]=T.PLATE;
+    m[5][7]=T.BOW;
+    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
+  }),enemies:[{x:7*TL,y:6*TL,hp:8,type:"miniboss",name:"Vine Guardian"},{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:4*TL,hp:2,type:"bat"}]},
 
   // North chamber — key guarded by enemies
   "0,-3":{tiles:mr(m=>{ae(m,["S","NB","E"]);
