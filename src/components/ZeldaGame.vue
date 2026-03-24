@@ -388,6 +388,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(Math.abs(off)<10&&tm(p.x+dx*sp,p.y-Math.sign(off)*2))p.y-=Math.sign(off)*1.5*(dt/16);}
   if(moved&&dy!==0&&!tm(p.x,p.y+dy*sp*2)){const cx=p.x+HB.x+HB.w/2,tcx=Math.round(cx/TL)*TL;const off=cx-tcx;
     if(Math.abs(off)<10&&tm(p.x-Math.sign(off)*2,p.y+dy*sp))p.x-=Math.sign(off)*1.5*(dt/16);}
+  // Footstep particles by terrain
+  if(moved&&s.gt%6<2){const ftx2=Math.floor((p.x+PS/2)/TL),fty2=Math.floor((p.y+PS-2)/TL),mp3=gm(s);
+    if(mp3&&fty2>=0&&fty2<RO&&ftx2>=0&&ftx2<CO){const ft=mp3[fty2][ftx2],fx=p.x+PS/2+(Math.random()-.5)*6,fy=p.y+PS-2;
+      if(ft===T.GRASS||ft===T.TALLGRASS||ft===T.FLOWER)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1.5,dy:-Math.random()*1.2,l:250,c:Math.random()>.5?"#5a5":"#7b7"});
+      else if(ft===T.SAND)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*2,dy:-Math.random()*0.8,l:300,c:Math.random()>.5?"#d4b060":"#c8a848"});
+      else if(ft===T.WATER||ft===T.BRIDGE)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:200,c:Math.random()>.5?"#6af":"#8cf"});
+      else if(ft===T.ICE)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*2.5,dy:-Math.random()*1,l:300,c:Math.random()>.5?"#cef":"#fff"});
+      else if(ft===T.PATH)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:200,c:"#8a7050"});
+      else if(ft===T.FLOOR&&s.loc.ty!=="ow")s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:200,c:"rgba(150,150,150,0.5)"});}}
   if(p.burn>0){p.burn-=dt;p.burnTick+=dt;if(p.burnTick>=500){p.burnTick=0;if(p.ifr<=0){p.hp--;sfx("hurt");
     s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:400,c:"#f80"})));
     if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
