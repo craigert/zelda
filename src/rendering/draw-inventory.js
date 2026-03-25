@@ -339,11 +339,11 @@ function drawSecretsRow(c,s,t){
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
-  c.fillStyle="#aaa";c.font="bold 9px monospace";c.fillText(`${secrets.found} / ${secrets.total}`,W2/2,y+4);
+  c.fillStyle="#aaa";c.font="bold 9px monospace";c.fillText(`${secrets.found} / ${secrets.total}`,W2/2,y+12);
   // Dots below
   const dotW=secrets.total*16;const startX=W2/2-dotW/2;
   for(let i=0;i<secrets.total;i++){
-    const dx=startX+i*16+8,dy=y+16;
+    const dx=startX+i*16+8,dy=y+26;
     if(i<secrets.found){c.fillStyle="#fd3";c.beginPath();c.arc(dx,dy,4,0,Math.PI*2);c.fill();
       c.fillStyle="#ffe866";c.beginPath();c.arc(dx-1,dy-1,1.5,0,Math.PI*2);c.fill();
     }else{c.strokeStyle="#555";c.lineWidth=1;c.beginPath();c.arc(dx,dy,3,0,Math.PI*2);c.stroke();}
