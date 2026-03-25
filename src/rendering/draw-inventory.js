@@ -97,7 +97,7 @@ function drawMapPage(c,s,t){
   drawQuickStats(c,s,226);
   drawDivider(c,258,"DUNGEONS");
   drawDungeonProgressPolished(c,s,t);
-  drawDivider(c,330,"SECRETS");
+  drawDivider(c,340,"SECRETS");
   drawSecretsRow(c,s,t);
 }
 
