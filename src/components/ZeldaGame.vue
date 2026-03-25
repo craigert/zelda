@@ -1593,15 +1593,6 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       let col="#3a5a2a";if(ok==="2,0")col="#8a7a40";if(ok===loc.scr)col="#fd3";
       c.fillStyle=col;c.fillRect(omX+op+(cx2-onX)*os+1,omY+op+(cy2-onY)*os+1,os-2,os-2);
       for(const de2 of DE){if(de2.s===ok){c.fillStyle=ok===loc.scr?"#000":"#222";c.fillRect(omX+op+(cx2-onX)*os+os/2-2,omY+op+(cy2-onY)*os+os/2-2,4,4);}}}
-    const pcx2=p.x+PS/2,pcy2=p.y+PS/2;let nearD=null,nearDist=Infinity;
-    for(let di=0;di<3;di++){if(p.tri[di])continue;const de2=DE[di];
-      const[dsx,dsy]=de2.s.split(",").map(Number);const[csx,csy]=loc.scr.split(",").map(Number);
-      const ddx=(dsx-csx)*W2+de2.t[0][0]*TL-pcx2,ddy=(dsy-csy)*H2+de2.t[0][1]*TL-pcy2;
-      const dd=Math.hypot(ddx,ddy);if(dd<nearDist){nearDist=dd;nearD={dx:ddx,dy:ddy};}}
-    if(nearD){const ang=Math.atan2(nearD.dy,nearD.dx);const cr=8;const ccx=omX+oW/2,ccy=omY-12;
-      c.fillStyle="#fd3";c.beginPath();c.moveTo(ccx+Math.cos(ang)*cr,ccy+Math.sin(ang)*cr);
-      c.lineTo(ccx+Math.cos(ang+2.5)*cr*0.5,ccy+Math.sin(ang+2.5)*cr*0.5);
-      c.lineTo(ccx+Math.cos(ang-2.5)*cr*0.5,ccy+Math.sin(ang-2.5)*cr*0.5);c.fill();}
   }
   if(s.timedDoors.length>0){const td=s.timedDoors[0];const pct=td.t/5000;
     c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(W2/2-60,4,120,10);

@@ -29,7 +29,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=2;y<=4;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     for(let y=7;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][6]=T.PUSH;m[5][9]=T.PUSH;m[6][7]=T.PLATE;m[6][8]=T.PLATE;
-    m[3][7]=T.KEY;
+    m[3][7]=T.RUPEE;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;m[9][2]=T.TORCH;m[9][13]=T.TORCH;
   }),enemies:[{x:6*TL,y:3*TL,hp:3,type:"bat"},{x:9*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
@@ -48,7 +48,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][5]=T.PUSH;m[3][10]=T.PUSH;m[7][7]=T.PUSH;
     m[5][4]=T.PLATE;m[6][11]=T.PLATE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][3]=T.WALL;m[7][12]=T.WALL;
-    m[8][7]=T.KEY;
+    m[8][7]=T.HEART;
   }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:7*TL,hp:2,type:"bat"}]},
 
   // Central north — pit maze with bridges
@@ -73,7 +73,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
   }),enemies:[{x:5*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
   // North corridor — spiked hallway with blade traps
-  "0,-2":{tiles:mr(m=>{ae(m,["S","N","W","E"]);
+  "0,-2":{tiles:mr(m=>{ae(m,["S","ND","W","E"]);
     for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
@@ -89,7 +89,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=3;y<=8;y++){m[y][3]=T.PIT;m[y][12]=T.PIT;}
     m[3][6]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
-    m[5][7]=T.KEY;m[6][8]=T.RUPEE;
+    m[5][7]=T.RUPEE;m[6][8]=T.RUPEE;
     m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;
   }),enemies:[{x:7*TL,y:4*TL,hp:3,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"bat"},{x:4*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
@@ -178,7 +178,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let x=3;x<=7;x++)m[3][x]=T.WALL;for(let x=8;x<=12;x++)m[5][x]=T.WALL;
     for(let x=3;x<=7;x++)m[7][x]=T.WALL;for(let x=8;x<=12;x++)m[9][x]=T.WALL;
     m[4][6]=T.SPIKE;m[4][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][10]=T.SPIKE;m[8][6]=T.SPIKE;m[8][7]=T.SPIKE;
-    m[4][10]=T.KEY;m[2][7]=T.TORCH;
+    m[4][10]=T.HEART;m[2][7]=T.TORCH;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:3,type:"fire_bat"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
   // Upper east — timed switch room
@@ -186,7 +186,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let y=2;y<=9;y++){m[y][5]=T.WALL;m[y][10]=T.WALL;}
     m[5][5]=T.FLOOR;m[6][5]=T.FLOOR;m[5][10]=T.FLOOR;m[6][10]=T.FLOOR;
     m[3][3]=T.SPIKE;m[3][12]=T.SPIKE;m[8][3]=T.SPIKE;m[8][12]=T.SPIKE;
-    m[3][7]=T.HEART;m[8][8]=T.KEY;
+    m[3][7]=T.HEART;m[8][8]=T.HEART;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
   }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
@@ -214,7 +214,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let y=2;y<=9;y++)m[y][7]=T.WALL;
     m[5][7]=T.FLOOR;m[6][7]=T.FLOOR;
     m[3][4]=T.SPIKE;m[3][10]=T.SPIKE;m[8][4]=T.SPIKE;m[8][10]=T.SPIKE;
-    m[5][4]=T.KEY;m[6][11]=T.HEART;
+    m[5][4]=T.RUPEE;m[6][11]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"fire_bat"},{x:11*TL,y:5*TL,hp:4,type:"fire_bat"}]},
 
@@ -266,7 +266,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let x=4;x<=11;x++){m[4][x]=T.SPIKE;m[7][x]=T.SPIKE;}
     m[5][5]=T.ICE;m[5][6]=T.ICE;m[5][7]=T.ICE;m[5][8]=T.ICE;m[5][9]=T.ICE;m[5][10]=T.ICE;
     m[6][5]=T.ICE;m[6][6]=T.ICE;m[6][7]=T.ICE;m[6][8]=T.ICE;m[6][9]=T.ICE;m[6][10]=T.ICE;
-    m[2][7]=T.HEART;m[2][8]=T.KEY;
+    m[2][7]=T.HEART;m[2][8]=T.HEART;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"fire_bat"},{x:9*TL,y:6*TL,hp:4,type:"fire_bat"}]},
 
@@ -297,7 +297,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
 
   // South treasure (crack south wall of entry room)
   "0,2":{tiles:mr(m=>{m[0][7]=T.FLOOR;m[0][8]=T.FLOOR;
-    m[4][6]=T.RUPEE;m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[5][7]=T.KEY;m[6][7]=T.HEART;m[6][8]=T.HEART;
+    m[4][6]=T.RUPEE;m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[5][7]=T.RUPEE;m[6][7]=T.HEART;m[6][8]=T.HEART;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
 
@@ -335,7 +335,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
   "1,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
     m[5][7]=T.HEART_PIECE;
-    m[4][7]=T.RUPEE;m[6][7]=T.BOMB;m[6][8]=T.KEY;
+    m[4][7]=T.RUPEE;m[6][7]=T.BOMB;m[6][8]=T.RUPEE;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
 
@@ -343,7 +343,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
   "-1,0":{tiles:mr(m=>{ae(m,["E","N"]);
     for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
     m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
-    m[4][7]=T.KEY;m[7][8]=T.HEART;m[2][5]=T.TORCH;m[2][10]=T.TORCH;
+    m[4][7]=T.RUPEE;m[7][8]=T.HEART;m[2][5]=T.TORCH;m[2][10]=T.TORCH;
   }),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
 
   // Northwest — ghost gauntlet (dark room)
@@ -368,7 +368,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     for(let y=3;y<=4;y++)for(let x=3;x<=12;x++)m[y][x]=T.PIT;
     for(let y=7;y<=8;y++)for(let x=3;x<=12;x++)m[y][x]=T.PIT;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
-    m[5][7]=T.KEY;m[2][7]=T.HEART;
+    m[5][7]=T.HEART;m[2][7]=T.HEART;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}]},
 
   // East of north — spike corridor with key
@@ -377,7 +377,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     for(let y=8;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
     m[5][4]=T.SPIKE;m[5][6]=T.SPIKE;m[5][8]=T.SPIKE;m[5][10]=T.SPIKE;m[5][12]=T.SPIKE;
     m[6][3]=T.SPIKE;m[6][5]=T.SPIKE;m[6][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][11]=T.SPIKE;
-    m[4][7]=T.KEY;m[7][8]=T.KEY;
+    m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
   traps:[{x:3,y:5,dir:"h",range:8},{x:12,y:6,dir:"h",range:8}]},
@@ -387,7 +387,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
     m[5][7]=T.BOMB;m[5][8]=T.BOMB;m[6][7]=T.HEART;m[6][8]=T.HEART;
     m[4][5]=T.TORCH;m[4][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;
-    m[3][7]=T.KEY;
+    m[3][7]=T.RUPEE;
   }),enemies:[]},
 
   // North depth — scattered pits with ghosts (crack east to master sword)
@@ -430,7 +430,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[3][5]=T.WALL;m[3][10]=T.WALL;m[5][7]=T.WALL;m[5][8]=T.WALL;
     m[8][5]=T.WALL;m[8][10]=T.WALL;
     m[4][4]=T.SPIKE;m[4][11]=T.SPIKE;m[7][4]=T.SPIKE;m[7][11]=T.SPIKE;
-    m[6][6]=T.TSWITCH;m[2][7]=T.HEART;m[9][8]=T.KEY;
+    m[6][6]=T.TSWITCH;m[2][7]=T.HEART;m[9][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:10*TL,y:5*TL,hp:4,type:"ghost"},{x:5*TL,y:7*TL,hp:4,type:"ghost"}]},
 
@@ -530,7 +530,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[3][5]=T.WALL;m[3][10]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;
     m[5][7]=T.WALL;m[6][7]=T.WALL;
     m[4][4]=T.SPIKE;m[4][11]=T.SPIKE;m[7][4]=T.SPIKE;m[7][11]=T.SPIKE;
-    m[2][7]=T.HEART;m[9][8]=T.KEY;
+    m[2][7]=T.HEART;m[9][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}]},
 
@@ -542,7 +542,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     }
     // Safe path down the center
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
-    m[5][7]=T.KEY;m[6][8]=T.HEART;
+    m[5][7]=T.RUPEE;m[6][8]=T.HEART;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:6,type:"skeleton"},{x:10*TL,y:5*TL,hp:6,type:"skeleton"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
 
@@ -560,7 +560,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[3][4]=T.TSWITCH;m[3][11]=T.TSWITCH;
     for(let x=5;x<=10;x++){m[5][x]=T.SPIKE;m[6][x]=T.SPIKE;}
     m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;
-    m[8][7]=T.KEY;m[8][8]=T.BOMB;
+    m[8][7]=T.HEART;m[8][8]=T.BOMB;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
   }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"}],
   traps:[{x:3,y:2,dir:"v",range:7},{x:12,y:2,dir:"v",range:7}]},
@@ -572,7 +572,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     for(let y=7;y<=8;y++)for(let x=3;x<=5;x++)m[y][x]=T.PIT;
     for(let y=7;y<=8;y++)for(let x=10;x<=12;x++)m[y][x]=T.PIT;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
-    m[5][7]=T.KEY;m[6][8]=T.HEART;
+    m[5][7]=T.HEART;m[6][8]=T.HEART;
   }),enemies:[{x:7*TL,y:3*TL,hp:6,type:"ghost"},{x:7*TL,y:8*TL,hp:6,type:"ghost"},{x:4*TL,y:5*TL,hp:5,type:"skeleton"},{x:11*TL,y:6*TL,hp:5,type:"skeleton"}]},
 
   // Deep north — pre-boss gauntlet
@@ -601,7 +601,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     for(let y=5;y<=6;y++)for(let x=6;x<=9;x++)m[y][x]=T.FLOOR;
     // Bridge from east
     m[5][10]=T.FLOOR;m[5][11]=T.FLOOR;m[6][10]=T.FLOOR;m[6][11]=T.FLOOR;
-    m[5][7]=T.KEY;m[6][7]=T.RUPEE;m[6][8]=T.RUPEE;
+    m[5][7]=T.RUPEE;m[6][7]=T.RUPEE;m[6][8]=T.RUPEE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][3]=T.TORCH;m[2][12]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:7,type:"ghost"},{x:10*TL,y:6*TL,hp:7,type:"ghost"}]},
 
