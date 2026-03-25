@@ -71,6 +71,7 @@ import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf } from '../render
 import { dH } from '../rendering/draw-hud.js';
 import { dT } from '../rendering/draw-tiles.js';
 import { drawTerrainOverlay } from '../rendering/draw-terrain.js';
+import { drawInventoryScreen } from '../rendering/draw-inventory.js';
 import { NPC_DATA } from '../data/npcs.js';
 
 // --- Refs ---
@@ -1240,20 +1241,21 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects
   if(!iD){
-    // Wind wisps — occasional streaks blowing across the screen
-    for(let i=0;i<3;i++){
-      const wPhase=t/6000+i*2.1;const wActive=Math.sin(wPhase)>0.6;// only visible ~20% of the time
-      if(wActive){const wp=((Math.sin(wPhase)-0.6)/0.4);// 0→1 during active
-        const wy=hs(i,20,300)*H2;const wx=(t/6+i*200)%(W2+100)-50;
-        const wa=wp<0.3?wp/0.3:wp>0.7?(1-wp)/0.3:1;// fade in/out
-        c.strokeStyle=`rgba(220,230,255,${wa*0.12})`;c.lineWidth=1.5;
-        c.beginPath();c.moveTo(wx,wy+Math.sin(t/200+i)*8);
-        c.quadraticCurveTo(wx+30,wy+Math.sin(t/180+i*2)*12-5,wx+60,wy+Math.sin(t/220+i*3)*6);
-        c.quadraticCurveTo(wx+90,wy+Math.sin(t/250+i)*10+3,wx+120,wy+Math.sin(t/200+i*4)*8);
-        c.stroke();
-        // Wisp particles along the streak
-        for(let j=0;j<3;j++){const px3=wx+j*40+Math.sin(t/150+j)*10,py3=wy+Math.sin(t/200+i+j)*8;
-          c.fillStyle=`rgba(220,230,255,${wa*0.08})`;c.beginPath();c.arc(px3,py3,2,0,Math.PI*2);c.fill();}}}
+    // Wind wisps — short mystical wisps with particle trails
+    for(let i=0;i<4;i++){
+      const wPhase=t/8000+i*1.7;const wActive=Math.sin(wPhase)>0.65;
+      if(wActive){const wp=((Math.sin(wPhase)-0.65)/0.35);
+        const wy=hs(i,20,300)*H2;const wx=(t/8+i*170)%(W2+60)-30;
+        const wa=wp<0.3?wp/0.3:wp>0.7?(1-wp)/0.3:1;
+        const wy2=wy+Math.sin(t/400+i*3)*6;
+        // Short curved wisp
+        c.strokeStyle=`rgba(200,220,255,${wa*0.09})`;c.lineWidth=1;
+        c.beginPath();c.moveTo(wx,wy2);c.quadraticCurveTo(wx+20,wy2+Math.sin(t/300+i)*5-3,wx+40,wy2+Math.sin(t/350+i*2)*3);c.stroke();
+        // Trailing particles — staggered, shrinking, fading
+        for(let j=0;j<5;j++){const age=j*0.2;
+          const px3=wx-j*8+Math.sin(t/250+j+i)*3,py3=wy2+Math.sin(t/300+j*2+i)*4;
+          const pa=wa*(1-age)*0.1,ps=1.5-age*0.8;
+          c.fillStyle=`rgba(200,220,255,${pa})`;c.beginPath();c.arc(px3,py3,Math.max(0.5,ps),0,Math.PI*2);c.fill();}}}
     // Drifting leaves (slow diagonal movement)
     for(let i=0;i<6;i++){const lx=(hs(i,0,200)*W2+t/8+i*90)%W2,ly=(hs(i,1,201)*H2+t/12+i*60)%H2;
       const lr=Math.sin(t/400+i*2)*Math.PI;const la=0.12+Math.sin(t/600+i)*0.06;
