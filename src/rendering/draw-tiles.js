@@ -26,16 +26,18 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.beginPath();c.arc(hx,hy,5+hs(px,py,72)*5,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(120,210,80,0.12)";
       c.beginPath();c.arc(px+hs(px,py,73)*22+5,py+hs(px,py,74)*18+7,4+hs(px,py,75)*3,0,Math.PI*2);c.fill();
-      // Grass tuft marks (small arcs)
-      const tufts=3+((hs(px,py,80)*3)|0);
+      // Swaying grass blades — animated with wind
+      const tufts=4+((hs(px,py,80)*3)|0);
+      const wind=Math.sin(t/1200+px/60)*1.5+Math.sin(t/800+py/50)*0.8;
       for(let i=0;i<tufts;i++){
-        const tx=px+hs(px,py,81+i*4)*26+3,ty=py+hs(px,py,82+i*4)*24+4;
-        const th=2+hs(px,py,83+i*4)*3;
+        const tx=px+hs(px,py,81+i*4)*26+3,ty=py+hs(px,py,82+i*4)*20+8;
+        const th=4+hs(px,py,83+i*4)*5;
         const tShade=hs(px,py,84+i*4);
+        const sway=wind+Math.sin(t/600+tx/20+i*1.5)*1.8;
         c.strokeStyle=tShade>.6?"#2a7a1a":tShade>.3?"#348a24":"#40a030";
-        c.lineWidth=0.8;c.lineCap="round";
-        c.beginPath();c.moveTo(tx,ty+th);c.quadraticCurveTo(tx+1,ty+th*0.4,tx-1,ty);c.stroke();
-        c.beginPath();c.moveTo(tx+2,ty+th);c.quadraticCurveTo(tx+3,ty+th*0.3,tx+4,ty+1);c.stroke();
+        c.lineWidth=1;c.lineCap="round";
+        c.beginPath();c.moveTo(tx,ty+th);c.quadraticCurveTo(tx+sway*0.6,ty+th*0.4,tx+sway,ty);c.stroke();
+        c.beginPath();c.moveTo(tx+3,ty+th);c.quadraticCurveTo(tx+3+sway*0.5,ty+th*0.3,tx+4+sway*0.8,ty+1);c.stroke();
       }
       c.lineCap="butt";
       // Tiny dark texture dots
@@ -864,7 +866,7 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
         const fy=py+8+hs(px,py,62+f*10)*14;
         const fci=((Math.floor(px/TL)*7+Math.floor(py/TL)*13+f*3)%fColors.length);
         const fc=fColors[fci];
-        const sw=Math.sin(t/800+fx/50+f)*0.8;
+        const sw=Math.sin(t/900+fx/40+f*1.3)*1.8+Math.sin(t/1200+fy/50)*0.6;
         const fSize=2+hs(px,py,63+f*10)*1.5;
         // Stem
         c.strokeStyle="#2a6a18";c.lineWidth=1;c.lineCap="round";
@@ -1002,15 +1004,22 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       }
       break;}
     case T.TALLGRASS:{c.fillStyle="#2d6a1e";c.fillRect(px,py,TL,TL);
-      const sw2=Math.sin(t/600+px/40)*2;
-      // Multiple layers of grass at different heights/colors
-      c.fillStyle="#2a7020";
-      for(let i=0;i<6;i++){const gx=px+2+i*5+hs(px,py,i*3)*3+sw2;const gh=12+hs(px,py,i*3+1)*10;c.fillRect(gx,py+TL-gh,2,gh);}
-      c.fillStyle="#3a9030";
-      for(let i=0;i<4;i++){const gx=px+4+i*7+hs(px,py,i*5+20)*4+sw2*.7;const gh=8+hs(px,py,i*5+21)*8;c.fillRect(gx,py+TL-gh,2,gh);}
-      c.fillStyle="#4aa040";
-      for(let i=0;i<3;i++){const gx=px+6+i*8+hs(px,py,i*7+40)*5+sw2*.5;c.fillRect(gx,py+TL-8-hs(px,py,i*7+41)*6,1,6);}
-      break;}
+      const windTG=Math.sin(t/1000+px/50)*1.5+Math.sin(t/700+py/40)*0.8;
+      // Multiple layers of swaying grass blades
+      c.lineCap="round";
+      c.strokeStyle="#2a7020";c.lineWidth=2;
+      for(let i=0;i<6;i++){const gx=px+3+i*5+hs(px,py,i*3)*3;const gh=14+hs(px,py,i*3+1)*10;
+        const sw3=windTG+Math.sin(t/500+gx/15+i*1.2)*2;
+        c.beginPath();c.moveTo(gx,py+TL);c.quadraticCurveTo(gx+sw3*0.6,py+TL-gh*0.5,gx+sw3,py+TL-gh);c.stroke();}
+      c.strokeStyle="#3a9030";c.lineWidth=1.5;
+      for(let i=0;i<4;i++){const gx=px+5+i*7+hs(px,py,i*5+20)*4;const gh=10+hs(px,py,i*5+21)*8;
+        const sw3=windTG*0.8+Math.sin(t/450+gx/12+i*1.8)*1.5;
+        c.beginPath();c.moveTo(gx,py+TL);c.quadraticCurveTo(gx+sw3*0.5,py+TL-gh*0.4,gx+sw3*0.7,py+TL-gh);c.stroke();}
+      c.strokeStyle="#4aa040";c.lineWidth=1;
+      for(let i=0;i<3;i++){const gx=px+7+i*9+hs(px,py,i*7+40)*5;const gh=7+hs(px,py,i*7+41)*6;
+        const sw3=windTG*0.5+Math.sin(t/600+gx/18+i*2.5)*1;
+        c.beginPath();c.moveTo(gx,py+TL);c.quadraticCurveTo(gx+sw3*0.4,py+TL-gh*0.5,gx+sw3*0.6,py+TL-gh);c.stroke();}
+      c.lineCap="butt";break;}
     case T.STUMP:{c.fillStyle="#2d6a1e";c.fillRect(px,py,TL,TL);
       // Grass underneath
       c.fillStyle="#348a24";c.fillRect(px+6,py+24,2,4);c.fillRect(px+22,py+22,2,4);

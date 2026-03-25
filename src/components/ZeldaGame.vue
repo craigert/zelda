@@ -1146,6 +1146,28 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)drawBars(0,5*TL,TL,TL*2,true);
     if(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)drawBars((CO-1)*TL,5*TL,TL,TL*2,true);}
   if(!iD)drawTerrainOverlay(c,m,t);
+  // Overworld ambient effects — fireflies, drifting leaves, wind dust
+  if(!iD){
+    // Drifting leaves (slow diagonal movement)
+    for(let i=0;i<6;i++){const lx=(hs(i,0,200)*W2+t/8+i*90)%W2,ly=(hs(i,1,201)*H2+t/12+i*60)%H2;
+      const lr=Math.sin(t/400+i*2)*Math.PI;const la=0.12+Math.sin(t/600+i)*0.06;
+      c.save();c.translate(lx,ly);c.rotate(lr);c.fillStyle=`rgba(100,160,40,${la})`;
+      c.beginPath();c.ellipse(0,0,3,1.5,0,0,Math.PI*2);c.fill();c.restore();}
+    // Tiny floating pollen/dust (very subtle)
+    for(let i=0;i<8;i++){const dx2=hs(i,5,210)*W2,dy2=(hs(i,6,211)*H2+t/25+i*50)%H2;
+      const da=0.08+Math.sin(t/500+i*3)*0.04;
+      c.fillStyle=`rgba(255,255,200,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/700+i*2)*6,dy2,0.8,0,Math.PI*2);c.fill();}
+    // Butterflies near flowers (rare, only if flowers visible)
+    if(m){for(let i=0;i<2;i++){const bx=hs(i,10,220)*W2,by=hs(i,11,221)*H2;
+      const btx=Math.floor(bx/TL),bty=Math.floor(by/TL);
+      if(btx>=0&&btx<CO&&bty>=0&&bty<RO&&m[bty][btx]===T.FLOWER){
+        const bfx=bx+Math.sin(t/300+i*4)*12,bfy=by+Math.cos(t/350+i*3)*8-6;
+        const wing=Math.sin(t/80+i*5)*0.4;
+        c.fillStyle=`rgba(255,200,100,${0.3+Math.sin(t/200+i)*0.1})`;
+        c.save();c.translate(bfx,bfy);
+        c.beginPath();c.ellipse(-2,0,2.5,1.5+wing,0,0,Math.PI*2);c.fill();
+        c.beginPath();c.ellipse(2,0,2.5,1.5-wing,0,0,Math.PI*2);c.fill();
+        c.restore();}}}}
   if(iD&&m){
     // Darken unlit torches (only in dark rooms)
     const isDkRm=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;
