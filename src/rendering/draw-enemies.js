@@ -197,6 +197,40 @@ export function dKn(c,x,y,sz,fl,t){
   c.strokeStyle=fl?"#eee":"#aa8833";c.lineWidth=3;
   c.beginPath();c.moveTo(x+sz*.65,y+sz*.3);c.lineTo(x+sz*.8,y+sz*.3);c.stroke();
 }
+// Vine Creeper — green plant creature with tendrils
+export function dVc(c,x,y,sz,fl,t){
+  const sway=Math.sin(t/400)*2;
+  c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(x+sz/2,y+sz-2,sz/2,3,0,0,Math.PI*2);c.fill();
+  // Body — leafy bulb
+  c.fillStyle=fl?"#fff":"#2a6a18";c.beginPath();c.arc(x+sz/2,y+sz*0.5,sz*0.3,0,Math.PI*2);c.fill();
+  c.fillStyle=fl?"#efe":"#3a8a28";c.beginPath();c.arc(x+sz*0.45,y+sz*0.45,sz*0.2,0,Math.PI*2);c.fill();
+  // Vine tendrils extending outward
+  c.strokeStyle=fl?"#cfc":"#1a5a10";c.lineWidth=2;c.lineCap="round";
+  c.beginPath();c.moveTo(x+sz*0.3,y+sz*0.5);c.quadraticCurveTo(x+sz*0.1+sway,y+sz*0.3,x+sway*1.5,y+sz*0.15);c.stroke();
+  c.beginPath();c.moveTo(x+sz*0.7,y+sz*0.5);c.quadraticCurveTo(x+sz*0.9-sway,y+sz*0.3,x+sz+(-sway)*1.5,y+sz*0.15);c.stroke();
+  c.beginPath();c.moveTo(x+sz*0.5,y+sz*0.7);c.quadraticCurveTo(x+sz*0.3+sway,y+sz*0.85,x+sz*0.2+sway,y+sz);c.stroke();
+  c.lineCap="butt";
+  // Eyes
+  if(!fl){c.fillStyle="#ff0";c.beginPath();c.arc(x+sz*0.4,y+sz*0.42,2,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.58,y+sz*0.42,2,0,Math.PI*2);c.fill();
+  c.fillStyle="#000";c.beginPath();c.arc(x+sz*0.4,y+sz*0.42,1,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.58,y+sz*0.42,1,0,Math.PI*2);c.fill();}
+}
+// Stalfos Knight — armored skeleton, glowing red eyes
+export function dSf(c,x,y,sz,fl,t){
+  dSk(c,x,y,sz,fl,t);// base skeleton
+  // Armor overlay
+  c.fillStyle=fl?"#fff":"#6a6a7a";c.fillRect(x+sz*0.15,y+sz*0.25,sz*0.7,sz*0.3);
+  c.fillStyle=fl?"#eee":"#8a8a9a";c.fillRect(x+sz*0.3,y+sz*0.05,sz*0.4,sz*0.18);
+  // Red eyes
+  if(!fl){c.fillStyle="#f22";c.beginPath();c.arc(x+sz*0.35,y+sz*0.15,2.5,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.65,y+sz*0.15,2.5,0,Math.PI*2);c.fill();
+  c.fillStyle="#fff";c.beginPath();c.arc(x+sz*0.35,y+sz*0.14,1,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.65,y+sz*0.14,1,0,Math.PI*2);c.fill();}
+  // Sword
+  c.fillStyle=fl?"#ddd":"#aaa";c.save();c.translate(x+sz*0.8,y+sz*0.3);c.rotate(Math.sin(t/300)*0.3);
+  c.fillRect(-1,-10,2,14);c.fillStyle="#fd3";c.fillRect(-3,-1,6,2);c.restore();
+}
 // Magma Slug — glowing orange slug with molten body
 export function dMs(c,x,y,sz,fl,t){
   const bob=Math.sin(t/300)*1.5,pulse=Math.sin(t/200)*0.15+0.85;

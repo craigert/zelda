@@ -67,7 +67,7 @@ import { initSfx, sfx } from '../audio/sfx.js';
 import { dc, hs } from '../utils/helpers.js';
 import { dP } from '../rendering/draw-player.js';
 import { dSw } from '../rendering/draw-sword.js';
-import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm } from '../rendering/draw-enemies.js';
+import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf } from '../rendering/draw-enemies.js';
 import { dH } from '../rendering/draw-hud.js';
 import { dT } from '../rendering/draw-tiles.js';
 import { drawTerrainOverlay } from '../rendering/draw-terrain.js';
@@ -743,7 +743,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
     if(e.st==="chase"&&dist>loseRange&&!isBossLike)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:1.0;
+    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:1.0;
     let moveX=0,moveY=0;
     if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
       if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
@@ -799,6 +799,22 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         const phase=Math.floor(e.mt/2500)%3;
         if(phase===2){const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
         else{const ca=e.mt/800+Math.PI/2;moveX=Math.cos(ang+ca*0.3)*es*0.4;moveY=Math.sin(ang+ca*0.3)*es*0.4;}
+      }else if(e.type==="vine_creeper"){
+        // Slow chase, shoots vine tendril arcs periodically
+        moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;
+        if(!e.vineT)e.vineT=0;e.vineT+=dt;
+        if(e.vineT>2500&&dist<TL*5){e.vineT=0;sfx("sword");
+          // Shoot 3 vine projectiles in a spread arc
+          for(let v=-1;v<=1;v++){const va=ang+v*0.4;
+            s.bProj.push({x:ecx,y:ecy,dx:Math.cos(va)*2,dy:Math.sin(va)*2,type:"root",l:800});}}
+      }else if(e.type==="stalfos"){
+        // Tough skeleton — jumps back when hit, counterattacks
+        if(e.fl>200){// Just got hit — jump back
+          const ka=Math.atan2(ecy-pcy,ecx-pcx);moveX=Math.cos(ka)*3;moveY=Math.sin(ka)*3;
+        }else{// Normal chase with occasional lunge
+          const phase=Math.floor(e.mt/2000)%3;
+          if(phase===2){moveX=Math.cos(ang)*es*2.5;moveY=Math.sin(ang)*es*2.5;}
+          else{moveX=Math.cos(ang)*es*0.6;moveY=Math.sin(ang)*es*0.6;}}
       }else if(e.type==="wallmaster"){
         // Drops from ceiling — shadow warning, then grab
         if(!e.wmState)e.wmState="lurk";
@@ -854,7 +870,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         sfx("hit",e.type==="boss"?"E2":"C3");
         s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:sdmg,c:p.hasMasterSword?"#8af":e.type==="boss"?"#ff4":"#fff"});
         s.pt.push(...Array.from({length:p.hasMasterSword?8:5},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:p.hasMasterSword?"#8af":"#fff"})));}}
-    if(e.hp<=0){s.en.splice(i,1);
+    if(e.hp<=0){
+      // Stalfos reforms once before dying
+      if(e.type==="stalfos"&&!e.reformed){e.hp=e.mhp;e.reformed=true;e.fl=500;
+        s.pt.push(...Array.from({length:8},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#aaa"})));
+        s.dmgNums.push({x:ecx,y:ecy-12,t:800,val:"REFORM!",c:"#fa0"});sfx("door");continue;}
+      s.en.splice(i,1);
       s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:500,c:e.type==="boss"?"#fd3":"#f88"})));
       if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
@@ -1221,9 +1242,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD){
     // Wind wisps — occasional streaks blowing across the screen
     for(let i=0;i<3;i++){
-      const wPhase=t/4000+i*2.1;const wActive=Math.sin(wPhase)>0.6;// only visible ~20% of the time
+      const wPhase=t/6000+i*2.1;const wActive=Math.sin(wPhase)>0.6;// only visible ~20% of the time
       if(wActive){const wp=((Math.sin(wPhase)-0.6)/0.4);// 0→1 during active
-        const wy=hs(i,20,300)*H2;const wx=(t/3+i*200)%(W2+100)-50;
+        const wy=hs(i,20,300)*H2;const wx=(t/6+i*200)%(W2+100)-50;
         const wa=wp<0.3?wp/0.3:wp>0.7?(1-wp)/0.3:1;// fade in/out
         c.strokeStyle=`rgba(220,230,255,${wa*0.12})`;c.lineWidth=1.5;
         c.beginPath();c.moveTo(wx,wy+Math.sin(t/200+i)*8);
@@ -1345,6 +1366,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="knight")dKn(c,ex,ey,sz,fl,t);
     else if(e.type==="magma_slug")dMs(c,ex,ey,sz,fl,t);
     else if(e.type==="wallmaster")dWm(c,ex,ey,sz,fl,t);
+    else if(e.type==="vine_creeper")dVc(c,ex,ey,sz,fl,t);
+    else if(e.type==="stalfos")dSf(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw blade traps
   for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
@@ -1931,7 +1954,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.font="7px monospace";c.fillStyle=p.tri[i]?"#fd3":"#555";c.fillText(triNames[i],tx2,triY+28);}
     const seY=triY+36;
     // Secrets counter — 7 total: 4 heart pieces, banana, lantern, shield+
-    const secY=seY+(effects.length>0?30:0)+10;
+    const secY=seY+10;
     let secFound=0;const secTotal=7;
     // Heart pieces collected (each piece counts, 4 pieces = 1 heart)
     const hpCollected=p.heartPieces+(p.mhp>8?4:0);// if mhp grew past 8, all 4 were found

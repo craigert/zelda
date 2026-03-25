@@ -14,7 +14,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
     m[5][3]=T.TORCH;m[5][12]=T.TORCH;
     m[5][7]=T.PUSH;
-  }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"skeleton"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
+  }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"vine_creeper"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
 
   // East wing — spike corridor with key
   "1,0":{tiles:mr(m=>{ae(m,["W","N","E"]);
@@ -57,7 +57,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][5]=T.FLOOR;m[5][6]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[5][9]=T.FLOOR;m[5][10]=T.FLOOR;
     m[6][5]=T.FLOOR;m[6][6]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;m[6][9]=T.FLOOR;m[6][10]=T.FLOOR;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-  }),enemies:[{x:5*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:4*TL,hp:2,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:5*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:4*TL,hp:3,type:"vine_creeper"},{x:7*TL,y:7*TL,hp:3,type:"skeleton"}]},
 
   // East of north corridor — lever and plate room with U-shaped walkway (east of 0,-2)
   "1,-2":{tiles:mr(m=>{ae(m,["W"]);
@@ -469,7 +469,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
     m[5][7]=T.PUSH;
-  }),enemies:[{x:4*TL,y:5*TL,hp:5,type:"ghost"},{x:11*TL,y:5*TL,hp:5,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"skeleton"},{x:7*TL,y:8*TL,hp:5,type:"skeleton"}]},
+  }),enemies:[{x:4*TL,y:5*TL,hp:5,type:"stalfos"},{x:11*TL,y:5*TL,hp:5,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"stalfos"},{x:7*TL,y:8*TL,hp:5,type:"skeleton"}]},
 
   // East wing — dark spike room
   "1,0":{dark:true,tiles:mr(m=>{ae(m,["W","N"]);
@@ -579,7 +579,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
     m[5][7]=T.HEART;m[9][7]=T.BOMB;m[9][8]=T.BOMB;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:6,type:"ghost"},{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:5*TL,y:8*TL,hp:5,type:"skeleton"}],
+  }),enemies:[{x:7*TL,y:4*TL,hp:6,type:"stalfos"},{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:5*TL,y:8*TL,hp:5,type:"stalfos"}],
   traps:[{x:4,y:2,dir:"v",range:7},{x:11,y:2,dir:"v",range:7}]},
 
   // Far west — ghost treasure room with pit moat (west of -1,-3)
