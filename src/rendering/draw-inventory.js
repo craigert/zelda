@@ -90,21 +90,22 @@ function drawSectionTitle(c,y,text){
 
 // ========== TAB 0: MAP ==========
 function drawMapPage(c,s,t){
-  drawSectionTitle(c,48,"OVERWORLD");
-  drawOverworldMap(c,s,t);
-  drawDivider(c,180);
-  drawQuickStats(c,s,186);
-  drawDivider(c,218,"DUNGEONS");
-  drawDungeonProgressPolished(c,s,t);
-  drawDivider(c,290,"SECRETS");
-  drawSecretsRow(c,s,t);
+  // Evenly spaced: usable 36→406 (370px), 5 sections
+  drawSectionTitle(c,52,"OVERWORLD");
+  drawOverworldMap(c,s,t);// map at y=60, ~112px tall → ends ~172
+  drawDivider(c,184);
+  drawQuickStats(c,s,190);// ~26px → ends ~216
+  drawDivider(c,226,"DUNGEONS");
+  drawDungeonProgressPolished(c,s,t);// 60px → ends ~296
+  drawDivider(c,306,"SECRETS");
+  drawSecretsRow(c,s,t);// ~30px → ends ~340
 }
 
 function drawOverworldMap(c,s,t){
   const onX=-1,oxX=4,onY=-1,oxY=2;
   const cW=40,cH=28,op=6;
   const gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-  const omX=W2/2-gW/2,omY=56;
+  const omX=W2/2-gW/2,omY=60;
 
   // Map background with subtle border
   c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-4,omY-4,gW+8,gH+8);
@@ -284,7 +285,7 @@ function drawQuickStats(c,s,yPos){
 }
 
 function drawDungeonProgressPolished(c,s,t){
-  const y=226;
+  const y=234;
   const dungeons=[
     {name:"Forest Temple",col:"#3a8830",di:0},
     {name:"Fire Cavern",col:"#d84020",di:1},
@@ -335,7 +336,7 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=298;
+  const y=314;
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
