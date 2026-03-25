@@ -90,20 +90,14 @@ function drawSectionTitle(c,y,text){
 
 // ========== TAB 0: MAP ==========
 function drawMapPage(c,s,t){
-  const loc=s.loc;
-  if(loc.ty==="ow"||loc.ty==="cave"){
-    drawSectionTitle(c,50,"OVERWORLD");
-    drawOverworldMap(c,s,t);
-  }else if(loc.ty==="dg"){
-    const dgName=s.dg[loc.di]?.name||"Dungeon";
-    drawSectionTitle(c,50,dgName.toUpperCase());
-    drawDungeonMap(c,s,t);
-  }
+  // Always show overworld map (even when in dungeon)
+  drawOverworldMap(c,s,t);
+  drawDivider(c,216);
   drawQuickStats(c,s,t);
   drawDivider(c,260);
-  drawDungeonLegend(c,s,t);
-  drawDivider(c,310);
-  drawMiniTriforce(c,s,t);
+  drawDungeonBlocks(c,s,t);
+  drawDivider(c,328);
+  drawSecretsRow(c,s,t);
 }
 
 function drawOverworldMap(c,s,t){
@@ -138,9 +132,10 @@ function drawOverworldMap(c,s,t){
     }
     // Screen border
     c.strokeStyle="rgba(0,0,0,0.6)";c.lineWidth=0.5;c.strokeRect(rx,ry,cW,cH);
-    // Current screen highlight
+    // Current screen — subtle white pulse, no yellow box
     if(ok===s.loc.scr){
-      c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(rx-1,ry-1,cW+2,cH+2);c.lineWidth=1;
+      const pa=0.2+Math.sin(t/400)*0.1;
+      c.strokeStyle=`rgba(255,255,255,${pa})`;c.lineWidth=1;c.strokeRect(rx,ry,cW,cH);
     }
   }
   // Grid lines
@@ -292,50 +287,55 @@ function drawQuickStats(c,s,t){
   c.textAlign="left";
 }
 
-function drawDungeonLegend(c,s,t){
+function drawDungeonBlocks(c,s,t){
   const y=270;
   const names=["Forest Temple","Fire Cavern","Shadow Keep","Dark Sanctum"];
   const colors=["#3a8830","#d84020","#6060cc","#c040c0"];
-  c.font="8px monospace";c.textAlign="center";
+  const bw=110,bh=48,gap=8;
+  const startX=W2/2-((bw*2+gap)/2);
+  c.textAlign="center";
   for(let i=0;i<4;i++){
-    const cx=W2/2-150+i*100;
-    // Colored dot
-    c.fillStyle=colors[i];c.beginPath();c.arc(cx-20,y+6,4,0,Math.PI*2);c.fill();
-    // Triforce indicator
-    if(i<3){
-      c.fillStyle=s.p.tri[i]?"#fd3":"#333";
-      c.beginPath();c.moveTo(cx-20,y+14);c.lineTo(cx-16,y+20);c.lineTo(cx-24,y+20);c.closePath();c.fill();
-    }
-    // Master key indicator
-    c.fillStyle=s.p.masterKey[i]?"#c070ff":"#333";c.font="8px monospace";
-    c.fillText(s.p.masterKey[i]?"\u2605":"\u2606",cx-20,y+30);
+    const col=i%2,row=Math.floor(i/2);
+    const bx=startX+col*(bw+gap),by=y+row*(bh+4);
+    // Block bg
+    c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(bx,by,bw,bh);
+    c.strokeStyle=colors[i];c.lineWidth=1;c.strokeRect(bx,by,bw,bh);
+    // Color bar at top
+    c.fillStyle=colors[i];c.fillRect(bx,by,bw,3);
     // Name
-    c.fillStyle="#aaa";c.font="7px monospace";c.fillText(names[i],cx,y+6);
+    c.fillStyle="#ccc";c.font="bold 7px monospace";c.fillText(names[i],bx+bw/2,by+14);
+    // Items row: triforce, master key, cleared rooms
+    const iy=by+22;
+    // Triforce (D1-D3 only)
+    if(i<3){c.fillStyle=s.p.tri[i]?"#fd3":"#333";
+      c.beginPath();c.moveTo(bx+20,iy);c.lineTo(bx+26,iy+10);c.lineTo(bx+14,iy+10);c.closePath();c.fill();
+      c.fillStyle="#888";c.font="6px monospace";c.fillText("Triforce",bx+20,iy+18);}
+    // Master key
+    c.fillStyle=s.p.masterKey[i]?"#c070ff":"#333";c.font="bold 9px monospace";
+    c.fillText(s.p.masterKey[i]?"\u2605":"\u2606",bx+55,iy+8);
+    c.fillStyle="#888";c.font="6px monospace";c.fillText("M.Key",bx+55,iy+18);
+    // Cleared count
+    let cleared=0,total=0;const dg=s.dg[i];if(dg){const rks=Object.keys(dg.rooms);total=rks.length;
+      for(const rk of rks)if(s.cl.has(`dg:${i}:${rk}`))cleared++;}
+    c.fillStyle=cleared===total&&total>0?"#4f4":"#aaa";c.font="bold 9px monospace";
+    c.fillText(`${cleared}/${total}`,bx+90,iy+8);
+    c.fillStyle="#888";c.font="6px monospace";c.fillText("Rooms",bx+90,iy+18);
   }
   c.textAlign="left";
 }
 
-function drawMiniTriforce(c,s,t){
-  const y=325,cx=W2/2-60;
-  c.fillStyle="#aaa";c.font="bold 9px monospace";c.textAlign="left";c.fillText("TRIFORCE",cx-30,y+8);
-  const triS=10;
-  for(let i=0;i<3;i++){
-    const tx=cx+40+i*28,ty=y;
-    c.fillStyle=s.p.tri[i]?"#fd3":"#333";
-    c.beginPath();c.moveTo(tx,ty);c.lineTo(tx+triS,ty+triS*1.7);c.lineTo(tx-triS,ty+triS*1.7);c.closePath();c.fill();
-    if(s.p.tri[i]){
-      c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx,ty+4);c.lineTo(tx+6,ty+triS*1.4);c.lineTo(tx-6,ty+triS*1.4);c.closePath();c.fill();
-    }
-  }
-  // Secrets
-  const secY=y;
+function drawSecretsRow(c,s,t){
+  const y=338;
   const secrets=countSecrets(s);
-  c.fillStyle="#aaa";c.font="bold 9px monospace";c.textAlign="left";
-  c.fillText(`SECRETS ${secrets.found}/${secrets.total}`,cx+130,secY+8);
+  c.textAlign="center";
+  c.fillStyle="#d4a820";c.font="bold 9px monospace";c.fillText(`SECRETS  ${secrets.found} / ${secrets.total}`,W2/2,y+6);
+  // Dots
+  const dotW=secrets.total*14;const startX=W2/2-dotW/2;
   for(let i=0;i<secrets.total;i++){
-    const sx=cx+130+i*12,sy=secY+14;
-    if(i<secrets.found){c.fillStyle="#fd3";c.beginPath();c.arc(sx+4,sy+4,3,0,Math.PI*2);c.fill();}
-    else{c.strokeStyle="#555";c.lineWidth=1;c.beginPath();c.arc(sx+4,sy+4,3,0,Math.PI*2);c.stroke();}
+    const dx=startX+i*14+7,dy=y+16;
+    if(i<secrets.found){c.fillStyle="#fd3";c.beginPath();c.arc(dx,dy,4,0,Math.PI*2);c.fill();
+      c.fillStyle="#ffe866";c.beginPath();c.arc(dx-1,dy-1,1.5,0,Math.PI*2);c.fill();
+    }else{c.strokeStyle="#555";c.lineWidth=1;c.beginPath();c.arc(dx,dy,3,0,Math.PI*2);c.stroke();}
   }
   c.textAlign="left";
 }
@@ -356,10 +356,6 @@ function drawGearPage(c,s,t){
   drawEquipGrid(c,s,t);
   drawDivider(c,234,"TRIFORCE");
   drawBigTriforce(c,s,t);
-  drawDivider(c,326,"DUNGEONS");
-  drawDungeonProgress(c,s,t);
-  drawDivider(c,380,"SECRETS");
-  drawSecretsRow(c,s);
 }
 
 function drawPaperDoll(c,s,t){
