@@ -269,7 +269,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
     if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
   // Init NPC runtime state
   const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
-  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000})):[];}
+  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:n.name.includes("Tree")})):[];}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
@@ -717,7 +717,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const ka=Math.atan2(pcy-bcy,pcx-bcx);if(tm(p.x+Math.cos(ka)*12,p.y+Math.sin(ka)*12)){p.x+=Math.cos(ka)*12;p.y+=Math.sin(ka)*12;}
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
   // NPC wandering
-  for(const ns2 of s.npcState){ns2.mt+=dt;ns2.wait-=dt;
+  for(const ns2 of s.npcState){ns2.mt+=dt;if(ns2.fixed)continue;ns2.wait-=dt;
     if(ns2.st==="idle"&&ns2.wait<=0){ns2.st="walk";ns2.wait=800+Math.random()*1500;
       ns2.dir=[0,1,2,3][Math.random()*4|0];}
     else if(ns2.st==="walk"){const nsp=0.5*(dt/16);
