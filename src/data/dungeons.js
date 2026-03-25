@@ -146,7 +146,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][3]=T.TORCH;m[3][12]=T.TORCH;m[8][3]=T.TORCH;m[8][12]=T.TORCH;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     // Triforce reward
-    m[2][8]=T.TRIFORCE;
+    m[2][8]=T.FLOOR;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
 
@@ -282,7 +282,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     // Torches at corners
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
     // Triforce reward
-    m[2][7]=T.TRIFORCE;
+    m[2][7]=T.FLOOR;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:14,type:"boss",name:"Flame Wyrm",pattern:"spawn"}]},
 
   // South treasure (crack south wall of entry room)
@@ -453,7 +453,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     // Torches
     m[3][3]=T.TORCH;m[3][12]=T.TORCH;m[8][3]=T.TORCH;m[8][12]=T.TORCH;
     // Triforce reward
-    m[2][12]=T.TRIFORCE;
+    m[2][12]=T.FLOOR;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:16,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
 }};
 
@@ -614,7 +614,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[3][7]=T.TORCH;m[3][8]=T.TORCH;m[8][7]=T.TORCH;m[8][8]=T.TORCH;
     m[5][4]=T.TORCH;m[5][11]=T.TORCH;m[6][4]=T.TORCH;m[6][11]=T.TORCH;
     // Triforce reward
-    m[2][7]=T.TRIFORCE;
+    m[2][7]=T.FLOOR;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:24,type:"boss",name:"Dark King",pattern:"all"}]},
 }};
 
