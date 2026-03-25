@@ -251,7 +251,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
