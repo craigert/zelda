@@ -173,11 +173,11 @@ function drawOverworldMap(c,s,t){
       c.fillStyle="rgba(255,255,255,0.2)";c.beginPath();c.arc(prx,pry,5,0,Math.PI*2);c.fill();
     }
   }
-  // Compass rose
+  // Compass rose — inside the map border
   c.fillStyle="rgba(184,150,42,0.5)";c.font="bold 7px monospace";c.textAlign="center";
-  c.fillText("N",omX+gW/2,omY-6);c.fillText("S",omX+gW/2,omY+gH+10);
-  c.textAlign="right";c.fillText("W",omX-6,omY+gH/2+3);
-  c.textAlign="left";c.fillText("E",omX+gW+6,omY+gH/2+3);
+  c.fillText("N",omX+gW/2,omY+8);c.fillText("S",omX+gW/2,omY+gH-2);
+  c.textAlign="right";c.fillText("W",omX+8,omY+gH/2+3);
+  c.textAlign="left";c.fillText("E",omX+gW-4,omY+gH/2+3);
   c.textAlign="left";
 }
 
