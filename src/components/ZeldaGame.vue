@@ -1066,9 +1066,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(p.burn>0){c.fillStyle="#f80";c.font="bold 10px monospace";c.fillText("\ud83d\udd25BURN",sx2,20);sx2+=55;}
   if(p.freeze>0){c.fillStyle="#8cf";c.font="bold 10px monospace";c.fillText("\u2744\ufe0fFREEZE",sx2,20);sx2+=65;}
   if(p.poison>0){c.fillStyle="#4a4";c.font="bold 10px monospace";c.fillText("\u2620\ufe0fPOISON",sx2,20);sx2+=65;}
-  // Triforce pieces — after hearts, before items
+  // Triforce pieces — after hearts
   for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",hc*hsp+20+i*18,21);}
-  if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 11px monospace";c.fillText(dgn,p.mhp/2*22+16,21);}
+  // Dungeon name — centered in header
+  if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 10px monospace";c.textAlign="center";c.fillText(dgn,W2/2,12);c.textAlign="left";}
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
