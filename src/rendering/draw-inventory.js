@@ -90,21 +90,21 @@ function drawSectionTitle(c,y,text){
 
 // ========== TAB 0: MAP ==========
 function drawMapPage(c,s,t){
-  // Always show overworld map (even when in dungeon)
+  drawSectionTitle(c,50,"OVERWORLD");
   drawOverworldMap(c,s,t);
-  drawDivider(c,192);
-  drawQuickStats(c,s,198);
-  drawDivider(c,230,"DUNGEONS");
+  drawDivider(c,210);
+  drawQuickStats(c,s,216);
+  drawDivider(c,248,"DUNGEONS");
   drawDungeonProgressPolished(c,s,t);
-  drawDivider(c,306,"SECRETS");
+  drawDivider(c,320,"SECRETS");
   drawSecretsRow(c,s,t);
 }
 
 function drawOverworldMap(c,s,t){
   const onX=-1,oxX=4,onY=-1,oxY=2;
-  const cW=44,cH=32,op=6;
+  const cW=40,cH=28,op=6;
   const gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-  const omX=W2/2-gW/2,omY=46;
+  const omX=W2/2-gW/2,omY=58;
 
   // Map background with subtle border
   c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-4,omY-4,gW+8,gH+8);
@@ -284,14 +284,14 @@ function drawQuickStats(c,s,yPos){
 }
 
 function drawDungeonProgressPolished(c,s,t){
-  const y=240;
+  const y=256;
   const dungeons=[
     {name:"Forest Temple",col:"#3a8830",di:0},
     {name:"Fire Cavern",col:"#d84020",di:1},
     {name:"Shadow Keep",col:"#6060cc",di:2},
     {name:"Dark Sanctum",col:"#c040c0",di:3},
   ];
-  const cellW=W2/4-14,startX=20;
+  const cellW=W2/4-18,startX=22;
   c.textAlign="center";
   for(let i=0;i<4;i++){
     const d=dungeons[i];
@@ -335,7 +335,7 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=314;
+  const y=328;
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
@@ -499,7 +499,7 @@ function drawEquipGrid(c,s,t){
 }
 
 function drawBigTriforce(c,s,t){
-  const cx=W2/2,cy=295;
+  const cx=W2/2,cy=315;
   const triS=50;
   const allCollected=s.p.tri[0]&&s.p.tri[1]&&s.p.tri[2];
   const pieces=[
