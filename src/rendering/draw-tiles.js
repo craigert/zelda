@@ -1165,12 +1165,12 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Hourglass icon
       c.fillStyle=`rgba(255,200,100,${tp*0.8})`;c.font="10px monospace";c.textAlign="center";c.fillText("\u23F1",px+16,py+20);c.textAlign="left";
       break;}
-    case T.RUPEE:{// Rupee pickup on floor
+    case T.RUPEE:{// Rupee pickup on floor — Zelda hexagonal shape
       c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
       const rg2=Math.sin(t/300)*.15+.2;c.fillStyle=`rgba(50,255,50,${rg2})`;c.beginPath();c.arc(px+16,py+16,10,0,Math.PI*2);c.fill();
-      // Rupee gem shape
-      c.fillStyle="#4f4";c.beginPath();c.moveTo(px+16,py+6);c.lineTo(px+22,py+14);c.lineTo(px+16,py+26);c.lineTo(px+10,py+14);c.closePath();c.fill();
-      c.fillStyle="#8f8";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+20,py+14);c.lineTo(px+16,py+14);c.closePath();c.fill();
+      const rx2=px+16,ry2=py+16;
+      c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-8);c.lineTo(rx2+5,ry2-3);c.lineTo(rx2+5,ry2+3);c.lineTo(rx2,ry2+8);c.lineTo(rx2-5,ry2+3);c.lineTo(rx2-5,ry2-3);c.closePath();c.fill();
+      c.fillStyle="#8f8";c.beginPath();c.moveTo(rx2,ry2-6);c.lineTo(rx2+4,ry2-2);c.lineTo(rx2,ry2);c.lineTo(rx2-4,ry2-2);c.closePath();c.fill();
       break;}
     case T.LEDGE_S:case T.LEDGE_N:case T.LEDGE_E:case T.LEDGE_W:{
       // Floor base

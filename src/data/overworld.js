@@ -200,6 +200,7 @@ export const OW={
   // Central oasis path
   m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   m[4][7]=T.PATH;m[4][8]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;
+  m[8][12]=T.CRACK;// Hidden shop cave
   oe(m,"W",T.SAND);oe(m,"E",T.SAND);oe(m,"N",T.SAND);oe(m,"S",T.SAND);return m;})(),
 
 // Desert ruins with crack cave

@@ -59,4 +59,16 @@ export const NPC_DATA = {
       "behind locked doors within."
     ]},
   ],
+  "0,1": [
+    { tx: 7, ty: 4, name: "Ancient Tree", lines: [
+      "...*creak*... Ah, a visitor...",
+      "I have watched these lands for ages.",
+      "The mountains to the north hide a",
+      "golden treasure behind cracked stone.",
+      "In each dungeon, defeat all foes",
+      "in a room to earn its treasure.",
+      "Light dim torches with your sword...",
+      "and the darkness will reward you."
+    ]},
+  ],
 };

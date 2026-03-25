@@ -118,6 +118,8 @@ function init() {
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[], // runtime NPC positions {x,y,hx,hy,dir,mt,st}
+    shop:null, // {items:[],sel:0} — active shop menu
+    hasLantern:false,hasShieldUp:false, // shop upgrades
     pArrows:[],
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
@@ -211,7 +213,8 @@ function saveGame(s) {
       cl: [...s.cl],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
-      respawn: { ...s.respawn }
+      respawn: { ...s.respawn },
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp
     };
     localStorage.setItem('zelda_save', JSON.stringify(data));
   } catch (e) {}
@@ -234,7 +237,7 @@ function applySave(s, save) {
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.heartContainers = [...save.heartContainers];
-  s.finalOpen = save.finalOpen;
+  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false;
   s.respawn = { ...save.respawn };
   if (s.finalOpen) {
     const fm = OW["3,2"];
@@ -344,7 +347,13 @@ function cTr(s){const p=s.p,loc=s.loc;
         const owm=OW[loc.scr];
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
-            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);s.msg={text:"Hidden Cave!",t:1500};}};sfx("door");return;}}}
+            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);
+            if(cv.shop){s.shop={sel:0,items:[
+              {name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;}},
+              {name:"Lantern",cost:30,req:null,once:"hasLantern",action:s2=>{s2.hasLantern=true;}},
+              {name:"Shield+",cost:50,req:null,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;}},
+            ]};s.msg={text:"Welcome to my shop!",t:1500};}
+            else{s.msg={text:"Hidden Cave!",t:1500};}}};sfx("door");return;}}}
     }
     const[sx,sy]=loc.scr.split(",").map(Number);
     if(p.x<-4){const ns=`${sx-1},${sy}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-PS-8;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
@@ -388,6 +397,20 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   // Boss intro sequence — freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur){s.bossIntro=null;}
+    return;}
+  // Shop menu interaction
+  if(s.shop){const ky=kyR.value;
+    if(ky.has("arrowup")||ky.has("w")){s.shop.sel=(s.shop.sel-1+s.shop.items.length)%s.shop.items.length;ky.delete("arrowup");ky.delete("w");}
+    if(ky.has("arrowdown")||ky.has("s")){s.shop.sel=(s.shop.sel+1)%s.shop.items.length;ky.delete("arrowdown");ky.delete("s");}
+    if(ky.has(" ")||ky.has("enter")||ky.has("z")){
+      const item=s.shop.items[s.shop.sel];
+      if(item.once&&s[item.once]){s.msg={text:"Already purchased!",t:1000};}
+      else if(item.req&&!s.p[item.req]){s.msg={text:"You need the right equipment first!",t:1500};}
+      else if(s.p.rupees>=item.cost){s.p.rupees-=item.cost;item.action(s);sfx("triforce");s.shake.t=200;
+        s.msg={text:`Bought ${item.name}!`,t:1500};}
+      else{s.msg={text:"Not enough rupees!",t:1000};}
+      ky.delete(" ");ky.delete("enter");ky.delete("z");}
+    if(ky.has("escape")||ky.has("p")){s.shop=null;ky.delete("escape");ky.delete("p");}
     return;}
   if(s.npcTalk){
     s.npcTalk.timer+=dt;
@@ -612,6 +635,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
       else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");}
       else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");}
+      else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");}
       else if(d2.type==="bow"){p.hasBow=true;sfx("triforce");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
@@ -847,7 +871,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const ba=Math.atan2(bp.y-(p.y+PS/2),bp.x-(p.x+PS/2));
       const pf=p.dir===0?-Math.PI/2:p.dir===2?Math.PI/2:p.dir===3?Math.PI:0;
       const diff=Math.abs(((ba-pf+Math.PI*3)%(Math.PI*2))-Math.PI);
-      if(diff<Math.PI*0.6){sfx("door");s.bProj.splice(i,1);
+      if(diff<Math.PI*(s.hasShieldUp?0.85:0.6)){sfx("door");s.bProj.splice(i,1);
         s.pt.push(...Array.from({length:6},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#88f"})));
         s.dmgNums.push({x:p.x+PS/2,y:p.y,t:500,val:"BLOCK",c:"#8af"});
         continue;}}
@@ -1280,6 +1304,24 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD){const npcs=NPC_DATA[loc.scr];if(npcs){for(let ni=0;ni<npcs.length;ni++){const npc=npcs[ni],ns2=s.npcState[ni];if(!ns2)continue;
     const nx=ns2.x,ny=ns2.y,ndir=ns2.dir,walking=ns2.st==="walk";
     const walkBob=walking?Math.sin(ns2.mt/120)*1.5:0;
+    // Special: Ancient Tree NPC
+    if(npc.name.includes("Tree")){
+      const sway=Math.sin(t/1500)*1.5;
+      // Trunk
+      c.fillStyle="#5a3a18";c.fillRect(nx+10,ny+10,12,22);c.fillStyle="#4a2a10";c.fillRect(nx+12,ny+12,3,18);
+      // Canopy
+      c.fillStyle="#2a6a18";c.beginPath();c.arc(nx+16,ny+6+sway,14,0,Math.PI*2);c.fill();
+      c.fillStyle="#3a8a28";c.beginPath();c.arc(nx+12,ny+4+sway,9,0,Math.PI*2);c.fill();
+      c.fillStyle="#4aa038";c.beginPath();c.arc(nx+20,ny+3+sway,8,0,Math.PI*2);c.fill();
+      // Eyes in trunk
+      c.fillStyle="#fd3";c.beginPath();c.arc(nx+13,ny+18,2,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(nx+19,ny+18,2,0,Math.PI*2);c.fill();
+      c.fillStyle="#000";c.beginPath();c.arc(nx+13,ny+18,1,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(nx+19,ny+18,1,0,Math.PI*2);c.fill();
+      // Exclamation when near
+      const pdist2=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
+      if(pdist2<TL*3){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("!",nx+16,ny-10+bob);c.textAlign="left";}
+      continue;}
     // Shadow
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+29,10,3,0,0,Math.PI*2);c.fill();
     // Body/robe
@@ -1485,11 +1527,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle="#ffe866";c.beginPath();c.moveTo(0,-6);c.lineTo(7,6);c.lineTo(-7,6);c.fill();
       c.fillStyle="#fff";c.globalAlpha=0.4;c.beginPath();c.moveTo(0,-4);c.lineTo(3,2);c.lineTo(-3,2);c.fill();c.globalAlpha=1;
       c.restore();}
-    else if(d2.type==="rupee_green"||d2.type==="rupee_blue"||d2.type==="rupee_red"){
-      const rc=d2.type==="rupee_green"?"#4f4":d2.type==="rupee_blue"?"#44f":"#f44";
+    else if(d2.type==="rupee_green"||d2.type==="rupee_blue"||d2.type==="rupee_purple"||d2.type==="rupee_red"){
+      const rc=d2.type==="rupee_green"?"#4f4":d2.type==="rupee_blue"?"#44f":d2.type==="rupee_purple"?"#a4f":"#f44";
       const rg=Math.sin(t/200)*0.2+0.3;c.fillStyle=rc.replace("4","8").replace("f","a");c.globalAlpha=rg;c.beginPath();c.arc(d2.x,d2.y+bob2,8,0,Math.PI*2);c.fill();c.globalAlpha=1;
-      c.fillStyle=rc;c.beginPath();c.moveTo(d2.x,d2.y-5+bob2);c.lineTo(d2.x+4,d2.y+bob2);c.lineTo(d2.x,d2.y+5+bob2);c.lineTo(d2.x-4,d2.y+bob2);c.closePath();c.fill();
-      c.fillStyle="#fff";c.globalAlpha=0.4;c.beginPath();c.moveTo(d2.x,d2.y-3+bob2);c.lineTo(d2.x+2,d2.y+bob2);c.lineTo(d2.x,d2.y+bob2);c.closePath();c.fill();c.globalAlpha=1;}
+      // Zelda hexagonal rupee shape
+      const rx=d2.x,ry=d2.y+bob2;
+      c.fillStyle=rc;c.beginPath();c.moveTo(rx,ry-6);c.lineTo(rx+4,ry-2);c.lineTo(rx+4,ry+2);c.lineTo(rx,ry+6);c.lineTo(rx-4,ry+2);c.lineTo(rx-4,ry-2);c.closePath();c.fill();
+      c.fillStyle="#fff";c.globalAlpha=0.35;c.beginPath();c.moveTo(rx,ry-5);c.lineTo(rx+3,ry-2);c.lineTo(rx,ry);c.lineTo(rx-3,ry-2);c.closePath();c.fill();c.globalAlpha=1;}
     else{c.fillStyle="#444";c.beginPath();c.arc(d2.x,d2.y+bob2,5,0,Math.PI*2);c.fill();c.fillStyle="#666";c.beginPath();c.arc(d2.x,d2.y-1+bob2,4,0,Math.PI*2);c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
@@ -1552,7 +1596,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         // Cut light circles around player and lit torches
         c.save();c.globalCompositeOperation="destination-out";
         // Player light (small personal glow)
-        const plr=40+litT2*8;const pg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plr);
+        const plr=(s.hasLantern?100:40)+litT2*8;const pg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plr);
         pg.addColorStop(0,`rgba(0,0,0,${darkness*0.9})`);pg.addColorStop(0.7,`rgba(0,0,0,${darkness*0.4})`);pg.addColorStop(1,"rgba(0,0,0,0)");
         c.fillStyle=pg;c.fillRect(p.x+PS/2-plr,p.y+PS/2-plr,plr*2,plr*2);
         // Lit torch lights
@@ -1675,6 +1719,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.textAlign="left";c.globalAlpha=1;}
     // Screen shake on initial slam
     if(bi.t<200){const si=1-bi.t/200;c.save();c.translate((Math.random()-.5)*si*6,(Math.random()-.5)*si*6);c.restore();}}
+  // Shop overlay
+  if(s.shop){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
+    c.textAlign="center";c.fillStyle="#fd3";c.font="bold 20px monospace";c.fillText("SHOP",W2/2,FH2/2-80);
+    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-80,FH2/2-72,160,1);
+    // Shopkeeper
+    c.fillStyle="#8a5a2a";c.fillRect(W2/2-8,FH2/2-65,16,20);c.fillStyle="#f0c8a0";c.beginPath();c.arc(W2/2,FH2/2-68,8,0,Math.PI*2);c.fill();
+    c.fillStyle="#654321";c.beginPath();c.arc(W2/2,FH2/2-72,9,Math.PI+0.2,-0.2);c.fill();
+    c.fillStyle="#222";c.beginPath();c.arc(W2/2-3,FH2/2-68,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(W2/2+3,FH2/2-68,1.5,0,Math.PI*2);c.fill();
+    for(let i=0;i<s.shop.items.length;i++){const it=s.shop.items[i],iy=FH2/2-30+i*30,sel=s.shop.sel===i;
+      const owned=it.once&&s[it.once];const cantBuy=it.req&&!s.p[it.req];
+      if(sel){c.fillStyle="rgba(253,211,51,0.1)";c.fillRect(W2/2-110,iy-10,220,24);
+        c.fillStyle="#fd3";c.font="bold 12px monospace";c.fillText("\u25b6",W2/2-100,iy+5);}
+      c.fillStyle=owned?"#555":cantBuy?"#664":sel?"#fff":"#aaa";c.font=sel?"bold 13px monospace":"13px monospace";
+      c.fillText(owned?"SOLD OUT":it.name,W2/2-20,iy+5);
+      if(!owned){c.fillStyle=s.p.rupees>=it.cost?"#4f4":"#f44";c.font="11px monospace";c.fillText(`${it.cost} rupees`,W2/2+60,iy+5);}}
+    c.fillStyle="#666";c.font="9px monospace";c.fillText("Space to buy \u00b7 Esc to leave",W2/2,FH2/2+70);
+    c.textAlign="left";}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
@@ -1808,7 +1869,15 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle=ef.col;c.font="bold 9px monospace";c.fillText(ef.name,ex2+40,seY+14);
         c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(ex2+10,seY+18,60,4);
         c.fillStyle=ef.col;c.fillRect(ex2+10,seY+18,60*(ef.t/ef.max),4);}}
-    c.fillStyle="#555";c.font="9px monospace";c.fillText("Press TAB to close",W2/2,FH2-10);
+    // Secrets counter
+    const secY=seY+(effects.length>0?30:0)+10;
+    let secFound=0,secTotal=12;// total secrets: 8 heart pieces + 3 hidden caves + 1 banana
+    secFound+=p.heartPieces;// partial pieces count
+    for(let i=0;i<4;i++)secFound+=p.mhp>8+i*2?1:0;// completed heart containers from pieces
+    if(p.redArmor)secFound++;
+    if(s.hasLantern)secFound++;if(s.hasShieldUp)secFound++;
+    c.fillStyle="#aaa";c.font="bold 10px monospace";c.fillText(`SECRETS: ${Math.min(secFound,secTotal)}/${secTotal}`,W2/2,secY);
+    c.fillStyle="#555";c.font="9px monospace";c.fillText("I / Tab / Esc to close",W2/2,FH2-10);
     c.textAlign="left";}
   if(s.go){c.fillStyle="rgba(10,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#e33";c.font="bold 36px monospace";c.textAlign="center";c.fillText("GAME OVER",W2/2,FH2/2-20);c.fillStyle="#ccc";c.font="16px monospace";c.fillText("Tap to respawn",W2/2,FH2/2+25);c.textAlign="left";}
   if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("All Triforce pieces collected!",W2/2,FH2/2+10);c.fillText("Tap to play again",W2/2,FH2/2+35);c.textAlign="left";}}
