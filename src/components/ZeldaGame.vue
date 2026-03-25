@@ -122,6 +122,7 @@ function init() {
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
+    combatLockTime:0, // safety timer for combat lock
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
     bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
     ledgeHop:0, // timer for hop animation when dropping off a ledge
@@ -254,7 +255,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Combat lock — seal exits in dungeons/caves when enemies present
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
-  if(isDg&&s.en.length>0){s.combatLock=true;sfx("door");s.shake.t=200;
+  if(isDg&&s.en.length>0){s.combatLock=true;s.combatLockTime=0;sfx("door");s.shake.t=200;
     // Boss intro — cinematic sequence if room has a boss
     const boss=s.en.find(e=>e.type==="boss");
     if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
@@ -361,6 +362,9 @@ function cTr(s){const p=s.p,loc=s.loc;
         const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
     const dg=s.dg[loc.di];
     if(s.combatLock){// Block exits during combat lock
+      s.combatLockTime+=dt;
+      // Safety valve: if locked for 30+ seconds, force release
+      if(s.combatLockTime>30000){s.combatLock=false;s.combatLockTime=0;const rk2=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;s.cl.add(rk2);s.en=[];s.msg={text:"Enemies fled!",t:1500};}
       if(p.y<2)p.y=2;if(p.y>H2-PS-2)p.y=H2-PS-2;if(p.x<2)p.x=2;if(p.x>W2-PS-2)p.x=W2-PS-2;
     }else{
     if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}

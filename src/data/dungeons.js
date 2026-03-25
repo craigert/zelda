@@ -78,8 +78,8 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
     m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
-    // One-way ledge — can drop south but not climb back north
-    for(let x2=5;x2<=10;x2++)m[6][x2]=T.LEDGE_S;
+    // One-way ledge — shorter, doesn't block E/W exits
+    m[6][6]=T.LEDGE_S;m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[6][9]=T.LEDGE_S;
     m[9][7]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
   traps:[{x:4,y:3,dir:"h",range:6},{x:4,y:8,dir:"h",range:6}]},
