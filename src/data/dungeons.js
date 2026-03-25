@@ -240,7 +240,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
   }),enemies:[{x:7*TL,y:3*TL,hp:4,type:"fire_bat"},{x:7*TL,y:8*TL,hp:4,type:"fire_bat"}],reward:"master_key"},
 
   // North door — lava crossing (crack west to bomb room)
-  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E"]);
+  "0,-1":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E","W"]);
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)m[y][x]=T.PIT;
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
@@ -248,12 +248,10 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     // One-way ledge drop — shortcut south
     m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-    m[5][0]=T.CRACK;m[6][0]=T.CRACK;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
 
-  // Hidden bomb room — hard enemies guard the bomb bag
-  "-1,-1":{tiles:mr(m=>{
-    m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;
+  // Bomb bag room — west of lava crossing, accessible without bombs
+  "-1,-1":{tiles:mr(m=>{ae(m,["E"]);
     for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[3][5]=T.PIT;m[3][10]=T.PIT;m[8][5]=T.PIT;m[8][10]=T.PIT;
@@ -411,17 +409,15 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
   }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:12,type:"miniboss",name:"Shadow Knight"}],reward:"master_sword"},
 
   // West of depth — spike+ghost gauntlet leading to master key
-  "-1,-2":{tiles:mr(m=>{ae(m,["E"]);
+  "-1,-2":{tiles:mr(m=>{ae(m,["E","W"]);
     m[3][4]=T.WALL;m[3][5]=T.WALL;m[4][4]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;m[4][11]=T.WALL;
     m[7][4]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[7][11]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;
     m[5][7]=T.SPIKE;m[5][8]=T.SPIKE;m[6][7]=T.SPIKE;m[6][8]=T.SPIKE;
-    m[5][0]=T.CRACK;m[6][0]=T.CRACK;
     m[9][7]=T.KEY;
   }),enemies:[{x:7*TL,y:3*TL,hp:5,type:"ghost"},{x:3*TL,y:6*TL,hp:5,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
-  // Master key room — spike gauntlet with ghost guards (bomb west wall of -1,-2)
-  "-2,-2":{tiles:mr(m=>{
-    m[5][CO-1]=T.FLOOR;m[6][CO-1]=T.FLOOR;
+  // Master key room — spike gauntlet with ghost guards (west of -1,-2)
+  "-2,-2":{tiles:mr(m=>{ae(m,["E"]);
     for(let x=3;x<=12;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
@@ -502,19 +498,17 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
 
-  // East upper — ghost arena
-  "1,-1":{tiles:mr(m=>{ae(m,["S","W"]);
+  // East upper — ghost arena (east leads to master key)
+  "1,-1":{tiles:mr(m=>{ae(m,["S","W","E"]);
     m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;
     m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;
     m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
     m[5][7]=T.LEVER;m[6][8]=T.KEY;
-    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
   }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"}]},
 
-  // MASTER_KEY room (crack east from 1,-1; bomb wall then fight)
-  "2,-1":{tiles:mr(m=>{
-    m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
+  // MASTER_KEY room (east of 1,-1)
+  "2,-1":{tiles:mr(m=>{ae(m,["W"]);
     for(let x=4;x<=11;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
     m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
