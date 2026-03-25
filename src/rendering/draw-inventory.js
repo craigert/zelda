@@ -92,19 +92,19 @@ function drawSectionTitle(c,y,text){
 function drawMapPage(c,s,t){
   // Always show overworld map (even when in dungeon)
   drawOverworldMap(c,s,t);
-  drawDivider(c,216);
-  drawQuickStats(c,s,t);
-  drawDivider(c,258,"DUNGEONS");
+  drawDivider(c,192);
+  drawQuickStats(c,s,198);
+  drawDivider(c,230,"DUNGEONS");
   drawDungeonProgressPolished(c,s,t);
-  drawDivider(c,340,"SECRETS");
+  drawDivider(c,306,"SECRETS");
   drawSecretsRow(c,s,t);
 }
 
 function drawOverworldMap(c,s,t){
   const onX=-1,oxX=4,onY=-1,oxY=2;
-  const cW=48,cH=36,op=6;
+  const cW=44,cH=32,op=6;
   const gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-  const omX=W2/2-gW/2,omY=60;
+  const omX=W2/2-gW/2,omY=46;
 
   // Map background with subtle border
   c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-4,omY-4,gW+8,gH+8);
@@ -117,15 +117,11 @@ function drawOverworldMap(c,s,t){
     const tiles=OW[ok];
     if(tiles){
       // Draw 3px per tile for 16x12 = 48x36
+      const tw=cW/16,th=cH/12;
       for(let ty2=0;ty2<12;ty2++)for(let tx2=0;tx2<16;tx2++){
         const tv=tiles[ty2]?.[tx2]??0;
         c.fillStyle=tCols[tv]||"#333";
-        c.fillRect(rx+tx2*3,ry+ty2*3,3,3);
-        // Flower color dots
-        if(tv===T.FLOWER){
-          c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";
-          c.fillRect(rx+tx2*3,ry+ty2*3,1,1);
-        }
+        c.fillRect(rx+Math.floor(tx2*tw),ry+Math.floor(ty2*th),Math.ceil(tw),Math.ceil(th));
       }
     }else{
       c.fillStyle="#111";c.fillRect(rx,ry,cW,cH);
@@ -255,8 +251,8 @@ function drawDungeonMap(c,s,t){
   }
 }
 
-function drawQuickStats(c,s,t){
-  const y=222,p=s.p;
+function drawQuickStats(c,s,yPos){
+  const y=yPos||222,p=s.p;
   c.fillStyle="rgba(0,0,0,0.3)";c.fillRect(20,y-2,W2-40,30);
   const stats=[
     {draw:(cx,cy)=>{c.fillStyle="#ee3333";dH(c,cx-6,cy-6,12);},val:`${Math.ceil(p.hp/2)}/${Math.ceil(p.mhp/2)}`,col:"#f44"},
@@ -288,18 +284,18 @@ function drawQuickStats(c,s,t){
 }
 
 function drawDungeonProgressPolished(c,s,t){
-  const y=268;
+  const y=240;
   const dungeons=[
     {name:"Forest Temple",col:"#3a8830",di:0},
     {name:"Fire Cavern",col:"#d84020",di:1},
     {name:"Shadow Keep",col:"#6060cc",di:2},
     {name:"Dark Sanctum",col:"#c040c0",di:3},
   ];
-  const cellW=W2/4-8,startX=14;
+  const cellW=W2/4-14,startX=20;
   c.textAlign="center";
   for(let i=0;i<4;i++){
     const d=dungeons[i];
-    const bx=startX+i*(cellW+4),cx2=bx+cellW/2;
+    const bx=startX+i*(cellW+8),cx2=bx+cellW/2;
     // Cell bg with gradient
     const bg=c.createLinearGradient(bx,y,bx,y+60);
     bg.addColorStop(0,"rgba(0,0,0,0.3)");bg.addColorStop(1,"rgba(0,0,0,0.15)");
@@ -339,7 +335,7 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=348;
+  const y=314;
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
