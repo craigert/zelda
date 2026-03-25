@@ -115,7 +115,7 @@ function init() {
     bProj:[],
     gt:0,
     dgTitle:{text:"",t:0}, // dungeon title overlay
-    mapOpen:false,
+    mapOpen:false,mapTab:0,
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[], // runtime NPC positions {x,y,hx,hy,dir,mt,st}
@@ -150,7 +150,13 @@ function onCanvasClick() {
     return;
   }
   if (s && (s.go || s.won)) { s.respawnClick = true; return; }
-  if (s && s.mapOpen) { s.mapOpen = false; s.paused = false; return; }
+  if (s && s.mapOpen) {
+    // Check if click is on tab bar area (scaled coordinates)
+    const cv=cvRef.value;if(cv){const r=cv.getBoundingClientRect();const e2=event||window.event;
+      if(e2){const cx=(e2.clientX-r.left)/r.width*W2,cy=(e2.clientY-r.top)/r.height*(H2+HH);
+        if(cy>=14&&cy<=34){if(cx>=18&&cx<=96){s.mapTab=0;return;}if(cx>=102&&cx<=180){s.mapTab=1;return;}}}}
+    s.mapOpen=false;s.paused=false;return;
+  }
   if (s && s.paused) s.paused = false;
 }
 
@@ -1861,111 +1867,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","X / Shift \u2014 Shield","I / Tab \u2014 Map & Inventory","P / Esc \u2014 Pause","M \u2014 Toggle Music"];
     for(let i=0;i<ctrls.length;i++)c.fillText(ctrls[i],W2/2,cy2+30+i*13);
     c.textAlign="left";}
-  if(s.mapOpen){c.fillStyle="rgba(0,0,10,0.92)";c.fillRect(0,0,W2,FH2);
-    c.textAlign="center";
-    c.fillStyle="#fd3";c.font="bold 18px monospace";c.fillText("MAP & INVENTORY",W2/2,24);
-    c.fillStyle="#666";c.font="9px monospace";c.fillText("I / Tab / Esc to close",W2/2,FH2-8);
-    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-100,28,200,1);
-    const mapY=36,mapH=200;
-    if(s.loc.ty==="ow"||s.loc.ty==="cave"){
-      const owKeys=Object.keys(OW);
-      const onX=-1,oxX=4,onY=-1,oxY=2;
-      const cW=48,cH=36,op=8,gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-      const oW=gW+op*2,oH=gH+op*2;
-      const omX=W2/2-oW/2,omY=mapY+10;
-      c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(omX-2,omY-2,oW+4,oH+4);
-      c.strokeStyle="rgba(253,211,51,0.3)";c.strokeRect(omX-2,omY-2,oW+4,oH+4);
-      const tCols={[T.GRASS]:"#4aaa3a",[T.WATER]:"#2266aa",[T.TREE]:"#1a5a1a",[T.SAND]:"#d4b060",[T.PATH]:"#a08050",[T.ROCK]:"#777",[T.FLOWER]:"#4aaa3a",[T.BUSH]:"#2a7a2a",[T.TALLGRASS]:"#3a9a3a",[T.BRIDGE]:"#8b6914",[T.ICE]:"#aaddff",[T.ENTRANCE]:"#fd3",[T.WALL]:"#555",[T.CRACK]:"#666",[T.EMPTY]:"#222",[T.STUMP]:"#5a3a1a",[T.FLOOR]:"#555"};
-      for(const ok of owKeys){
-        const[cx2,cy2]=ok.split(",").map(Number);
-        const rx=omX+op+(cx2-onX)*cW,ry=omY+op+(cy2-onY)*cH;
-        const tiles=OW[ok];
-        if(tiles){
-          for(let ty2=0;ty2<12;ty2++)for(let tx2=0;tx2<16;tx2++){
-            const tv=tiles[ty2]?.[tx2]??0;
-            c.fillStyle=tCols[tv]||"#333";
-            c.fillRect(rx+tx2*3,ry+ty2*3,3,3);
-            if(tv===T.FLOWER){c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";c.fillRect(rx+tx2*3,ry+ty2*3,2,2);}
-          }
-        }else{c.fillStyle="#222";c.fillRect(rx,ry,cW,cH);}
-        if(ok===s.loc.scr){c.strokeStyle="rgba(255,255,255,0.4)";c.lineWidth=1;c.strokeRect(rx,ry,cW,cH);}
-      }
-      c.strokeStyle="rgba(253,211,51,0.12)";c.lineWidth=1;
-      for(let gx=0;gx<=oxX-onX+1;gx++){const lx=omX+op+gx*cW;c.beginPath();c.moveTo(lx,omY+op);c.lineTo(lx,omY+op+gH);c.stroke();}
-      for(let gy=0;gy<=oxY-onY+1;gy++){const ly=omY+op+gy*cH;c.beginPath();c.moveTo(omX+op,ly);c.lineTo(omX+op+gW,ly);c.stroke();}
-      for(const de2 of DE){const[dx,dy]=de2.s.split(",").map(Number);
-        const ex=omX+op+(dx-onX)*cW+cW/2,ey=omY+op+(dy-onY)*cH+cH/2;
-        c.fillStyle=de2.d===3?(s.finalOpen?"#f0f":"#444"):"#ff4";
-        c.beginPath();c.arc(ex,ey,3,0,Math.PI*2);c.fill();}
-      if(s.loc.ty==="ow"){
-        const[px,py]=s.loc.scr.split(",").map(Number);
-        const prx=omX+op+(px-onX)*cW+(s.p.x/(CO*TL))*cW;
-        const pry=omY+op+(py-onY)*cH+(s.p.y/(RO*TL))*cH;
-        const blink=Math.floor(Date.now()/300)%2===0;
-        if(blink){c.fillStyle="#fff";c.beginPath();c.arc(prx,pry,2,0,Math.PI*2);c.fill();}
-      }
-      c.fillStyle="#aaa";c.font="10px monospace";c.fillText("OVERWORLD",W2/2,omY+oH+14);
-    }else if(s.loc.ty==="dg"){
-      const dg2=s.dg[s.loc.di];const rks=Object.keys(dg2.rooms);const cds=rks.map(k=>k.split(",").map(Number));
-      const nX=Math.min(...cds.map(c2=>c2[0])),xX=Math.max(...cds.map(c2=>c2[0])),nY=Math.min(...cds.map(c2=>c2[1])),xY=Math.max(...cds.map(c2=>c2[1]));
-      const ms=22,mp=8,mW=(xX-nX+1)*ms+mp*2,mH=(xY-nY+1)*ms+mp*2;
-      const mmX=W2/2-mW/2,mmY=mapY+10;
-      c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(mmX-2,mmY-2,mW+4,mH+4);
-      c.strokeStyle="rgba(253,211,51,0.3)";c.strokeRect(mmX-2,mmY-2,mW+4,mH+4);
-      for(const rk2 of rks){const[cx2,cy2]=rk2.split(",").map(Number);
-        const rx=mmX+mp+(cx2-nX)*ms,ry=mmY+mp+(cy2-nY)*ms;
-        const cleared=s.cl.has(`dg:${s.loc.di}:${rk2}`);
-        c.fillStyle=rk2===s.loc.scr?"#fd3":cleared?"#4a4":"#444";
-        c.fillRect(rx+1,ry+1,ms-2,ms-2);
-        const rm=dg2.rooms[rk2];if(rm?.enemies?.some(e2=>e2.type==="boss")){c.fillStyle="#f44";c.beginPath();c.arc(rx+ms/2,ry+ms/2,3,0,Math.PI*2);c.fill();}
-      }
-      c.fillStyle="#aaa";c.font="10px monospace";c.fillText(dg2.name,W2/2,mmY+mH+14);
-    }
-    // --- INVENTORY SECTION ---
-    const invY=mapY+mapH+14;
-    c.fillStyle="rgba(253,211,51,0.2)";c.fillRect(W2/2-60,invY,120,1);
-    // Items — compact two rows
-    const items=[
-      {icon:"\u2764\ufe0f",label:"Hearts",val:`${Math.ceil(p.hp/2)}/${p.mhp/2}`,col:"#f44"},
-      {icon:"\ud83d\udd11",label:"Keys",val:p.keys,col:"#fd3"},
-      ...(p.hasBombs?[{icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"}]:[]),
-      {icon:"\u25c7",label:"Rupees",val:p.rupees,col:"#4f4"},
-      ...(p.hasBow?[{icon:"\ud83c\udff9",label:"Bow",val:"\u2713",col:"#fd3"}]:[]),
-      ...(p.hasMasterSword?[{icon:"\u2694\ufe0f",label:"M.Sword",val:"2x dmg",col:"#8af"}]:[]),
-      ...(p.redArmor?[{icon:"\ud83c\udf4c",label:"Armor",val:"\u00bd dmg",col:"#f44"}]:[]),
-      ...(s.hasLantern?[{icon:"\ud83d\udd2e",label:"Lantern",val:"\u2713",col:"#fa0"}]:[]),
-      ...(s.hasShieldUp?[{icon:"\ud83d\udee1\ufe0f",label:"Shield+",val:"\u2713",col:"#88f"}]:[]),
-    ];
-    const iw=items.length>5?56:70,ix=W2/2-(items.length*iw)/2;
-    for(let i=0;i<items.length;i++){const it=items[i];const cx2=ix+i*iw+iw/2;
-      c.fillStyle="rgba(255,255,255,0.03)";c.fillRect(ix+i*iw+2,invY+6,iw-4,36);
-      if(it.label==="Rupees"){// Draw hex rupee icon
-        const ry3=invY+17;c.fillStyle="#4f4";c.beginPath();c.moveTo(cx2,ry3-6);c.lineTo(cx2+4,ry3-2);c.lineTo(cx2+4,ry3+2);c.lineTo(cx2,ry3+6);c.lineTo(cx2-4,ry3+2);c.lineTo(cx2-4,ry3-2);c.closePath();c.fill();
-        c.fillStyle="#8f8";c.beginPath();c.moveTo(cx2,ry3-4);c.lineTo(cx2+3,ry3-1);c.lineTo(cx2,ry3);c.lineTo(cx2-3,ry3-1);c.closePath();c.fill();
-      }else{c.font="14px monospace";c.fillStyle="#fff";c.fillText(it.icon,cx2,invY+22);}
-      c.font="bold 9px monospace";c.fillStyle=it.col;c.fillText(it.val,cx2,invY+34);
-      c.font="7px monospace";c.fillStyle="#666";c.fillText(it.label,cx2,invY+43);}
-    // --- TRIFORCE ---
-    const triY=invY+52;
-    c.fillStyle="rgba(253,211,51,0.2)";c.fillRect(W2/2-60,triY,120,1);
-    const triNames=["Forest","Fire","Shadow"];
-    for(let i=0;i<3;i++){const tx2=W2/2-50+i*50;
-      c.fillStyle=p.tri[i]?"#fd3":"#222";
-      c.beginPath();c.moveTo(tx2,triY+6);c.lineTo(tx2+10,triY+20);c.lineTo(tx2-10,triY+20);c.closePath();c.fill();
-      if(p.tri[i]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx2,triY+9);c.lineTo(tx2+6,triY+18);c.lineTo(tx2-6,triY+18);c.closePath();c.fill();}
-      c.font="7px monospace";c.fillStyle=p.tri[i]?"#fd3":"#555";c.fillText(triNames[i],tx2,triY+28);}
-    const seY=triY+36;
-    // Secrets counter — 7 total: 4 heart pieces, banana, lantern, shield+
-    const secY=seY+10;
-    let secFound=0;const secTotal=7;
-    // Heart pieces collected (each piece counts, 4 pieces = 1 heart)
-    const hpCollected=p.heartPieces+(p.mhp>8?4:0);// if mhp grew past 8, all 4 were found
-    secFound+=Math.min(4,hpCollected);
-    if(p.redArmor)secFound++;
-    if(s.hasLantern)secFound++;if(s.hasShieldUp)secFound++;
-    c.fillStyle="#aaa";c.font="bold 10px monospace";c.fillText(`SECRETS: ${Math.min(secFound,secTotal)}/${secTotal}`,W2/2,secY);
-    c.fillStyle="#555";c.font="9px monospace";c.fillText("I / Tab / Esc to close",W2/2,FH2-10);
-    c.textAlign="left";}
+  if(s.mapOpen){drawInventoryScreen(c,s,t);}
   if(s.go){c.fillStyle="rgba(10,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#e33";c.font="bold 36px monospace";c.textAlign="center";c.fillText("GAME OVER",W2/2,FH2/2-20);c.fillStyle="#ccc";c.font="16px monospace";c.fillText("Tap to respawn",W2/2,FH2/2+25);c.textAlign="left";}
   if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("All Triforce pieces collected!",W2/2,FH2/2+10);c.fillText("Tap to play again",W2/2,FH2/2+35);c.textAlign="left";}}
 
@@ -2025,7 +1927,8 @@ onMounted(() => {
         e.preventDefault();
       }
     }
-    if ((e.key === "Tab" || e.key.toLowerCase() === "i") && s && !s.title && !s.go && !s.won) { e.preventDefault(); s.mapOpen = !s.mapOpen; s.paused = s.mapOpen; }
+    if ((e.key === "Tab" || e.key.toLowerCase() === "i") && s && !s.title && !s.go && !s.won) { e.preventDefault(); s.mapOpen = !s.mapOpen; s.paused = s.mapOpen; if(s.mapOpen)s.mapTab=0; }
+    if (s && s.mapOpen) { if(e.key==="ArrowLeft"||e.key.toLowerCase()==="q"){s.mapTab=0;e.preventDefault();}if(e.key==="ArrowRight"||e.key.toLowerCase()==="e"){s.mapTab=1;e.preventDefault();}if(e.key==="Escape"){s.mapOpen=false;s.paused=false;e.preventDefault();} }
     if (e.key.toLowerCase() === "m") { Tone.start().then(() => { initSfx(); }); muOn.value = !muOn.value; }
   };
   const ku = e => kyR.value.delete(e.key.toLowerCase());
