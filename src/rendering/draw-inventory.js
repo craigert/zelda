@@ -90,13 +90,13 @@ function drawSectionTitle(c,y,text){
 
 // ========== TAB 0: MAP ==========
 function drawMapPage(c,s,t){
-  drawSectionTitle(c,50,"OVERWORLD");
+  drawSectionTitle(c,48,"OVERWORLD");
   drawOverworldMap(c,s,t);
-  drawDivider(c,210);
-  drawQuickStats(c,s,216);
-  drawDivider(c,248,"DUNGEONS");
+  drawDivider(c,180);
+  drawQuickStats(c,s,186);
+  drawDivider(c,218,"DUNGEONS");
   drawDungeonProgressPolished(c,s,t);
-  drawDivider(c,320,"SECRETS");
+  drawDivider(c,290,"SECRETS");
   drawSecretsRow(c,s,t);
 }
 
@@ -104,7 +104,7 @@ function drawOverworldMap(c,s,t){
   const onX=-1,oxX=4,onY=-1,oxY=2;
   const cW=40,cH=28,op=6;
   const gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-  const omX=W2/2-gW/2,omY=58;
+  const omX=W2/2-gW/2,omY=56;
 
   // Map background with subtle border
   c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-4,omY-4,gW+8,gH+8);
@@ -284,7 +284,7 @@ function drawQuickStats(c,s,yPos){
 }
 
 function drawDungeonProgressPolished(c,s,t){
-  const y=256;
+  const y=226;
   const dungeons=[
     {name:"Forest Temple",col:"#3a8830",di:0},
     {name:"Fire Cavern",col:"#d84020",di:1},
@@ -335,7 +335,7 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=328;
+  const y=298;
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
