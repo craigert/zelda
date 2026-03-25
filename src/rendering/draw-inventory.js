@@ -339,14 +339,15 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=338;
+  const y=348;
   const secrets=countSecrets(s);
   c.textAlign="center";
-  c.fillStyle="#d4a820";c.font="bold 9px monospace";c.fillText(`SECRETS  ${secrets.found} / ${secrets.total}`,W2/2,y+6);
-  // Dots
-  const dotW=secrets.total*14;const startX=W2/2-dotW/2;
+  // Count text
+  c.fillStyle="#aaa";c.font="bold 9px monospace";c.fillText(`${secrets.found} / ${secrets.total}`,W2/2,y+4);
+  // Dots below
+  const dotW=secrets.total*16;const startX=W2/2-dotW/2;
   for(let i=0;i<secrets.total;i++){
-    const dx=startX+i*14+7,dy=y+16;
+    const dx=startX+i*16+8,dy=y+16;
     if(i<secrets.found){c.fillStyle="#fd3";c.beginPath();c.arc(dx,dy,4,0,Math.PI*2);c.fill();
       c.fillStyle="#ffe866";c.beginPath();c.arc(dx-1,dy-1,1.5,0,Math.PI*2);c.fill();
     }else{c.strokeStyle="#555";c.lineWidth=1;c.beginPath();c.arc(dx,dy,3,0,Math.PI*2);c.stroke();}
