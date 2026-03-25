@@ -1043,33 +1043,34 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const p=s.p;
   c.fillStyle="#111";c.fillRect(0,0,W2,HH);
   c.fillStyle="rgba(60,60,60,0.5)";c.fillRect(0,HH-1,W2,1);
-  const hc=p.mhp/2,hsz=hc>6?12:16,hsp=hc>6?16:22;
-  for(let i=0;i<hc;i++){const hx=8+i*hsp,hy=hc>6?10:8;
+  // LEFT: Hearts
+  const hc=p.mhp/2,hsz=hc>6?10:14,hsp=hc>6?14:18;
+  for(let i=0;i<hc;i++){const hx=6+i*hsp,hy=hc>6?11:9;
     if(p.hp>=(i+1)*2){c.fillStyle="#ee3333";dH(c,hx,hy,hsz);}
     else if(p.hp>=i*2+1){c.save();c.beginPath();c.rect(hx,hy,hsz/2,hsz);c.clip();c.fillStyle="#ee3333";dH(c,hx,hy,hsz);c.restore();c.save();c.beginPath();c.rect(hx+hsz/2,hy,hsz/2,hsz);c.clip();c.fillStyle="#444";dH(c,hx,hy,hsz);c.restore();}
     else{c.fillStyle="#444";dH(c,hx,hy,hsz);}}
   if(p.hp<=2&&p.hp>0&&Math.sin(s.lowHp/200)>0.3){c.fillStyle="rgba(255,50,50,0.15)";c.fillRect(0,0,W2,HH);}
-  // Items — right side, spaced to avoid triforce overlap
-  const iR=W2-10;// rightmost item edge
-  c.font="bold 12px monospace";
-  let ix=iR;
-  if(s.loc.ty==="dg"&&s.loc.di>=0){ix-=18;c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);}
-  if(p.hasBombs){ix-=35;c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);}
-  ix-=35;c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);
-  ix-=40;// Draw rupee hex icon
-  c.fillStyle="#4f4";c.beginPath();const rix2=ix,riy2=14;c.moveTo(rix2,riy2-6);c.lineTo(rix2+4,riy2-2);c.lineTo(rix2+4,riy2+2);c.lineTo(rix2,riy2+6);c.lineTo(rix2-4,riy2+2);c.lineTo(rix2-4,riy2-2);c.closePath();c.fill();
-  c.fillStyle="#8f8";c.beginPath();c.moveTo(rix2,riy2-4);c.lineTo(rix2+3,riy2-1);c.lineTo(rix2,riy2);c.lineTo(rix2-3,riy2-1);c.closePath();c.fill();
-  c.fillStyle="#4f4";c.font="bold 12px monospace";c.fillText(`${p.rupees}`,ix+7,21);
-  if(p.hasBow){ix-=18;c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",ix,21);c.font="bold 12px monospace";}
+  // CENTER: Triforce pieces + dungeon name
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
-  let sx2=p.mhp/2*22+16;if(iD2)sx2+=80;
-  if(p.burn>0){c.fillStyle="#f80";c.font="bold 10px monospace";c.fillText("\ud83d\udd25BURN",sx2,20);sx2+=55;}
-  if(p.freeze>0){c.fillStyle="#8cf";c.font="bold 10px monospace";c.fillText("\u2744\ufe0fFREEZE",sx2,20);sx2+=65;}
-  if(p.poison>0){c.fillStyle="#4a4";c.font="bold 10px monospace";c.fillText("\u2620\ufe0fPOISON",sx2,20);sx2+=65;}
-  // Triforce pieces — after hearts
-  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="14px monospace";c.fillText("\u25b2",hc*hsp+20+i*18,21);}
-  // Dungeon name — centered in header
-  if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#999";c.font="bold 10px monospace";c.textAlign="center";c.fillText(dgn,W2/2,12);c.textAlign="left";}
+  c.textAlign="center";
+  if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#888";c.font="bold 9px monospace";c.fillText(dgn,W2/2,11);}
+  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="12px monospace";c.fillText("\u25b2",W2/2-20+i*20,iD2?26:18);}
+  // Status effects — below triforce if in dungeon
+  if(p.burn>0||p.freeze>0||p.poison>0){let stx=W2/2-40;c.font="bold 8px monospace";
+    if(p.burn>0){c.fillStyle="#f80";c.fillText("BURN",stx,26);stx+=35;}
+    if(p.freeze>0){c.fillStyle="#8cf";c.fillText("FREEZE",stx,26);stx+=40;}
+    if(p.poison>0){c.fillStyle="#4a4";c.fillText("POISON",stx,26);}}
+  c.textAlign="left";
+  // RIGHT: Items — evenly spaced from right edge
+  c.font="bold 11px monospace";let ix=W2-8;
+  if(s.loc.ty==="dg"&&s.loc.di>=0){c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#444";c.textAlign="right";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);ix-=20;c.textAlign="left";}
+  if(p.hasBombs){c.fillStyle="#8af";c.textAlign="right";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);ix-=38;c.textAlign="left";}
+  c.fillStyle="#fd3";c.textAlign="right";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);ix-=32;c.textAlign="left";
+  // Rupee hex icon
+  const rix2=ix-3,riy2=15;
+  c.fillStyle="#4f4";c.beginPath();c.moveTo(rix2,riy2-5);c.lineTo(rix2+3,riy2-2);c.lineTo(rix2+3,riy2+2);c.lineTo(rix2,riy2+5);c.lineTo(rix2-3,riy2+2);c.lineTo(rix2-3,riy2-2);c.closePath();c.fill();
+  c.fillStyle="#8f8";c.beginPath();c.moveTo(rix2,riy2-3);c.lineTo(rix2+2,riy2-1);c.lineTo(rix2,riy2);c.lineTo(rix2-2,riy2-1);c.closePath();c.fill();
+  c.fillStyle="#4f4";c.font="bold 11px monospace";c.textAlign="right";c.fillText(`${p.rupees}`,ix-8,21);c.textAlign="left";
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
@@ -1184,8 +1185,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(m[5]&&(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)){c.fillRect(0,5*TL,4,TL*2);c.fillRect(TL-4,5*TL,4,TL*2);}
     if(m[5]&&(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)){c.fillRect((CO-1)*TL,5*TL,4,TL*2);c.fillRect(CO*TL-4,5*TL,4,TL*2);}}
   if(!iD)drawTerrainOverlay(c,m,t);
-  // Overworld ambient effects — fireflies, drifting leaves, wind dust
+  // Overworld ambient effects
   if(!iD){
+    // Wind wisps — occasional streaks blowing across the screen
+    for(let i=0;i<3;i++){
+      const wPhase=t/4000+i*2.1;const wActive=Math.sin(wPhase)>0.6;// only visible ~20% of the time
+      if(wActive){const wp=((Math.sin(wPhase)-0.6)/0.4);// 0→1 during active
+        const wy=hs(i,20,300)*H2;const wx=(t/3+i*200)%(W2+100)-50;
+        const wa=wp<0.3?wp/0.3:wp>0.7?(1-wp)/0.3:1;// fade in/out
+        c.strokeStyle=`rgba(220,230,255,${wa*0.12})`;c.lineWidth=1.5;
+        c.beginPath();c.moveTo(wx,wy+Math.sin(t/200+i)*8);
+        c.quadraticCurveTo(wx+30,wy+Math.sin(t/180+i*2)*12-5,wx+60,wy+Math.sin(t/220+i*3)*6);
+        c.quadraticCurveTo(wx+90,wy+Math.sin(t/250+i)*10+3,wx+120,wy+Math.sin(t/200+i*4)*8);
+        c.stroke();
+        // Wisp particles along the streak
+        for(let j=0;j<3;j++){const px3=wx+j*40+Math.sin(t/150+j)*10,py3=wy+Math.sin(t/200+i+j)*8;
+          c.fillStyle=`rgba(220,230,255,${wa*0.08})`;c.beginPath();c.arc(px3,py3,2,0,Math.PI*2);c.fill();}}}
     // Drifting leaves (slow diagonal movement)
     for(let i=0;i<6;i++){const lx=(hs(i,0,200)*W2+t/8+i*90)%W2,ly=(hs(i,1,201)*H2+t/12+i*60)%H2;
       const lr=Math.sin(t/400+i*2)*Math.PI;const la=0.12+Math.sin(t/600+i)*0.06;
