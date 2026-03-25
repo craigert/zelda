@@ -256,9 +256,16 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
-  // Combat lock — seal exits in dungeons/caves when enemies present
+  // Combat lock — only for rooms with key items, minibosses, or bosses (not every room)
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
-  if(isDg&&s.en.length>0){s.combatLock=true;s.combatLockTime=0;sfx("door");s.shake.t=200;
+  const roomData2=isDg&&s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+  const hasStairs=gm(s)?.some(r=>r.includes(T.STAIRS_UP));
+  const shouldLock=isDg&&s.en.length>0&&!hasStairs&&(
+    roomData2?.reward||// rooms with dungeon items
+    s.en.some(e=>e.type==="boss"||e.type==="miniboss")||// boss/miniboss rooms
+    roomData2?.lock// explicitly flagged rooms
+  );
+  if(shouldLock){s.combatLock=true;s.combatLockTime=0;sfx("door");s.shake.t=200;
     // Boss intro — cinematic sequence if room has a boss
     const boss=s.en.find(e=>e.type==="boss");
     if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
@@ -342,7 +349,7 @@ function cTr(s){const p=s.p,loc=s.loc;
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="dg";loc.di=ent.d;const dg2=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg2.rooms))if(dg2.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
             s.respawn={ty:"dg",scr:er,di:ent.d,x:7*TL,y:9*TL};
-            loc.scr=er;p.x=7*TL;p.y=9*TL;le(s);s.dgTitle={text:dg2.name,t:3000};}};sfx("door");return;}}}
+            loc.scr=er;p.x=7*TL;p.y=9*TL;s.shop=null;le(s);s.dgTitle={text:dg2.name,t:3000};}};sfx("door");return;}}}
       for(let ci=0;ci<CAVES.length;ci++){const cv=CAVES[ci];if(cv.s!==loc.scr)continue;
         const owm=OW[loc.scr];
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
@@ -396,7 +403,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     return;}
   // Boss intro sequence — freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
-    if(s.bossIntro.t>=s.bossIntro.dur){s.bossIntro=null;}
+    if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
   // Shop menu interaction
   if(s.shop){const ky=kyR.value;
