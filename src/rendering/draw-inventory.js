@@ -336,7 +336,7 @@ function drawDungeonProgressPolished(c,s,t){
 }
 
 function drawSecretsRow(c,s,t){
-  const y=338;
+  const y=348;
   const secrets=countSecrets(s);
   c.textAlign="center";
   // Count text
