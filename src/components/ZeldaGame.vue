@@ -1121,16 +1121,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(p.freeze>0){c.fillStyle="#8cf";c.fillText("FREEZE",stx,26);stx+=40;}
     if(p.poison>0){c.fillStyle="#4a4";c.fillText("POISON",stx,26);}}
   c.textAlign="left";
-  // RIGHT: Items — evenly spaced from right edge
-  c.font="bold 11px monospace";let ix=W2-8;
-  if(s.loc.ty==="dg"&&s.loc.di>=0){c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#444";c.textAlign="right";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);ix-=20;c.textAlign="left";}
-  if(p.hasBombs){c.fillStyle="#8af";c.textAlign="right";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);ix-=38;c.textAlign="left";}
-  c.fillStyle="#fd3";c.textAlign="right";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);ix-=32;c.textAlign="left";
-  // Rupee hex icon
-  const rix2=ix-3,riy2=15;
+  // RIGHT: Items — icon then number, consistent spacing
+  c.font="bold 11px monospace";let ix=W2-6;
+  const drawHudItem=(icon,val,col)=>{
+    const vw=c.measureText(val).width;ix-=vw+2;
+    c.fillStyle=col;c.textAlign="left";c.fillText(val,ix,21);
+    ix-=14;c.fillText(icon,ix,21);ix-=6;};
+  if(s.loc.ty==="dg"&&s.loc.di>=0){const mk=p.masterKey[s.loc.di];
+    ix-=14;c.fillStyle=mk?"#c070ff":"#444";c.textAlign="left";c.fillText(mk?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);ix-=6;}
+  if(p.hasBombs)drawHudItem("\ud83d\udca3",`${p.bombs}`,"#8af");
+  drawHudItem("\ud83d\udd11",`${p.keys}`,"#fd3");
+  // Rupee: hex icon then number
+  const rv=`${p.rupees}`,rvw=c.measureText(rv).width;ix-=rvw+2;
+  c.fillStyle="#4f4";c.textAlign="left";c.fillText(rv,ix,21);
+  ix-=10;const rix2=ix,riy2=15;
   c.fillStyle="#4f4";c.beginPath();c.moveTo(rix2,riy2-5);c.lineTo(rix2+3,riy2-2);c.lineTo(rix2+3,riy2+2);c.lineTo(rix2,riy2+5);c.lineTo(rix2-3,riy2+2);c.lineTo(rix2-3,riy2-2);c.closePath();c.fill();
   c.fillStyle="#8f8";c.beginPath();c.moveTo(rix2,riy2-3);c.lineTo(rix2+2,riy2-1);c.lineTo(rix2,riy2);c.lineTo(rix2-2,riy2-1);c.closePath();c.fill();
-  c.fillStyle="#4f4";c.font="bold 11px monospace";c.textAlign="right";c.fillText(`${p.rupees}`,ix-8,21);c.textAlign="left";
+  ix-=6;
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
