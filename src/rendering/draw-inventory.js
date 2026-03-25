@@ -94,9 +94,9 @@ function drawMapPage(c,s,t){
   drawOverworldMap(c,s,t);
   drawDivider(c,216);
   drawQuickStats(c,s,t);
-  drawDivider(c,260);
-  drawDungeonBlocks(c,s,t);
-  drawDivider(c,328);
+  drawDivider(c,258,"DUNGEONS");
+  drawDungeonProgressPolished(c,s,t);
+  drawDivider(c,340,"SECRETS");
   drawSecretsRow(c,s,t);
 }
 
@@ -287,39 +287,53 @@ function drawQuickStats(c,s,t){
   c.textAlign="left";
 }
 
-function drawDungeonBlocks(c,s,t){
-  const y=270;
-  const names=["Forest Temple","Fire Cavern","Shadow Keep","Dark Sanctum"];
-  const colors=["#3a8830","#d84020","#6060cc","#c040c0"];
-  const bw=110,bh=48,gap=8;
-  const startX=W2/2-((bw*2+gap)/2);
+function drawDungeonProgressPolished(c,s,t){
+  const y=268;
+  const dungeons=[
+    {name:"Forest Temple",col:"#3a8830",di:0},
+    {name:"Fire Cavern",col:"#d84020",di:1},
+    {name:"Shadow Keep",col:"#6060cc",di:2},
+    {name:"Dark Sanctum",col:"#c040c0",di:3},
+  ];
+  const cellW=W2/4-8,startX=14;
   c.textAlign="center";
   for(let i=0;i<4;i++){
-    const col=i%2,row=Math.floor(i/2);
-    const bx=startX+col*(bw+gap),by=y+row*(bh+4);
-    // Block bg
-    c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(bx,by,bw,bh);
-    c.strokeStyle=colors[i];c.lineWidth=1;c.strokeRect(bx,by,bw,bh);
-    // Color bar at top
-    c.fillStyle=colors[i];c.fillRect(bx,by,bw,3);
+    const d=dungeons[i];
+    const bx=startX+i*(cellW+4),cx2=bx+cellW/2;
+    // Cell bg with gradient
+    const bg=c.createLinearGradient(bx,y,bx,y+60);
+    bg.addColorStop(0,"rgba(0,0,0,0.3)");bg.addColorStop(1,"rgba(0,0,0,0.15)");
+    c.fillStyle=bg;c.fillRect(bx,y,cellW,60);
+    // Color accent bar
+    c.fillStyle=d.col;c.fillRect(bx,y,cellW,2);
+    // Border
+    c.strokeStyle=`${d.col}55`;c.lineWidth=0.5;c.strokeRect(bx,y,cellW,60);
     // Name
-    c.fillStyle="#ccc";c.font="bold 7px monospace";c.fillText(names[i],bx+bw/2,by+14);
-    // Items row: triforce, master key, cleared rooms
-    const iy=by+22;
-    // Triforce (D1-D3 only)
-    if(i<3){c.fillStyle=s.p.tri[i]?"#fd3":"#333";
-      c.beginPath();c.moveTo(bx+20,iy);c.lineTo(bx+26,iy+10);c.lineTo(bx+14,iy+10);c.closePath();c.fill();
-      c.fillStyle="#888";c.font="6px monospace";c.fillText("Triforce",bx+20,iy+18);}
+    c.fillStyle="#ddd";c.font="bold 7px monospace";c.fillText(d.name,cx2,y+13);
+    // Icons row
+    const iy=y+20;
+    // Triforce (D1-D3)
+    if(d.di<3){
+      c.fillStyle=s.p.tri[d.di]?"#fd3":"#2a2a2a";
+      c.beginPath();c.moveTo(cx2-18,iy);c.lineTo(cx2-13,iy+8);c.lineTo(cx2-23,iy+8);c.closePath();c.fill();
+      if(s.p.tri[d.di]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(cx2-18,iy+2);c.lineTo(cx2-15,iy+7);c.lineTo(cx2-21,iy+7);c.closePath();c.fill();}
+    }else{// D4 — crown icon
+      c.fillStyle=s.won?"#fd3":"#2a2a2a";c.font="9px monospace";c.fillText(s.won?"\u2654":"\u265a",cx2-18,iy+8);}
     // Master key
-    c.fillStyle=s.p.masterKey[i]?"#c070ff":"#333";c.font="bold 9px monospace";
-    c.fillText(s.p.masterKey[i]?"\u2605":"\u2606",bx+55,iy+8);
-    c.fillStyle="#888";c.font="6px monospace";c.fillText("M.Key",bx+55,iy+18);
-    // Cleared count
-    let cleared=0,total=0;const dg=s.dg[i];if(dg){const rks=Object.keys(dg.rooms);total=rks.length;
-      for(const rk of rks)if(s.cl.has(`dg:${i}:${rk}`))cleared++;}
-    c.fillStyle=cleared===total&&total>0?"#4f4":"#aaa";c.font="bold 9px monospace";
-    c.fillText(`${cleared}/${total}`,bx+90,iy+8);
-    c.fillStyle="#888";c.font="6px monospace";c.fillText("Rooms",bx+90,iy+18);
+    c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#2a2a2a";
+    c.beginPath();c.arc(cx2,iy+2,3,0,Math.PI*2);c.fill();
+    c.fillRect(cx2-0.5,iy+5,1,5);if(s.p.masterKey[d.di]){c.fillRect(cx2,iy+7,2,1);c.fillRect(cx2,iy+9,1.5,1);}
+    // Room progress bar
+    const dg=s.dg[d.di];let cleared=0,total=0;
+    if(dg){const rks=Object.keys(dg.rooms);total=rks.length;for(const rk of rks)if(s.cl.has(`dg:${d.di}:${rk}`))cleared++;}
+    const barX=cx2+10,barW=cellW/2-16,barY=iy+2;
+    c.fillStyle="rgba(0,0,0,0.4)";c.fillRect(barX,barY,barW,6);
+    if(total>0){c.fillStyle=cleared===total?d.col:"#666";c.fillRect(barX,barY,barW*(cleared/total),6);}
+    c.fillStyle="#999";c.font="6px monospace";c.fillText(`${cleared}/${total}`,cx2+10+barW/2,iy+16);
+    // Labels
+    c.fillStyle="#555";c.font="5px monospace";
+    if(d.di<3)c.fillText("\u25b2",cx2-18,iy+16);
+    c.fillText("\u2605",cx2,iy+16);
   }
   c.textAlign="left";
 }
