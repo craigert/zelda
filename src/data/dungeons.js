@@ -22,7 +22,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=2;y<=6;y++)m[y][8]=T.WALL;
     m[8][4]=T.SPIKE;m[8][5]=T.SPIKE;m[8][6]=T.SPIKE;m[8][9]=T.SPIKE;m[8][10]=T.SPIKE;m[8][11]=T.SPIKE;
     m[5][4]=T.KEY;m[9][12]=T.HEART;m[4][2]=T.TORCH;m[7][13]=T.TORCH;
-  }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"skeleton"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
+  }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"archer"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
 
   // East wing upper — lever puzzle room
   "1,-1":{tiles:mr(m=>{ae(m,["S","E","W"]);
@@ -68,7 +68,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][3]=T.WALL;m[3][12]=T.WALL;m[8][3]=T.WALL;m[8][12]=T.WALL;
     m[5][7]=T.HEART;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[9][12]=T.HEART;
-  }),enemies:[{x:5*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:6*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:5*TL,y:5*TL,hp:3,type:"archer"},{x:10*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
   // North corridor — spiked hallway with blade traps
   "0,-2":{tiles:mr(m=>{ae(m,["S","ND","W","E"]);
@@ -113,7 +113,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][3]=T.PIT;m[6][3]=T.PIT;
     m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;
     m[5][7]=T.HEART;m[9][5]=T.HEART;
-  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"bat"}]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"knight"},{x:9*TL,y:5*TL,hp:4,type:"archer"},{x:7*TL,y:8*TL,hp:3,type:"bat"}]},
 
   // Spike arena — central island surrounded by spikes (east of 0,-3)
   "1,-3":{tiles:mr(m=>{ae(m,["W"]);
@@ -179,7 +179,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[3][7]=T.HEART;m[8][8]=T.HEART;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
-  }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"mage"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
   // Secret room (crack east wall of 1,0) — treasure cache
   "2,0":{tiles:mr(m=>{
@@ -196,7 +196,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[5][4]=T.WALL;m[6][4]=T.WALL;m[5][11]=T.WALL;m[6][11]=T.WALL;
     m[5][7]=T.SPIKE;m[6][8]=T.SPIKE;m[5][8]=T.SPIKE;m[6][7]=T.SPIKE;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-  }),enemies:[{x:3*TL,y:3*TL,hp:3,type:"skeleton"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
+  }),enemies:[{x:3*TL,y:3*TL,hp:3,type:"mage"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
 
   // East of zigzag — divided chambers with water channel (east of 1,1)
   "2,1":{tiles:mr(m=>{ae(m,["W"]);
@@ -266,7 +266,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[3][7]=T.WALL;m[3][8]=T.WALL;m[8][7]=T.WALL;m[8][8]=T.WALL;
     m[5][7]=T.KEY;m[6][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-  }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"skeleton"},{x:3*TL,y:4*TL,hp:4,type:"fire_bat"},{x:12*TL,y:7*TL,hp:4,type:"fire_bat"}]},
+  }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"mage"},{x:3*TL,y:4*TL,hp:4,type:"fire_bat"},{x:12*TL,y:7*TL,hp:4,type:"fire_bat"}]},
 
   // BOSS ROOM — Flame Wyrm (lava moat with ice bridges)
   "-1,-2":{tiles:mr(m=>{
@@ -319,7 +319,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[6][3]=T.WALL;m[6][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-  }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:11*TL,y:4*TL,hp:3,type:"ghost"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:11*TL,y:4*TL,hp:3,type:"knight"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
   // Secret room (crack east wall of 0,0) — treasure cache
   "1,0":{tiles:mr(m=>{
@@ -350,7 +350,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;
     m[4][3]=T.PIT;m[7][12]=T.PIT;
     m[5][7]=T.PUSH;m[6][8]=T.PUSH;
-  }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"ghost"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"knight"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
 
   // Far west ghost room — pit-flanked corridor (west of -1,-1)
   "-2,-1":{tiles:mr(m=>{ae(m,["E"]);
@@ -404,7 +404,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[7][4]=T.WALL;m[8][4]=T.WALL;m[8][5]=T.WALL;m[7][11]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;
     m[5][7]=T.SPIKE;m[5][8]=T.SPIKE;m[6][7]=T.SPIKE;m[6][8]=T.SPIKE;
     m[9][7]=T.KEY;
-  }),enemies:[{x:7*TL,y:3*TL,hp:5,type:"ghost"},{x:3*TL,y:6*TL,hp:5,type:"ghost"},{x:12*TL,y:8*TL,hp:4,type:"skeleton"}]},
+  }),enemies:[{x:7*TL,y:3*TL,hp:5,type:"ghost"},{x:3*TL,y:6*TL,hp:5,type:"knight"},{x:12*TL,y:8*TL,hp:4,type:"ghost"}]},
 
   // Master key room — spike gauntlet with ghost guards (west of -1,-2)
   "-2,-2":{tiles:mr(m=>{ae(m,["E"]);
@@ -432,7 +432,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;
     m[5][7]=T.HEART;m[5][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"skeleton"}]},
+  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"knight"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
 
   // BOSS ROOM — Shadow Lord (checkerboard pit + floor islands)
   "-1,-4":{tiles:mr(m=>{
@@ -478,7 +478,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][7]=T.KEY;m[6][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-  }),enemies:[{x:6*TL,y:5*TL,hp:5,type:"ghost"},{x:9*TL,y:6*TL,hp:5,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"skeleton"}]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:5,type:"mage"},{x:9*TL,y:6*TL,hp:5,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"knight"}]},
 
   // Secret room (crack east wall of 1,0) — treasure cache
   "2,0":{tiles:mr(m=>{
@@ -495,7 +495,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
     m[5][7]=T.HEART;m[6][8]=T.HEART;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-  }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"ghost"},{x:11*TL,y:6*TL,hp:6,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"}]},
+  }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"knight"},{x:11*TL,y:6*TL,hp:6,type:"mage"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"}]},
 
   // MASTER_KEY room (east of 1,-1)
   "2,-1":{tiles:mr(m=>{ae(m,["W"]);
@@ -562,7 +562,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     for(let y=7;y<=8;y++)for(let x=10;x<=12;x++)m[y][x]=T.PIT;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
     m[5][7]=T.HEART;m[6][8]=T.HEART;
-  }),enemies:[{x:7*TL,y:3*TL,hp:6,type:"ghost"},{x:7*TL,y:8*TL,hp:6,type:"ghost"},{x:4*TL,y:5*TL,hp:5,type:"skeleton"},{x:11*TL,y:6*TL,hp:5,type:"skeleton"}]},
+  }),enemies:[{x:7*TL,y:3*TL,hp:6,type:"ghost"},{x:7*TL,y:8*TL,hp:6,type:"mage"},{x:4*TL,y:5*TL,hp:5,type:"knight"},{x:11*TL,y:6*TL,hp:5,type:"archer"}]},
 
   // Deep north — pre-boss gauntlet
   "0,-3":{tiles:mr(m=>{ae(m,["S","NB","W"]);

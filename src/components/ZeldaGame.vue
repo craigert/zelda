@@ -1868,7 +1868,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const iw=items.length>5?56:70,ix=W2/2-(items.length*iw)/2;
     for(let i=0;i<items.length;i++){const it=items[i];const cx2=ix+i*iw+iw/2;
       c.fillStyle="rgba(255,255,255,0.03)";c.fillRect(ix+i*iw+2,invY+6,iw-4,36);
-      c.font="14px monospace";c.fillStyle="#fff";c.fillText(it.icon,cx2,invY+22);
+      if(it.label==="Rupees"){// Draw hex rupee icon
+        const ry3=invY+17;c.fillStyle="#4f4";c.beginPath();c.moveTo(cx2,ry3-6);c.lineTo(cx2+4,ry3-2);c.lineTo(cx2+4,ry3+2);c.lineTo(cx2,ry3+6);c.lineTo(cx2-4,ry3+2);c.lineTo(cx2-4,ry3-2);c.closePath();c.fill();
+        c.fillStyle="#8f8";c.beginPath();c.moveTo(cx2,ry3-4);c.lineTo(cx2+3,ry3-1);c.lineTo(cx2,ry3);c.lineTo(cx2-3,ry3-1);c.closePath();c.fill();
+      }else{c.font="14px monospace";c.fillStyle="#fff";c.fillText(it.icon,cx2,invY+22);}
       c.font="bold 9px monospace";c.fillStyle=it.col;c.fillText(it.val,cx2,invY+34);
       c.font="7px monospace";c.fillStyle="#666";c.fillText(it.label,cx2,invY+43);}
     // --- TRIFORCE ---
