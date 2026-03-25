@@ -1014,7 +1014,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle="#fff";c.font="bold 16px monospace";c.fillText(hs2?"CONTINUE":"START",W/2,by+bh/2+6);
       if(hs2){c.fillStyle="rgba(255,255,255,0.4)";c.font="10px monospace";c.fillText("Press N for New Game",W/2,by+bh+14);}
     }else if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("PRESS SPACE OR CLICK",W/2,H*0.92);}
-    c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space atk \u00b7 B bomb \u00b7 X shield \u00b7 C bow \u00b7 Tab map",W/2,H*0.97);
+    c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space atk \u00b7 B bomb \u00b7 X shield \u00b7 C bow \u00b7 I/Tab map \u00b7 Esc pause",W/2,H*0.97);
     c.textAlign="left";c.lineCap="butt";return;}
   // ===== HUD =====
   const p=s.p;
@@ -1707,18 +1707,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#666";c.font="10px monospace";
     c.fillText("CONTROLS",W2/2,cy2+16);
     c.fillStyle="#555";c.font="9px monospace";
-    const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","X / Shift \u2014 Shield","Tab \u2014 Map & Inventory","P \u2014 Pause","M \u2014 Toggle Music"];
+    const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","X / Shift \u2014 Shield","I / Tab \u2014 Map & Inventory","P / Esc \u2014 Pause","M \u2014 Toggle Music"];
     for(let i=0;i<ctrls.length;i++)c.fillText(ctrls[i],W2/2,cy2+30+i*13);
     c.textAlign="left";}
   if(s.mapOpen){c.fillStyle="rgba(0,0,10,0.92)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
     c.fillStyle="#fd3";c.font="bold 18px monospace";c.fillText("MAP & INVENTORY",W2/2,24);
+    c.fillStyle="#666";c.font="9px monospace";c.fillText("I / Tab / Esc to close",W2/2,FH2-8);
     c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-100,28,200,1);
-    const mapY=40,mapH=160;
+    const mapY=36,mapH=200;
     if(s.loc.ty==="ow"||s.loc.ty==="cave"){
       const owKeys=Object.keys(OW);
       const onX=-1,oxX=4,onY=-1,oxY=2;
-      const cW=32,cH=24,op=8,gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
+      const cW=48,cH=36,op=8,gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
       const oW=gW+op*2,oH=gH+op*2;
       const omX=W2/2-oW/2,omY=mapY+10;
       c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(omX-2,omY-2,oW+4,oH+4);
@@ -1732,8 +1733,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
           for(let ty2=0;ty2<12;ty2++)for(let tx2=0;tx2<16;tx2++){
             const tv=tiles[ty2]?.[tx2]??0;
             c.fillStyle=tCols[tv]||"#333";
-            c.fillRect(rx+tx2*2,ry+ty2*2,2,2);
-            if(tv===T.FLOWER){c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";c.fillRect(rx+tx2*2,ry+ty2*2,1,1);}
+            c.fillRect(rx+tx2*3,ry+ty2*3,3,3);
+            if(tv===T.FLOWER){c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";c.fillRect(rx+tx2*3,ry+ty2*3,2,2);}
           }
         }else{c.fillStyle="#222";c.fillRect(rx,ry,cW,cH);}
         if(ok===s.loc.scr){c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(rx-1,ry-1,cW+2,cH+2);c.lineWidth=1;}
@@ -1852,7 +1853,9 @@ onMounted(() => {
       }
       return;
     }
-    if (e.key.toLowerCase() === "p" && s && !s.title && !s.go && !s.won) { s.paused = !s.paused; if(s.paused)s.pauseSel=0; }
+    if ((e.key.toLowerCase() === "p" || e.key === "Escape") && s && !s.title && !s.go && !s.won) {
+      if(s.mapOpen){s.mapOpen=false;s.paused=false;}else{s.paused=!s.paused;if(s.paused)s.pauseSel=0;}
+      if(e.key==="Escape")e.preventDefault();}
     if (s && s.paused && !s.mapOpen) {
       const k = e.key.toLowerCase();
       if (k === "arrowup" || k === "w") { s.pauseSel = (s.pauseSel - 1 + 4) % 4; e.preventDefault(); }
@@ -1866,7 +1869,7 @@ onMounted(() => {
         e.preventDefault();
       }
     }
-    if (e.key === "Tab" && s && !s.title && !s.go && !s.won) { e.preventDefault(); s.mapOpen = !s.mapOpen; s.paused = s.mapOpen; }
+    if ((e.key === "Tab" || e.key.toLowerCase() === "i") && s && !s.title && !s.go && !s.won) { e.preventDefault(); s.mapOpen = !s.mapOpen; s.paused = s.mapOpen; }
     if (e.key.toLowerCase() === "m") { Tone.start().then(() => { initSfx(); }); muOn.value = !muOn.value; }
   };
   const ku = e => kyR.value.delete(e.key.toLowerCase());
