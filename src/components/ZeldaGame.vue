@@ -1216,7 +1216,21 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.save();c.translate(bfx,bfy);
         c.beginPath();c.ellipse(-2,0,2.5,1.5+wing,0,0,Math.PI*2);c.fill();
         c.beginPath();c.ellipse(2,0,2.5,1.5-wing,0,0,Math.PI*2);c.fill();
-        c.restore();}}}}
+        c.restore();}}}
+    // Poisonous swamp — purple mist over tallgrass tiles
+    if(loc.scr==="0,1"&&m){for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+      if(m[y][x]===T.TALLGRASS){const px3=x*TL,py3=y*TL;
+        // Purple mist layer
+        const ma=0.12+Math.sin(t/600+x*3+y*5)*0.06;
+        c.fillStyle=`rgba(100,40,140,${ma})`;c.beginPath();c.ellipse(px3+16,py3+16,18,14,0,0,Math.PI*2);c.fill();
+        // Drifting mist wisps
+        const wx=Math.sin(t/800+x*2+y)*6,wy=Math.cos(t/900+y*3)*4;
+        c.fillStyle=`rgba(140,60,180,${ma*0.5})`;c.beginPath();c.ellipse(px3+10+wx,py3+8+wy,8,5,0,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(120,50,160,${ma*0.4})`;c.beginPath();c.ellipse(px3+22-wx,py3+20-wy,6,4,0,0,Math.PI*2);c.fill();
+        // Tiny rising particles
+        if(hs(x,y,55)>0.7){const py4=(py3-t/15+y*20)%H2;
+          c.fillStyle=`rgba(160,80,200,${0.15+Math.sin(t/400+x)*0.08})`;
+          c.beginPath();c.arc(px3+10+hs(x,y,56)*12,py4%32+py3,1.5,0,Math.PI*2);c.fill();}}}}}
   if(iD&&m){
     // Darken unlit torches (only in dark rooms)
     const isDkRm=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;

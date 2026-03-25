@@ -260,12 +260,23 @@ export const OW={
   m[7][2]=T.TREE;m[7][13]=T.TREE;m[8][2]=T.TREE;m[8][13]=T.TREE;
   m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;
   m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;
-  // Central clearing with paths
+  // Safe paths winding through swamp
   m[3][5]=T.PATH;m[3][6]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[3][9]=T.PATH;m[3][10]=T.PATH;
-  m[5][4]=T.PATH;m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][4]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
-  m[8][5]=T.PATH;m[8][6]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;
-  m[5][7]=T.FLOWER;m[5][8]=T.FLOWER;m[6][7]=T.BUSH;m[6][8]=T.BUSH;
-  m[4][4]=T.TALLGRASS;m[7][10]=T.TALLGRASS;m[2][7]=T.BUSH;m[9][7]=T.BUSH;
+  m[5][4]=T.PATH;m[5][5]=T.PATH;m[8][5]=T.PATH;m[8][6]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;
+  // Poisonous swamp clusters — clumped tallgrass patches
+  // West swamp pool
+  m[4][3]=T.TALLGRASS;m[4][4]=T.TALLGRASS;m[4][5]=T.TALLGRASS;
+  m[5][3]=T.TALLGRASS;m[5][6]=T.TALLGRASS;
+  m[6][3]=T.TALLGRASS;m[6][4]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[6][6]=T.TALLGRASS;
+  m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;
+  // East swamp pool
+  m[4][9]=T.TALLGRASS;m[4][10]=T.TALLGRASS;m[4][11]=T.TALLGRASS;
+  m[5][9]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[5][11]=T.TALLGRASS;
+  m[6][9]=T.TALLGRASS;m[6][10]=T.TALLGRASS;m[6][11]=T.TALLGRASS;
+  m[7][9]=T.TALLGRASS;m[7][10]=T.TALLGRASS;m[7][11]=T.TALLGRASS;
+  // Central safe island
+  m[5][7]=T.FLOWER;m[5][8]=T.FLOWER;m[6][7]=T.GRASS;m[6][8]=T.GRASS;
+  m[2][7]=T.BUSH;m[9][7]=T.BUSH;
   oe(m,"W");oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
 
 // Central hub — peaceful crossroads
