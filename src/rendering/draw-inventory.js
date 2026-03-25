@@ -503,9 +503,9 @@ function drawBigTriforce(c,s,t){
   const triS=50;
   const allCollected=s.p.tri[0]&&s.p.tri[1]&&s.p.tri[2];
   const pieces=[
-    {x:cx,y:cy-triS*0.5,idx:2,name:"Shadow Keep"},
-    {x:cx-triS*0.53,y:cy+triS*0.36,idx:0,name:"Forest Temple"},
-    {x:cx+triS*0.53,y:cy+triS*0.36,idx:1,name:"Fire Cavern"},
+    {x:cx,y:cy-triS*0.5,idx:2,name:"Shadow",lx:cx,ly:cy-triS*0.5-triS*0.4-8},
+    {x:cx-triS*0.53,y:cy+triS*0.36,idx:0,name:"Forest",lx:cx-triS*1.1,ly:cy+triS*0.36+6},
+    {x:cx+triS*0.53,y:cy+triS*0.36,idx:1,name:"Fire",lx:cx+triS*1.1,ly:cy+triS*0.36+6},
   ];
   // Large ambient glow
   const glow=Math.sin(t/800)*0.08+(allCollected?0.3:0.12);
@@ -552,9 +552,9 @@ function drawBigTriforce(c,s,t){
       c.fillStyle=`rgba(255,255,230,${sp2})`;c.beginPath();c.arc(piece.x-triS*0.06,piece.y-triS*0.08,2.5,0,Math.PI*2);c.fill();
     }
     c.globalAlpha=1;
-    // Label
+    // Label — positioned outside the triangle to avoid overlap
     c.fillStyle=collected?"#d4a820":"#3a3a3a";c.font="bold 8px monospace";c.textAlign="center";
-    c.fillText(piece.name,piece.x,piece.y+triS*0.4+14);
+    c.fillText(piece.name,piece.lx,piece.ly);
   }
   // Count text
   const count=s.p.tri.filter(Boolean).length;
