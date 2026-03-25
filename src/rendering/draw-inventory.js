@@ -598,22 +598,6 @@ function drawDungeonProgress(c,s,t){
   c.textAlign="left";
 }
 
-function drawSecretsRow(c,s){
-  const y=390;
-  const secrets=countSecrets(s);
-  c.fillStyle="#aaa";c.font="bold 10px monospace";c.textAlign="center";
-  c.fillText(`${secrets.found} / ${secrets.total} found`,W2/2,y);
-  for(let i=0;i<secrets.total;i++){
-    const sx=W2/2-(secrets.total*14)/2+i*14+7;
-    if(i<secrets.found){
-      c.fillStyle="#fd3";c.beginPath();c.arc(sx,y+12,4,0,Math.PI*2);c.fill();
-      c.fillStyle="#ffe866";c.beginPath();c.arc(sx-1,y+11,2,0,Math.PI*2);c.fill();
-    }else{
-      c.strokeStyle="#555";c.lineWidth=1;c.beginPath();c.arc(sx,y+12,4,0,Math.PI*2);c.stroke();
-    }
-  }
-  c.textAlign="left";
-}
 
 // ========== MAIN EXPORT ==========
 export function drawInventoryScreen(c,s,t){
