@@ -93,13 +93,13 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;
   }),enemies:[{x:7*TL,y:4*TL,hp:3,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"bat"},{x:4*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
-  // HEART_PIECE secret room (bomb south wall of -1,-2)
+  // Secret room (bomb south wall of -1,-2) — treasure cache
   "-1,-1":{tiles:mr(m=>{
     m[0][5]=T.FLOOR;m[0][6]=T.FLOOR;
-    m[5][7]=T.HEART_PIECE;
+    m[5][7]=T.HEART;m[5][8]=T.HEART;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
-    m[6][7]=T.HEART;m[6][8]=T.HEART;
+    m[6][7]=T.BOMB;m[6][8]=T.BOMB;
   }),enemies:[]},
 
   // Northwest passage — Vine Guardian mini-boss guards the Bow
@@ -191,10 +191,10 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
   }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"skeleton"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
-  // HEART_PIECE secret (crack east wall of 1,0)
+  // Secret room (crack east wall of 1,0) — treasure cache
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.HEART_PIECE;
+    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
     m[4][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;
     m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;
   }),enemies:[]},
@@ -331,10 +331,10 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:11*TL,y:4*TL,hp:3,type:"ghost"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
-  // HEART_PIECE secret room (crack east wall of 0,0)
+  // Secret room (crack east wall of 0,0) — treasure cache
   "1,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.HEART_PIECE;
+    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
     m[4][7]=T.RUPEE;m[6][7]=T.BOMB;m[6][8]=T.RUPEE;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
@@ -490,10 +490,10 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:6*TL,y:5*TL,hp:5,type:"ghost"},{x:9*TL,y:6*TL,hp:5,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"skeleton"}]},
 
-  // HEART_PIECE secret (crack east wall of 1,0)
+  // Secret room (crack east wall of 1,0) — treasure cache
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.HEART_PIECE;
+    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[6][6]=T.BOMB;m[6][9]=T.BOMB;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
