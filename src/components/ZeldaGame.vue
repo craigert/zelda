@@ -388,6 +388,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
       if(s.chest.reward){s.drops.push({x:s.chest.x+12,y:s.chest.y-(s.chest.itemY||0),vy:-1,ground:s.chest.y,type:s.chest.reward,t:0});}
       const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
+      const isSpecial=["bow","bomb_bag","master_sword","master_key"].includes(s.chest.reward);
+      sfx(isSpecial?"itemget":"pickup");
       s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
     // Still update particles during freeze
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
@@ -657,7 +659,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
       ch.near=Math.abs(cdx)<24&&Math.abs(cdy)<24;
       if(ch.near&&(ky.has(" ")||ky.has("enter")||ky.has("e")||ky.has("z"))){ch.state="opening";ch.t=0;sfx("door");s.shake.t=200;}}
-    else if(ch.state==="opening"&&ch.t>=600){ch.state="presenting";ch.t=0;ch.itemY=0;sfx("triforce");
+    else if(ch.state==="opening"&&ch.t>=600){ch.state="presenting";ch.t=0;ch.itemY=0;sfx("door");
       s.pt.push(...Array.from({length:12},()=>({x:ch.x+12,y:ch.y+8,dx:(Math.random()-.5)*5,dy:-Math.random()*4-1,l:600,c:"#fd3"})));}
     else if(ch.state==="open"&&ch.t>2000)s.chest=null;}
   // Active bombs update
@@ -1483,7 +1485,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Draw reward type icon
       if(ch.reward==="heart"){c.fillStyle="#ee3333";dH(c,rix-6,riy-6+bob3,12);}
       else if(ch.reward==="bomb"){c.fillStyle="#333";c.beginPath();c.arc(rix,riy+bob3,5,0,Math.PI*2);c.fill();c.fillStyle="#f80";c.beginPath();c.arc(rix+2,riy-5+bob3,2,0,Math.PI*2);c.fill();}
-      else if(ch.reward==="rupee_blue"||ch.reward==="rupee_green"){const rc=ch.reward==="rupee_blue"?"#44f":"#4f4";c.fillStyle=rc;c.beginPath();c.moveTo(rix,riy-5+bob3);c.lineTo(rix+4,riy+bob3);c.lineTo(rix,riy+5+bob3);c.lineTo(rix-4,riy+bob3);c.fill();}
+      else if(ch.reward==="rupee_blue"||ch.reward==="rupee_green"){const rc=ch.reward==="rupee_blue"?"#44f":"#4f4";
+        c.fillStyle=rc;c.beginPath();c.moveTo(rix,riy-6+bob3);c.lineTo(rix+4,riy-2+bob3);c.lineTo(rix+4,riy+2+bob3);c.lineTo(rix,riy+6+bob3);c.lineTo(rix-4,riy+2+bob3);c.lineTo(rix-4,riy-2+bob3);c.closePath();c.fill();
+        c.fillStyle="#fff";c.globalAlpha=0.3;c.beginPath();c.moveTo(rix,riy-4+bob3);c.lineTo(rix+3,riy-1+bob3);c.lineTo(rix,riy+bob3);c.lineTo(rix-3,riy-1+bob3);c.closePath();c.fill();c.globalAlpha=1;}
       else if(ch.reward==="bow"){// Bow icon
         c.strokeStyle="#8B5A2B";c.lineWidth=2;c.beginPath();c.arc(rix-2,riy+bob3,7,-Math.PI*0.4,Math.PI*0.4);c.stroke();
         c.strokeStyle="#ddd";c.lineWidth=1;c.beginPath();c.moveTo(rix-2+Math.cos(-Math.PI*0.4)*7,riy+bob3+Math.sin(-Math.PI*0.4)*7);c.lineTo(rix-2+Math.cos(Math.PI*0.4)*7,riy+bob3+Math.sin(Math.PI*0.4)*7);c.stroke();
