@@ -256,20 +256,13 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
-  // Combat lock — only for rooms with key items, minibosses, or bosses (not every room)
+  // Boss intro — cinematic sequence if room has a boss
+  s.combatLock=false;
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
-  const roomData2=isDg&&s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
-  const hasStairs=gm(s)?.some(r=>r.includes(T.STAIRS_UP));
-  const shouldLock=isDg&&s.en.length>0&&!hasStairs&&(
-    roomData2?.reward||// rooms with dungeon items
-    s.en.some(e=>e.type==="boss"||e.type==="miniboss")||// boss/miniboss rooms
-    roomData2?.lock// explicitly flagged rooms
-  );
-  if(shouldLock){s.combatLock=true;s.combatLockTime=0;sfx("door");s.shake.t=200;
-    // Boss intro — cinematic sequence if room has a boss
+  if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
     if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
-  }else{s.combatLock=false;}
+  }
   // Load blade traps from room data
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];
@@ -300,8 +293,6 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
     if(tl===T.LEDGE_E&&md!==1)return true;// can only pass going east (right)
     if(tl===T.LEDGE_W&&md!==3)return true;// can only pass going west (left)
   }
-  // Combat lock — exits act as walls
-  if(s.combatLock&&tl===T.FLOOR&&((ty===0&&(tx===7||tx===8))||(ty===RO-1&&(tx===7||tx===8))||(tx===0&&(ty===5||ty===6))||(tx===CO-1&&(ty===5||ty===6))))return true;
   if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
     if(s.dr.has(dk))return false;
@@ -368,23 +359,18 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-PS-8;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=8;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
   }else if(loc.ty==="cave"){const m=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
-    if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
+    if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const ci2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const cv=CAVES[ci2];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
         p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
   }else{const[rx,ry]=loc.scr.split(",").map(Number),m=gm(s);
     const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
-    if(!s.combatLock&&m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
+    if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const di2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const ent=DE[di2];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
         const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
     const dg=s.dg[loc.di];
-    if(s.combatLock){// Block exits during combat lock
-      s.combatLockTime+=dt;
-      // Safety valve: if locked for 30+ seconds, force release
-      if(s.combatLockTime>30000){s.combatLock=false;s.combatLockTime=0;const rk2=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;s.cl.add(rk2);s.en=[];s.msg={text:"Enemies fled!",t:1500};}
-      if(p.y<2)p.y=2;if(p.y>H2-PS-2)p.y=H2-PS-2;if(p.x<2)p.x=2;if(p.x>W2-PS-2)p.x=W2-PS-2;
-    }else{
+    {
     if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=TL+4;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
     if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-TL-PS-4;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
@@ -849,14 +835,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
-        // Combat unlock — open exits with fanfare
-        if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;
-          // Particles at all exit positions
-          const m3=gm(s);if(m3){
-            const exits=[[7,0],[8,0],[7,RO-1],[8,RO-1],[0,5],[0,6],[CO-1,5],[CO-1,6]];
-            for(const[ex,ey]of exits){if(m3[ey]&&(m3[ey][ex]===T.FLOOR||m3[ey][ex]===T.DOOR||m3[ey][ex]===T.BOSS_DOOR))
-              s.pt.push(...Array.from({length:4},()=>({x:ex*TL+16,y:ey*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:500,c:"#fd3"})));}}
-        }else{sfx("pickup");}
+        sfx("pickup");
         // Spawn reward chest — room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
         const specialItem=roomData?.reward||null;
@@ -1189,21 +1168,6 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle=mc2;c.beginPath();c.moveTo(px2+8+h2*16,py2);c.lineTo(px2+6+h2*16,py2+5+h3*3);
         c.lineTo(px2+11+h2*16,py2+3+h3*4);c.lineTo(px2+10+h2*16,py2);c.fill();
       }}}}
-  // Combat lock bars — iron gates over exits
-  if(s.combatLock&&m){
-    const drawBars=(bx,by,bw,bh,vert)=>{
-      c.fillStyle="#444";c.fillRect(bx,by,bw,bh);
-      c.fillStyle="#555";const bars=vert?4:5;
-      for(let i=0;i<bars;i++){
-        if(vert){const yy=by+4+i*(bh-8)/(bars-1);c.fillRect(bx+2,yy-1,bw-4,3);}
-        else{const xx=bx+4+i*(bw-8)/(bars-1);c.fillRect(xx-1,by+2,3,bh-4);}}
-      c.fillStyle="#333";c.fillRect(bx,by,bw,2);c.fillRect(bx,by,2,bh);
-      c.fillStyle="#666";c.fillRect(bx+bw-2,by,2,bh);c.fillRect(bx,by+bh-2,bw,2);};
-    // Check which exits exist and draw bars
-    if(m[0][7]===T.FLOOR||m[0][7]===T.DOOR)drawBars(7*TL,0,TL*2,TL,false);
-    if(m[RO-1][7]===T.FLOOR||m[RO-1][7]===T.DOOR)drawBars(7*TL,(RO-1)*TL,TL*2,TL,false);
-    if(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)drawBars(0,5*TL,TL,TL*2,true);
-    if(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)drawBars((CO-1)*TL,5*TL,TL,TL*2,true);}
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects — fireflies, drifting leaves, wind dust
   if(!iD){
