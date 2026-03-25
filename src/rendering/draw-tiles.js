@@ -1189,6 +1189,21 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       else if(tl===T.LEDGE_E){c.beginPath();c.moveTo(cx+4,cy);c.lineTo(cx-3,cy-5);c.lineTo(cx-3,cy+5);c.fill();}
       else{c.beginPath();c.moveTo(cx-4,cy);c.lineTo(cx+3,cy-5);c.lineTo(cx+3,cy+5);c.fill();}
       break;}
+    case T.BANANA:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      // Mysterious golden glow
+      const bg3=Math.sin(t/250)*.15+.3;c.fillStyle=`rgba(253,211,51,${bg3})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      // Banana shape — crescent curve
+      c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";
+      c.beginPath();c.arc(px+16,py+20,8,-Math.PI*0.8,-Math.PI*0.15);c.stroke();
+      c.strokeStyle="#ffe866";c.lineWidth=2;
+      c.beginPath();c.arc(px+16,py+20,8,-Math.PI*0.7,-Math.PI*0.2);c.stroke();
+      // Stem
+      c.fillStyle="#8a6a30";c.fillRect(px+20,py+10,2,4);
+      // Sparkle
+      const sp3=Math.sin(t/180)*2;c.fillStyle="#fff";
+      c.beginPath();c.arc(px+10+sp3,py+10,1.5,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(px+22-sp3,py+14,1,0,Math.PI*2);c.fill();
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }

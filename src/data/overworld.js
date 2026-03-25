@@ -106,6 +106,8 @@ export const OW={
   // Path to the gap
   m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
+  // Hidden banana cave entrance
+  m[9][13]=T.CRACK;
   oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
 
 // Snowy highland approach
