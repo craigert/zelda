@@ -503,63 +503,69 @@ function drawEquipGrid(c,s,t){
 }
 
 function drawBigTriforce(c,s,t){
-  const cx=W2/2,cy=274;
-  const triS=28;
+  const cx=W2/2,cy=295;
+  const triS=50;
+  const allCollected=s.p.tri[0]&&s.p.tri[1]&&s.p.tri[2];
   const pieces=[
-    {x:cx,y:cy-triS*0.55,idx:2,name:"Shadow"},
-    {x:cx-triS*0.58,y:cy+triS*0.35,idx:0,name:"Forest"},
-    {x:cx+triS*0.58,y:cy+triS*0.35,idx:1,name:"Fire"},
+    {x:cx,y:cy-triS*0.5,idx:2,name:"Shadow Keep"},
+    {x:cx-triS*0.53,y:cy+triS*0.36,idx:0,name:"Forest Temple"},
+    {x:cx+triS*0.53,y:cy+triS*0.36,idx:1,name:"Fire Cavern"},
   ];
-  // Background glow
-  const glow=Math.sin(t/800)*0.15+0.2;
-  const gg=c.createRadialGradient(cx,cy,5,cx,cy,triS*2);
-  gg.addColorStop(0,`rgba(253,211,51,${glow})`);gg.addColorStop(1,"rgba(253,211,51,0)");
-  c.fillStyle=gg;c.beginPath();c.arc(cx,cy,triS*2,0,Math.PI*2);c.fill();
+  // Large ambient glow
+  const glow=Math.sin(t/800)*0.08+(allCollected?0.3:0.12);
+  const gg=c.createRadialGradient(cx,cy,10,cx,cy,triS*2.8);
+  gg.addColorStop(0,`rgba(253,211,51,${glow})`);gg.addColorStop(0.5,`rgba(253,211,51,${glow*0.3})`);gg.addColorStop(1,"rgba(253,211,51,0)");
+  c.fillStyle=gg;c.beginPath();c.arc(cx,cy,triS*2.8,0,Math.PI*2);c.fill();
+  // Outer master triangle
+  c.strokeStyle=allCollected?"rgba(253,211,51,0.5)":"rgba(80,65,30,0.25)";c.lineWidth=allCollected?2:1;
+  c.beginPath();c.moveTo(cx,cy-triS*1.02);c.lineTo(cx+triS*0.98,cy+triS*0.86);c.lineTo(cx-triS*0.98,cy+triS*0.86);c.closePath();c.stroke();
+  // Rotating sparkle ring when all collected
+  if(allCollected){for(let i=0;i<6;i++){const a=t/1500+i*Math.PI/3;const sr=triS*1.1;
+    const sp=Math.sin(t/300+i*1.5)*0.4+0.6;
+    c.fillStyle=`rgba(255,240,180,${sp*0.2})`;c.beginPath();c.arc(cx+Math.cos(a)*sr,cy+Math.sin(a)*sr,2,0,Math.PI*2);c.fill();}}
 
   for(const piece of pieces){
     const collected=s.p.tri[piece.idx];
-    const pulse=collected?Math.sin(t/600+piece.idx*2)*0.15+0.85:1;
+    const pulse=collected?Math.sin(t/600+piece.idx*2)*0.1+0.9:1;
     c.globalAlpha=pulse;
-
     if(collected){
-      // Outer glow
-      const pg=c.createRadialGradient(piece.x,piece.y,2,piece.x,piece.y,triS);
-      pg.addColorStop(0,"rgba(253,211,51,0.3)");pg.addColorStop(1,"rgba(253,211,51,0)");
-      c.fillStyle=pg;c.beginPath();c.arc(piece.x,piece.y+triS*0.15,triS,0,Math.PI*2);c.fill();
-      // Filled triangle
-      const tg=c.createLinearGradient(piece.x,piece.y-triS*0.5,piece.x,piece.y+triS*0.5);
-      tg.addColorStop(0,"#ffe866");tg.addColorStop(0.5,"#ffd633");tg.addColorStop(1,"#c8a020");
+      // Per-piece glow
+      const pg=c.createRadialGradient(piece.x,piece.y+5,4,piece.x,piece.y+5,triS*0.55);
+      pg.addColorStop(0,"rgba(253,211,51,0.35)");pg.addColorStop(1,"rgba(253,211,51,0)");
+      c.fillStyle=pg;c.beginPath();c.arc(piece.x,piece.y+5,triS*0.55,0,Math.PI*2);c.fill();
+      // Gradient fill
+      const tg=c.createLinearGradient(piece.x,piece.y-triS*0.4,piece.x,piece.y+triS*0.4);
+      tg.addColorStop(0,"#ffe866");tg.addColorStop(0.35,"#ffd633");tg.addColorStop(1,"#a07014");
       c.fillStyle=tg;
-    }else{
-      c.fillStyle="#222";
-    }
-    c.beginPath();
-    c.moveTo(piece.x,piece.y-triS*0.5);
-    c.lineTo(piece.x+triS*0.43,piece.y+triS*0.5);
-    c.lineTo(piece.x-triS*0.43,piece.y+triS*0.5);
-    c.closePath();c.fill();
-
-    if(!collected){
-      c.strokeStyle="#444";c.lineWidth=1;c.stroke();
-    }else{
-      // Inner highlight
-      c.fillStyle="#ffe866";c.beginPath();
-      c.moveTo(piece.x,piece.y-triS*0.25);
-      c.lineTo(piece.x+triS*0.22,piece.y+triS*0.25);
-      c.lineTo(piece.x-triS*0.22,piece.y+triS*0.25);
-      c.closePath();c.fill();
+    }else{c.fillStyle="#141414";}
+    // Triangle shape
+    c.beginPath();c.moveTo(piece.x,piece.y-triS*0.4);
+    c.lineTo(piece.x+triS*0.38,piece.y+triS*0.4);
+    c.lineTo(piece.x-triS*0.38,piece.y+triS*0.4);c.closePath();c.fill();
+    if(!collected){c.strokeStyle="#2a2a2a";c.lineWidth=1;c.stroke();}
+    else{
+      // Inner bright core
+      c.fillStyle="rgba(255,245,200,0.35)";c.beginPath();
+      c.moveTo(piece.x,piece.y-triS*0.18);c.lineTo(piece.x+triS*0.16,piece.y+triS*0.18);
+      c.lineTo(piece.x-triS*0.16,piece.y+triS*0.18);c.closePath();c.fill();
+      // Edge highlight (left edge shine)
+      c.strokeStyle="rgba(255,230,130,0.25)";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(piece.x,piece.y-triS*0.4);c.lineTo(piece.x-triS*0.38,piece.y+triS*0.4);c.stroke();
       // Sparkle
-      c.fillStyle=`rgba(255,255,220,${Math.sin(t/300+piece.idx)*0.5+0.5})`;
-      c.beginPath();c.arc(piece.x,piece.y,2,0,Math.PI*2);c.fill();
+      const sp2=Math.sin(t/250+piece.idx*2.5)*0.5+0.5;
+      c.fillStyle=`rgba(255,255,230,${sp2})`;c.beginPath();c.arc(piece.x-triS*0.06,piece.y-triS*0.08,2.5,0,Math.PI*2);c.fill();
     }
     c.globalAlpha=1;
     // Label
-    c.fillStyle=collected?"#fd3":"#555";c.font="bold 7px monospace";c.textAlign="center";
-    c.fillText(piece.name,piece.x,piece.y+triS*0.5+10);c.textAlign="left";
+    c.fillStyle=collected?"#d4a820":"#3a3a3a";c.font="bold 8px monospace";c.textAlign="center";
+    c.fillText(piece.name,piece.x,piece.y+triS*0.4+14);
   }
-  // Outer triangle outline
-  c.strokeStyle="rgba(184,150,42,0.2)";c.lineWidth=1;
-  c.beginPath();c.moveTo(cx,cy-triS*1.1);c.lineTo(cx+triS*1.05,cy+triS*0.85);c.lineTo(cx-triS*1.05,cy+triS*0.85);c.closePath();c.stroke();
+  // Count text
+  const count=s.p.tri.filter(Boolean).length;
+  c.fillStyle=allCollected?"#fd3":"#777";c.font="bold 11px monospace";c.textAlign="center";
+  c.fillText(`${count} / 3`,cx,cy+triS+32);
+  if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",cx,cy+triS+44);}
+  c.textAlign="left";
 }
 
 function drawDungeonProgress(c,s,t){
