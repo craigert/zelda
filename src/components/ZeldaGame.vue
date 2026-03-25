@@ -1817,7 +1817,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
             if(tv===T.FLOWER){c.fillStyle=((tx2+ty2)%3===0)?"#f66":((tx2+ty2)%3===1)?"#ff6":"#f6f";c.fillRect(rx+tx2*3,ry+ty2*3,2,2);}
           }
         }else{c.fillStyle="#222";c.fillRect(rx,ry,cW,cH);}
-        if(ok===s.loc.scr){c.strokeStyle="#fd3";c.lineWidth=2;c.strokeRect(rx-1,ry-1,cW+2,cH+2);c.lineWidth=1;}
+        if(ok===s.loc.scr){c.strokeStyle="rgba(255,255,255,0.4)";c.lineWidth=1;c.strokeRect(rx,ry,cW,cH);}
       }
       c.strokeStyle="rgba(253,211,51,0.12)";c.lineWidth=1;
       for(let gx=0;gx<=oxX-onX+1;gx++){const lx=omX+op+gx*cW;c.beginPath();c.moveTo(lx,omY+op);c.lineTo(lx,omY+op+gH);c.stroke();}
@@ -1850,50 +1850,43 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       }
       c.fillStyle="#aaa";c.font="10px monospace";c.fillText(dg2.name,W2/2,mmY+mH+14);
     }
-    const invY=mapY+mapH+20;
-    c.fillStyle="rgba(255,255,255,0.1)";c.fillRect(30,invY,W2-60,1);
-    c.fillStyle="#ccc";c.font="bold 12px monospace";c.fillText("INVENTORY",W2/2,invY+16);
+    // --- INVENTORY SECTION ---
+    const invY=mapY+mapH+14;
+    c.fillStyle="rgba(253,211,51,0.2)";c.fillRect(W2/2-60,invY,120,1);
+    // Items — compact two rows
     const items=[
-      {icon:"\ud83d\udd11",label:"Keys",val:p.keys,col:"#fd3"},
-      {icon:"\ud83d\udddd\ufe0f",label:"Master Keys",val:p.masterKey.filter(Boolean).length+"/4",col:"#c070ff"},
-      ...(p.hasBombs?[{icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"}]:[]),
-      {icon:"\ud83d\udc8e",label:"Rupees",val:p.rupees,col:"#4f4"},
       {icon:"\u2764\ufe0f",label:"Hearts",val:`${Math.ceil(p.hp/2)}/${p.mhp/2}`,col:"#f44"},
-      ...(p.hasBow?[{icon:"\ud83c\udff9",label:"Bow",val:"C",col:"#fd3"}]:[]),
-      ...(p.hasMasterSword?[{icon:"\u2694\ufe0f",label:"M.Sword",val:"2x",col:"#8af"}]:[]),
-      ...(p.redArmor?[{icon:"\ud83c\udf4c",label:"Red Armor",val:"\u00bd dmg",col:"#f44"}]:[]),
+      {icon:"\ud83d\udd11",label:"Keys",val:p.keys,col:"#fd3"},
+      ...(p.hasBombs?[{icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"}]:[]),
+      {icon:"\u25c7",label:"Rupees",val:p.rupees,col:"#4f4"},
+      ...(p.hasBow?[{icon:"\ud83c\udff9",label:"Bow",val:"\u2713",col:"#fd3"}]:[]),
+      ...(p.hasMasterSword?[{icon:"\u2694\ufe0f",label:"M.Sword",val:"2x dmg",col:"#8af"}]:[]),
+      ...(p.redArmor?[{icon:"\ud83c\udf4c",label:"Armor",val:"\u00bd dmg",col:"#f44"}]:[]),
+      ...(s.hasLantern?[{icon:"\ud83d\udd2e",label:"Lantern",val:"\u2713",col:"#fa0"}]:[]),
+      ...(s.hasShieldUp?[{icon:"\ud83d\udee1\ufe0f",label:"Shield+",val:"\u2713",col:"#88f"}]:[]),
     ];
-    const iw=90,ix=W2/2-(items.length*iw)/2;
-    for(let i=0;i<items.length;i++){const it=items[i];
-      c.fillStyle="rgba(255,255,255,0.04)";c.fillRect(ix+i*iw+4,invY+24,iw-8,42);
-      c.strokeStyle="rgba(255,255,255,0.1)";c.strokeRect(ix+i*iw+4,invY+24,iw-8,42);
-      c.font="16px monospace";c.fillStyle="#fff";c.fillText(it.icon,ix+i*iw+iw/2,invY+42);
-      c.font="bold 11px monospace";c.fillStyle=it.col;c.fillText(it.val,ix+i*iw+iw/2,invY+58);
-      c.font="8px monospace";c.fillStyle="#888";c.fillText(it.label,ix+i*iw+iw/2,invY+70);}
-    const triY=invY+82;
-    c.fillStyle="#ccc";c.font="bold 12px monospace";c.fillText("TRIFORCE",W2/2,triY);
+    const iw=items.length>5?56:70,ix=W2/2-(items.length*iw)/2;
+    for(let i=0;i<items.length;i++){const it=items[i];const cx2=ix+i*iw+iw/2;
+      c.fillStyle="rgba(255,255,255,0.03)";c.fillRect(ix+i*iw+2,invY+6,iw-4,36);
+      c.font="14px monospace";c.fillStyle="#fff";c.fillText(it.icon,cx2,invY+22);
+      c.font="bold 9px monospace";c.fillStyle=it.col;c.fillText(it.val,cx2,invY+34);
+      c.font="7px monospace";c.fillStyle="#666";c.fillText(it.label,cx2,invY+43);}
+    // --- TRIFORCE ---
+    const triY=invY+52;
+    c.fillStyle="rgba(253,211,51,0.2)";c.fillRect(W2/2-60,triY,120,1);
     const triNames=["Forest","Fire","Shadow"];
-    for(let i=0;i<3;i++){const tx2=W2/2-60+i*60;
-      c.fillStyle=p.tri[i]?"#fd3":"#333";
-      c.beginPath();c.moveTo(tx2,triY+6);c.lineTo(tx2+12,triY+24);c.lineTo(tx2-12,triY+24);c.closePath();c.fill();
-      if(p.tri[i]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx2,triY+10);c.lineTo(tx2+8,triY+22);c.lineTo(tx2-8,triY+22);c.closePath();c.fill();}
-      c.font="8px monospace";c.fillStyle=p.tri[i]?"#fd3":"#666";c.fillText(triNames[i],tx2,triY+34);}
-    const seY=triY+44;
-    const effects=[];
-    if(p.burn>0)effects.push({name:"BURN",col:"#f80",t:p.burn,max:3000});
-    if(p.freeze>0)effects.push({name:"FREEZE",col:"#8cf",t:p.freeze,max:2500});
-    if(p.poison>0)effects.push({name:"POISON",col:"#4a4",t:p.poison,max:4000});
-    if(effects.length>0){c.fillStyle="#ccc";c.font="bold 10px monospace";c.fillText("STATUS",W2/2,seY);
-      for(let i=0;i<effects.length;i++){const ef=effects[i];
-        const ex2=W2/2-effects.length*40+i*80;
-        c.fillStyle=ef.col;c.font="bold 9px monospace";c.fillText(ef.name,ex2+40,seY+14);
-        c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(ex2+10,seY+18,60,4);
-        c.fillStyle=ef.col;c.fillRect(ex2+10,seY+18,60*(ef.t/ef.max),4);}}
-    // Secrets counter
+    for(let i=0;i<3;i++){const tx2=W2/2-50+i*50;
+      c.fillStyle=p.tri[i]?"#fd3":"#222";
+      c.beginPath();c.moveTo(tx2,triY+6);c.lineTo(tx2+10,triY+20);c.lineTo(tx2-10,triY+20);c.closePath();c.fill();
+      if(p.tri[i]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx2,triY+9);c.lineTo(tx2+6,triY+18);c.lineTo(tx2-6,triY+18);c.closePath();c.fill();}
+      c.font="7px monospace";c.fillStyle=p.tri[i]?"#fd3":"#555";c.fillText(triNames[i],tx2,triY+28);}
+    const seY=triY+36;
+    // Secrets counter — 7 total: 4 heart pieces, banana, lantern, shield+
     const secY=seY+(effects.length>0?30:0)+10;
-    let secFound=0,secTotal=12;// total secrets: 8 heart pieces + 3 hidden caves + 1 banana
-    secFound+=p.heartPieces;// partial pieces count
-    for(let i=0;i<4;i++)secFound+=p.mhp>8+i*2?1:0;// completed heart containers from pieces
+    let secFound=0;const secTotal=7;
+    // Heart pieces collected (each piece counts, 4 pieces = 1 heart)
+    const hpCollected=p.heartPieces+(p.mhp>8?4:0);// if mhp grew past 8, all 4 were found
+    secFound+=Math.min(4,hpCollected);
     if(p.redArmor)secFound++;
     if(s.hasLantern)secFound++;if(s.hasShieldUp)secFound++;
     c.fillStyle="#aaa";c.font="bold 10px monospace";c.fillText(`SECRETS: ${Math.min(secFound,secTotal)}/${secTotal}`,W2/2,secY);
