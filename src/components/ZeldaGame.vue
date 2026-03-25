@@ -117,7 +117,7 @@ function init() {
     mapOpen:false,
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
-    npcTalk:null,
+    npcTalk:null,npcState:[], // runtime NPC positions {x,y,hx,hy,dir,mt,st}
     pArrows:[],
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
@@ -262,7 +262,10 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   // Load blade traps from room data
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];
-    if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}}
+    if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
+  // Init NPC runtime state
+  const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
+  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000})):[];}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
@@ -288,7 +291,7 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   }
   // Combat lock — exits act as walls
   if(s.combatLock&&tl===T.FLOOR&&((ty===0&&(tx===7||tx===8))||(ty===RO-1&&(tx===7||tx===8))||(tx===0&&(ty===5||ty===6))||(tx===CO-1&&(ty===5||ty===6))))return true;
-  if(s.loc.ty==="ow"){const npcs=NPC_DATA[s.loc.scr];if(npcs){for(const npc of npcs){if(tx===npc.tx&&ty===npc.ty)return true;}}}
+  if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
     if(s.dr.has(dk))return false;
     if(tl===T.BOSS_DOOR){if(s.p.masterKey[s.loc.di]){s.dr.add(dk);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
@@ -388,7 +391,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       s.respawnClick=false;
       if(s.npcTalk.charIdx>=s.npcTalk.lines[s.npcTalk.idx].length){
         s.npcTalk.idx++;
-        if(s.npcTalk.idx>=s.npcTalk.lines.length){s.npcTalk=null;}
+        if(s.npcTalk.idx>=s.npcTalk.lines.length){s.npcTalk=null;
+          for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;}
         else{s.npcTalk.charIdx=0;s.npcTalk.timer=0;}
       }else{s.npcTalk.charIdx=s.npcTalk.lines[s.npcTalk.idx].length;s.npcTalk.timer=99999;}
       ky.delete(" ");ky.delete("enter");ky.delete("e");ky.delete("z");
@@ -541,10 +545,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if((ky.has(" ")||ky.has("z")||tc.atk)&&!s.sw.a){
     let npcHit=false;
     if(s.loc.ty==="ow"&&!s.npcTalk){const npcs=NPC_DATA[s.loc.scr];if(npcs){
-      const pcx2=Math.floor((p.x+PS/2)/TL),pcy2=Math.floor((p.y+PS/2)/TL);
-      const ftx2=pcx2+(p.dir===1?1:p.dir===3?-1:0),fty2=pcy2+(p.dir===0?-1:p.dir===2?1:0);
-      for(const npc of npcs){if(Math.abs(ftx2-npc.tx)<=1&&Math.abs(fty2-npc.ty)<=1){
-        s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;break;}}}}
+      const pcx2=p.x+PS/2,pcy2=p.y+PS/2;
+      for(let ni=0;ni<npcs.length;ni++){const npc=npcs[ni],ns2=s.npcState[ni];if(!ns2)continue;
+        const ndx=pcx2-(ns2.x+16),ndy=pcy2-(ns2.y+16),ndist=Math.hypot(ndx,ndy);
+        if(ndist<TL*1.2){// Close enough — face NPC to talk
+          s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
+          ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
+          // NPC faces player
+          ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);
+          break;}}}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
       // Light torches with sword — only in dark rooms
       const isDkRoom=s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark;
@@ -677,6 +686,16 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
       const ka=Math.atan2(pcy-bcy,pcx-bcx);if(tm(p.x+Math.cos(ka)*12,p.y+Math.sin(ka)*12)){p.x+=Math.cos(ka)*12;p.y+=Math.sin(ka)*12;}
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
+  // NPC wandering
+  for(const ns2 of s.npcState){ns2.mt+=dt;ns2.wait-=dt;
+    if(ns2.st==="idle"&&ns2.wait<=0){ns2.st="walk";ns2.wait=800+Math.random()*1500;
+      ns2.dir=[0,1,2,3][Math.random()*4|0];}
+    else if(ns2.st==="walk"){const nsp=0.5*(dt/16);
+      let nx2=ns2.x,ny2=ns2.y;
+      if(ns2.dir===0)ny2-=nsp;if(ns2.dir===2)ny2+=nsp;if(ns2.dir===1)nx2+=nsp;if(ns2.dir===3)nx2-=nsp;
+      // Stay within 2 tiles of home
+      if(Math.abs(nx2-ns2.hx)<TL*2&&Math.abs(ny2-ns2.hy)<TL*2&&nx2>TL&&nx2<W2-TL*2&&ny2>TL&&ny2<H2-TL*2){ns2.x=nx2;ns2.y=ny2;}
+      ns2.wait-=dt;if(ns2.wait<=0){ns2.st="idle";ns2.wait=1500+Math.random()*3000;}}}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];
     if(e.spawnT>0){e.spawnT-=dt;continue;}
@@ -1252,23 +1271,57 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Border
     c.strokeStyle=lunging?"#aaa":"#555";c.lineWidth=1.5;c.strokeRect(bx+2,by+2,TL-4,TL-4);}
   // Draw NPCs
-  if(!iD){const npcs=NPC_DATA[loc.scr];if(npcs){for(const npc of npcs){
-    const nx=npc.tx*TL,ny=npc.ty*TL;
-    c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+28,10,3,0,0,Math.PI*2);c.fill();
-    const robe=npc.name.includes("Witch")?"#6a2a8a":npc.name.includes("Fire")?"#aa3322":npc.name.includes("Dark")?"#444":npc.name.includes("Fisher")?"#3366aa":"#336633";
-    c.fillStyle=robe;c.beginPath();c.moveTo(nx+8,ny+12);c.lineTo(nx+24,ny+12);c.lineTo(nx+26,ny+30);c.lineTo(nx+6,ny+30);c.fill();
-    c.fillStyle="#f0c8a0";c.beginPath();c.arc(nx+16,ny+10,7,0,Math.PI*2);c.fill();
+  if(!iD){const npcs=NPC_DATA[loc.scr];if(npcs){for(let ni=0;ni<npcs.length;ni++){const npc=npcs[ni],ns2=s.npcState[ni];if(!ns2)continue;
+    const nx=ns2.x,ny=ns2.y,ndir=ns2.dir,walking=ns2.st==="walk";
+    const walkBob=walking?Math.sin(ns2.mt/120)*1.5:0;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+29,10,3,0,0,Math.PI*2);c.fill();
+    // Body/robe
+    const robe=npc.name.includes("Witch")?"#6a2a8a":npc.name.includes("Fire")?"#aa3322":npc.name.includes("Dark")?"#444":npc.name.includes("Fisher")?"#3366aa":npc.name.includes("Wanderer")?"#8a6a30":"#336633";
+    c.fillStyle=robe;c.beginPath();c.moveTo(nx+8,ny+13);c.lineTo(nx+24,ny+13);c.lineTo(nx+26,ny+30);c.lineTo(nx+6,ny+30);c.fill();
+    // Robe trim
+    c.fillStyle="rgba(255,255,255,0.1)";c.fillRect(nx+7,ny+28,18,2);
+    // Arms (swing when walking)
+    const armSwing=walking?Math.sin(ns2.mt/150)*3:0;
+    c.fillStyle=robe;
+    c.fillRect(nx+4,ny+16+armSwing,4,8);c.fillRect(nx+24,ny+16-armSwing,4,8);
+    // Head
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(nx+16,ny+10+walkBob,7,0,Math.PI*2);c.fill();
+    // Direction-based face
+    const faceX=ndir===1?2:ndir===3?-2:0,faceY=ndir===0?-1:ndir===2?1:0;
+    // Hair/hat per character type
     if(npc.name.includes("Sage")||npc.name.includes("Hermit")){
-      c.fillStyle="#ccc";c.beginPath();c.arc(nx+16,ny+8,8,Math.PI,0);c.fill();
-      c.fillStyle="#888";c.fillRect(nx+13,ny+14,6,2);
+      c.fillStyle="#ccc";c.beginPath();c.arc(nx+16,ny+8+walkBob,8,Math.PI,0);c.fill();
+      c.fillStyle="#aaa";c.fillRect(nx+11,ny+14+walkBob,10,3);// beard
     }else if(npc.name.includes("Witch")){
-      c.fillStyle="#333";c.beginPath();c.moveTo(nx+8,ny+8);c.lineTo(nx+16,ny-4);c.lineTo(nx+24,ny+8);c.fill();
-    }else{c.fillStyle="#654321";c.beginPath();c.arc(nx+16,ny+7,7,Math.PI+0.3,-0.3);c.fill();}
-    c.fillStyle="#222";c.beginPath();c.arc(nx+13,ny+10,1.5,0,Math.PI*2);c.fill();
-    c.beginPath();c.arc(nx+19,ny+10,1.5,0,Math.PI*2);c.fill();
-    const bob=Math.sin(t/300)*3;
-    c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";
-    c.fillText("!",nx+16,ny-4+bob);c.textAlign="left";}}}
+      c.fillStyle="#333";c.beginPath();c.moveTo(nx+9,ny+8+walkBob);c.lineTo(nx+16,ny-5+walkBob);c.lineTo(nx+23,ny+8+walkBob);c.fill();
+      c.fillStyle="#6a2a8a";c.fillRect(nx+10,ny+7+walkBob,12,2);
+    }else if(npc.name.includes("Fisher")){
+      c.fillStyle="#2255aa";c.beginPath();c.arc(nx+16,ny+6+walkBob,8,Math.PI+0.2,-0.2);c.fill();
+      // Fishing rod
+      c.strokeStyle="#8a6a30";c.lineWidth=1.5;c.beginPath();c.moveTo(nx+22,ny+14);c.lineTo(nx+30,ny+4);c.stroke();
+    }else if(npc.name.includes("Wanderer")){
+      c.fillStyle="#6a4a20";c.beginPath();c.arc(nx+16,ny+6+walkBob,8,Math.PI+0.1,-0.1);c.fill();
+      c.fillStyle="#8a6a30";c.fillRect(nx+10,ny+5+walkBob,12,3);// headband
+    }else if(npc.name.includes("Sentinel")||npc.name.includes("Dark")){
+      c.fillStyle="#555";c.beginPath();c.arc(nx+16,ny+6+walkBob,8,Math.PI,0);c.fill();
+      c.fillStyle="#333";c.fillRect(nx+10,ny+5+walkBob,12,4);// helmet visor
+    }else{// Guide / generic
+      c.fillStyle="#2a6a18";c.beginPath();c.arc(nx+16,ny+6+walkBob,7,Math.PI+0.3,-0.3);c.fill();
+      c.fillStyle="#3a8a28";c.fillRect(nx+11,ny+5+walkBob,10,3);// cap brim
+    }
+    // Eyes (face direction)
+    c.fillStyle="#222";c.beginPath();c.arc(nx+13+faceX,ny+10+faceY+walkBob,1.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(nx+19+faceX,ny+10+faceY+walkBob,1.5,0,Math.PI*2);c.fill();
+    // Exclamation mark — only when player is nearby
+    const pdist=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
+    if(pdist<TL*3){const bob=Math.sin(t/300)*3;
+      c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";
+      c.fillText("!",nx+16,ny-6+bob+walkBob);c.textAlign="left";}
+    // Feet animation when walking
+    if(walking){const step=Math.sin(ns2.mt/120)>0;
+      c.fillStyle="#654321";c.fillRect(nx+9+(step?1:-1),ny+29,5,2);c.fillRect(nx+17+(step?-1:1),ny+29,5,2);}
+    }}}
   for(const bp of s.bProj){
     if(bp.type==="root"){c.fillStyle="#3a6a18";c.beginPath();c.arc(bp.x,bp.y,5,0,Math.PI*2);c.fill();
       c.fillStyle="#5a9a28";c.beginPath();c.arc(bp.x-1,bp.y-1,3,0,Math.PI*2);c.fill();
