@@ -6,6 +6,7 @@ export const DEFAULT_MUSIC = {
   fire: "music/fire.mp3",
   shadow: "music/shadow.mp3",
   triforce: "music/triforce.mp3",
+  guardian: "music/guardian.mp3",
 };
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
@@ -139,5 +140,24 @@ export const MUSIC = {
       "K",null,null,null,"K",null,"S",null,"K",null,"S",null,"K","S","K","S",
       "K",null,null,null,"K",null,null,null,null,null,null,null,null,null,"S",null,
       "K",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  },
+  // GUARDIAN — Intense boss battle, E minor. Fast aggressive FM lead, power drums.
+  guardian: { tempo: 170,
+    lead: ["E5","G5","B5","E6","B5","G5","E5","D5","E5","F#5","G5","A5","B5","A5","G5","F#5",
+      "E5","D5","E5","G5","B5","A5","G5","F#5","E5","D5","C5","D5","E5",null,null,null,
+      "G5","A5","B5","C6","B5","A5","G5","F#5","E5","D5","E5","F#5","G5",null,null,null,
+      "B5","A5","G5","F#5","E5","D5","E5","D5","E5",null,null,null,null,null,null,null],
+    pad: ["E3","E3","E3","E3","C3","C3","C3","C3","D3","D3","D3","D3","B2","B2","B2","B2",
+      "E3","E3","E3","E3","C3","C3","C3","C3","A2","A2","A2","A2","B2","B2","B2","B2",
+      "C3","C3","C3","C3","D3","D3","D3","D3","E3","E3","E3","E3","G3","G3","G3","G3",
+      "B2","B2","A2","A2","E3","E3","E3","E3","E3",null,null,null,null,null,null,null],
+    bass: ["E2","E3","E2","E3","C2","C3","C2","C3","D2","D3","D2","D3","B1","B2","B1","B2",
+      "E2","E3","E2","E3","C2","C3","C2","C3","A1","A2","A1","A2","B1","B2","B1","B2",
+      "C2","C3","C2","C3","D2","D3","D2","D3","E2","E3","E2","E3","G2","G2","G2","G2",
+      "B1","B2","A1","A2","E2","E3","E2","E3","E2",null,null,null,null,null,null,null],
+    drums: ["K","S","K","S","K","S","K","S","K","S","K","S","K","K","S","S",
+      "K","S","K","S","K","S","K","S","K","S","K","S","K","K","S","K",
+      "K","S","K","S","K","K","S","S","K","S","K","S","K","S","K","S",
+      "K","K","S","K","K","S","K","K","K",null,null,null,null,null,null,null],
   },
 };

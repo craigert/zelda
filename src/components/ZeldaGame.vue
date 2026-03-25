@@ -33,7 +33,7 @@
     </div>
     <div v-if="showMuPicker" :style="{background:'rgba(0,0,0,0.85)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'8px',padding:'12px',marginTop:'8px',maxWidth:'480px',width:'100%'}">
       <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC — Pick files or paste URLs</div>
-      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['triforce','✨ Triforce Moment']]" :key="key"
+      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['triforce','✨ Triforce Moment']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
           <span :style="{color:'#888',fontSize:'10px',fontFamily:'monospace',width:'100px',flexShrink:0}">{{ label }}</span>
@@ -128,6 +128,7 @@ function init() {
     combatLockTime:0, // safety timer for combat lock
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
     bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
+    bossFight:false, // true while in a boss room with boss alive
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -258,7 +259,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;s.fireTrails=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;s.fireTrails=[];s.bossFight=false;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
@@ -271,7 +272,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
     roomData2?.reward||roomData2?.lock||s.en.some(e=>e.type==="boss"||e.type==="miniboss"));
   if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
-    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
+    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;sfx("bossdeath");}
   }
   // Load blade traps from room data
   s.bladeTraps=[];
@@ -884,7 +885,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.dmgNums.push({x:ecx,y:ecy-12,t:800,val:"REFORM!",c:"#fa0"});sfx("door");continue;}
       s.en.splice(i,1);
       s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:500,c:e.type==="boss"?"#fd3":"#f88"})));
-      if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;
+      if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;s.bossFight=false;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
         const bossId=`${s.loc.di}:${e.name}`;
         if(s.loc.di<3&&!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
@@ -1887,7 +1888,7 @@ onMounted(() => {
   const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
     // Force music to start now that audio is unlocked
     const s = stR.value; if (!s || !muOn.value) return;
-    const th = s.title ? "title" : s.triMu ? "triforce" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    const th = s.title ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
     stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
     ltRef.value = th;
     if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
