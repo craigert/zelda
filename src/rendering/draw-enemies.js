@@ -197,3 +197,50 @@ export function dKn(c,x,y,sz,fl,t){
   c.strokeStyle=fl?"#eee":"#aa8833";c.lineWidth=3;
   c.beginPath();c.moveTo(x+sz*.65,y+sz*.3);c.lineTo(x+sz*.8,y+sz*.3);c.stroke();
 }
+// Magma Slug — glowing orange slug with molten body
+export function dMs(c,x,y,sz,fl,t){
+  const bob=Math.sin(t/300)*1.5,pulse=Math.sin(t/200)*0.15+0.85;
+  // Shadow
+  c.fillStyle="rgba(0,0,0,0.3)";c.beginPath();c.ellipse(x+sz/2,y+sz-2,sz/2,3,0,0,Math.PI*2);c.fill();
+  // Fire glow underneath
+  c.fillStyle=`rgba(255,100,0,${0.15+Math.sin(t/150)*0.08})`;c.beginPath();c.ellipse(x+sz/2,y+sz*0.7,sz*0.5,sz*0.3,0,0,Math.PI*2);c.fill();
+  // Body — elongated blob
+  const bg=c.createRadialGradient(x+sz*0.45,y+sz*0.45,2,x+sz/2,y+sz*0.5,sz*0.4);
+  bg.addColorStop(0,fl?"#fff":"#ff8800");bg.addColorStop(0.5,fl?"#fcc":"#cc4400");bg.addColorStop(1,fl?"#faa":"#881100");
+  c.fillStyle=bg;
+  c.beginPath();c.moveTo(x+sz*0.2,y+sz*0.65+bob);
+  c.quadraticCurveTo(x+sz*0.15,y+sz*0.35,x+sz*0.35,y+sz*0.25+bob);
+  c.quadraticCurveTo(x+sz*0.5,y+sz*0.15+bob,x+sz*0.7,y+sz*0.3+bob);
+  c.quadraticCurveTo(x+sz*0.85,y+sz*0.45,x+sz*0.75,y+sz*0.7+bob);
+  c.quadraticCurveTo(x+sz*0.5,y+sz*0.8,x+sz*0.2,y+sz*0.65+bob);c.fill();
+  // Molten cracks
+  c.strokeStyle=`rgba(255,200,50,${pulse*0.6})`;c.lineWidth=1;
+  c.beginPath();c.moveTo(x+sz*0.35,y+sz*0.4+bob);c.lineTo(x+sz*0.5,y+sz*0.5+bob);c.lineTo(x+sz*0.6,y+sz*0.4+bob);c.stroke();
+  // Eyes — glowing yellow
+  if(!fl){c.fillStyle="#ff0";c.beginPath();c.arc(x+sz*0.38,y+sz*0.35+bob,2,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.55,y+sz*0.35+bob,2,0,Math.PI*2);c.fill();
+  c.fillStyle="#000";c.beginPath();c.arc(x+sz*0.38,y+sz*0.35+bob,1,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.55,y+sz*0.35+bob,1,0,Math.PI*2);c.fill();}
+  // Antennae/stalks
+  c.strokeStyle=fl?"#fcc":"#cc6600";c.lineWidth=1.5;
+  c.beginPath();c.moveTo(x+sz*0.35,y+sz*0.3+bob);c.quadraticCurveTo(x+sz*0.3,y+sz*0.15+bob,x+sz*0.25,y+sz*0.1+bob);c.stroke();
+  c.beginPath();c.moveTo(x+sz*0.55,y+sz*0.3+bob);c.quadraticCurveTo(x+sz*0.6,y+sz*0.15+bob,x+sz*0.65,y+sz*0.1+bob);c.stroke();
+}
+// Wallmaster — giant shadow hand
+export function dWm(c,x,y,sz,fl,t){
+  const grab=Math.sin(t/200)*0.1;
+  c.fillStyle=fl?"#fff":"#2a1a3a";
+  // Palm
+  c.beginPath();c.ellipse(x+sz/2,y+sz*0.55,sz*0.35,sz*0.25,0,0,Math.PI*2);c.fill();
+  // Fingers
+  const fingers=[[0.2,0.15],[0.35,0.08],[0.5,0.05],[0.65,0.08],[0.8,0.15]];
+  for(const[fx,fy]of fingers){
+    c.fillStyle=fl?"#eee":"#3a2a4a";
+    c.beginPath();c.ellipse(x+sz*fx,y+sz*(fy+grab),sz*0.08,sz*0.18,0,0,Math.PI*2);c.fill();}
+  // Knuckle lines
+  if(!fl){c.strokeStyle="rgba(80,50,100,0.5)";c.lineWidth=1;
+    c.beginPath();c.moveTo(x+sz*0.25,y+sz*0.45);c.lineTo(x+sz*0.75,y+sz*0.45);c.stroke();}
+  // Glowing eyes in palm
+  c.fillStyle=fl?"#fff":"#a040ff";c.beginPath();c.arc(x+sz*0.4,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.6,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
+}

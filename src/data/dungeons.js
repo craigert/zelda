@@ -169,7 +169,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let x=3;x<=7;x++)m[7][x]=T.WALL;for(let x=8;x<=12;x++)m[9][x]=T.WALL;
     m[4][6]=T.SPIKE;m[4][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][10]=T.SPIKE;m[8][6]=T.SPIKE;m[8][7]=T.SPIKE;
     m[4][10]=T.HEART;m[2][7]=T.TORCH;
-  }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:3,type:"fire_bat"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:4,type:"magma_slug"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
   // Upper east — timed switch room
   "1,0":{tiles:mr(m=>{ae(m,["S","W"]);
@@ -238,7 +238,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     // One-way ledge drop — shortcut south
     m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-  }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:4,type:"magma_slug"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
 
   // Bomb bag room — west of lava crossing, accessible without bombs
   "-1,-1":{tiles:mr(m=>{ae(m,["E"]);
@@ -334,7 +334,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
     m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
     m[4][7]=T.RUPEE;m[7][8]=T.HEART;m[2][5]=T.TORCH;m[2][10]=T.TORCH;
-  }),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
+  }),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:7*TL,y:9*TL,hp:4,type:"wallmaster"}]},
 
   // Northwest — ghost gauntlet (dark room)
   "-1,-1":{dark:true,tiles:mr(m=>{ae(m,["S","E","W"]);
@@ -385,7 +385,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)if((x+y)%3===0)m[y][x]=T.PIT;
     m[5][7]=T.HEART;m[5][8]=T.HEART;m[2][3]=T.TORCH;m[9][12]=T.TORCH;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
+  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"wallmaster"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
 
   // Hidden master sword room — hard ghost gauntlet
   "1,-2":{tiles:mr(m=>{

@@ -67,7 +67,7 @@ import { initSfx, sfx } from '../audio/sfx.js';
 import { dc, hs } from '../utils/helpers.js';
 import { dP } from '../rendering/draw-player.js';
 import { dSw } from '../rendering/draw-sword.js';
-import { dSk, dBt, dGh, dBo, dAr, dMg, dKn } from '../rendering/draw-enemies.js';
+import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm } from '../rendering/draw-enemies.js';
 import { dH } from '../rendering/draw-hud.js';
 import { dT } from '../rendering/draw-tiles.js';
 import { drawTerrainOverlay } from '../rendering/draw-terrain.js';
@@ -251,7 +251,7 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;s.fireTrails=[];const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
@@ -716,6 +716,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
       const ka=Math.atan2(pcy-bcy,pcx-bcx);if(tm(p.x+Math.cos(ka)*12,p.y+Math.sin(ka)*12)){p.x+=Math.cos(ka)*12;p.y+=Math.sin(ka)*12;}
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
+  // Fire trails from magma slugs
+  if(s.fireTrails){for(let i=s.fireTrails.length-1;i>=0;i--){const ft=s.fireTrails[i];ft.t-=dt;
+    if(ft.t<=0){s.fireTrails.splice(i,1);continue;}
+    // Damage player if touching fire
+    if(p.ifr<=0&&Math.hypot(p.x+PS/2-ft.x,p.y+PS/2-ft.y)<14){
+      if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");p.burn=1500;p.burnTick=0;
+      if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
   // NPC wandering
   for(const ns2 of s.npcState){ns2.mt+=dt;if(ns2.fixed)continue;ns2.wait-=dt;
     if(ns2.st==="idle"&&ns2.wait<=0){ns2.st="walk";ns2.wait=800+Math.random()*1500;
@@ -736,7 +743,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
     if(e.st==="chase"&&dist>loseRange&&!isBossLike)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:1.0;
+    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:1.0;
     let moveX=0,moveY=0;
     if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
       if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
@@ -792,6 +799,31 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         const phase=Math.floor(e.mt/2500)%3;
         if(phase===2){const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
         else{const ca=e.mt/800+Math.PI/2;moveX=Math.cos(ang+ca*0.3)*es*0.4;moveY=Math.sin(ang+ca*0.3)*es*0.4;}
+      }else if(e.type==="wallmaster"){
+        // Drops from ceiling — shadow warning, then grab
+        if(!e.wmState)e.wmState="lurk";
+        if(e.wmState==="lurk"){moveX=0;moveY=0;e.wmT=(e.wmT||0)+dt;
+          // Teleport near player every 4s
+          if(e.wmT>4000){e.wmState="shadow";e.wmT=0;e.wmTx=pcx;e.wmTy=pcy;e.x=pcx-ES/2;e.y=-30;}
+        }else if(e.wmState==="shadow"){e.wmT+=dt;moveX=0;moveY=0;
+          if(e.wmT>1200){e.wmState="drop";e.wmT=0;e.y=e.wmTy-ES/2;}
+        }else if(e.wmState==="drop"){e.wmT+=dt;moveX=0;moveY=0;
+          // Check if grabbed player
+          if(Math.hypot(pcx-ecx,pcy-ecy)<20&&p.ifr<=0){
+            if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=500;
+            s.msg={text:"Wallmaster! Dragged to entrance!",t:2000};
+            // Teleport to dungeon entrance
+            const dg3=s.dg[s.loc.di];if(dg3){for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){s.loc.scr=rk3;p.x=7*TL;p.y=9*TL;le(s);break;}}}
+          }
+          if(e.wmT>2000){e.wmState="lurk";e.wmT=0;e.x=e.hx;e.y=e.hy;}
+        }
+      }else if(e.type==="magma_slug"){
+        // Slow chase, leaves burning trail
+        moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;
+        if(!e.trailT)e.trailT=0;e.trailT+=dt;
+        if(e.trailT>400){e.trailT=0;
+          if(!s.fireTrails)s.fireTrails=[];
+          s.fireTrails.push({x:ecx,y:ecy,t:3000});}
       }else if(e.type==="miniboss"){
         // Mini-boss: charge pattern — circle, then lunge
         const mbPhase=Math.floor(e.mt/2500)%3;
@@ -1257,6 +1289,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}
   if(iD){for(let i=0;i<15;i++){const dx2=hs(i,3,77)*W2,dy2=(hs(i,7,88)*H2+t/20)%H2;
     const da=0.15+Math.sin(t/600+i*2)*0.1;c.fillStyle=`rgba(200,180,140,${da})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i)*8,dy2,0.8+hs(i,1,99)*0.8,0,Math.PI*2);c.fill();}}
+  // Wallmaster shadow warnings
+  for(const e of s.en){if(e.type==="wallmaster"&&e.wmState==="shadow"){
+    const sa2=Math.min(1,(e.wmT||0)/1200);
+    c.fillStyle=`rgba(40,0,60,${sa2*0.4})`;c.beginPath();c.ellipse(e.wmTx||0,e.wmTy||0,14+sa2*8,8+sa2*4,0,0,Math.PI*2);c.fill();
+    c.fillStyle=`rgba(80,20,120,${sa2*0.2})`;c.beginPath();c.ellipse(e.wmTx||0,e.wmTy||0,8+sa2*4,4+sa2*2,0,0,Math.PI*2);c.fill();}}
+  // Fire trails from magma slugs
+  if(s.fireTrails){for(const ft of s.fireTrails){const fa=Math.min(1,ft.t/1000);
+    c.fillStyle=`rgba(255,100,0,${fa*0.3})`;c.beginPath();c.arc(ft.x,ft.y,10,0,Math.PI*2);c.fill();
+    c.fillStyle=`rgba(255,200,50,${fa*0.2+Math.sin(t/100+ft.x)*0.1})`;c.beginPath();c.arc(ft.x,ft.y,6,0,Math.PI*2);c.fill();
+    c.fillStyle=`rgba(255,255,150,${fa*0.15})`;c.beginPath();c.arc(ft.x+(Math.sin(t/80+ft.y)*2),ft.y-2,3,0,Math.PI*2);c.fill();}}
   for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:e.type==="miniboss"?ES*1.3:ES;
     if(e.spawnT>0){
       // Spawn animation — smoke puff and scale-in
@@ -1274,6 +1316,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       else if(e.type==="archer")dAr(c,ex,ey,sz,false,t);
       else if(e.type==="mage")dMg(c,ex,ey,sz,false,t);
       else if(e.type==="knight")dKn(c,ex,ey,sz,false,t);
+      else if(e.type==="magma_slug")dMs(c,ex,ey,sz,false,t);
+      else if(e.type==="wallmaster")dWm(c,ex,ey,sz,false,t);
       else dSk(c,ex,ey,sz,false,t);
       c.globalAlpha=1;c.restore();continue;}
     const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
@@ -1299,6 +1343,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="archer")dAr(c,ex,ey,sz,fl,t);
     else if(e.type==="mage")dMg(c,ex,ey,sz,fl,t);
     else if(e.type==="knight")dKn(c,ex,ey,sz,fl,t);
+    else if(e.type==="magma_slug")dMs(c,ex,ey,sz,fl,t);
+    else if(e.type==="wallmaster")dWm(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw blade traps
   for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
