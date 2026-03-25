@@ -1063,7 +1063,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(s.loc.ty==="dg"&&s.loc.di>=0){ix-=18;c.fillStyle=p.masterKey[s.loc.di]?"#c070ff":"#555";c.fillText(p.masterKey[s.loc.di]?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);}
   if(p.hasBombs){ix-=35;c.fillStyle="#8af";c.fillText(`\ud83d\udca3${p.bombs}`,ix,21);}
   ix-=35;c.fillStyle="#fd3";c.fillText(`\ud83d\udd11${p.keys}`,ix,21);
-  ix-=40;c.fillStyle="#4f4";c.fillText(`\ud83d\udc8e${p.rupees}`,ix,21);
+  ix-=40;// Draw rupee hex icon
+  c.fillStyle="#4f4";c.beginPath();const rix2=ix,riy2=14;c.moveTo(rix2,riy2-6);c.lineTo(rix2+4,riy2-2);c.lineTo(rix2+4,riy2+2);c.lineTo(rix2,riy2+6);c.lineTo(rix2-4,riy2+2);c.lineTo(rix2-4,riy2-2);c.closePath();c.fill();
+  c.fillStyle="#8f8";c.beginPath();c.moveTo(rix2,riy2-4);c.lineTo(rix2+3,riy2-1);c.lineTo(rix2,riy2);c.lineTo(rix2-3,riy2-1);c.closePath();c.fill();
+  c.fillStyle="#4f4";c.font="bold 12px monospace";c.fillText(`${p.rupees}`,ix+7,21);
   if(p.hasBow){ix-=18;c.fillStyle="#fd3";c.font="bold 11px monospace";c.fillText("\ud83c\udff9",ix,21);c.font="bold 12px monospace";}
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   let sx2=p.mhp/2*22+16;if(iD2)sx2+=80;
