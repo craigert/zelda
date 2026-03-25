@@ -257,8 +257,11 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Boss intro — cinematic sequence if room has a boss
-  s.combatLock=false;
+  // Combat lock — only for reward/boss/miniboss rooms, blocks transitions only (not collision)
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
+  const roomData2=isDg&&s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+  s.combatLock=isDg&&s.en.length>0&&(
+    roomData2?.reward||roomData2?.lock||s.en.some(e=>e.type==="boss"||e.type==="miniboss"));
   if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
     if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};sfx("bossdeath");}
@@ -370,7 +373,9 @@ function cTr(s){const p=s.p,loc=s.loc;
         const ent=DE[di2];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
         const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
     const dg=s.dg[loc.di];
-    {
+    if(s.combatLock){// Block room transitions but NOT movement/collision
+      if(p.y<0)p.y=0;if(p.y>H2-PS)p.y=H2-PS;if(p.x<0)p.x=0;if(p.x>W2-PS)p.x=W2-PS;
+    }else{
     if(p.y<-4){const ns=`${rx},${ry-1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=TL+4;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
     if(p.x<-4){const ns=`${rx-1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-TL-PS-4;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
@@ -835,7 +840,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
-        sfx("pickup");
+        if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;}else{sfx("pickup");}
         // Spawn reward chest — room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
         const specialItem=roomData?.reward||null;
@@ -1168,6 +1173,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle=mc2;c.beginPath();c.moveTo(px2+8+h2*16,py2);c.lineTo(px2+6+h2*16,py2+5+h3*3);
         c.lineTo(px2+11+h2*16,py2+3+h3*4);c.lineTo(px2+10+h2*16,py2);c.fill();
       }}}}
+  // Simple bars over exits when combat locked
+  if(s.combatLock&&iD){
+    c.fillStyle="rgba(80,40,20,0.8)";
+    if(m[0]&&(m[0][7]===T.FLOOR||m[0][7]===T.DOOR)){c.fillRect(7*TL,0,TL*2,4);c.fillRect(7*TL,TL-4,TL*2,4);}
+    if(m[RO-1]&&(m[RO-1][7]===T.FLOOR||m[RO-1][7]===T.DOOR)){c.fillRect(7*TL,(RO-1)*TL,TL*2,4);c.fillRect(7*TL,RO*TL-4,TL*2,4);}
+    if(m[5]&&(m[5][0]===T.FLOOR||m[5][0]===T.DOOR)){c.fillRect(0,5*TL,4,TL*2);c.fillRect(TL-4,5*TL,4,TL*2);}
+    if(m[5]&&(m[5][CO-1]===T.FLOOR||m[5][CO-1]===T.DOOR)){c.fillRect((CO-1)*TL,5*TL,4,TL*2);c.fillRect(CO*TL-4,5*TL,4,TL*2);}}
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects — fireflies, drifting leaves, wind dust
   if(!iD){
