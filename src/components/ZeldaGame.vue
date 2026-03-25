@@ -320,13 +320,13 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
       if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
       else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
       s.pt.push(...Array.from({length:10},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
-    else if(tl===T.BANANA){s.pk.add(pk);p.redArmor=true;sfx("triforce");s.shake.t=600;s.freeze=400;s.msg={text:"Mysterious Banana! Red Armor acquired! (half damage)",t:3500};
+    else if(tl===T.BANANA){s.pk.add(pk);p.redArmor=true;sfx("itemget");s.shake.t=600;s.freeze=400;s.msg={text:"Mysterious Banana! Red Armor acquired! (half damage)",t:3500};
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#f44":"#fd3"})));}
-    else if(tl===T.BOW){s.pk.add(pk);p.hasBow=true;sfx("triforce");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
+    else if(tl===T.BOW){s.pk.add(pk);p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
     else if(tl===T.BOMB_BAG){s.pk.add(pk);p.hasBombs=true;p.bombs+=5;sfx("triforce");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
-    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
+    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
     else if(tl===T.TRIFORCE){s.pk.add(pk);p.tri[s.loc.di]=true;const c2=p.tri.filter(Boolean).length;sfx("triforce");
@@ -637,15 +637,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");}
-      else if(d2.type==="bow"){p.hasBow=true;sfx("triforce");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
+      else if(d2.type==="bow"){p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
-      else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;sfx("triforce");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
+      else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;sfx("itemget");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
-      else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
+      else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
-      else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("triforce");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
+      else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
-      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.msg={text:"Heart Container! Max HP up!",t:2500};}
+      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("triforce");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;s.msg={text:"The Dark Sanctum has opened!",t:3000};
@@ -827,7 +827,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
         const bossId=`${s.loc.di}:${e.name}`;
-        if(!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
+        if(s.loc.di<3&&!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
           s.drops.push({x:ecx,y:ecy-12,vy:-5,ground:ecy,type:"heartcontainer",t:0});}
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
@@ -1838,7 +1838,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       {icon:"\ud83d\udddd\ufe0f",label:"Master Keys",val:p.masterKey.filter(Boolean).length+"/4",col:"#c070ff"},
       ...(p.hasBombs?[{icon:"\ud83d\udca3",label:"Bombs",val:p.bombs,col:"#8af"}]:[]),
       {icon:"\ud83d\udc8e",label:"Rupees",val:p.rupees,col:"#4f4"},
-      {icon:"\u2764\ufe0f",label:"HP",val:`${p.hp}/${p.mhp}`,col:"#f44"},
+      {icon:"\u2764\ufe0f",label:"Hearts",val:`${Math.ceil(p.hp/2)}/${p.mhp/2}`,col:"#f44"},
       ...(p.hasBow?[{icon:"\ud83c\udff9",label:"Bow",val:"C",col:"#fd3"}]:[]),
       ...(p.hasMasterSword?[{icon:"\u2694\ufe0f",label:"M.Sword",val:"2x",col:"#8af"}]:[]),
       ...(p.redArmor?[{icon:"\ud83c\udf4c",label:"Red Armor",val:"\u00bd dmg",col:"#f44"}]:[]),

@@ -29,4 +29,5 @@ export function sfx(name,note){if(!sfxReady)return;
   else if(name==="kill"){const t=Tone.now();sfxSynths.hit.triggerAttackRelease("A4","16n",t);sfxSynths.hit.triggerAttackRelease("E4","16n",t+0.06);}
   else if(name==="bossdeath"){const t=Tone.now();["D5","F#5","A5","D6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.15));}
   else if(name==="triforce"){const t=Tone.now();["A4","C#5","E5","A5","C#6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.12));}
+  else if(name==="itemget"){const t=Tone.now();["C5","E5","G5","C6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.1));}
   }catch(e){}}
