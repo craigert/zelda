@@ -661,7 +661,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         }else{s.msg={text:`Triforce piece ${tc2}/3!`,t:2000};}
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
-    if(d2.t>8000&&d2.type!=="triforce")s.drops.splice(i,1);}
+    if(d2.t>8000&&!["triforce","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
   // Chest update — requires action button to open
   if(s.chest){const ch=s.chest;ch.t+=dt;const ky=kyR.value;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
