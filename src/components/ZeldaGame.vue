@@ -420,13 +420,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
-    // Check if warp should appear -- need no uncollected triforce or heartcontainer drops
-    const pendingDrops=s.drops.some(d=>d.type==="triforce"||d.type==="heartcontainer");
-    if(s.triforceHold.t>2000&&!s.triforceHold.warp&&!pendingDrops){s.triforceHold.warp=true;sfx("door");
+    if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
       const tc3=s.p.tri.filter(Boolean).length;
       s.msg={text:tc3>=3?"The Dark Sanctum has opened!":`Triforce piece ${tc3}/3!`,t:2000};}
     // Only warp after portal appeared and 500ms passed
-    if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur&&!pendingDrops){
+    if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur){
       const di2=s.loc.di;const dg3=s.dg[di2];if(dg3){
         for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){
           s.loc.scr=rk3;s.p.x=7*TL;s.p.y=9*TL;le(s);break;}}}
@@ -436,9 +434,6 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     // Allow drop collection during hold
     for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
       if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
-      // Auto-fly heartcontainer to player during hold so it doesn't block warp
-      if(d2.type==="heartcontainer"&&d2.y>=d2.ground){const fdx=s.p.x+PS/2-d2.x,fdy=s.p.y+PS/2-d2.y,fd=Math.max(Math.hypot(fdx,fdy),1);
-        const spd=3*(dt/16);d2.x+=fdx/fd*spd;d2.y+=fdy/fd*spd;}
       if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
         if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
         s.drops.splice(i,1);}}
