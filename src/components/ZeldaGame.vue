@@ -1639,6 +1639,26 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const rx=d2.x,ry=d2.y+bob2;
       c.fillStyle=rc;c.beginPath();c.moveTo(rx,ry-6);c.lineTo(rx+4,ry-2);c.lineTo(rx+4,ry+2);c.lineTo(rx,ry+6);c.lineTo(rx-4,ry+2);c.lineTo(rx-4,ry-2);c.closePath();c.fill();
       c.fillStyle="#fff";c.globalAlpha=0.35;c.beginPath();c.moveTo(rx,ry-5);c.lineTo(rx+3,ry-2);c.lineTo(rx,ry);c.lineTo(rx-3,ry-2);c.closePath();c.fill();c.globalAlpha=1;}
+    else if(d2.type==="master_key"){// Purple key
+      const ky2=d2.y+bob2;c.fillStyle=`rgba(192,112,255,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,ky2,10,0,Math.PI*2);c.fill();
+      c.fillStyle="#c070ff";c.beginPath();c.arc(d2.x,ky2-3,4,0,Math.PI*2);c.fill();
+      c.fillRect(d2.x-1,ky2+1,2,7);c.fillRect(d2.x,ky2+5,3,2);c.fillRect(d2.x,ky2+7,2,1.5);}
+    else if(d2.type==="bow"){// Bow icon
+      const by2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,by2,10,0,Math.PI*2);c.fill();
+      c.strokeStyle="#8B5A2B";c.lineWidth=2;c.beginPath();c.arc(d2.x-2,by2,7,-Math.PI*0.4,Math.PI*0.4);c.stroke();
+      c.strokeStyle="#ddd";c.lineWidth=1;c.beginPath();c.moveTo(d2.x-2+Math.cos(-Math.PI*0.4)*7,by2+Math.sin(-Math.PI*0.4)*7);c.lineTo(d2.x-2+Math.cos(Math.PI*0.4)*7,by2+Math.sin(Math.PI*0.4)*7);c.stroke();
+      c.strokeStyle="#a06820";c.lineWidth=1.5;c.beginPath();c.moveTo(d2.x-4,by2);c.lineTo(d2.x+8,by2);c.stroke();}
+    else if(d2.type==="bomb_bag"){// Brown bag
+      const bg2=d2.y+bob2;c.fillStyle=`rgba(100,100,255,${0.15+Math.sin(t/200)*0.08})`;c.beginPath();c.arc(d2.x,bg2,10,0,Math.PI*2);c.fill();
+      c.fillStyle="#8B6B3A";c.beginPath();c.moveTo(d2.x-5,bg2-1);c.lineTo(d2.x-6,bg2+7);c.lineTo(d2.x+6,bg2+7);c.lineTo(d2.x+5,bg2-1);c.fill();
+      c.fillStyle="#333";c.beginPath();c.arc(d2.x,bg2+3,4,0,Math.PI*2);c.fill();}
+    else if(d2.type==="master_sword"){// Blue blade
+      const sy2=d2.y+bob2;c.fillStyle=`rgba(130,180,255,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,sy2,10,0,Math.PI*2);c.fill();
+      c.fillStyle="#c0d8ff";c.beginPath();c.moveTo(d2.x,sy2-8);c.lineTo(d2.x-2,sy2+3);c.lineTo(d2.x+2,sy2+3);c.fill();
+      c.fillStyle="#fd3";c.fillRect(d2.x-5,sy2+2,10,2);c.fillStyle="#6a4a2a";c.fillRect(d2.x-1,sy2+4,2,4);}
+    else if(d2.type==="banana"){// Golden banana
+      const bn2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,bn2,10,0,Math.PI*2);c.fill();
+      c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";c.beginPath();c.arc(d2.x,bn2+3,6,-Math.PI*0.8,-Math.PI*0.15);c.stroke();c.lineCap="butt";}
     else{c.fillStyle="#444";c.beginPath();c.arc(d2.x,d2.y+bob2,5,0,Math.PI*2);c.fill();c.fillStyle="#666";c.beginPath();c.arc(d2.x,d2.y-1+bob2,4,0,Math.PI*2);c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
