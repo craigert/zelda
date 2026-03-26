@@ -119,7 +119,7 @@ function init() {
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[], // runtime NPC positions {x,y,hx,hy,dir,mt,st}
-    shop:null, // {items:[],sel:0} — active shop menu
+    shop:null, // active shop menu
     hasLantern:false,hasShieldUp:false, // shop upgrades
     pArrows:[],
     chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
