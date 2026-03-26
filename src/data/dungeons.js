@@ -358,11 +358,12 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"ghost"},{x:11*TL,y:5*TL,hp:4,type:"ghost"},{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"bat"}]},
 
-  // North — push block + lever puzzle
+  // North — push blocks into pits to get key
   "0,-1":{tiles:mr(m=>{ae(m,["S","N","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
     for(let y=3;y<=5;y++)m[y][5]=T.WALL;for(let y=6;y<=8;y++)m[y][10]=T.WALL;
     m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;
-    m[4][3]=T.PIT;m[7][12]=T.PIT;
+    // Push blocks + pits — fill both pits to get a key
+    m[5][8]=T.PIT;m[6][7]=T.PIT;
     m[5][7]=T.PUSH;m[6][8]=T.PUSH;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"knight"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
 

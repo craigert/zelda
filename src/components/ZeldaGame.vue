@@ -130,6 +130,7 @@ function init() {
     bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
     bossFight:false, // true while in a boss room with boss alive
     pitFall:{a:false,t:0,x:0,y:0}, // pit fall animation
+    litTorchesAll:{}, // persisted lit torches per room
     triforceHold:null, // {t,dur,piece,px,py,warp} — hold triforce above head
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
@@ -261,7 +262,11 @@ function hasSave() {
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorches=new Set();s.shop=null;s.fireTrails=[];s.bossFight=false;const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.fireTrails=[];s.bossFight=false;
+  // Restore lit torches for this room (persists between visits)
+  if(!s.litTorchesAll)s.litTorchesAll={};
+  const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
+  s.litTorches=s.litTorchesAll[trk]||(s.litTorchesAll[trk]=new Set());const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
@@ -430,7 +435,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     // Allow drop collection during hold
     for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
-      if(d2.type==="triforce"||d2.type==="heartcontainer"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
+      if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
       if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
         if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
         s.drops.splice(i,1);}}
@@ -581,7 +586,17 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     const ftx=pcx+(dx>0?1:dx<0?-1:0),fty=pcy+(dy>0?1:dy<0?-1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO&&m2[fty][ftx]===T.PUSH&&!s.pushCd){
       const bx=ftx+(dx>0?1:dx<0?-1:0),by=fty+(dy>0?1:dy<0?-1:0);
-      if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.PIT&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP){
+      // Special: push block into pit — fills the pit
+      if(bx>=0&&bx<CO&&by>=0&&by<RO&&m2[by][bx]===T.PIT){
+        m2[fty][ftx]=T.FLOOR;m2[by][bx]=T.FLOOR;// block falls into pit, both become floor
+        s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
+        sfx("bomb");s.shake.t=200;s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#888"})));
+        // Check if all pits in room are now filled — if so, drop a key
+        let pitsLeft=false;for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.PIT)pitsLeft=true;
+        if(!pitsLeft){sfx("itemget");s.shake.t=300;s.msg={text:"A key appeared!",t:1500};
+          s.drops.push({x:W2/2,y:-20,vy:0.5,ground:H2/2,type:"key_drop",t:0});}
+      }
+      else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP){
         const wasPlate=m2[by][bx]===T.PLATE;
         m2[by][bx]=T.PUSH;m2[fty][ftx]=T.FLOOR;
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
@@ -661,7 +676,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   for(let i=s.dmgNums.length-1;i>=0;i--){const dn=s.dmgNums[i];dn.y-=1.2*(dt/16);dn.t-=dt;if(dn.t<=0)s.dmgNums.splice(i,1);}
   if(s.roomFlash>0)s.roomFlash-=dt;
   for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
-    if(d2.type==="triforce"||d2.type==="heartcontainer"){
+    if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){
       // Slow descent with gentle gravity cap
       d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);
       if(d2.spin!=null)d2.spin+=2.5*(dt/16);
@@ -672,11 +687,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     }else{d2.y+=d2.vy*(dt/16);d2.vy+=0.15*(dt/16);
     if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
-    if((d2.type==="triforce"||d2.type==="heartcontainer")&&d2.y<d2.ground){/* no magnet pull while falling */}
+    if((d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop")&&d2.y<d2.ground){/* no magnet pull while falling */}
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
       else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
+      else if(d2.type==="key_drop"){p.keys++;sfx("itemget");s.msg={text:"Got a key!",t:1500};
+        s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
       else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");}
       else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");}
@@ -700,7 +717,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.triforceHold={t:0,dur:2500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
-    if(d2.t>8000&&!["triforce","heartcontainer","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
+    if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
   // Chest update — requires action button to open
   if(s.chest){const ch=s.chest;ch.t+=dt;const ky=kyR.value;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
@@ -1696,6 +1713,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const sy2=d2.y+bob2;c.fillStyle=`rgba(130,180,255,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,sy2,10,0,Math.PI*2);c.fill();
       c.fillStyle="#c0d8ff";c.beginPath();c.moveTo(d2.x,sy2-8);c.lineTo(d2.x-2,sy2+3);c.lineTo(d2.x+2,sy2+3);c.fill();
       c.fillStyle="#fd3";c.fillRect(d2.x-5,sy2+2,10,2);c.fillStyle="#6a4a2a";c.fillRect(d2.x-1,sy2+4,2,4);}
+    else if(d2.type==="key_drop"){// Falling key
+      const ky3=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,ky3,10,0,Math.PI*2);c.fill();
+      c.fillStyle="#fd3";c.beginPath();c.arc(d2.x,ky3-3,4,0,Math.PI*2);c.fill();
+      c.fillRect(d2.x-1,ky3+1,2,7);c.fillRect(d2.x,ky3+5,3,2);c.fillRect(d2.x,ky3+7,2,1.5);}
     else if(d2.type==="banana"){// Golden banana
       const bn2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,bn2,10,0,Math.PI*2);c.fill();
       c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";c.beginPath();c.arc(d2.x,bn2+3,6,-Math.PI*0.8,-Math.PI*0.15);c.stroke();c.lineCap="butt";}
