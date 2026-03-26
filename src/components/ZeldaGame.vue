@@ -586,8 +586,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     const ftx=pcx+(dx>0?1:dx<0?-1:0),fty=pcy+(dy>0?1:dy<0?-1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO&&m2[fty][ftx]===T.PUSH&&!s.pushCd){
       const bx=ftx+(dx>0?1:dx<0?-1:0),by=fty+(dy>0?1:dy<0?-1:0);
-      // Special: push block into pit — fills the pit
-      if(bx>=0&&bx<CO&&by>=0&&by<RO&&m2[by][bx]===T.PIT){
+      // Special: push block into pit — only in rooms flagged pitPuzzle
+      const roomD=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+      if(bx>=0&&bx<CO&&by>=0&&by<RO&&m2[by][bx]===T.PIT&&roomD?.pitPuzzle){
         m2[fty][ftx]=T.FLOOR;m2[by][bx]=T.FLOOR;// block falls into pit, both become floor
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("bomb");s.shake.t=200;s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#888"})));

@@ -359,7 +359,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"ghost"},{x:11*TL,y:5*TL,hp:4,type:"ghost"},{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"bat"}]},
 
   // North — push blocks into pits to get key
-  "0,-1":{tiles:mr(m=>{ae(m,["S","N","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
+  "0,-1":{pitPuzzle:true,tiles:mr(m=>{ae(m,["S","N","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
     for(let y=3;y<=5;y++)m[y][5]=T.WALL;for(let y=6;y<=8;y++)m[y][10]=T.WALL;
     m[3][8]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][7]=T.WALL;
     // Push blocks + pits — fill both pits to get a key
