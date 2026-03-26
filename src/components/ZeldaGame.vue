@@ -143,14 +143,12 @@ function onCanvasClick() {
   const s = stR.value;
   if (s && s.npcTalk) { s.respawnClick = true; return; }
   if (s && s.title) {
-    if (ltRef.value === "title") {
-      s.title = false;
-      const save = loadGame();
-      if (save && applySave(s, save)) {
-        le(s); s.msg = { text: "Game loaded!", t: 1500 };
-      } else { le(s); }
-      ltRef.value = null;
-    }
+    s.title = false;
+    const save = loadGame();
+    if (save && applySave(s, save)) {
+      le(s); s.msg = { text: "Game loaded!", t: 1500 };
+    } else { le(s); }
+    ltRef.value = null;
     return;
   }
   if (s && (s.go || s.won)) { s.respawnClick = true; return; }
