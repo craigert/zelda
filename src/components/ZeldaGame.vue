@@ -90,6 +90,7 @@ const wrapRef = ref(null);
 const isFS = ref(false);
 const muBtnRef = ref(null);
 const trR = ref({active:false,alpha:0,dir:0});
+const saveSlot = ref(0); // active save slot 0-2
 
 // --- Init ---
 function init() {
@@ -98,7 +99,7 @@ function init() {
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
-    title:true,
+    title:true,saveSelect:false,saveSelIdx:0,
     fade:{a:false,alpha:0,dir:1,cb:null,t:0},
     shake:{x:0,y:0,t:0},
     drops:[],
@@ -143,12 +144,11 @@ function onCanvasClick() {
   const s = stR.value;
   if (s && s.npcTalk) { s.respawnClick = true; return; }
   if (s && s.title) {
-    s.title = false;
-    const save = loadGame();
-    if (save && applySave(s, save)) {
-      le(s); s.msg = { text: "Game loaded!", t: 1500 };
-    } else { le(s); }
-    ltRef.value = null;
+    s.title = false; s.saveSelect = true; s.saveSelIdx = 0;
+    return;
+  }
+  if (s && s.saveSelect) {
+    startFromSlot(s, s.saveSelIdx);
     return;
   }
   if (s && (s.go || s.won)) { s.respawnClick = true; return; }
@@ -210,8 +210,11 @@ function onUrlKeydown(e, key) {
 }
 
 // --- Save/Load ---
+// Migrate old single save to slot 0
+try{const old=localStorage.getItem('zelda_save');if(old&&!localStorage.getItem('zelda_save_0')){localStorage.setItem('zelda_save_0',old);localStorage.removeItem('zelda_save');}}catch(e){}
+
 function saveGame(s) {
-  if (!s || s.title || s.go || s.won) return;
+  if (!s || s.title || s.saveSelect || s.go || s.won) return;
   try {
     const data = {
       v: 1,
@@ -225,13 +228,13 @@ function saveGame(s) {
       respawn: { ...s.respawn },
       hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp
     };
-    localStorage.setItem('zelda_save', JSON.stringify(data));
+    localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
   } catch (e) {}
 }
 
-function loadGame() {
+function loadSlot(idx) {
   try {
-    const raw = localStorage.getItem('zelda_save');
+    const raw = localStorage.getItem('zelda_save_'+idx);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch (e) { return null; }
@@ -255,8 +258,18 @@ function applySave(s, save) {
   return true;
 }
 
-function hasSave() {
-  try { return !!localStorage.getItem('zelda_save'); } catch(e) { return false; }
+function startFromSlot(s, idx) {
+  saveSlot.value = idx;
+  const save = loadSlot(idx);
+  s.saveSelect = false; s.title = false;
+  if (save && applySave(s, save)) {
+    le(s); s.msg = { text: "Game loaded!", t: 1500 };
+  } else { le(s); }
+  ltRef.value = null;
+}
+
+function deleteSlot(idx) {
+  try { localStorage.removeItem('zelda_save_'+idx); } catch(e) {}
 }
 
 // --- Game logic functions ---
@@ -400,7 +413,7 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(dg.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=TL+4;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}}}
   saveGame(s);}
 
-function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
+function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return;s.gt+=dt;
   // Freeze gameplay during chest presentation
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
@@ -1139,19 +1152,77 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.strokeStyle=`rgba(253,220,80,${triFade*0.25})`;c.lineWidth=2;
     c.beginPath();c.moveTo(triCX,triCY-triS*0.6);c.lineTo(triCX-triS*0.7,triCY+triS*0.4);
     c.lineTo(triCX+triS*0.7,triCY+triS*0.4);c.closePath();c.stroke();
-    const bottomG=c.createLinearGradient(0,H*0.82,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
-    c.fillStyle=bottomG;c.fillRect(0,H*0.82,W,H*0.2);
-    if(ltRef.value==="title"){
-      const bw=120,bh=30,bx=W/2-bw/2,by=H*0.86;
-      const hover=Math.sin(t/300)*0.1+0.9;
-      const hs2=hasSave();
-      c.fillStyle=`rgba(253,211,51,${hover*0.25})`;c.strokeStyle=`rgba(253,211,51,${hover})`;c.lineWidth=2;
-      c.beginPath();c.moveTo(bx+8,by);c.lineTo(bx+bw-8,by);c.quadraticCurveTo(bx+bw,by,bx+bw,by+8);c.lineTo(bx+bw,by+bh-8);c.quadraticCurveTo(bx+bw,by+bh,bx+bw-8,by+bh);c.lineTo(bx+8,by+bh);c.quadraticCurveTo(bx,by+bh,bx,by+bh-8);c.lineTo(bx,by+8);c.quadraticCurveTo(bx,by,bx+8,by);c.fill();c.stroke();
-      c.fillStyle="#fff";c.font="bold 16px monospace";c.fillText(hs2?"CONTINUE":"START",W/2,by+bh/2+6);
-      if(hs2){c.fillStyle="rgba(255,255,255,0.4)";c.font="10px monospace";c.fillText("Press N for New Game",W/2,by+bh+14);}
-    }else if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("PRESS SPACE OR CLICK",W/2,H*0.92);}
-    c.fillStyle="rgba(255,255,255,0.3)";c.font="9px monospace";c.fillText("WASD move \u00b7 Space atk \u00b7 B bomb \u00b7 X shield \u00b7 C bow \u00b7 I/Tab map \u00b7 Esc pause",W/2,H*0.97);
+    const bottomG=c.createLinearGradient(0,H*0.78,0,H);bottomG.addColorStop(0,"rgba(0,0,0,0)");bottomG.addColorStop(1,"rgba(0,0,0,0.6)");
+    c.fillStyle=bottomG;c.fillRect(0,H*0.78,W,H*0.22);
+    if(Math.sin(t/500)>0){c.fillStyle="#fff";c.font="bold 14px monospace";c.fillText("PRESS SPACE OR CLICK",W/2,H*0.84);}
+    c.fillStyle="rgba(255,255,255,0.25)";c.font="8px monospace";
+    c.fillText("WASD move \u00b7 Space atk \u00b7 B bomb \u00b7 X shield",W/2,H*0.91);
+    c.fillText("C bow \u00b7 I/Tab map \u00b7 Esc pause",W/2,H*0.95);
     c.textAlign="left";c.lineCap="butt";return;}
+  // ===== SAVE SELECT SCREEN =====
+  if(s.saveSelect){
+    const W=W2,H=H2+HH;
+    c.fillStyle="#0a0a14";c.fillRect(0,0,W,H);
+    // Decorative border
+    c.strokeStyle="rgba(253,211,51,0.2)";c.lineWidth=2;c.strokeRect(8,8,W-16,H-16);
+    c.strokeStyle="rgba(253,211,51,0.1)";c.lineWidth=1;c.strokeRect(12,12,W-24,H-24);
+    c.textAlign="center";
+    c.fillStyle="#ffd633";c.font="bold 18px monospace";c.fillText("SELECT FILE",W/2,32);
+    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W/2-50,36,100,1);
+    for(let i=0;i<3;i++){
+      const save=loadSlot(i);
+      const by=52+i*52,bw=W-40,bx=20,bh=46;
+      const sel=s.saveSelIdx===i;
+      // Slot background
+      c.fillStyle=sel?"rgba(253,211,51,0.12)":"rgba(255,255,255,0.03)";
+      c.strokeStyle=sel?"rgba(253,211,51,0.6)":"rgba(255,255,255,0.1)";
+      c.lineWidth=sel?2:1;
+      c.beginPath();c.moveTo(bx+4,by);c.lineTo(bx+bw-4,by);c.quadraticCurveTo(bx+bw,by,bx+bw,by+4);
+      c.lineTo(bx+bw,by+bh-4);c.quadraticCurveTo(bx+bw,by+bh,bx+bw-4,by+bh);
+      c.lineTo(bx+4,by+bh);c.quadraticCurveTo(bx,by+bh,bx,by+bh-4);
+      c.lineTo(bx,by+4);c.quadraticCurveTo(bx,by,bx+4,by);c.fill();c.stroke();
+      // Selection cursor
+      if(sel){const ca=Math.sin(t/200)*0.3+0.7;
+        c.fillStyle=`rgba(253,211,51,${ca})`;c.font="bold 12px monospace";
+        c.textAlign="left";c.fillText("\u25b6",bx+6,by+bh/2+5);c.textAlign="center";}
+      // Slot content
+      c.font="bold 12px monospace";
+      c.fillStyle=sel?"#ffd633":"#888";
+      c.textAlign="left";c.fillText("FILE "+(i+1),bx+22,by+16);
+      if(save&&save.v===1){
+        // Hearts
+        const mhp=save.p.mhp||8,hp=save.p.hp||0,hc=mhp/2;
+        for(let h=0;h<hc;h++){const hxx=bx+22+h*10,hyy=by+22;
+          c.fillStyle=hp>=(h+1)*2?"#ee3333":hp>=h*2+1?"#ee3333":"#333";
+          c.font="8px monospace";c.fillText("\u2665",hxx,hyy+8);}
+        // Triforce pieces
+        const tri=save.p.tri||[false,false,false];
+        for(let ti=0;ti<3;ti++){c.fillStyle=tri[ti]?"#ffd633":"#333";c.font="10px monospace";
+          c.fillText("\u25b2",bx+bw-50+ti*14,by+16);}
+        // Location info
+        c.fillStyle=sel?"#aaa":"#666";c.font="9px monospace";
+        const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
+        c.fillText(locName,bx+22,by+40);
+        // Items
+        const items=[];
+        if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
+        if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
+        if(items.length){c.fillStyle=sel?"#888":"#555";c.fillText(items.join(" \u00b7 "),bx+80,by+40);}
+      }else{
+        c.fillStyle=sel?"#888":"#555";c.font="11px monospace";c.fillText("- Empty -",bx+22,by+34);
+      }
+    }
+    // Back option
+    const bi=3,bby=52+bi*52,sel4=s.saveSelIdx===3;
+    c.textAlign="center";c.fillStyle=sel4?"#ffd633":"#666";c.font="bold 11px monospace";
+    c.fillText("BACK",W/2,bby+12);
+    if(sel4){const ca=Math.sin(t/200)*0.3+0.7;
+      c.fillStyle=`rgba(253,211,51,${ca})`;c.font="bold 12px monospace";
+      c.fillText("\u25b6",W/2-30,bby+12);}
+    // Instructions
+    c.fillStyle="rgba(255,255,255,0.25)";c.font="8px monospace";c.textAlign="center";
+    c.fillText("\u2191\u2193 select \u00b7 Enter confirm \u00b7 Delete erase \u00b7 Esc back",W/2,H-10);
+    c.textAlign="left";return;}
   // ===== HUD =====
   const p=s.p;
   c.fillStyle="#111";c.fillRect(0,0,W2,HH);
@@ -2030,7 +2101,7 @@ onMounted(() => {
   const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
     // Force music to start now that audio is unlocked
     const s = stR.value; if (!s || !muOn.value) return;
-    const th = s.title ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    const th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
     stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
     ltRef.value = th;
     if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
@@ -2042,22 +2113,22 @@ onMounted(() => {
     const s = stR.value;
     doUnlock();
     if (s && s.title && (e.key === " " || e.key === "Enter" || e.key === "z")) {
-      if (ltRef.value === "title") {
-        s.title = false;
-        const save = loadGame();
-        if (save && applySave(s, save)) {
-          le(s); s.msg = { text: "Game loaded!", t: 1500 };
-        } else { le(s); }
-        ltRef.value = null;
-      }
+      s.title = false; s.saveSelect = true; s.saveSelIdx = 0;
       return;
     }
-    if (s && s.title && e.key.toLowerCase() === "n") {
-      if (ltRef.value === "title") {
-        try { localStorage.removeItem('zelda_save'); } catch(e2) {}
-        const ns = init(); ns.title = false;
-        stR.value = ns; le(ns); ltRef.value = null;
-        ns.msg = { text: "New game started!", t: 1500 };
+    if (s && s.saveSelect) {
+      const k = e.key.toLowerCase();
+      if (k === "arrowup" || k === "w") { s.saveSelIdx = (s.saveSelIdx - 1 + 4) % 4; e.preventDefault(); }
+      if (k === "arrowdown" || k === "s") { s.saveSelIdx = (s.saveSelIdx + 1) % 4; e.preventDefault(); }
+      if (k === " " || k === "enter" || k === "z") {
+        if (s.saveSelIdx < 3) { startFromSlot(s, s.saveSelIdx); }
+        else { s.saveSelect = false; s.title = true; }
+        e.preventDefault();
+      }
+      if (k === "escape") { s.saveSelect = false; s.title = true; }
+      if (k === "x" || k === "delete" || k === "backspace") {
+        if (s.saveSelIdx < 3 && loadSlot(s.saveSelIdx)) { deleteSlot(s.saveSelIdx); sfx("hurt"); }
+        e.preventDefault();
       }
       return;
     }
@@ -2073,7 +2144,7 @@ onMounted(() => {
       if (k === " " || k === "enter") {
         if (s.pauseSel === 1) { muOn.value = !muOn.value; }
         else if (s.pauseSel === 2) { saveGame(s); s.msg = { text: "Game saved!", t: 1500 }; s.paused = false; }
-        else if (s.pauseSel === 3) { saveGame(s); s.paused = false; s.title = true; s.msg = { text: "", t: 0 }; ltRef.value = null; }
+        else if (s.pauseSel === 3) { saveGame(s); s.paused = false; s.title = true; s.saveSelect = false; s.msg = { text: "", t: 0 }; ltRef.value = null; }
         e.preventDefault();
       }
     }
@@ -2130,7 +2201,7 @@ watch([muOn, customMu], () => {
   }
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = s.title ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    let th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
