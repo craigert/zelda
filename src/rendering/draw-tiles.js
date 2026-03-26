@@ -1223,6 +1223,20 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Highlight
       c.fillStyle="rgba(255,255,255,0.06)";c.fillRect(px+7,py+1,2,TL-2);
       break;}
+    case T.LOW_FLOOR:{// Sunken floor — darker, depressed area
+      const lfc=iD?(dg.fc||dg.color):"#1a2a16";
+      c.fillStyle=lfc;c.fillRect(px,py,TL,TL);
+      // Darken significantly
+      c.fillStyle="rgba(0,0,0,0.3)";c.fillRect(px,py,TL,TL);
+      // Inner shadow on top/left edges (depth illusion)
+      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py,TL,3);c.fillRect(px,py,3,TL);
+      // Light edge on bottom/right (opposite of shadow)
+      c.fillStyle="rgba(255,255,255,0.04)";c.fillRect(px,py+TL-2,TL,2);c.fillRect(px+TL-2,py,2,TL);
+      // Cracked texture
+      c.strokeStyle="rgba(0,0,0,0.15)";c.lineWidth=0.5;
+      const h1=hs(px,py,60),h2=hs(px,py,61);
+      c.beginPath();c.moveTo(px+6+h1*10,py+4+h2*6);c.lineTo(px+16+h1*6,py+14+h2*8);c.lineTo(px+24+h2*4,py+10+h1*10);c.stroke();
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }

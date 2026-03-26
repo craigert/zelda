@@ -42,13 +42,20 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:7*TL,hp:4,type:"bat"}],reward:"master_key"},
 
-  // East far room — icy push-block puzzle (east of 1,0)
+  // East far room — sunken pit with ledges and ladder (east of 1,0)
   "2,0":{tiles:mr(m=>{ae(m,["W"]);
-    for(let y=2;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.ICE;
-    m[3][5]=T.PUSH;m[3][10]=T.PUSH;m[7][7]=T.PUSH;
-    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][3]=T.WALL;m[7][12]=T.WALL;
-    m[8][7]=T.HEART;
-  }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"bat"},{x:10*TL,y:7*TL,hp:2,type:"bat"}]},
+    // Upper walkway around the edges
+    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][3]=T.TORCH;m[9][12]=T.TORCH;
+    // Ledges surrounding the sunken area — drop in from any side
+    for(let x=4;x<=11;x++){m[3][x]=T.LEDGE_S;m[8][x]=T.LEDGE_N;}
+    for(let y=4;y<=7;y++){m[y][4]=T.LEDGE_E;m[y][11]=T.LEDGE_W;}
+    // Sunken lower floor
+    for(let y=4;y<=7;y++)for(let x=5;x<=10;x++)m[y][x]=T.LOW_FLOOR;
+    // Treasure in the pit
+    m[5][7]=T.HEART;m[6][8]=T.RUPEE;
+    // Ladder on east side to climb back out
+    m[7][11]=T.LADDER;m[3][11]=T.LADDER;
+  }),enemies:[{x:6*TL,y:5*TL,hp:3,type:"vine_creeper"},{x:9*TL,y:6*TL,hp:2,type:"bat"}]},
 
   // Central north — pit maze with bridges
   "0,-1":{tiles:mr(m=>{ae(m,["S","N","E"]);
@@ -330,12 +337,18 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[]},
 
-  // West wing — pit-flanked path
+  // West wing — sunken center with ghosts
   "-1,0":{tiles:mr(m=>{ae(m,["E","N"]);
-    for(let y=2;y<=9;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
-    m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
-    m[4][7]=T.RUPEE;m[7][8]=T.HEART;m[2][5]=T.TORCH;m[2][10]=T.TORCH;
-  }),enemies:[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:7*TL,y:9*TL,hp:4,type:"wallmaster"}]},
+    // Ledges around a sunken center
+    for(let x=5;x<=10;x++){m[3][x]=T.LEDGE_S;m[8][x]=T.LEDGE_N;}
+    for(let y=4;y<=7;y++){m[y][5]=T.LEDGE_E;m[y][10]=T.LEDGE_W;}
+    // Sunken lower floor
+    for(let y=4;y<=7;y++)for(let x=6;x<=9;x++)m[y][x]=T.LOW_FLOOR;
+    m[5][7]=T.RUPEE;m[6][8]=T.HEART;
+    // Ladder to climb out
+    m[3][10]=T.LADDER;
+    m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
+  }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:8*TL,y:6*TL,hp:4,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"wallmaster"}]},
 
   // Northwest — ghost gauntlet (dark room)
   "-1,-1":{dark:true,tiles:mr(m=>{ae(m,["S","E","W"]);
