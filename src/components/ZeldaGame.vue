@@ -2252,11 +2252,12 @@ watch([muOn, customMu], () => {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
       ltRef.value = th; // set immediately to prevent duplicate plays from next ck() tick
+      const wanted = th; // capture for async check
       if (customMu.value[th]) {
         const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5;
-        a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); // reset on failure so ck() retries
+        a.play().then(() => { if(ltRef.value===wanted)customAuRef.value = a; else a.pause(); }).catch(() => { if(ltRef.value===wanted)ltRef.value = null; });
       } else {
-        Tone.start().then(() => { if (!au.i) initAu(); playTh(th); }).catch(() => { ltRef.value = null; });
+        Tone.start().then(() => { if(ltRef.value!==wanted)return; if (!au.i) initAu(); playTh(wanted); }).catch(() => { if(ltRef.value===wanted)ltRef.value = null; });
       }
     }
   };
