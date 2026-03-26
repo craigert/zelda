@@ -689,6 +689,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
     if((d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop")&&d2.y<d2.ground){/* no magnet pull while falling */}
+    else if((d2.type==="triforce"||d2.type==="heartcontainer")&&d2.y>=d2.ground){
+      // Auto-fly to player after landing
+      const spd=4*(dt/16);d2.x+=mdx/Math.max(mdist,1)*spd;d2.y+=mdy/Math.max(mdist,1)*spd;}
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
