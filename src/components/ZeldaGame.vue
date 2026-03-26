@@ -2247,7 +2247,7 @@ watch([muOn, customMu], () => {
   };
   ck();
   _musicInterval = setInterval(ck, 500);
-});
+}, { immediate: true });
 </script>
 
 <style scoped>
