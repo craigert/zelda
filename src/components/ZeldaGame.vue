@@ -2084,6 +2084,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (_cleanup) _cleanup();
+  if (_musicInterval) { clearInterval(_musicInterval); _musicInterval = null; }
 });
 
 // --- Music watcher ---
@@ -2113,12 +2114,8 @@ watch([muOn, customMu], () => {
   };
   ck();
   _musicInterval = setInterval(ck, 500);
-}, { immediate: true });
-
-// Clean up music interval on unmount
-onUnmounted(() => {
-  if (_musicInterval) { clearInterval(_musicInterval); _musicInterval = null; }
 });
+
 </script>
 
 <style scoped>
