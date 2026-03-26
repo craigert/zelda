@@ -367,48 +367,10 @@ function drawGearPage(c,s,t){
   drawPaperDoll(c,s,t);
   drawEquipGrid(c,s,t);
   drawDivider(c,234,"TRIFORCE & HEARTS");
-  drawBigTriforce(c,s,t);
-  drawHeartProgress(c,s,t);
+  drawTriforceAndHearts(c,s,t);
 }
 
-function drawHeartProgress(c,s,t){
-  // Show heart piece collection progress next to triforce
-  const cx=W2/2+90,cy=270;
-  const p=s.p;
-  // Large heart outline (4 quarters)
-  const hsz=24,hx=cx-hsz/2,hy=cy;
-  // How many pieces collected (0-3 partial, 4=complete → resets to 0)
-  const pieces=p.heartPieces;// 0-3
-  const fullHearts=Math.floor((p.mhp-8)/2);// hearts gained from containers+pieces
-  c.textAlign="center";
-  c.fillStyle="#888";c.font="bold 8px monospace";c.fillText("HEART PIECES",cx,cy-4);
-  // Draw the 4 quadrants of the heart
-  for(let q=0;q<4;q++){
-    const filled=q<pieces;
-    c.save();
-    // Clip to quadrant
-    c.beginPath();
-    if(q===0)c.rect(hx,hy,hsz/2,hsz/2);
-    else if(q===1)c.rect(hx+hsz/2,hy,hsz/2,hsz/2);
-    else if(q===2)c.rect(hx,hy+hsz/2,hsz/2,hsz/2);
-    else c.rect(hx+hsz/2,hy+hsz/2,hsz/2,hsz/2);
-    c.clip();
-    c.fillStyle=filled?"#ee3333":"#333";dH(c,hx,hy,hsz);
-    c.restore();
-  }
-  // Heart outline
-  c.save();c.strokeStyle="#666";c.lineWidth=1;
-  c.beginPath();const hs2=hsz;c.moveTo(hx+hs2/2,hy+hs2*.85);c.bezierCurveTo(hx,hy+hs2*.5,hx,hy,hx+hs2/2,hy+hs2*.2);c.bezierCurveTo(hx+hs2,hy,hx+hs2,hy+hs2*.5,hx+hs2/2,hy+hs2*.85);c.stroke();
-  // Cross lines showing quarters
-  c.strokeStyle="#555";c.lineWidth=0.5;
-  c.beginPath();c.moveTo(hx+hsz/2,hy+2);c.lineTo(hx+hsz/2,hy+hsz-2);c.stroke();
-  c.beginPath();c.moveTo(hx+4,hy+hsz/2);c.lineTo(hx+hsz-4,hy+hsz/2);c.stroke();
-  c.restore();
-  // Label
-  c.fillStyle="#aaa";c.font="bold 9px monospace";
-  c.fillText(`${pieces}/4`,cx,cy+hsz+6);
-  c.textAlign="left";
-}
+// drawHeartProgress removed — merged into drawTriforceAndHearts
 
 function drawPaperDoll(c,s,t){
   const px=30,py=62,pw=190,ph=160;
@@ -506,7 +468,6 @@ function drawEquipGrid(c,s,t){
     {name:"Red Armor",has:s.p.redArmor,draw:(cx,cy)=>{c.fillStyle=s.p.redArmor?"#cc3333":"#444";c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.fill();}},
     {name:"M.Sword",has:s.p.hasMasterSword,draw:(cx,cy)=>{if(s.p.hasMasterSword){c.fillStyle="#88ccff";c.fillRect(cx-1,cy-6,3,10);c.fillStyle="#ffd633";c.fillRect(cx-3,cy+3,7,2);c.fillStyle="rgba(136,204,255,0.3)";c.beginPath();c.arc(cx,cy,8,0,Math.PI*2);c.fill();}else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx,cy+4);c.stroke();c.beginPath();c.moveTo(cx-3,cy+3);c.lineTo(cx+3,cy+3);c.stroke();}}},
     {name:"Shield+",has:s.hasShieldUp,draw:(cx,cy)=>{c.fillStyle=s.hasShieldUp?"#4488ff":"#444";c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();if(s.hasShieldUp){c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-1);c.lineTo(cx+2,cy+3);c.lineTo(cx-2,cy+3);c.closePath();c.fill();}}},
-    {name:"Hearts",has:s.p.heartPieces>0,draw:(cx,cy)=>{c.fillStyle=s.p.heartPieces>0?"#f44":"#444";dH(c,cx-5,cy-5,10);if(s.p.heartPieces>0){c.fillStyle="#fff";c.font="bold 7px monospace";c.textAlign="center";c.fillText(`${s.p.heartPieces}`,cx,cy+3);c.textAlign="left";}}},
   ];
 
   const cols=3,cellW=72,cellH=48;
@@ -539,69 +500,90 @@ function drawEquipGrid(c,s,t){
   }
 }
 
-function drawBigTriforce(c,s,t){
-  const cx=W2/2,cy=315;
-  const triS=50;
+function drawTriforceAndHearts(c,s,t){
+  // Side by side: triforce left, heart pieces right, evenly spaced
+  const cy=310,triS=45;
+  const leftCx=W2/2-80,rightCx=W2/2+80;
+
+  // ===== TRIFORCE (left) =====
   const allCollected=s.p.tri[0]&&s.p.tri[1]&&s.p.tri[2];
   const pieces=[
-    {x:cx,y:cy-triS*0.5,idx:2,name:"Shadow",lx:cx,ly:cy-triS*0.5-triS*0.4-8},
-    {x:cx-triS*0.53,y:cy+triS*0.36,idx:0,name:"Forest",lx:cx-triS*1.1,ly:cy+triS*0.36+6},
-    {x:cx+triS*0.53,y:cy+triS*0.36,idx:1,name:"Fire",lx:cx+triS*1.1,ly:cy+triS*0.36+6},
+    {x:leftCx,y:cy-triS*0.5,idx:2,name:"Shadow"},
+    {x:leftCx-triS*0.53,y:cy+triS*0.36,idx:0,name:"Forest"},
+    {x:leftCx+triS*0.53,y:cy+triS*0.36,idx:1,name:"Fire"},
   ];
-  // Large ambient glow
   const glow=Math.sin(t/800)*0.08+(allCollected?0.3:0.12);
-  const gg=c.createRadialGradient(cx,cy,10,cx,cy,triS*2.8);
+  const gg=c.createRadialGradient(leftCx,cy,10,leftCx,cy,triS*2);
   gg.addColorStop(0,`rgba(253,211,51,${glow})`);gg.addColorStop(0.5,`rgba(253,211,51,${glow*0.3})`);gg.addColorStop(1,"rgba(253,211,51,0)");
-  c.fillStyle=gg;c.beginPath();c.arc(cx,cy,triS*2.8,0,Math.PI*2);c.fill();
-  // Outer master triangle
+  c.fillStyle=gg;c.beginPath();c.arc(leftCx,cy,triS*2,0,Math.PI*2);c.fill();
   c.strokeStyle=allCollected?"rgba(253,211,51,0.5)":"rgba(80,65,30,0.25)";c.lineWidth=allCollected?2:1;
-  c.beginPath();c.moveTo(cx,cy-triS*1.02);c.lineTo(cx+triS*0.98,cy+triS*0.86);c.lineTo(cx-triS*0.98,cy+triS*0.86);c.closePath();c.stroke();
-  // Rotating sparkle ring when all collected
+  c.beginPath();c.moveTo(leftCx,cy-triS*1.02);c.lineTo(leftCx+triS*0.98,cy+triS*0.86);c.lineTo(leftCx-triS*0.98,cy+triS*0.86);c.closePath();c.stroke();
   if(allCollected){for(let i=0;i<6;i++){const a=t/1500+i*Math.PI/3;const sr=triS*1.1;
     const sp=Math.sin(t/300+i*1.5)*0.4+0.6;
-    c.fillStyle=`rgba(255,240,180,${sp*0.2})`;c.beginPath();c.arc(cx+Math.cos(a)*sr,cy+Math.sin(a)*sr,2,0,Math.PI*2);c.fill();}}
-
+    c.fillStyle=`rgba(255,240,180,${sp*0.2})`;c.beginPath();c.arc(leftCx+Math.cos(a)*sr,cy+Math.sin(a)*sr,2,0,Math.PI*2);c.fill();}}
   for(const piece of pieces){
     const collected=s.p.tri[piece.idx];
-    const pulse=collected?Math.sin(t/600+piece.idx*2)*0.1+0.9:1;
-    c.globalAlpha=pulse;
+    c.globalAlpha=collected?Math.sin(t/600+piece.idx*2)*0.1+0.9:1;
     if(collected){
-      // Per-piece glow
       const pg=c.createRadialGradient(piece.x,piece.y+5,4,piece.x,piece.y+5,triS*0.55);
       pg.addColorStop(0,"rgba(253,211,51,0.35)");pg.addColorStop(1,"rgba(253,211,51,0)");
       c.fillStyle=pg;c.beginPath();c.arc(piece.x,piece.y+5,triS*0.55,0,Math.PI*2);c.fill();
-      // Gradient fill
       const tg=c.createLinearGradient(piece.x,piece.y-triS*0.4,piece.x,piece.y+triS*0.4);
       tg.addColorStop(0,"#ffe866");tg.addColorStop(0.35,"#ffd633");tg.addColorStop(1,"#a07014");
       c.fillStyle=tg;
     }else{c.fillStyle="#141414";}
-    // Triangle shape
     c.beginPath();c.moveTo(piece.x,piece.y-triS*0.4);
     c.lineTo(piece.x+triS*0.38,piece.y+triS*0.4);
     c.lineTo(piece.x-triS*0.38,piece.y+triS*0.4);c.closePath();c.fill();
     if(!collected){c.strokeStyle="#2a2a2a";c.lineWidth=1;c.stroke();}
     else{
-      // Inner bright core
       c.fillStyle="rgba(255,245,200,0.35)";c.beginPath();
       c.moveTo(piece.x,piece.y-triS*0.18);c.lineTo(piece.x+triS*0.16,piece.y+triS*0.18);
       c.lineTo(piece.x-triS*0.16,piece.y+triS*0.18);c.closePath();c.fill();
-      // Edge highlight (left edge shine)
       c.strokeStyle="rgba(255,230,130,0.25)";c.lineWidth=1.5;
       c.beginPath();c.moveTo(piece.x,piece.y-triS*0.4);c.lineTo(piece.x-triS*0.38,piece.y+triS*0.4);c.stroke();
-      // Sparkle
       const sp2=Math.sin(t/250+piece.idx*2.5)*0.5+0.5;
       c.fillStyle=`rgba(255,255,230,${sp2})`;c.beginPath();c.arc(piece.x-triS*0.06,piece.y-triS*0.08,2.5,0,Math.PI*2);c.fill();
     }
     c.globalAlpha=1;
-    // Label — positioned outside the triangle to avoid overlap
-    c.fillStyle=collected?"#d4a820":"#3a3a3a";c.font="bold 8px monospace";c.textAlign="center";
-    c.fillText(piece.name,piece.lx,piece.ly);
   }
-  // Count text
   const count=s.p.tri.filter(Boolean).length;
   c.fillStyle=allCollected?"#fd3":"#777";c.font="bold 11px monospace";c.textAlign="center";
-  c.fillText(`${count} / 3`,cx,cy+triS+32);
-  if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",cx,cy+triS+44);}
+  c.fillText(`${count} / 3`,leftCx,cy+triS+28);
+  if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",leftCx,cy+triS+40);}
+
+  // ===== HEART PIECES (right, same scale as triforce) =====
+  const hsz=42,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
+  const hp=s.p.heartPieces;
+  // Glow
+  const hglow=Math.sin(t/800)*0.06+0.1;
+  const hgg=c.createRadialGradient(rightCx,cy,5,rightCx,cy,hsz*1.5);
+  hgg.addColorStop(0,`rgba(238,51,51,${hglow})`);hgg.addColorStop(1,"rgba(238,51,51,0)");
+  c.fillStyle=hgg;c.beginPath();c.arc(rightCx,cy,hsz*1.5,0,Math.PI*2);c.fill();
+  // 4 quadrants
+  for(let q=0;q<4;q++){
+    c.save();
+    if(q===0)c.beginPath(),c.rect(hx,hy,hsz/2,hsz/2),c.clip();
+    else if(q===1)c.beginPath(),c.rect(hx+hsz/2,hy,hsz/2,hsz/2),c.clip();
+    else if(q===2)c.beginPath(),c.rect(hx,hy+hsz/2,hsz/2,hsz/2),c.clip();
+    else c.beginPath(),c.rect(hx+hsz/2,hy+hsz/2,hsz/2,hsz/2),c.clip();
+    c.fillStyle=q<hp?"#ee3333":"#222";dH(c,hx,hy,hsz);
+    c.restore();
+  }
+  // Outline
+  c.strokeStyle="#666";c.lineWidth=1.5;
+  c.beginPath();c.moveTo(hx+hsz/2,hy+hsz*.85);
+  c.bezierCurveTo(hx,hy+hsz*.5,hx,hy,hx+hsz/2,hy+hsz*.2);
+  c.bezierCurveTo(hx+hsz,hy,hx+hsz,hy+hsz*.5,hx+hsz/2,hy+hsz*.85);c.stroke();
+  // Quarter lines
+  c.strokeStyle="rgba(100,100,100,0.4)";c.lineWidth=0.8;
+  c.beginPath();c.moveTo(hx+hsz/2,hy+4);c.lineTo(hx+hsz/2,hy+hsz-4);c.stroke();
+  c.beginPath();c.moveTo(hx+6,hy+hsz/2);c.lineTo(hx+hsz-6,hy+hsz/2);c.stroke();
+  // Shine
+  if(hp>0){c.fillStyle="rgba(255,150,150,0.2)";c.beginPath();c.arc(hx+hsz*0.35,hy+hsz*0.3,hsz*0.15,0,Math.PI*2);c.fill();}
+  // Label
+  c.fillStyle="#aaa";c.font="bold 11px monospace";
+  c.fillText(`${hp} / 4`,rightCx,cy+hsz/2+16);
   c.textAlign="left";
 }
 
