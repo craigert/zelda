@@ -623,7 +623,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
       if(m2[pty][ptx]===T.PIT&&p.ifr<=0&&!s.pitFall.a){
         s.pitFall={a:true,t:0,x:p.x,y:p.y};sfx("hurt");}}
-  // Pit fall animation — handled in update freeze section}
+  // Pit fall animation -- handled in update freeze section
   {const m2=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(s.loc.ty==="ow"&&s.loc.scr==="0,1"&&m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TALLGRASS&&p.poison<=0){
       p.poison=3000;p.poisonTick=0;s.msg={text:"Poisonous swamp!",t:1000};}}
