@@ -129,6 +129,7 @@ function init() {
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
     bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
     bossFight:false, // true while in a boss room with boss alive
+    pitFall:{a:false,t:0,x:0,y:0}, // pit fall animation
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -406,6 +407,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
+  // Pit fall animation — freeze gameplay, shrink player
+  if(s.pitFall&&s.pitFall.a){s.pitFall.t+=dt;
+    if(s.pitFall.t>=600){s.pitFall.a=false;
+      const p=s.p;if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;s.shake.t=300;
+      const m3=gm(s);let ex=7*TL,ey=9*TL;
+      if(m3)for(let ty2=RO-1;ty2>=0;ty2--)for(let tx2=0;tx2<CO;tx2++){if(m3[ty2][tx2]===T.STAIRS_UP||(m3[ty2][tx2]===T.FLOOR&&ty2>8)){ex=tx2*TL;ey=ty2*TL;ty2=-1;break;}}
+      p.x=ex;p.y=ey;s.msg={text:"Fell into a pit!",t:1000};
+      if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
+    return;}
   // Shop menu interaction
   if(s.shop){const ky=kyR.value;
     if(ky.has("arrowup")||ky.has("w")){s.shop.sel=(s.shop.sel-1+s.shop.items.length)%s.shop.items.length;ky.delete("arrowup");ky.delete("w");}
@@ -567,12 +577,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(m2[pty][ptx]===T.SPIKE&&Math.sin(s.gt/750)>0&&p.ifr<=0){if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
         s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#888"})));
         if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
-      if(m2[pty][ptx]===T.PIT&&p.ifr<=0){if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=400;
-        s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#444"})));
-        let ex=7*TL,ey=9*TL;
-        for(let ty2=RO-1;ty2>=0;ty2--)for(let tx2=0;tx2<CO;tx2++){if(m2[ty2][tx2]===T.STAIRS_UP||m2[ty2][tx2]===T.FLOOR&&ty2>8){ex=tx2*TL;ey=ty2*TL;ty2=-1;break;}}
-        p.x=ex;p.y=ey;s.msg={text:"Fell into a pit!",t:1000};
-        if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
+      if(m2[pty][ptx]===T.PIT&&p.ifr<=0&&!s.pitFall.a){
+        s.pitFall={a:true,t:0,x:p.x,y:p.y};sfx("hurt");}}
+  // Pit fall animation — handled in update freeze section}
   {const m2=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(s.loc.ty==="ow"&&s.loc.scr==="0,1"&&m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TALLGRASS&&p.poison<=0){
       p.poison=3000;p.poisonTick=0;s.msg={text:"Poisonous swamp!",t:1000};}}
@@ -747,9 +754,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
     e.stT+=dt;const isBossLike=e.type==="boss"||e.type==="miniboss";
-    const detectRange=isBossLike?250:120;const loseRange=180;
+    const alwaysChase=e.type==="wallmaster"||e.type==="magma_slug"||e.type==="vine_creeper"||e.type==="stalfos";
+    const detectRange=isBossLike?250:alwaysChase?300:160;const loseRange=250;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
-    if(e.st==="chase"&&dist>loseRange&&!isBossLike)e.st="retreat";
+    if(e.st==="chase"&&dist>loseRange&&!isBossLike&&!alwaysChase)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
     let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:1.0;
     let moveX=0,moveY=0;
@@ -1663,6 +1671,11 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
     dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
+  }else if(s.pitFall&&s.pitFall.a){// Falling into pit — shrink + spin
+    const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
+    const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
+    c.save();c.translate(fx,fy);c.rotate(spin);c.scale(sc,sc);c.globalAlpha=1-fp;
+    dP(c,-PS/2,-PS/2,p.dir,t);c.restore();
   }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;
     if(vis){
       const hopY=s.ledgeHop>0?-Math.sin(s.ledgeHop/250*Math.PI)*8:0;
