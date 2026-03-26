@@ -266,6 +266,9 @@ function startFromSlot(s, idx) {
   if (save && applySave(ns, save)) {
     ns.msg = { text: "Game loaded!", t: 1500 };
   }
+  // Stop any playing music before switching state
+  stopMu();
+  if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
   stR.value = ns;
   le(ns);
   ltRef.value = null;
