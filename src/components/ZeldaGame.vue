@@ -32,7 +32,7 @@
         :style="{background:isFS?'rgba(100,255,100,0.15)':'rgba(255,255,255,0.06)',border:`1px solid ${isFS?'rgba(100,255,100,0.3)':'rgba(255,255,255,0.12)'}`,borderRadius:'4px',color:isFS?'#8f8':'#666',fontSize:'11px',padding:'3px 10px',cursor:'pointer',fontFamily:'monospace',letterSpacing:'1px'}">{{ isFS ? '⛶ EXIT' : '⛶ FULL' }}</button>
     </div>
     <div v-if="showMuPicker" :style="{background:'rgba(0,0,0,0.85)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'8px',padding:'12px',marginTop:'8px',maxWidth:'480px',width:'100%'}">
-      <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC — Pick files or paste URLs</div>
+      <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC -- Pick files or paste URLs</div>
       <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['triforce','✨ Triforce Moment']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
@@ -118,20 +118,20 @@ function init() {
     mapOpen:false,mapTab:0,
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
-    npcTalk:null,npcState:[], // runtime NPC positions {x,y,hx,hy,dir,mt,st}
+    npcTalk:null,npcState:[],
     shop:null, // active shop menu
     hasLantern:false,hasShieldUp:false, // shop upgrades
     pArrows:[],
-    chest:null, // {x,y,state:"closed"|"opening"|"open",t:0,reward:null}
+    chest:null,
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
     combatLockTime:0, // safety timer for combat lock
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
-    bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
+    bossIntro:null, // {name,t,dur,bx,by} -- cinematic boss intro sequence
     bossFight:false, // true while in a boss room with boss alive
     pitFall:{a:false,t:0,x:0,y:0}, // pit fall animation
     litTorchesAll:{}, // persisted lit torches per room
-    triforceHold:null, // {t,dur,piece,px,py,warp} — hold triforce above head
+    triforceHold:null, // {t,dur,piece,px,py,warp} -- hold triforce above head
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -271,8 +271,8 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
-  // Boss intro — cinematic sequence if room has a boss
-  // Combat lock — only for reward/boss/miniboss rooms, blocks transitions only (not collision)
+  // Boss intro -- cinematic sequence if room has a boss
+  // Combat lock -- only for reward/boss/miniboss rooms, blocks transitions only (not collision)
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
   const roomData2=isDg&&s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
   s.combatLock=isDg&&s.en.length>0&&(
@@ -305,7 +305,7 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   if(ty<0){return SOLID.has(gts(s,`${sx},${sy-1}`,tx,RO+ty));}
   if(ty>=RO){return SOLID.has(gts(s,`${sx},${sy+1}`,tx,ty-RO));}
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
-  // Ledge tiles — one-way passage (solid from wrong direction)
+  // Ledge tiles -- one-way passage (solid from wrong direction)
   if(tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W){
     // Ladders let you pass through ledges in any direction
     const ptx2=Math.floor((s.p.x+PS/2)/TL),pty2=Math.floor((s.p.y+PS/2)/TL);
@@ -414,13 +414,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     // Still update particles during freeze
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
-  // Boss intro sequence — freeze gameplay, animate camera
+  // Boss intro sequence -- freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
-    // Check if warp should appear — need no uncollected triforce or heartcontainer drops
+    // Check if warp should appear -- need no uncollected triforce or heartcontainer drops
     const pendingDrops=s.drops.some(d=>d.type==="triforce"||d.type==="heartcontainer");
     if(s.triforceHold.t>2000&&!s.triforceHold.warp&&!pendingDrops){s.triforceHold.warp=true;sfx("door");
       const tc3=s.p.tri.filter(Boolean).length;
@@ -440,7 +440,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
         s.drops.splice(i,1);}}
     return;}
-  // Pit fall animation — freeze gameplay, shrink player
+  // Pit fall animation -- freeze gameplay, shrink player
   if(s.pitFall&&s.pitFall.a){s.pitFall.t+=dt;
     if(s.pitFall.t>=600){s.pitFall.a=false;
       const p=s.p;if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;s.shake.t=300;
@@ -555,7 +555,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const tk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:tswitch`;
       if(!s.timedDoors.find(td=>td.key===tk)){
         sfx("pickup");s.msg={text:"Timed switch! Hurry!",t:1500};s.shake.t=200;
-        // Open walls temporarily (not locked doors) — creates timed passages
+        // Open walls temporarily (not locked doors) -- creates timed passages
         const openedWalls=[];
         for(let yy=1;yy<RO-1;yy++)for(let xx=1;xx<CO-1;xx++){if(m2[yy][xx]===T.WALL){
           // Only open walls adjacent to floor on both sides (passageway walls)
@@ -586,13 +586,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     const ftx=pcx+(dx>0?1:dx<0?-1:0),fty=pcy+(dy>0?1:dy<0?-1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO&&m2[fty][ftx]===T.PUSH&&!s.pushCd){
       const bx=ftx+(dx>0?1:dx<0?-1:0),by=fty+(dy>0?1:dy<0?-1:0);
-      // Special: push block into pit — only in rooms flagged pitPuzzle
+      // Special: push block into pit -- only in rooms flagged pitPuzzle
       const roomD=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
       if(bx>=0&&bx<CO&&by>=0&&by<RO&&m2[by][bx]===T.PIT&&roomD?.pitPuzzle){
         m2[fty][ftx]=T.FLOOR;m2[by][bx]=T.FLOOR;// block falls into pit, both become floor
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("bomb");s.shake.t=200;s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#888"})));
-        // Check if all pits in room are now filled — if so, drop a key
+        // Check if all pits in room are now filled -- if so, drop a key
         let pitsLeft=false;for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.PIT)pitsLeft=true;
         if(!pitsLeft){sfx("itemget");s.shake.t=300;s.msg={text:"A key appeared!",t:1500};
           s.drops.push({x:W2/2,y:-20,vy:0.5,ground:H2/2,type:"key_drop",t:0});}
@@ -603,7 +603,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){sfx("pickup");s.msg={text:"A key appeared!",t:1500};s.shake.t=200;
-          // Plates spawn a key — never open locked doors directly
+          // Plates spawn a key -- never open locked doors directly
           m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
       }}}}
   if(s.sw.a&&s.sw.t>SD*0.5){const m2=gm(s);if(m2&&!s.leverCd){
@@ -613,7 +613,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       m2[fty][ftx]=T.FLOOR;s.leverCd=true;setTimeout(()=>{if(stR.value)stR.value.leverCd=false;},1000);
       sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};s.shake.t=200;
       s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#f88"})));
-      // Levers spawn a key — never open locked doors directly
+      // Levers spawn a key -- never open locked doors directly
       m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}
 
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
@@ -636,14 +636,14 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       const pcx2=p.x+PS/2,pcy2=p.y+PS/2;
       for(let ni=0;ni<npcs.length;ni++){const npc=npcs[ni],ns2=s.npcState[ni];if(!ns2)continue;
         const ndx=pcx2-(ns2.x+16),ndy=pcy2-(ns2.y+16),ndist=Math.hypot(ndx,ndy);
-        if(ndist<TL*1.2){// Close enough — face NPC to talk
+        if(ndist<TL*1.2){// Close enough -- face NPC to talk
           s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
           ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
           // NPC faces player
           ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);
           break;}}}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
-      // Light torches with sword — only in dark rooms
+      // Light torches with sword -- only in dark rooms
       const isDkRoom=s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark;
       if(isDkRoom){const m2=gm(s);
         const ftx3=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
@@ -719,7 +719,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
-  // Chest update — requires action button to open
+  // Chest update -- requires action button to open
   if(s.chest){const ch=s.chest;ch.t+=dt;const ky=kyR.value;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
       ch.near=Math.abs(cdx)<24&&Math.abs(cdy)<24;
@@ -874,15 +874,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           for(let v=-1;v<=1;v++){const va=ang+v*0.4;
             s.bProj.push({x:ecx,y:ecy,dx:Math.cos(va)*2,dy:Math.sin(va)*2,type:"root",l:800});}}
       }else if(e.type==="stalfos"){
-        // Tough skeleton — jumps back when hit, counterattacks
-        if(e.fl>200){// Just got hit — jump back
+        // Tough skeleton -- jumps back when hit, counterattacks
+        if(e.fl>200){// Just got hit -- jump back
           const ka=Math.atan2(ecy-pcy,ecx-pcx);moveX=Math.cos(ka)*3;moveY=Math.sin(ka)*3;
         }else{// Normal chase with occasional lunge
           const phase=Math.floor(e.mt/2000)%3;
           if(phase===2){moveX=Math.cos(ang)*es*2.5;moveY=Math.sin(ang)*es*2.5;}
           else{moveX=Math.cos(ang)*es*0.6;moveY=Math.sin(ang)*es*0.6;}}
       }else if(e.type==="wallmaster"){
-        // Drops from ceiling — shadow warning, then grab
+        // Drops from ceiling -- shadow warning, then grab
         if(!e.wmState)e.wmState="lurk";
         if(e.wmState==="lurk"){moveX=0;moveY=0;e.wmT=(e.wmT||0)+dt;
           // Teleport near player every 4s
@@ -907,7 +907,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
           if(!s.fireTrails)s.fireTrails=[];
           s.fireTrails.push({x:ecx,y:ecy,t:3000});}
       }else if(e.type==="miniboss"){
-        // Mini-boss: charge pattern — circle, then lunge
+        // Mini-boss: charge pattern -- circle, then lunge
         const mbPhase=Math.floor(e.mt/2500)%3;
         if(mbPhase===2){const bsp=es*2.8;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;}
         else if(mbPhase===1){moveX=0;moveY=0;
@@ -962,7 +962,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
         if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;}else{sfx("pickup");}
-        // Spawn reward chest — room reward property or detect key/heart_piece tiles
+        // Spawn reward chest -- room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
         const specialItem=roomData?.reward||null;
         const hasTreasure=specialItem||rm2&&rm2.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART_PIECE));
@@ -1174,13 +1174,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.textAlign="center";
   if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#888";c.font="bold 9px monospace";c.fillText(dgn,W2/2,11);}
   for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="12px monospace";c.fillText("\u25b2",W2/2-20+i*20,iD2?26:18);}
-  // Status effects — below triforce if in dungeon
+  // Status effects -- below triforce if in dungeon
   if(p.burn>0||p.freeze>0||p.poison>0){let stx=W2/2-40;c.font="bold 8px monospace";
     if(p.burn>0){c.fillStyle="#f80";c.fillText("BURN",stx,26);stx+=35;}
     if(p.freeze>0){c.fillStyle="#8cf";c.fillText("FREEZE",stx,26);stx+=40;}
     if(p.poison>0){c.fillStyle="#4a4";c.fillText("POISON",stx,26);}}
   c.textAlign="left";
-  // RIGHT: Items — icon then number, consistent spacing
+  // RIGHT: Items -- icon then number, consistent spacing
   c.font="bold 11px monospace";let ix=W2-6;
   const drawHudItem=(icon,val,col)=>{
     const vw=c.measureText(val).width;ix-=vw+2;
@@ -1226,12 +1226,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
     dT(c,tl,px,py,iD,dg,t,ei);}
-  // Ambient dungeon decorations — sparse, theme-aware, deterministic
+  // Ambient dungeon decorations -- sparse, theme-aware, deterministic
   if(iD&&m){const th=dg?.th||"forest";
     for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
     const tl2=m[y][x];if(tl2!==T.FLOOR)continue;
     const h1=hs(x,y,42),h2=hs(x,y,73),h3=hs(x,y,101),h4=hs(x,y,137),px2=x*TL,py2=y*TL;
-    // Theme-specific floor decorations — sparse (each ~3-5% of tiles)
+    // Theme-specific floor decorations -- sparse (each ~3-5% of tiles)
     if(th==="forest"){
       if(h1<0.04){// Vine tendrils creeping across floor
         c.strokeStyle="rgba(40,90,30,0.25)";c.lineWidth=1.2;const vx=px2+h2*20,vy=py2+10+h3*12;
@@ -1239,7 +1239,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle="rgba(50,110,30,0.2)";// tiny leaves
         c.beginPath();c.arc(vx+6,vy-2+h3*4,2,0,Math.PI*2);c.fill();
         c.beginPath();c.arc(vx+14,vy+h3*6,1.5,0,Math.PI*2);c.fill();
-      }else if(h1<0.08){// Moss patch — soft organic blobs
+      }else if(h1<0.08){// Moss patch -- soft organic blobs
         c.fillStyle="rgba(35,80,25,0.2)";
         c.beginPath();c.arc(px2+10+h2*12,py2+20+h3*8,4+h2*3,0,Math.PI*2);c.fill();
         c.fillStyle="rgba(50,100,35,0.15)";
@@ -1285,13 +1285,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.beginPath();c.moveTo(rx,ry);c.lineTo(rx+3+h2*2,ry-1);c.lineTo(rx+5,ry+2);c.lineTo(rx+1,ry+2);c.fill();
       }
     }
-    // Rare skull — only in shadow/generic, very sparse
+    // Rare skull -- only in shadow/generic, very sparse
     if((th==="shadow"||th==="generic")&&h1>0.97){
       const sx2=px2+10+h2*12,sy2=py2+10+h3*12;
       c.fillStyle="rgba(180,170,150,0.25)";c.beginPath();c.arc(sx2,sy2,3.5,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(20,10,10,0.35)";c.beginPath();c.arc(sx2-1.2,sy2-0.5,1,0,Math.PI*2);c.fill();
       c.beginPath();c.arc(sx2+1.2,sy2-0.5,1,0,Math.PI*2);c.fill();}
-    // Wall decorations — sparse (north wall adjacent)
+    // Wall decorations -- sparse (north wall adjacent)
     if(y>0&&m[y-1][x]===T.WALL){
       if(h1>0.92){// Hanging chains (shadow/fire only)
         if(th==="shadow"||th==="fire"){c.strokeStyle="rgba(140,140,140,0.2)";c.lineWidth=1.2;
@@ -1313,7 +1313,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects
   if(!iD){
-    // Wind wisps — mystical wisps with particle trails
+    // Wind wisps -- mystical wisps with particle trails
     for(let i=0;i<5;i++){
       const wPhase=t/5000+i*1.3;const wActive=Math.sin(wPhase)>0.3;// visible ~40% of the time
       if(wActive){const wp=((Math.sin(wPhase)-0.3)/0.7);
@@ -1323,7 +1323,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         // Curved wisp stroke
         c.strokeStyle=`rgba(210,225,255,${wa*0.18})`;c.lineWidth=1.5;
         c.beginPath();c.moveTo(wx,wy2);c.quadraticCurveTo(wx+25,wy2+Math.sin(t/300+i)*6-4,wx+50,wy2+Math.sin(t/350+i*2)*4);c.stroke();
-        // Trailing particles — staggered, shrinking, fading
+        // Trailing particles -- staggered, shrinking, fading
         for(let j=0;j<6;j++){const age=j*0.17;
           const px3=wx-j*9+Math.sin(t/250+j+i)*4,py3=wy2+Math.sin(t/300+j*2+i)*5;
           const pa=wa*(1-age)*0.18,ps=2-age*1;
@@ -1348,7 +1348,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.beginPath();c.ellipse(-2,0,2.5,1.5+wing,0,0,Math.PI*2);c.fill();
         c.beginPath();c.ellipse(2,0,2.5,1.5-wing,0,0,Math.PI*2);c.fill();
         c.restore();}}}
-    // Poisonous swamp — purple mist over tallgrass tiles
+    // Poisonous swamp -- purple mist over tallgrass tiles
     if(loc.scr==="0,1"&&m){for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
       if(m[y][x]===T.TALLGRASS){const px3=x*TL,py3=y*TL;
         // Purple mist layer
@@ -1396,7 +1396,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle=`rgba(255,255,150,${fa*0.15})`;c.beginPath();c.arc(ft.x+(Math.sin(t/80+ft.y)*2),ft.y-2,3,0,Math.PI*2);c.fill();}}
   for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:e.type==="miniboss"?ES*1.3:ES;
     if(e.spawnT>0){
-      // Spawn animation — smoke puff and scale-in
+      // Spawn animation -- smoke puff and scale-in
       const sp=e.spawnT/400,ease=1-sp;const cx3=e.x+ES/2,cy3=e.y+ES/2;
       // Smoke puffs
       for(let j=0;j<5;j++){const sa=j*Math.PI*2/5+sp*3,sr=12*(1-ease*0.5);
@@ -1419,7 +1419,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+3,e.y+ES-1,sz/2+1,4,0.1,0,Math.PI*2);c.fill();
     if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
     else if(e.type==="miniboss"){
-      // Draw miniboss — armored skeleton, larger, with HP bar and aura
+      // Draw miniboss -- armored skeleton, larger, with HP bar and aura
       const mbPh=Math.floor(e.mt/2500)%3;const charging=mbPh===2;
       const auraA=charging?0.25:0.1+Math.sin(t/300)*0.05;
       c.fillStyle=`rgba(200,50,50,${auraA})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
@@ -1522,7 +1522,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Eyes (face direction)
     c.fillStyle="#222";c.beginPath();c.arc(nx+13+faceX,ny+10+faceY+walkBob,1.5,0,Math.PI*2);c.fill();
     c.beginPath();c.arc(nx+19+faceX,ny+10+faceY+walkBob,1.5,0,Math.PI*2);c.fill();
-    // Exclamation mark — only when player is nearby
+    // Exclamation mark -- only when player is nearby
     const pdist=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
     if(pdist<TL*3){const bob=Math.sin(t/300)*3;
       c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";
@@ -1557,7 +1557,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   // Draw active bombs
   for(const ab of s.activeBombs){const prog=ab.t/ab.fuse;
     if(!ab.exploded){
-      // Bomb body — grows slightly as fuse burns
+      // Bomb body -- grows slightly as fuse burns
       const sc=1+prog*0.3,bsz=8*sc;
       const flash=prog>0.7&&Math.sin(ab.t/(prog>0.9?40:80))>0;
       // Shadow
@@ -1615,7 +1615,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Chest body
       c.fillStyle="#8B5A2B";c.fillRect(cx2,cy2+8,24,16);
       c.fillStyle="#6B3A1B";c.fillRect(cx2,cy2+8,24,3);
-      // Lid opening — rotates up
+      // Lid opening -- rotates up
       c.save();c.translate(cx2,cy2+10);c.rotate(-ease*Math.PI*0.4);c.translate(-cx2,-(cy2+10));
       c.fillStyle="#A0682C";c.fillRect(cx2-1,cy2+2,26,8);c.fillRect(cx2,cy2,24,4);
       c.fillStyle="rgba(255,255,255,0.12)";c.fillRect(cx2+2,cy2+4,20,2);
@@ -1721,7 +1721,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(d2.type==="banana"){// Golden banana
       const bn2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,bn2,10,0,Math.PI*2);c.fill();
       c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";c.beginPath();c.arc(d2.x,bn2+3,6,-Math.PI*0.8,-Math.PI*0.15);c.stroke();c.lineCap="butt";}
-    else{// Default — render as green rupee
+    else{// Default -- render as green rupee
       const rx2=d2.x,ry2=d2.y+bob2;c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-5);c.lineTo(rx2+3,ry2-1);c.lineTo(rx2+3,ry2+1);c.lineTo(rx2,ry2+5);c.lineTo(rx2-3,ry2+1);c.lineTo(rx2-3,ry2-1);c.closePath();c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
@@ -1730,7 +1730,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const th2=s.triforceHold,hp2=Math.min(1,th2.t/500);
     // Draw player standing
     dP(c,th2.px,th2.py,2,t);
-    // Triforce above head — rises up then bobs
+    // Triforce above head -- rises up then bobs
     const liftY=hp2*20+Math.sin(t/200)*2;
     const tglow=Math.sin(t/150)*0.15+0.4;
     c.fillStyle=`rgba(253,211,51,${tglow})`;c.beginPath();c.arc(th2.px+PS/2,th2.py-liftY,16,0,Math.PI*2);c.fill();
@@ -1749,7 +1749,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Spinning particles
       for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
         c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
-  }else if(s.pitFall&&s.pitFall.a){// Falling into pit — shrink + spin
+  }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
     c.save();c.translate(fx,fy);c.rotate(spin);c.scale(sc,sc);c.globalAlpha=1-fp;
@@ -1800,7 +1800,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#fff";c.globalAlpha=pa*0.5;c.beginPath();c.arc(pt.x,pt.y,psz*0.4,0,Math.PI*2);c.fill();}c.globalAlpha=1;
   for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
   if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
-  // Dungeon darkness — dark until torches are lit
+  // Dungeon darkness -- dark until torches are lit
   // Only dark rooms flagged with dark:true in room data
   const isDarkRoom=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;
   if(iD&&m&&isDarkRoom){let totalT2=0,litT2=0;
@@ -1828,7 +1828,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
   if(iD){
-    // Simple minimap — always show when in dungeon or cave
+    // Simple minimap -- always show when in dungeon or cave
     const dgRooms=dg&&dg.rooms?Object.keys(dg.rooms).filter(k=>{const p2=k.split(",");return p2.length===2&&!isNaN(+p2[0])&&!isNaN(+p2[1]);}):[];
     if(dgRooms.length>0){
       const cds=dgRooms.map(k=>k.split(",").map(Number));
@@ -1888,7 +1888,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.restore(); // end clip
   c.restore(); // end game area offset
   const FH2=H2+HH;
-  // Dungeon title overlay — fades in then out over 3 seconds
+  // Dungeon title overlay -- fades in then out over 3 seconds
   if(s.dgTitle.t>0){const dt2=3000-s.dgTitle.t;// time elapsed
     let alpha=1;if(dt2<400)alpha=dt2/400;// fade in
     else if(s.dgTitle.t<800)alpha=s.dgTitle.t/800;// fade out
@@ -1910,13 +1910,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Darkened edges
     c.fillStyle=`rgba(0,0,0,${bp<0.1?bp/0.1*0.4:bp>0.8?(1-(bp-0.8)/0.2)*0.4:0.4})`;
     c.fillRect(0,0,W2,FH2);
-    // Camera spotlight on boss — bright circle
+    // Camera spotlight on boss -- bright circle
     if(bp>0.1&&bp<0.85){const sa=Math.min(1,(bp-0.1)/0.2);
       c.save();c.globalCompositeOperation="destination-out";
       const sr=60+sa*40;const sg=c.createRadialGradient(bi.bx,bi.by+HH,0,bi.bx,bi.by+HH,sr);
       sg.addColorStop(0,"rgba(0,0,0,0.4)");sg.addColorStop(0.7,"rgba(0,0,0,0.2)");sg.addColorStop(1,"rgba(0,0,0,0)");
       c.fillStyle=sg;c.fillRect(bi.bx-sr,bi.by+HH-sr,sr*2,sr*2);c.restore();}
-    // Boss name text — dramatic fade in
+    // Boss name text -- dramatic fade in
     if(bp>0.2&&bp<0.85){const ta=bp<0.35?(bp-0.2)/0.15:bp>0.7?(0.85-bp)/0.15:1;
       c.textAlign="center";c.globalAlpha=ta;
       // Name shadow
@@ -2119,5 +2119,5 @@ watch([muOn, customMu], () => {
 </script>
 
 <style scoped>
-/* No additional scoped styles needed — all styling is inline */
+/* No additional scoped styles needed -- all styling is inline */
 </style>
