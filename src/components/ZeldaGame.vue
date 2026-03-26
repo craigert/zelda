@@ -436,6 +436,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     // Allow drop collection during hold
     for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
       if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
+      // Auto-fly triforce to player during hold
+      if(d2.type==="triforce"&&d2.y>=d2.ground){const fdx=s.p.x+PS/2-d2.x,fdy=s.p.y+PS/2-d2.y,fd=Math.max(Math.hypot(fdx,fdy),1);
+        const spd=4*(dt/16);d2.x+=fdx/fd*spd;d2.y+=fdy/fd*spd;}
       if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
         if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
         s.drops.splice(i,1);}}
@@ -689,7 +692,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
     if((d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop")&&d2.y<d2.ground){/* no magnet pull while falling */}
-    else if((d2.type==="triforce"||d2.type==="heartcontainer")&&d2.y>=d2.ground){
+    else if(d2.type==="triforce"&&d2.y>=d2.ground){
       // Auto-fly to player after landing
       const spd=4*(dt/16);d2.x+=mdx/Math.max(mdist,1)*spd;d2.y+=mdy/Math.max(mdist,1)*spd;}
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
