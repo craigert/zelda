@@ -1205,10 +1205,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
           dH(c,hxx,hyy,12);}
         // Triforce pieces — larger, after hearts with gap
         const triStartX=startX+hc*spacing+spacing;
-        for(let ti=0;ti<3;ti++){const tx=triStartX+ti*spacing,ty=iconY+2;
+        for(let ti=0;ti<3;ti++){const tx=triStartX+ti*spacing,ty=iconY;
           c.fillStyle=tri[ti]?"#ffd633":"#333";
-          c.beginPath();c.moveTo(tx+6,ty);c.lineTo(tx+12,ty+10);c.lineTo(tx,ty+10);c.closePath();c.fill();
-          if(tri[ti]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+6,ty+3);c.lineTo(tx+9,ty+8);c.lineTo(tx+3,ty+8);c.closePath();c.fill();}}
+          c.beginPath();c.moveTo(tx+8,ty);c.lineTo(tx+16,ty+14);c.lineTo(tx,ty+14);c.closePath();c.fill();
+          if(tri[ti]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+8,ty+4);c.lineTo(tx+12,ty+11);c.lineTo(tx+4,ty+11);c.closePath();c.fill();}}
         // Location + items on second row
         c.fillStyle=sel?"#aaa":"#666";c.font="9px monospace";
         const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
@@ -1247,7 +1247,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   c.textAlign="center";
   if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#888";c.font="bold 9px monospace";c.fillText(dgn,W2/2,11);}
-  for(let i=0;i<3;i++){c.fillStyle=p.tri[i]?"#fd3":"#333";c.font="12px monospace";c.fillText("\u25b2",W2/2-20+i*20,iD2?26:18);}
+  for(let i=0;i<3;i++){const tx=W2/2-22+i*22,ty=iD2?16:8;
+    c.fillStyle=p.tri[i]?"#ffd633":"#333";c.beginPath();c.moveTo(tx+8,ty);c.lineTo(tx+16,ty+14);c.lineTo(tx,ty+14);c.closePath();c.fill();
+    if(p.tri[i]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+8,ty+4);c.lineTo(tx+12,ty+11);c.lineTo(tx+4,ty+11);c.closePath();c.fill();}}
   // Status effects -- below triforce if in dungeon
   if(p.burn>0||p.freeze>0||p.poison>0){let stx=W2/2-40;c.font="bold 8px monospace";
     if(p.burn>0){c.fillStyle="#f80";c.fillText("BURN",stx,26);stx+=35;}
