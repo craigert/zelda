@@ -710,10 +710,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
       else if(d2.type==="key_drop"){p.keys++;sfx("itemget");s.msg={text:"Got a key!",t:1500};
         s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
-      else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");}
-      else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");}
-      else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");}
-      else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");}
+      else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.msg={text:"+1 Rupee",t:800};}
+      else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.msg={text:"+5 Rupees",t:800};}
+      else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");s.msg={text:"+10 Rupees",t:800};}
+      else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");s.msg={text:"+20 Rupees",t:800};}
       else if(d2.type==="bow"){p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
       else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;sfx("itemget");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
@@ -931,9 +931,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
     const nx=e.x+moveX*(dt/16),ny=e.y+moveY*(dt/16);
     const em=4;
+    const flies=e.type==="ghost"||e.type==="bat"||e.type==="fire_bat";
+    if(flies){e.x=nx;e.y=ny;}else{
     const eCanX=!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+ES-em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+ES-em)/TL));
     const eCanY=!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+ES-em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+ES-em)/TL));
-    if(eCanX)e.x=nx;if(eCanY)e.y=ny;
+    if(eCanX)e.x=nx;if(eCanY)e.y=ny;}
     e.x=Math.max(TL,Math.min(W2-TL-ES,e.x));e.y=Math.max(TL,Math.min(H2-TL-ES,e.y));
     if(s.sw.a){const sOff=SR*0.7,sR2=SR*0.85;let sx2=p.x+PS/2,sy2=p.y+PS/2;if(p.dir===0)sy2-=sOff;if(p.dir===2)sy2+=sOff;if(p.dir===3)sx2-=sOff;if(p.dir===1)sx2+=sOff;
       const sDist=Math.hypot(sx2-ecx,sy2-ecy);
