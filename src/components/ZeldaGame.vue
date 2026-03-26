@@ -2042,7 +2042,7 @@ onMounted(() => {
       if (k === " " || k === "enter") {
         if (s.pauseSel === 1) { muOn.value = !muOn.value; }
         else if (s.pauseSel === 2) { saveGame(s); s.msg = { text: "Game saved!", t: 1500 }; s.paused = false; }
-        else if (s.pauseSel === 3) { saveGame(s); s.paused = false; s.title = true; s.msg = { text: "", t: 0 }; }
+        else if (s.pauseSel === 3) { saveGame(s); s.paused = false; s.title = true; s.msg = { text: "", t: 0 }; ltRef.value = null; }
         e.preventDefault();
       }
     }
