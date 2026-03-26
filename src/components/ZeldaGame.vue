@@ -1170,70 +1170,87 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const W=W2,H=H2+HH;
     c.fillStyle="#0a0a14";c.fillRect(0,0,W,H);
     // Decorative border
-    c.strokeStyle="rgba(253,211,51,0.2)";c.lineWidth=2;c.strokeRect(8,8,W-16,H-16);
-    c.strokeStyle="rgba(253,211,51,0.1)";c.lineWidth=1;c.strokeRect(12,12,W-24,H-24);
+    c.strokeStyle="rgba(253,211,51,0.15)";c.lineWidth=2;c.strokeRect(6,6,W-12,H-12);
     c.textAlign="center";
-    c.fillStyle="#ffd633";c.font="bold 18px monospace";c.fillText("SELECT FILE",W/2,32);
-    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W/2-50,36,100,1);
+    // Title
+    c.fillStyle="#ffd633";c.font="bold 20px monospace";c.fillText("SELECT FILE",W/2,34);
+    c.strokeStyle="rgba(253,211,51,0.2)";c.lineWidth=1;
+    c.beginPath();c.moveTo(W/2-60,40);c.lineTo(W/2+60,40);c.stroke();
+    // Layout: 3 slots evenly in middle, back + instructions at bottom
+    const slotH=80,slotGap=10,slotsTop=54;
+    const bx=24,bw=W-48;
     for(let i=0;i<3;i++){
       const save=loadSlot(i);
-      const by=52+i*52,bw=W-40,bx=20,bh=46;
+      const by=slotsTop+i*(slotH+slotGap);
       const sel=s.saveSelIdx===i;
-      // Slot background
-      c.fillStyle=sel?"rgba(253,211,51,0.12)":"rgba(255,255,255,0.03)";
-      c.strokeStyle=sel?"rgba(253,211,51,0.6)":"rgba(255,255,255,0.1)";
+      // Slot background with rounded corners
+      const r=6;
+      c.fillStyle=sel?"rgba(253,211,51,0.10)":"rgba(255,255,255,0.025)";
+      c.strokeStyle=sel?"rgba(253,211,51,0.5)":"rgba(255,255,255,0.08)";
       c.lineWidth=sel?2:1;
-      c.beginPath();c.moveTo(bx+4,by);c.lineTo(bx+bw-4,by);c.quadraticCurveTo(bx+bw,by,bx+bw,by+4);
-      c.lineTo(bx+bw,by+bh-4);c.quadraticCurveTo(bx+bw,by+bh,bx+bw-4,by+bh);
-      c.lineTo(bx+4,by+bh);c.quadraticCurveTo(bx,by+bh,bx,by+bh-4);
-      c.lineTo(bx,by+4);c.quadraticCurveTo(bx,by,bx+4,by);c.fill();c.stroke();
-      // Selection cursor
+      c.beginPath();c.moveTo(bx+r,by);c.lineTo(bx+bw-r,by);c.quadraticCurveTo(bx+bw,by,bx+bw,by+r);
+      c.lineTo(bx+bw,by+slotH-r);c.quadraticCurveTo(bx+bw,by+slotH,bx+bw-r,by+slotH);
+      c.lineTo(bx+r,by+slotH);c.quadraticCurveTo(bx,by+slotH,bx,by+slotH-r);
+      c.lineTo(bx,by+r);c.quadraticCurveTo(bx,by,bx+r,by);c.fill();c.stroke();
+      // Selection cursor — pulsing arrow
       if(sel){const ca=Math.sin(t/200)*0.3+0.7;
-        c.fillStyle=`rgba(253,211,51,${ca})`;c.font="bold 12px monospace";
-        c.textAlign="left";c.fillText("\u25b6",bx+6,by+bh/2+5);c.textAlign="center";}
-      // Slot content
-      c.font="bold 12px monospace";
-      c.fillStyle=sel?"#ffd633":"#888";
-      c.textAlign="left";c.fillText("FILE "+(i+1),bx+22,by+16);
+        c.fillStyle=`rgba(253,211,51,${ca})`;
+        const ax=bx+10,ay=by+slotH/2;
+        c.beginPath();c.moveTo(ax,ay-6);c.lineTo(ax+8,ay);c.lineTo(ax,ay+6);c.closePath();c.fill();}
+      // File label
+      c.font="bold 13px monospace";c.fillStyle=sel?"#ffd633":"#777";
+      c.textAlign="left";c.fillText("FILE "+(i+1),bx+24,by+18);
       if(save&&save.v===1){
-        // Heart pieces and triforce — evenly spaced side by side
+        // --- Hearts and triforce on center row, large and evenly spaced ---
         const mhp=save.p.mhp||8,hp=save.p.hp||0,hc=mhp/2;
         const tri=save.p.tri||[false,false,false];
-        const iconY=by+12,iconH=22,iconW=bw-30;
-        const totalIcons=hc+3,spacing=Math.min(16,iconW/(totalIcons+1));
-        const startX=bx+22;
-        // Hearts — larger
-        for(let h=0;h<hc;h++){const hxx=startX+h*spacing,hyy=iconY;
+        const hsz=14; // heart icon size
+        const tsz=16; // triforce triangle width
+        const hGap=hsz+3; // space per heart
+        const tGap=tsz+6; // space per triforce
+        const divGap=12; // gap between hearts and triforce
+        const totalW=hc*hGap+divGap+3*tGap;
+        const rowX=bx+(bw-totalW)/2; // centered in slot
+        const rowY=by+26; // vertically centered row
+        // Hearts
+        for(let h=0;h<hc;h++){
           c.fillStyle=hp>=(h+1)*2?"#ee3333":hp>=h*2+1?"#993333":"#333";
-          dH(c,hxx,hyy,12);}
-        // Triforce pieces — larger, after hearts with gap
-        const triStartX=startX+hc*spacing+spacing;
-        for(let ti=0;ti<3;ti++){const tx=triStartX+ti*spacing,ty=iconY;
+          dH(c,rowX+h*hGap,rowY,hsz);}
+        // Divider line
+        const divX=rowX+hc*hGap+divGap/2;
+        c.strokeStyle=sel?"rgba(253,211,51,0.2)":"rgba(255,255,255,0.08)";
+        c.lineWidth=1;c.beginPath();c.moveTo(divX,rowY-1);c.lineTo(divX,rowY+hsz+1);c.stroke();
+        // Triforce pieces
+        const triX=rowX+hc*hGap+divGap;
+        for(let ti=0;ti<3;ti++){const tx=triX+ti*tGap,ty=rowY-1;
           c.fillStyle=tri[ti]?"#ffd633":"#333";
-          c.beginPath();c.moveTo(tx+8,ty);c.lineTo(tx+16,ty+14);c.lineTo(tx,ty+14);c.closePath();c.fill();
-          if(tri[ti]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+8,ty+4);c.lineTo(tx+12,ty+11);c.lineTo(tx+4,ty+11);c.closePath();c.fill();}}
-        // Location + items on second row
-        c.fillStyle=sel?"#aaa":"#666";c.font="9px monospace";
+          c.beginPath();c.moveTo(tx+tsz/2,ty);c.lineTo(tx+tsz,ty+tsz-2);c.lineTo(tx,ty+tsz-2);c.closePath();c.fill();
+          if(tri[ti]){const is=tsz*0.35;c.fillStyle="#ffe866";
+            c.beginPath();c.moveTo(tx+tsz/2,ty+4);c.lineTo(tx+tsz/2+is,ty+tsz-5);c.lineTo(tx+tsz/2-is,ty+tsz-5);c.closePath();c.fill();}}
+        // --- Bottom row: location + items ---
+        c.fillStyle=sel?"rgba(255,255,255,0.5)":"rgba(255,255,255,0.25)";c.font="10px monospace";
         const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
         const items=[];
         if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
         if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
-        const info=locName+(items.length?" \u00b7 "+items.join(" \u00b7 "):"");
-        c.fillText(info,startX,by+40);
+        const info=locName+(items.length?"  \u00b7  "+items.join("  \u00b7  "):"");
+        c.textAlign="center";c.fillText(info,bx+bw/2,by+slotH-10);c.textAlign="left";
       }else{
-        c.fillStyle=sel?"#888":"#555";c.font="11px monospace";c.fillText("- Empty -",bx+22,by+34);
+        c.fillStyle=sel?"rgba(255,255,255,0.4)":"rgba(255,255,255,0.15)";c.font="12px monospace";
+        c.textAlign="center";c.fillText("- Empty -",bx+bw/2,by+slotH/2+5);c.textAlign="left";
       }
     }
     // Back option
-    const bi=3,bby=52+bi*52,sel4=s.saveSelIdx===3;
-    c.textAlign="center";c.fillStyle=sel4?"#ffd633":"#666";c.font="bold 11px monospace";
-    c.fillText("BACK",W/2,bby+12);
+    const backY=slotsTop+3*(slotH+slotGap)+8;
+    const sel4=s.saveSelIdx===3;
+    c.textAlign="center";c.fillStyle=sel4?"#ffd633":"#666";c.font="bold 12px monospace";
+    c.fillText("BACK",W/2,backY);
     if(sel4){const ca=Math.sin(t/200)*0.3+0.7;
-      c.fillStyle=`rgba(253,211,51,${ca})`;c.font="bold 12px monospace";
-      c.fillText("\u25b6",W/2-30,bby+12);}
+      c.fillStyle=`rgba(253,211,51,${ca})`;
+      c.beginPath();c.moveTo(W/2-34,backY-6);c.lineTo(W/2-26,backY);c.lineTo(W/2-34,backY+6);c.closePath();c.fill();}
     // Instructions
-    c.fillStyle="rgba(255,255,255,0.25)";c.font="8px monospace";c.textAlign="center";
-    c.fillText("\u2191\u2193 select \u00b7 Enter confirm \u00b7 Delete erase \u00b7 Esc back",W/2,H-10);
+    c.fillStyle="rgba(255,255,255,0.2)";c.font="8px monospace";c.textAlign="center";
+    c.fillText("\u2191\u2193 select \u00b7 Enter confirm \u00b7 Delete erase \u00b7 Esc back",W/2,H-8);
     c.textAlign="left";return;}
   // ===== HUD =====
   const p=s.p;
