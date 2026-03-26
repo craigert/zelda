@@ -1255,20 +1255,20 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects
   if(!iD){
-    // Wind wisps — short mystical wisps with particle trails
-    for(let i=0;i<4;i++){
-      const wPhase=t/8000+i*1.7;const wActive=Math.sin(wPhase)>0.65;
-      if(wActive){const wp=((Math.sin(wPhase)-0.65)/0.35);
-        const wy=hs(i,20,300)*H2;const wx=(t/8+i*170)%(W2+60)-30;
-        const wa=wp<0.3?wp/0.3:wp>0.7?(1-wp)/0.3:1;
-        const wy2=wy+Math.sin(t/400+i*3)*6;
-        // Short curved wisp
-        c.strokeStyle=`rgba(200,220,255,${wa*0.09})`;c.lineWidth=1;
-        c.beginPath();c.moveTo(wx,wy2);c.quadraticCurveTo(wx+20,wy2+Math.sin(t/300+i)*5-3,wx+40,wy2+Math.sin(t/350+i*2)*3);c.stroke();
+    // Wind wisps — mystical wisps with particle trails
+    for(let i=0;i<5;i++){
+      const wPhase=t/5000+i*1.3;const wActive=Math.sin(wPhase)>0.3;// visible ~40% of the time
+      if(wActive){const wp=((Math.sin(wPhase)-0.3)/0.7);
+        const wy=hs(i,20,300)*H2;const wx=(t/6+i*130)%(W2+80)-40;
+        const wa=wp<0.2?wp/0.2:wp>0.8?(1-wp)/0.2:1;
+        const wy2=wy+Math.sin(t/400+i*3)*8;
+        // Curved wisp stroke
+        c.strokeStyle=`rgba(210,225,255,${wa*0.18})`;c.lineWidth=1.5;
+        c.beginPath();c.moveTo(wx,wy2);c.quadraticCurveTo(wx+25,wy2+Math.sin(t/300+i)*6-4,wx+50,wy2+Math.sin(t/350+i*2)*4);c.stroke();
         // Trailing particles — staggered, shrinking, fading
-        for(let j=0;j<5;j++){const age=j*0.2;
-          const px3=wx-j*8+Math.sin(t/250+j+i)*3,py3=wy2+Math.sin(t/300+j*2+i)*4;
-          const pa=wa*(1-age)*0.1,ps=1.5-age*0.8;
+        for(let j=0;j<6;j++){const age=j*0.17;
+          const px3=wx-j*9+Math.sin(t/250+j+i)*4,py3=wy2+Math.sin(t/300+j*2+i)*5;
+          const pa=wa*(1-age)*0.18,ps=2-age*1;
           c.fillStyle=`rgba(200,220,255,${pa})`;c.beginPath();c.arc(px3,py3,Math.max(0.5,ps),0,Math.PI*2);c.fill();}}}
     // Drifting leaves (slow diagonal movement)
     for(let i=0;i<6;i++){const lx=(hs(i,0,200)*W2+t/8+i*90)%W2,ly=(hs(i,1,201)*H2+t/12+i*60)%H2;
