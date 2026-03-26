@@ -1728,25 +1728,62 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
   }else if(s.triforceHold){// Holding triforce above head
     const th2=s.triforceHold,hp2=Math.min(1,th2.t/500);
-    // Draw player standing
-    dP(c,th2.px,th2.py,2,t);
+    const hx=th2.px,hy=th2.py;
+    // Screen flash on pickup
+    if(th2.t<300){const fa=1-th2.t/300;c.fillStyle=`rgba(253,211,51,${fa*0.4})`;c.fillRect(0,0,W2,H2);}
+    // Radial glow behind player
+    const rg=c.createRadialGradient(hx+PS/2,hy+PS/2,5,hx+PS/2,hy+PS/2,60+Math.sin(t/200)*10);
+    rg.addColorStop(0,`rgba(253,211,51,${0.15+Math.sin(t/150)*0.05})`);rg.addColorStop(1,"rgba(253,211,51,0)");
+    c.fillStyle=rg;c.fillRect(hx-50,hy-50,PS+100,PS+100);
+    // Draw player with arms raised
+    const bob=0;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx+12,hy+23,8,3,0,0,Math.PI*2);c.fill();
+    // Boots
+    c.fillStyle="#6a3a18";c.beginPath();c.arc(hx+7,hy+22,3,0,Math.PI*2);c.fill();c.beginPath();c.arc(hx+17,hy+22,3,0,Math.PI*2);c.fill();
+    // Legs
+    c.fillStyle="#c8b080";c.fillRect(hx+6,hy+17,4,5);c.fillRect(hx+14,hy+17,4,5);
+    // Tunic
+    const bg=c.createLinearGradient(hx+4,hy+8,hx+20,hy+18);bg.addColorStop(0,"#48aa48");bg.addColorStop(1,"#2a7a2a");
+    c.fillStyle=bg;c.beginPath();c.moveTo(hx+5,hy+9);c.lineTo(hx+19,hy+9);c.lineTo(hx+20,hy+18);c.lineTo(hx+4,hy+18);c.closePath();c.fill();
+    // Belt
+    c.fillStyle="#8a6a2a";c.fillRect(hx+4,hy+15,16,2);c.fillStyle="#d4b040";c.fillRect(hx+10,hy+15,4,2);
+    // Arms raised up
+    const armRaise=hp2*12;
+    c.fillStyle="#48aa48";c.fillRect(hx+1,hy+5-armRaise,4,8);c.fillRect(hx+19,hy+5-armRaise,4,8);
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+3,hy+4-armRaise,2.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(hx+21,hy+4-armRaise,2.5,0,Math.PI*2);c.fill();
+    // Head
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+12,hy+5,6,0,Math.PI*2);c.fill();
+    // Hair
+    c.fillStyle="#c8a030";c.beginPath();c.arc(hx+12,hy+3,6,Math.PI+0.3,Math.PI*2-0.3);c.fill();
+    // Hat
+    c.fillStyle="#48aa48";c.beginPath();c.moveTo(hx+6,hy+1);c.lineTo(hx+18,hy+1);c.lineTo(hx+22,hy-8);c.closePath();c.fill();
+    // Eyes looking up
+    c.fillStyle="#222";c.beginPath();c.arc(hx+10,hy+3,1,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(hx+14,hy+3,1,0,Math.PI*2);c.fill();
     // Triforce above head -- rises up then bobs
-    const liftY=hp2*20+Math.sin(t/200)*2;
+    const liftY=armRaise+8+Math.sin(t/200)*2;
     const tglow=Math.sin(t/150)*0.15+0.4;
-    c.fillStyle=`rgba(253,211,51,${tglow})`;c.beginPath();c.arc(th2.px+PS/2,th2.py-liftY,16,0,Math.PI*2);c.fill();
-    c.fillStyle="#ffd633";const tx3=th2.px+PS/2,ty3=th2.py-liftY-6;
-    c.beginPath();c.moveTo(tx3,ty3-8);c.lineTo(tx3+8,ty3+6);c.lineTo(tx3-8,ty3+6);c.closePath();c.fill();
-    c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx3,ty3-4);c.lineTo(tx3+4,ty3+3);c.lineTo(tx3-4,ty3+3);c.closePath();c.fill();
-    // Light column
-    c.fillStyle=`rgba(253,211,51,${0.06+Math.sin(t/200)*0.03})`;
-    c.beginPath();c.moveTo(tx3-10,ty3-8);c.lineTo(tx3+10,ty3-8);c.lineTo(tx3+4,-10);c.lineTo(tx3-4,-10);c.fill();
+    // Light column from triforce to sky
+    const tx3=hx+PS/2,ty3=hy-liftY-6;
+    c.fillStyle=`rgba(253,211,51,${0.08+Math.sin(t/200)*0.04})`;
+    c.beginPath();c.moveTo(tx3-12,ty3);c.lineTo(tx3+12,ty3);c.lineTo(tx3+4,-10);c.lineTo(tx3-4,-10);c.fill();
+    // Glow
+    c.fillStyle=`rgba(253,211,51,${tglow})`;c.beginPath();c.arc(tx3,ty3,18,0,Math.PI*2);c.fill();
+    // Triforce triangle
+    c.fillStyle="#ffd633";c.beginPath();c.moveTo(tx3,ty3-10);c.lineTo(tx3+10,ty3+7);c.lineTo(tx3-10,ty3+7);c.closePath();c.fill();
+    c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx3,ty3-6);c.lineTo(tx3+5,ty3+4);c.lineTo(tx3-5,ty3+4);c.closePath();c.fill();
+    // Sparkle particles around triforce
+    for(let i=0;i<8;i++){const sa=t/400+i*Math.PI/4,sr=14+Math.sin(t/250+i)*4;
+      const sx=tx3+Math.cos(sa)*sr,sy=ty3+Math.sin(sa)*sr;
+      c.fillStyle=`rgba(255,255,200,${0.3+Math.sin(t/200+i)*0.2})`;c.beginPath();c.arc(sx,sy,1.5,0,Math.PI*2);c.fill();}
     // Warp portal
     if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
       const wcx=W2/2,wcy=H2/2;const wr=wp2*20;
       c.strokeStyle=`rgba(100,180,255,${wp2*0.6})`;c.lineWidth=3;
       c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.stroke();
       c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
-      // Spinning particles
       for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
         c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
