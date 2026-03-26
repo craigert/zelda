@@ -76,11 +76,12 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
     m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
-    // One-way ledge — shorter, doesn't block E/W exits
+    // One-way ledge drop with ladder to climb back up
     m[6][6]=T.LEDGE_S;m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[6][9]=T.LEDGE_S;
+    m[7][10]=T.LADDER;// ladder on right side to climb back up
     m[9][7]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
-  traps:[{x:4,y:3,dir:"h",range:6},{x:4,y:8,dir:"h",range:6}]},
+  traps:[{x:4,y:3,dir:"h",range:6},{x:10,y:2,dir:"v",range:6}]},
 
   // West wing — dark room with torches (light them to reveal the path)
   "-1,-2":{dark:true,tiles:mr(m=>{ae(m,["E","N"]);
@@ -216,7 +217,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[5][13]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;
     m[8][7]=T.KEY;
   }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
-  traps:[{x:2,y:4,dir:"h",range:10},{x:2,y:6,dir:"h",range:10}]},
+  traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:2,dir:"v",range:7}]},
 
   // MASTER_KEY room — behind second locked door, timed switch puzzle
   "-2,0":{tiles:mr(m=>{
@@ -235,8 +236,8 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
     m[4][4]=T.SPIKE;m[7][11]=T.SPIKE;
-    // One-way ledge drop — shortcut south
-    m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;
+    // One-way ledge drop with ladder
+    m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[7][9]=T.LADDER;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:4,type:"magma_slug"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
 
@@ -370,7 +371,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
-  traps:[{x:3,y:5,dir:"h",range:8},{x:12,y:6,dir:"h",range:8}]},
+  traps:[{x:3,y:5,dir:"h",range:8},{x:8,y:2,dir:"v",range:7}]},
 
   // Secret room east of spike corridor — bombs and supplies
   "2,-1":{tiles:mr(m=>{
@@ -428,8 +429,9 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
   "-1,-3":{tiles:mr(m=>{ae(m,["E","NB"]);
     m[3][4]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
-    // One-way ledge — drop east to reach boss door faster
-    m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;
+    // One-way ledges with ladders to climb back
+    m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[3][9]=T.LADDER;
+    m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;m[8][6]=T.LADDER;
     m[5][7]=T.HEART;m[5][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"knight"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},

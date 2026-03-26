@@ -299,11 +299,14 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
   // Ledge tiles — one-way passage (solid from wrong direction)
   if(tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W){
-    const md=s._moveDir||0;// 0=up,1=right,2=down,3=left
-    if(tl===T.LEDGE_S&&md!==2)return true;// can only pass going south (down)
-    if(tl===T.LEDGE_N&&md!==0)return true;// can only pass going north (up)
-    if(tl===T.LEDGE_E&&md!==1)return true;// can only pass going east (right)
-    if(tl===T.LEDGE_W&&md!==3)return true;// can only pass going west (left)
+    // Ladders let you pass through ledges in any direction
+    const ptx2=Math.floor((s.p.x+PS/2)/TL),pty2=Math.floor((s.p.y+PS/2)/TL);
+    const onLadder=m&&pty2>=0&&pty2<RO&&ptx2>=0&&ptx2<CO&&m[pty2][ptx2]===T.LADDER;
+    if(!onLadder){const md=s._moveDir||0;
+      if(tl===T.LEDGE_S&&md!==2)return true;
+      if(tl===T.LEDGE_N&&md!==0)return true;
+      if(tl===T.LEDGE_E&&md!==1)return true;
+      if(tl===T.LEDGE_W&&md!==3)return true;}
   }
   if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;

@@ -1173,21 +1173,30 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#8f8";c.beginPath();c.moveTo(rx2,ry2-6);c.lineTo(rx2+4,ry2-2);c.lineTo(rx2,ry2);c.lineTo(rx2-4,ry2-2);c.closePath();c.fill();
       break;}
     case T.LEDGE_S:case T.LEDGE_N:case T.LEDGE_E:case T.LEDGE_W:{
-      // Floor base
+      // Floor base — higher side is lighter, lower side darker
       c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
-      // Ledge edge — dark raised cliff face
-      c.fillStyle=iD?"rgba(0,0,0,0.3)":"rgba(0,0,0,0.2)";
-      if(tl===T.LEDGE_S){c.fillRect(px,py,TL,5);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+5,TL,3);}
-      else if(tl===T.LEDGE_N){c.fillRect(px,py+TL-5,TL,5);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+TL-8,TL,3);}
-      else if(tl===T.LEDGE_E){c.fillRect(px,py,5,TL);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px+5,py,3,TL);}
-      else{c.fillRect(px+TL-5,py,5,TL);c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px+TL-8,py,3,TL);}
-      // Directional arrow hint
-      c.fillStyle="rgba(255,255,255,0.08)";
-      const cx=px+TL/2,cy=py+TL/2;
-      if(tl===T.LEDGE_S){c.beginPath();c.moveTo(cx,cy+4);c.lineTo(cx-5,cy-3);c.lineTo(cx+5,cy-3);c.fill();}
-      else if(tl===T.LEDGE_N){c.beginPath();c.moveTo(cx,cy-4);c.lineTo(cx-5,cy+3);c.lineTo(cx+5,cy+3);c.fill();}
-      else if(tl===T.LEDGE_E){c.beginPath();c.moveTo(cx+4,cy);c.lineTo(cx-3,cy-5);c.lineTo(cx-3,cy+5);c.fill();}
-      else{c.beginPath();c.moveTo(cx-4,cy);c.lineTo(cx+3,cy-5);c.lineTo(cx+3,cy+5);c.fill();}
+      // Cliff face — thick dark edge on the "wall" side, cracked stone look
+      if(tl===T.LEDGE_S){
+        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py,TL,7);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py+7,TL,3);
+        // Stone texture lines
+        c.strokeStyle="rgba(0,0,0,0.15)";c.lineWidth=0.5;
+        c.beginPath();c.moveTo(px+8,py);c.lineTo(px+10,py+6);c.moveTo(px+22,py);c.lineTo(px+20,py+5);c.stroke();
+        // Arrow
+        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+16,py+20);c.lineTo(px+12,py+14);c.lineTo(px+20,py+14);c.fill();
+      }else if(tl===T.LEDGE_N){
+        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py+TL-7,TL,7);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py+TL-10,TL,3);
+        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+16,py+12);c.lineTo(px+12,py+18);c.lineTo(px+20,py+18);c.fill();
+      }else if(tl===T.LEDGE_E){
+        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py,7,TL);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+7,py,3,TL);
+        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+20,py+16);c.lineTo(px+14,py+12);c.lineTo(px+14,py+20);c.fill();
+      }else{
+        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px+TL-7,py,7,TL);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+TL-10,py,3,TL);
+        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+12,py+16);c.lineTo(px+18,py+12);c.lineTo(px+18,py+20);c.fill();
+      }
       break;}
     case T.BANANA:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
       // Mysterious golden glow
@@ -1203,6 +1212,16 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       const sp3=Math.sin(t/180)*2;c.fillStyle="#fff";
       c.beginPath();c.arc(px+10+sp3,py+10,1.5,0,Math.PI*2);c.fill();
       c.beginPath();c.arc(px+22-sp3,py+14,1,0,Math.PI*2);c.fill();
+      break;}
+    case T.LADDER:{// Ladder — climbable tile to get back up ledges
+      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      // Side rails
+      c.fillStyle="#6a4a2a";c.fillRect(px+6,py+1,3,TL-2);c.fillRect(px+TL-9,py+1,3,TL-2);
+      // Rungs
+      c.fillStyle="#8a6a3a";
+      for(let r=0;r<4;r++){c.fillRect(px+8,py+4+r*8,TL-16,2);}
+      // Highlight
+      c.fillStyle="rgba(255,255,255,0.06)";c.fillRect(px+7,py+1,2,TL-2);
       break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
