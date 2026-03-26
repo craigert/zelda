@@ -1197,44 +1197,43 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle=`rgba(253,211,51,${ca})`;
         const ax=bx+10,ay=by+slotH/2;
         c.beginPath();c.moveTo(ax,ay-6);c.lineTo(ax+8,ay);c.lineTo(ax,ay+6);c.closePath();c.fill();}
-      // File label
+      // Left side: file label + location
+      c.textAlign="left";
       c.font="bold 13px monospace";c.fillStyle=sel?"#ffd633":"#777";
-      c.textAlign="left";c.fillText("FILE "+(i+1),bx+24,by+18);
+      c.fillText("FILE "+(i+1),bx+24,by+28);
       if(save&&save.v===1){
-        // --- Hearts and triforce on center row, large and evenly spaced ---
+        const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
+        c.fillStyle=sel?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.2)";c.font="10px monospace";
+        c.fillText(locName,bx+24,by+44);
+        // Items below location
+        const items=[];
+        if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
+        if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
+        if(items.length){c.fillStyle=sel?"rgba(255,255,255,0.3)":"rgba(255,255,255,0.12)";c.font="9px monospace";
+          c.fillText(items.join(" \u00b7 "),bx+24,by+58);}
+        // --- Center: hearts and triforce, vertically centered ---
         const mhp=save.p.mhp||8,hp=save.p.hp||0,hc=mhp/2;
         const tri=save.p.tri||[false,false,false];
-        const hsz=14; // heart icon size
-        const tsz=16; // triforce triangle width
-        const hGap=hsz+3; // space per heart
-        const tGap=tsz+6; // space per triforce
-        const divGap=12; // gap between hearts and triforce
+        const hsz=14,tsz=16;
+        const hGap=hsz+3,tGap=tsz+6,divGap=14;
         const totalW=hc*hGap+divGap+3*tGap;
-        const rowX=bx+(bw-totalW)/2; // centered in slot
-        const rowY=by+26; // vertically centered row
+        const rowX=bx+120+(bw-120-totalW)/2;
+        const rowY=by+(slotH-hsz)/2;
         // Hearts
         for(let h=0;h<hc;h++){
           c.fillStyle=hp>=(h+1)*2?"#ee3333":hp>=h*2+1?"#993333":"#333";
           dH(c,rowX+h*hGap,rowY,hsz);}
-        // Divider line
+        // Divider
         const divX=rowX+hc*hGap+divGap/2;
         c.strokeStyle=sel?"rgba(253,211,51,0.2)":"rgba(255,255,255,0.08)";
         c.lineWidth=1;c.beginPath();c.moveTo(divX,rowY-1);c.lineTo(divX,rowY+hsz+1);c.stroke();
-        // Triforce pieces
+        // Triforce
         const triX=rowX+hc*hGap+divGap;
         for(let ti=0;ti<3;ti++){const tx=triX+ti*tGap,ty=rowY-1;
           c.fillStyle=tri[ti]?"#ffd633":"#333";
           c.beginPath();c.moveTo(tx+tsz/2,ty);c.lineTo(tx+tsz,ty+tsz-2);c.lineTo(tx,ty+tsz-2);c.closePath();c.fill();
-          if(tri[ti]){const is=tsz*0.35;c.fillStyle="#ffe866";
-            c.beginPath();c.moveTo(tx+tsz/2,ty+4);c.lineTo(tx+tsz/2+is,ty+tsz-5);c.lineTo(tx+tsz/2-is,ty+tsz-5);c.closePath();c.fill();}}
-        // --- Bottom row: location + items ---
-        c.fillStyle=sel?"rgba(255,255,255,0.5)":"rgba(255,255,255,0.25)";c.font="10px monospace";
-        const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
-        const items=[];
-        if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
-        if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
-        const info=locName+(items.length?"  \u00b7  "+items.join("  \u00b7  "):"");
-        c.textAlign="center";c.fillText(info,bx+bw/2,by+slotH-10);c.textAlign="left";
+          if(tri[ti]){const is2=tsz*0.35;c.fillStyle="#ffe866";
+            c.beginPath();c.moveTo(tx+tsz/2,ty+4);c.lineTo(tx+tsz/2+is2,ty+tsz-5);c.lineTo(tx+tsz/2-is2,ty+tsz-5);c.closePath();c.fill();}}
       }else{
         c.fillStyle=sel?"rgba(255,255,255,0.4)":"rgba(255,255,255,0.15)";c.font="12px monospace";
         c.textAlign="center";c.fillText("- Empty -",bx+bw/2,by+slotH/2+5);c.textAlign="left";
