@@ -130,6 +130,7 @@ function init() {
     bossIntro:null, // {name,t,dur,bx,by} — cinematic boss intro sequence
     bossFight:false, // true while in a boss room with boss alive
     pitFall:{a:false,t:0,x:0,y:0}, // pit fall animation
+    triforceHold:null, // {t,dur,piece,px,py,warp} — hold triforce above head
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -273,7 +274,9 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.litTorche
     roomData2?.reward||roomData2?.lock||s.en.some(e=>e.type==="boss"||e.type==="miniboss"));
   if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
-    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;sfx("bossdeath");}
+    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;sfx("bossdeath");
+      // Force music switch immediately
+      ltRef.value=null;}
   }
   // Load blade traps from room data
   s.bladeTraps=[];
@@ -409,6 +412,21 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   // Boss intro sequence — freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
+    return;}
+  // Triforce hold-up animation
+  if(s.triforceHold){s.triforceHold.t+=dt;
+    // Spawn warp portal at 2 seconds
+    if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
+      const tc3=s.triforceHold.piece;
+      s.msg={text:tc3>=3?"The Dark Sanctum has opened!":` Triforce piece ${tc3}/3!`,t:2000};}
+    if(s.triforceHold.t>=s.triforceHold.dur){
+      // Warp to dungeon entrance
+      const di2=s.loc.di;const dg3=s.dg[di2];if(dg3){
+        for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){
+          s.loc.scr=rk3;s.p.x=7*TL;s.p.y=9*TL;le(s);break;}}}
+      s.triforceHold=null;}
+    // Update particles during hold
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
   // Pit fall animation — freeze gameplay, shrink player
   if(s.pitFall&&s.pitFall.a){s.pitFall.t+=dt;
@@ -666,9 +684,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
       else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
-        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;s.msg={text:"The Dark Sanctum has opened!",t:3000};
-          const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}
-        }else{s.msg={text:`Triforce piece ${tc2}/3!`,t:2000};}
+        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
+          const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}}
+        // Hold-up animation + warp portal
+        s.triforceHold={t:0,dur:2500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
@@ -1670,10 +1689,34 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(d2.type==="banana"){// Golden banana
       const bn2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,bn2,10,0,Math.PI*2);c.fill();
       c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";c.beginPath();c.arc(d2.x,bn2+3,6,-Math.PI*0.8,-Math.PI*0.15);c.stroke();c.lineCap="butt";}
-    else{c.fillStyle="#444";c.beginPath();c.arc(d2.x,d2.y+bob2,5,0,Math.PI*2);c.fill();c.fillStyle="#666";c.beginPath();c.arc(d2.x,d2.y-1+bob2,4,0,Math.PI*2);c.fill();}}
+    else{// Default — render as green rupee
+      const rx2=d2.x,ry2=d2.y+bob2;c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-5);c.lineTo(rx2+3,ry2-1);c.lineTo(rx2+3,ry2+1);c.lineTo(rx2,ry2+5);c.lineTo(rx2-3,ry2+1);c.lineTo(rx2-3,ry2-1);c.closePath();c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
     dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
+  }else if(s.triforceHold){// Holding triforce above head
+    const th2=s.triforceHold,hp2=Math.min(1,th2.t/500);
+    // Draw player standing
+    dP(c,th2.px,th2.py,2,t);
+    // Triforce above head — rises up then bobs
+    const liftY=hp2*20+Math.sin(t/200)*2;
+    const tglow=Math.sin(t/150)*0.15+0.4;
+    c.fillStyle=`rgba(253,211,51,${tglow})`;c.beginPath();c.arc(th2.px+PS/2,th2.py-liftY,16,0,Math.PI*2);c.fill();
+    c.fillStyle="#ffd633";const tx3=th2.px+PS/2,ty3=th2.py-liftY-6;
+    c.beginPath();c.moveTo(tx3,ty3-8);c.lineTo(tx3+8,ty3+6);c.lineTo(tx3-8,ty3+6);c.closePath();c.fill();
+    c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx3,ty3-4);c.lineTo(tx3+4,ty3+3);c.lineTo(tx3-4,ty3+3);c.closePath();c.fill();
+    // Light column
+    c.fillStyle=`rgba(253,211,51,${0.06+Math.sin(t/200)*0.03})`;
+    c.beginPath();c.moveTo(tx3-10,ty3-8);c.lineTo(tx3+10,ty3-8);c.lineTo(tx3+4,-10);c.lineTo(tx3-4,-10);c.fill();
+    // Warp portal
+    if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
+      const wcx=W2/2,wcy=H2/2;const wr=wp2*20;
+      c.strokeStyle=`rgba(100,180,255,${wp2*0.6})`;c.lineWidth=3;
+      c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.stroke();
+      c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
+      // Spinning particles
+      for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
+        c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit — shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
