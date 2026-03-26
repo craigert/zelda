@@ -436,9 +436,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     // Allow drop collection during hold
     for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
       if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
-      // Auto-fly triforce to player during hold
-      if(d2.type==="triforce"&&d2.y>=d2.ground){const fdx=s.p.x+PS/2-d2.x,fdy=s.p.y+PS/2-d2.y,fd=Math.max(Math.hypot(fdx,fdy),1);
-        const spd=4*(dt/16);d2.x+=fdx/fd*spd;d2.y+=fdy/fd*spd;}
+      // Auto-fly heartcontainer to player during hold so it doesn't block warp
+      if(d2.type==="heartcontainer"&&d2.y>=d2.ground){const fdx=s.p.x+PS/2-d2.x,fdy=s.p.y+PS/2-d2.y,fd=Math.max(Math.hypot(fdx,fdy),1);
+        const spd=3*(dt/16);d2.x+=fdx/fd*spd;d2.y+=fdy/fd*spd;}
       if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
         if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
         s.drops.splice(i,1);}}
@@ -692,9 +692,6 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
     if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
     if((d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop")&&d2.y<d2.ground){/* no magnet pull while falling */}
-    else if(d2.type==="triforce"&&d2.y>=d2.ground){
-      // Auto-fly to player after landing
-      const spd=4*(dt/16);d2.x+=mdx/Math.max(mdist,1)*spd;d2.y+=mdy/Math.max(mdist,1)*spd;}
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
@@ -713,9 +710,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
-      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
-        // If no hold active, start one for warp
-        if(!s.triforceHold){s.triforceHold={t:0,dur:2500,px:p.x,py:p.y,warp:false};}}
+      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
