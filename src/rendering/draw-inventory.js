@@ -366,8 +366,48 @@ function drawGearPage(c,s,t){
   drawSectionTitle(c,50,"EQUIPMENT");
   drawPaperDoll(c,s,t);
   drawEquipGrid(c,s,t);
-  drawDivider(c,234,"TRIFORCE");
+  drawDivider(c,234,"TRIFORCE & HEARTS");
   drawBigTriforce(c,s,t);
+  drawHeartProgress(c,s,t);
+}
+
+function drawHeartProgress(c,s,t){
+  // Show heart piece collection progress next to triforce
+  const cx=W2/2+90,cy=270;
+  const p=s.p;
+  // Large heart outline (4 quarters)
+  const hsz=24,hx=cx-hsz/2,hy=cy;
+  // How many pieces collected (0-3 partial, 4=complete → resets to 0)
+  const pieces=p.heartPieces;// 0-3
+  const fullHearts=Math.floor((p.mhp-8)/2);// hearts gained from containers+pieces
+  c.textAlign="center";
+  c.fillStyle="#888";c.font="bold 8px monospace";c.fillText("HEART PIECES",cx,cy-4);
+  // Draw the 4 quadrants of the heart
+  for(let q=0;q<4;q++){
+    const filled=q<pieces;
+    c.save();
+    // Clip to quadrant
+    c.beginPath();
+    if(q===0)c.rect(hx,hy,hsz/2,hsz/2);
+    else if(q===1)c.rect(hx+hsz/2,hy,hsz/2,hsz/2);
+    else if(q===2)c.rect(hx,hy+hsz/2,hsz/2,hsz/2);
+    else c.rect(hx+hsz/2,hy+hsz/2,hsz/2,hsz/2);
+    c.clip();
+    c.fillStyle=filled?"#ee3333":"#333";dH(c,hx,hy,hsz);
+    c.restore();
+  }
+  // Heart outline
+  c.save();c.strokeStyle="#666";c.lineWidth=1;
+  c.beginPath();const hs2=hsz;c.moveTo(hx+hs2/2,hy+hs2*.85);c.bezierCurveTo(hx,hy+hs2*.5,hx,hy,hx+hs2/2,hy+hs2*.2);c.bezierCurveTo(hx+hs2,hy,hx+hs2,hy+hs2*.5,hx+hs2/2,hy+hs2*.85);c.stroke();
+  // Cross lines showing quarters
+  c.strokeStyle="#555";c.lineWidth=0.5;
+  c.beginPath();c.moveTo(hx+hsz/2,hy+2);c.lineTo(hx+hsz/2,hy+hsz-2);c.stroke();
+  c.beginPath();c.moveTo(hx+4,hy+hsz/2);c.lineTo(hx+hsz-4,hy+hsz/2);c.stroke();
+  c.restore();
+  // Label
+  c.fillStyle="#aaa";c.font="bold 9px monospace";
+  c.fillText(`${pieces}/4`,cx,cy+hsz+6);
+  c.textAlign="left";
 }
 
 function drawPaperDoll(c,s,t){

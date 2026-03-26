@@ -413,20 +413,27 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
-  // Triforce hold-up animation
+  // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
-    // Spawn warp portal at 2 seconds
-    if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
-      const tc3=s.triforceHold.piece;
-      s.msg={text:tc3>=3?"The Dark Sanctum has opened!":` Triforce piece ${tc3}/3!`,t:2000};}
-    if(s.triforceHold.t>=s.triforceHold.dur){
-      // Warp to dungeon entrance
+    // Check if warp should appear — need no uncollected triforce or heartcontainer drops
+    const pendingDrops=s.drops.some(d=>d.type==="triforce"||d.type==="heartcontainer");
+    if(s.triforceHold.t>2000&&!s.triforceHold.warp&&!pendingDrops){s.triforceHold.warp=true;sfx("door");
+      const tc3=s.p.tri.filter(Boolean).length;
+      s.msg={text:tc3>=3?"The Dark Sanctum has opened!":`Triforce piece ${tc3}/3!`,t:2000};}
+    // Only warp after portal appeared and 500ms passed
+    if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur&&!pendingDrops){
       const di2=s.loc.di;const dg3=s.dg[di2];if(dg3){
         for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){
           s.loc.scr=rk3;s.p.x=7*TL;s.p.y=9*TL;le(s);break;}}}
       s.triforceHold=null;}
-    // Update particles during hold
+    // Update particles + drops during hold (so player can pick up remaining items)
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    // Allow drop collection during hold
+    for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
+      if(d2.type==="triforce"||d2.type==="heartcontainer"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
+      if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
+        if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
+        s.drops.splice(i,1);}}
     return;}
   // Pit fall animation — freeze gameplay, shrink player
   if(s.pitFall&&s.pitFall.a){s.pitFall.t+=dt;
@@ -654,17 +661,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
   for(let i=s.dmgNums.length-1;i>=0;i--){const dn=s.dmgNums[i];dn.y-=1.2*(dt/16);dn.t-=dt;if(dn.t<=0)s.dmgNums.splice(i,1);}
   if(s.roomFlash>0)s.roomFlash-=dt;
   for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
-    if(d2.type==="triforce"){
+    if(d2.type==="triforce"||d2.type==="heartcontainer"){
       // Slow descent with gentle gravity cap
       d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);
       if(d2.spin!=null)d2.spin+=2.5*(dt/16);
       if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}
       // Trailing sparkles during fall
-      if(d2.y<d2.ground&&d2.t%3<1)s.pt.push({x:d2.x+(Math.random()-.5)*10,y:d2.y+8,dx:(Math.random()-.5)*1.5,dy:Math.random()*0.5,l:400,c:Math.random()>.5?"#fd3":"#fff"});
+      const sparkCol=d2.type==="triforce"?"#fd3":"#f44";
+      if(d2.y<d2.ground&&d2.t%3<1)s.pt.push({x:d2.x+(Math.random()-.5)*10,y:d2.y+8,dx:(Math.random()-.5)*1.5,dy:Math.random()*0.5,l:400,c:Math.random()>.5?sparkCol:"#fff"});
     }else{d2.y+=d2.vy*(dt/16);d2.vy+=0.15*(dt/16);
     if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.5;if(Math.abs(d2.vy)<0.3)d2.vy=0;}}
     const mdx=p.x+PS/2-d2.x,mdy=p.y+PS/2-d2.y,mdist=Math.hypot(mdx,mdy);
-    if(d2.type==="triforce"&&d2.y<d2.ground){/* no magnet pull while falling */}
+    if((d2.type==="triforce"||d2.type==="heartcontainer")&&d2.y<d2.ground){/* no magnet pull while falling */}
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
@@ -681,7 +689,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
-      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};}
+      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
+        // If no hold active, start one for warp
+        if(!s.triforceHold){s.triforceHold={t:0,dur:2500,px:p.x,py:p.y,warp:false};}}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
@@ -690,7 +700,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.triforceHold={t:0,dur:2500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
-    if(d2.t>8000&&!["triforce","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
+    if(d2.t>8000&&!["triforce","heartcontainer","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
   // Chest update — requires action button to open
   if(s.chest){const ch=s.chest;ch.t+=dt;const ky=kyR.value;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
@@ -919,7 +929,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.paused)return;s.gt+=dt;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
         const bossId=`${s.loc.di}:${e.name}`;
         if(s.loc.di<3&&!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
-          s.drops.push({x:ecx,y:ecy-12,vy:-5,ground:ecy,type:"heartcontainer",t:0});}
+          s.drops.push({x:W2/2,y:-20,vy:0.4,ground:H2/2,type:"heartcontainer",t:0,spin:0});}
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
