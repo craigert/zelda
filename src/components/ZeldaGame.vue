@@ -261,10 +261,13 @@ function applySave(s, save) {
 function startFromSlot(s, idx) {
   saveSlot.value = idx;
   const save = loadSlot(idx);
-  s.saveSelect = false; s.title = false;
-  if (save && applySave(s, save)) {
-    le(s); s.msg = { text: "Game loaded!", t: 1500 };
-  } else { le(s); }
+  const ns = init();
+  ns.saveSelect = false; ns.title = false;
+  if (save && applySave(ns, save)) {
+    ns.msg = { text: "Game loaded!", t: 1500 };
+  }
+  stR.value = ns;
+  le(ns);
   ltRef.value = null;
 }
 
