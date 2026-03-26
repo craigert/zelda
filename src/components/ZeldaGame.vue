@@ -156,7 +156,7 @@ function onCanvasClick() {
   if (s && (s.go || s.won)) { s.respawnClick = true; return; }
   if (s && s.mapOpen) {
     // Check if click is on tab bar area (scaled coordinates)
-    const cv=cvRef.value;if(cv){const r=cv.getBoundingClientRect();const e2=event||window.event;
+    const cv=cvRef.value;if(cv){const r=cv.getBoundingClientRect();const e2=window.event;
       if(e2){const cx=(e2.clientX-r.left)/r.width*W2,cy=(e2.clientY-r.top)/r.height*(H2+HH);
         if(cy>=14&&cy<=34){if(cx>=18&&cx<=96){s.mapTab=0;return;}if(cx>=102&&cx<=180){s.mapTab=1;return;}}}}
     s.mapOpen=false;s.paused=false;return;
@@ -2115,7 +2115,7 @@ watch([muOn, customMu], () => {
   ck();
   _musicInterval = setInterval(ck, 500);
 });
-
+}
 </script>
 
 <style scoped>
