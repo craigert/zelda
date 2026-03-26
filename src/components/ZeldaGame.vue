@@ -1190,24 +1190,30 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=sel?"#ffd633":"#888";
       c.textAlign="left";c.fillText("FILE "+(i+1),bx+22,by+16);
       if(save&&save.v===1){
-        // Hearts
+        // Heart pieces and triforce — evenly spaced side by side
         const mhp=save.p.mhp||8,hp=save.p.hp||0,hc=mhp/2;
-        for(let h=0;h<hc;h++){const hxx=bx+22+h*10,hyy=by+22;
-          c.fillStyle=hp>=(h+1)*2?"#ee3333":hp>=h*2+1?"#ee3333":"#333";
-          c.font="8px monospace";c.fillText("\u2665",hxx,hyy+8);}
-        // Triforce pieces
         const tri=save.p.tri||[false,false,false];
-        for(let ti=0;ti<3;ti++){c.fillStyle=tri[ti]?"#ffd633":"#333";c.font="10px monospace";
-          c.fillText("\u25b2",bx+bw-50+ti*14,by+16);}
-        // Location info
+        const iconY=by+12,iconH=22,iconW=bw-30;
+        const totalIcons=hc+3,spacing=Math.min(16,iconW/(totalIcons+1));
+        const startX=bx+22;
+        // Hearts — larger
+        for(let h=0;h<hc;h++){const hxx=startX+h*spacing,hyy=iconY;
+          c.fillStyle=hp>=(h+1)*2?"#ee3333":hp>=h*2+1?"#993333":"#333";
+          dH(c,hxx,hyy,12);}
+        // Triforce pieces — larger, after hearts with gap
+        const triStartX=startX+hc*spacing+spacing;
+        for(let ti=0;ti<3;ti++){const tx=triStartX+ti*spacing,ty=iconY+2;
+          c.fillStyle=tri[ti]?"#ffd633":"#333";
+          c.beginPath();c.moveTo(tx+6,ty);c.lineTo(tx+12,ty+10);c.lineTo(tx,ty+10);c.closePath();c.fill();
+          if(tri[ti]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+6,ty+3);c.lineTo(tx+9,ty+8);c.lineTo(tx+3,ty+8);c.closePath();c.fill();}}
+        // Location + items on second row
         c.fillStyle=sel?"#aaa":"#666";c.font="9px monospace";
         const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
-        c.fillText(locName,bx+22,by+40);
-        // Items
         const items=[];
         if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
         if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
-        if(items.length){c.fillStyle=sel?"#888":"#555";c.fillText(items.join(" \u00b7 "),bx+80,by+40);}
+        const info=locName+(items.length?" \u00b7 "+items.join(" \u00b7 "):"");
+        c.fillText(info,startX,by+40);
       }else{
         c.fillStyle=sel?"#888":"#555";c.font="11px monospace";c.fillText("- Empty -",bx+22,by+34);
       }
