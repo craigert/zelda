@@ -1173,29 +1173,69 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#8f8";c.beginPath();c.moveTo(rx2,ry2-6);c.lineTo(rx2+4,ry2-2);c.lineTo(rx2,ry2);c.lineTo(rx2-4,ry2-2);c.closePath();c.fill();
       break;}
     case T.LEDGE_S:case T.LEDGE_N:case T.LEDGE_E:case T.LEDGE_W:{
-      // Floor base — higher side is lighter, lower side darker
-      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
-      // Cliff face — thick dark edge on the "wall" side, cracked stone look
+      // Base floor (upper level)
+      const lfc2=iD?(dg.fc||dg.color):"#2d6a1e";
+      c.fillStyle=lfc2;c.fillRect(px,py,TL,TL);
+      // Stone cliff face with 3D depth — the "wall" you drop off
+      const cw=10;// cliff face width
       if(tl===T.LEDGE_S){
-        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py,TL,7);
-        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py+7,TL,3);
-        // Stone texture lines
-        c.strokeStyle="rgba(0,0,0,0.15)";c.lineWidth=0.5;
-        c.beginPath();c.moveTo(px+8,py);c.lineTo(px+10,py+6);c.moveTo(px+22,py);c.lineTo(px+20,py+5);c.stroke();
-        // Arrow
-        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+16,py+20);c.lineTo(px+12,py+14);c.lineTo(px+20,py+14);c.fill();
+        // Dark cliff face at top — you drop southward
+        const cg=c.createLinearGradient(px,py,px,py+cw);
+        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        c.fillStyle=cg;c.fillRect(px,py,TL,cw);
+        // Stone block lines
+        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px,py+4);c.lineTo(px+TL,py+4);c.stroke();
+        c.beginPath();c.moveTo(px+8,py);c.lineTo(px+8,py+4);c.moveTo(px+24,py);c.lineTo(px+24,py+4);c.stroke();
+        c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+16,py+cw-2);c.stroke();
+        // Highlight edge (top of cliff = lit)
+        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py,TL,1);
+        // Drop shadow on floor below
+        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px,py+cw,TL,4);
+        // Chevron arrow hint
+        const pulse=Math.sin(t/400)*0.08+0.15;
+        c.fillStyle=`rgba(255,255,255,${pulse})`;
+        c.beginPath();c.moveTo(px+16,py+24);c.lineTo(px+11,py+18);c.lineTo(px+21,py+18);c.fill();
+        c.beginPath();c.moveTo(px+16,py+28);c.lineTo(px+13,py+24);c.lineTo(px+19,py+24);c.fill();
       }else if(tl===T.LEDGE_N){
-        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py+TL-7,TL,7);
-        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py+TL-10,TL,3);
-        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+16,py+12);c.lineTo(px+12,py+18);c.lineTo(px+20,py+18);c.fill();
+        const cg=c.createLinearGradient(px,py+TL,px,py+TL-cw);
+        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        c.fillStyle=cg;c.fillRect(px,py+TL-cw,TL,cw);
+        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px,py+TL-4);c.lineTo(px+TL,py+TL-4);c.stroke();
+        c.beginPath();c.moveTo(px+8,py+TL-4);c.lineTo(px+8,py+TL);c.moveTo(px+24,py+TL-4);c.lineTo(px+24,py+TL);c.stroke();
+        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py+TL-1,TL,1);
+        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px,py+TL-cw-4,TL,4);
+        const pulse=Math.sin(t/400)*0.08+0.15;
+        c.fillStyle=`rgba(255,255,255,${pulse})`;
+        c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+11,py+14);c.lineTo(px+21,py+14);c.fill();
+        c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+13,py+8);c.lineTo(px+19,py+8);c.fill();
       }else if(tl===T.LEDGE_E){
-        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py,7,TL);
-        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+7,py,3,TL);
-        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+20,py+16);c.lineTo(px+14,py+12);c.lineTo(px+14,py+20);c.fill();
-      }else{
-        c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px+TL-7,py,7,TL);
-        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+TL-10,py,3,TL);
-        c.fillStyle="rgba(255,255,255,0.12)";c.beginPath();c.moveTo(px+12,py+16);c.lineTo(px+18,py+12);c.lineTo(px+18,py+20);c.fill();
+        const cg=c.createLinearGradient(px,py,px+cw,py);
+        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        c.fillStyle=cg;c.fillRect(px,py,cw,TL);
+        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px+4,py);c.lineTo(px+4,py+TL);c.stroke();
+        c.beginPath();c.moveTo(px,py+8);c.lineTo(px+4,py+8);c.moveTo(px,py+24);c.lineTo(px+4,py+24);c.stroke();
+        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py,1,TL);
+        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px+cw,py,4,TL);
+        const pulse=Math.sin(t/400)*0.08+0.15;
+        c.fillStyle=`rgba(255,255,255,${pulse})`;
+        c.beginPath();c.moveTo(px+24,py+16);c.lineTo(px+18,py+11);c.lineTo(px+18,py+21);c.fill();
+        c.beginPath();c.moveTo(px+28,py+16);c.lineTo(px+24,py+13);c.lineTo(px+24,py+19);c.fill();
+      }else{// LEDGE_W
+        const cg=c.createLinearGradient(px+TL,py,px+TL-cw,py);
+        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        c.fillStyle=cg;c.fillRect(px+TL-cw,py,cw,TL);
+        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px+TL-4,py);c.lineTo(px+TL-4,py+TL);c.stroke();
+        c.beginPath();c.moveTo(px+TL-4,py+8);c.lineTo(px+TL,py+8);c.moveTo(px+TL-4,py+24);c.lineTo(px+TL,py+24);c.stroke();
+        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px+TL-1,py,1,TL);
+        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px+TL-cw-4,py,4,TL);
+        const pulse=Math.sin(t/400)*0.08+0.15;
+        c.fillStyle=`rgba(255,255,255,${pulse})`;
+        c.beginPath();c.moveTo(px+8,py+16);c.lineTo(px+14,py+11);c.lineTo(px+14,py+21);c.fill();
+        c.beginPath();c.moveTo(px+4,py+16);c.lineTo(px+8,py+13);c.lineTo(px+8,py+19);c.fill();
       }
       break;}
     case T.BANANA:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
@@ -1214,28 +1254,64 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.beginPath();c.arc(px+22-sp3,py+14,1,0,Math.PI*2);c.fill();
       break;}
     case T.LADDER:{// Ladder — climbable tile to get back up ledges
-      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
-      // Side rails
-      c.fillStyle="#6a4a2a";c.fillRect(px+6,py+1,3,TL-2);c.fillRect(px+TL-9,py+1,3,TL-2);
-      // Rungs
-      c.fillStyle="#8a6a3a";
-      for(let r=0;r<4;r++){c.fillRect(px+8,py+4+r*8,TL-16,2);}
-      // Highlight
-      c.fillStyle="rgba(255,255,255,0.06)";c.fillRect(px+7,py+1,2,TL-2);
+      // Sunken floor underneath
+      const ldc=iD?(dg.fc||dg.color):"#1a2a16";
+      c.fillStyle=ldc;c.fillRect(px,py,TL,TL);
+      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py,TL,TL);
+      // Side rails — thick wooden beams with bevel
+      const railW=4,railL=px+7,railR=px+TL-11;
+      // Rail shadows
+      c.fillStyle="#3a2a10";c.fillRect(railL+1,py,railW,TL);c.fillRect(railR+1,py,railW,TL);
+      // Rails
+      const rg=c.createLinearGradient(railL,py,railL+railW,py);
+      rg.addColorStop(0,"#8a6a3a");rg.addColorStop(0.3,"#a0824a");rg.addColorStop(0.7,"#7a5a2a");rg.addColorStop(1,"#5a4020");
+      c.fillStyle=rg;c.fillRect(railL,py,railW,TL);c.fillRect(railR,py,railW,TL);
+      // Rungs with wood grain
+      for(let r=0;r<4;r++){
+        const ry=py+5+r*7;
+        c.fillStyle="#5a4020";c.fillRect(railL+railW-1,ry+1,railR-railL-railW+2,3);
+        const rung=c.createLinearGradient(px,ry,px,ry+3);
+        rung.addColorStop(0,"#a0824a");rung.addColorStop(0.5,"#8a6a3a");rung.addColorStop(1,"#6a5028");
+        c.fillStyle=rung;c.fillRect(railL+railW-1,ry,railR-railL-railW+2,2.5);
+      }
+      // Nail dots at rung intersections
+      c.fillStyle="#555";
+      for(let r=0;r<4;r++){const ry=py+5+r*7;
+        c.beginPath();c.arc(railL+railW,ry+1,0.8,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(railR,ry+1,0.8,0,Math.PI*2);c.fill();}
+      // Subtle climb arrow hint
+      const lp2=Math.sin(t/500)*0.06+0.1;
+      c.fillStyle=`rgba(255,255,200,${lp2})`;
+      c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+12,py+10);c.lineTo(px+20,py+10);c.fill();
       break;}
-    case T.LOW_FLOOR:{// Sunken floor — darker, depressed area
+    case T.LOW_FLOOR:{// Sunken floor — darker, depressed area with 3D indentation
       const lfc=iD?(dg.fc||dg.color):"#1a2a16";
       c.fillStyle=lfc;c.fillRect(px,py,TL,TL);
-      // Darken significantly
-      c.fillStyle="rgba(0,0,0,0.3)";c.fillRect(px,py,TL,TL);
-      // Inner shadow on top/left edges (depth illusion)
-      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py,TL,3);c.fillRect(px,py,3,TL);
-      // Light edge on bottom/right (opposite of shadow)
-      c.fillStyle="rgba(255,255,255,0.04)";c.fillRect(px,py+TL-2,TL,2);c.fillRect(px+TL-2,py,2,TL);
-      // Cracked texture
-      c.strokeStyle="rgba(0,0,0,0.15)";c.lineWidth=0.5;
-      const h1=hs(px,py,60),h2=hs(px,py,61);
-      c.beginPath();c.moveTo(px+6+h1*10,py+4+h2*6);c.lineTo(px+16+h1*6,py+14+h2*8);c.lineTo(px+24+h2*4,py+10+h1*10);c.stroke();
+      // Heavy darken for sunken look
+      c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(px,py,TL,TL);
+      // Inner shadow edges — thick gradient shadows on top+left (light comes from top-left)
+      const shTop=c.createLinearGradient(px,py,px,py+8);
+      shTop.addColorStop(0,"rgba(0,0,0,0.45)");shTop.addColorStop(1,"rgba(0,0,0,0)");
+      c.fillStyle=shTop;c.fillRect(px,py,TL,8);
+      const shLeft=c.createLinearGradient(px,py,px+8,py);
+      shLeft.addColorStop(0,"rgba(0,0,0,0.35)");shLeft.addColorStop(1,"rgba(0,0,0,0)");
+      c.fillStyle=shLeft;c.fillRect(px,py,8,TL);
+      // Light catch on bottom+right edges (opposite = lit)
+      const lgBot=c.createLinearGradient(px,py+TL-6,px,py+TL);
+      lgBot.addColorStop(0,"rgba(0,0,0,0)");lgBot.addColorStop(1,"rgba(200,180,140,0.08)");
+      c.fillStyle=lgBot;c.fillRect(px,py+TL-6,TL,6);
+      const lgRight=c.createLinearGradient(px+TL-6,py,px+TL,py);
+      lgRight.addColorStop(0,"rgba(0,0,0,0)");lgRight.addColorStop(1,"rgba(200,180,140,0.06)");
+      c.fillStyle=lgRight;c.fillRect(px+TL-6,py,6,TL);
+      // Cracked stone texture — multiple random cracks
+      c.strokeStyle="rgba(0,0,0,0.2)";c.lineWidth=0.5;
+      const h1=hs(px,py,60),h2=hs(px,py,61),h3=hs(px,py,62);
+      c.beginPath();c.moveTo(px+6+h1*10,py+4+h2*6);c.lineTo(px+14+h1*6,py+12+h2*8);c.stroke();
+      c.beginPath();c.moveTo(px+18+h3*8,py+8+h1*6);c.lineTo(px+26+h2*4,py+18+h3*8);c.stroke();
+      c.beginPath();c.moveTo(px+10+h2*6,py+20+h3*4);c.lineTo(px+20+h1*6,py+26+h2*4);c.stroke();
+      // Occasional puddle/moss spots
+      if(h1>0.5){c.fillStyle="rgba(40,60,40,0.15)";c.beginPath();c.arc(px+10+h2*12,py+12+h3*10,3+h1*2,0,Math.PI*2);c.fill();}
+      if(h3>0.6){c.fillStyle="rgba(30,50,60,0.12)";c.beginPath();c.ellipse(px+20+h1*6,py+20+h2*6,4,2.5,h3,0,Math.PI*2);c.fill();}
       break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
