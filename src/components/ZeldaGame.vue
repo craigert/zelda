@@ -1203,14 +1203,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillText("FILE "+(i+1),bx+24,by+28);
       if(save&&save.v===1){
         const locName=save.loc.ty==="ow"?"Overworld":save.loc.ty==="dg"?"Dungeon":"Cave";
-        c.fillStyle=sel?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.2)";c.font="10px monospace";
-        c.fillText(locName,bx+24,by+44);
-        // Items below location
-        const items=[];
-        if(save.p.hasBow)items.push("Bow");if(save.p.hasBombs)items.push("Bombs");
-        if(save.p.hasMasterSword)items.push("M.Sword");if(save.p.redArmor)items.push("Armor");
-        if(items.length){c.fillStyle=sel?"rgba(255,255,255,0.3)":"rgba(255,255,255,0.12)";c.font="9px monospace";
-          c.fillText(items.join(" \u00b7 "),bx+24,by+58);}
+        c.fillStyle=sel?"rgba(255,255,255,0.5)":"rgba(255,255,255,0.25)";c.font="bold 12px monospace";
+        c.fillText(locName,bx+24,by+46);
         // --- Center: hearts and triforce, vertically centered ---
         const mhp=save.p.mhp||8,hp=save.p.hp||0,hc=mhp/2;
         const tri=save.p.tri||[false,false,false];
@@ -1234,6 +1228,26 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
           c.beginPath();c.moveTo(tx+tsz/2,ty);c.lineTo(tx+tsz,ty+tsz-2);c.lineTo(tx,ty+tsz-2);c.closePath();c.fill();
           if(tri[ti]){const is2=tsz*0.35;c.fillStyle="#ffe866";
             c.beginPath();c.moveTo(tx+tsz/2,ty+4);c.lineTo(tx+tsz/2+is2,ty+tsz-5);c.lineTo(tx+tsz/2-is2,ty+tsz-5);c.closePath();c.fill();}}
+        // Master sword on far right
+        if(save.p.hasMasterSword){const sx=bx+bw-22,sy=by+slotH/2;
+          // Blade
+          c.strokeStyle=sel?"#c0d0ff":"#8090aa";c.lineWidth=2.5;c.lineCap="round";
+          c.beginPath();c.moveTo(sx,sy+14);c.lineTo(sx,sy-14);c.stroke();
+          // Blade shine
+          c.strokeStyle=sel?"rgba(255,255,255,0.6)":"rgba(255,255,255,0.3)";c.lineWidth=1;
+          c.beginPath();c.moveTo(sx,sy+12);c.lineTo(sx,sy-12);c.stroke();
+          // Crossguard
+          c.strokeStyle=sel?"#d4b040":"#8a6a2a";c.lineWidth=2.5;
+          c.beginPath();c.moveTo(sx-6,sy+6);c.lineTo(sx+6,sy+6);c.stroke();
+          // Grip
+          c.strokeStyle=sel?"#6a3a18":"#4a2a10";c.lineWidth=3;
+          c.beginPath();c.moveTo(sx,sy+7);c.lineTo(sx,sy+14);c.stroke();
+          // Pommel
+          c.fillStyle=sel?"#ffd633":"#8a6a2a";c.beginPath();c.arc(sx,sy+15,2,0,Math.PI*2);c.fill();
+          // Tip glow
+          const gl=Math.sin(t/300)*0.3+0.5;
+          c.fillStyle=`rgba(200,220,255,${gl})`;c.beginPath();c.arc(sx,sy-14,2,0,Math.PI*2);c.fill();
+          c.lineCap="butt";}
       }else{
         c.fillStyle=sel?"rgba(255,255,255,0.4)":"rgba(255,255,255,0.15)";c.font="12px monospace";
         c.textAlign="center";c.fillText("- Empty -",bx+bw/2,by+slotH/2+5);c.textAlign="left";
