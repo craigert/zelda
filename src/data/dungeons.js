@@ -177,6 +177,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let x=3;x<=7;x++)m[7][x]=T.WALL;for(let x=8;x<=12;x++)m[9][x]=T.WALL;
     m[4][6]=T.SPIKE;m[4][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][10]=T.SPIKE;m[8][6]=T.SPIKE;m[8][7]=T.SPIKE;
     m[4][10]=T.HEART;m[2][7]=T.TORCH;
+    m[9][12]=T.KEY;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:4,type:"magma_slug"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
   // Upper east — timed switch room
