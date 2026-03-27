@@ -317,8 +317,10 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     // Re-spawn uncollected boss drops when re-entering a cleared boss room
     if(s.loc.ty==="dg"){const di2=s.loc.di;const rm2b=s.dg[di2]?.rooms[s.loc.scr];const boss=rm2b?.enemies?.find(e=>e.type==="boss");
       if(boss&&di2>=0&&di2<3){const bossId=`${di2}:${boss.name}`;const cx=W2/2,cy=H2/2;
-        if(!s.heartContainers.includes(bossId))s.drops.push({x:cx-20,y:cy,vy:0,ground:cy,type:"heartcontainer",t:0,spin:0});
-        if(!s.p.tri[di2])s.drops.push({x:cx+20,y:cy,vy:0,ground:cy,type:"triforce",t:0,spin:0});}}
+        const alreadyHC=s.drops.some(d2=>d2.type==="heartcontainer");
+        const alreadyTF=s.drops.some(d2=>d2.type==="triforce");
+        if(!s.heartContainers.includes(bossId)&&!alreadyHC)s.drops.push({x:cx-20,y:cy,vy:0,ground:cy,type:"heartcontainer",t:0,spin:0,bossId});
+        if(!s.p.tri[di2]&&!alreadyTF)s.drops.push({x:cx+20,y:cy,vy:0,ground:cy,type:"triforce",t:0,spin:0});}}
     return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
@@ -970,7 +972,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
-      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};}
+      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
+        if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
@@ -1290,8 +1293,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(e.type==="boss"){sfx("bossdeath");s.shake.t=600;s.freeze=400;s.bossFight=false;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0},{x:ecx+10,y:ecy-8,vy:-3.5,ground:ecy,type:"bomb",t:0});
         const bossId=`${s.loc.di}:${e.name}`;
-        if(s.loc.di<3&&!s.heartContainers.includes(bossId)){s.heartContainers.push(bossId);
-          s.drops.push({x:W2/2,y:-20,vy:0.4,ground:H2/2,type:"heartcontainer",t:0,spin:0});}
+        if(s.loc.di<3&&!s.heartContainers.includes(bossId)){
+          s.drops.push({x:W2/2,y:-20,vy:0.4,ground:H2/2,type:"heartcontainer",t:0,spin:0,bossId});}
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
