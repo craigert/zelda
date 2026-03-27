@@ -2725,6 +2725,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
       for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
         c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
+  }else if(s.finalDeath){// Hero drawn by finalDeath overlay — skip normal draw
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
@@ -3072,28 +3073,28 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=bg;c.beginPath();c.moveTo(hx-7,hy+9);c.lineTo(hx+7,hy+9);c.lineTo(hx+8,hy+18);c.lineTo(hx-8,hy+18);c.closePath();c.fill();
       // Belt
       c.fillStyle="#8a6a2a";c.fillRect(hx-8,hy+15,16,2);c.fillStyle="#d4b040";c.fillRect(hx-2,hy+15,4,2);
-      // Left arm — raised holding sword
-      const armAng=-0.3-raise*1.1;// swings from side to above head
-      c.save();c.translate(hx-7,hy+10);c.rotate(armAng);
-      c.fillStyle=tL;c.fillRect(-2,-1,4,10);
+      // Left arm — raised holding sword straight up
+      const armAng=-Math.PI/2*raise;// swings from side to straight up
+      c.save();c.translate(hx-5,hy+10);c.rotate(armAng);
+      c.fillStyle=tL;c.fillRect(-2,0,4,10);
       c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
-      // Sword in hand
-      const sLen=18+raise*4;
+      // Sword in hand — extends outward from fist
+      const sLen=20;
       c.strokeStyle=p2.hasMasterSword?"#88ccff":"#c0d8ff";c.lineWidth=3;c.lineCap="round";
-      c.beginPath();c.moveTo(0,10);c.lineTo(0,10+sLen);c.stroke();
+      c.beginPath();c.moveTo(0,11);c.lineTo(0,11+sLen);c.stroke();
       // Blade shine
       c.strokeStyle="rgba(255,255,255,0.5)";c.lineWidth=1.5;
-      c.beginPath();c.moveTo(0.5,12);c.lineTo(0.5,10+sLen-2);c.stroke();
+      c.beginPath();c.moveTo(0.5,13);c.lineTo(0.5,11+sLen-2);c.stroke();
       // Crossguard
       c.strokeStyle="#d4b040";c.lineWidth=2.5;
-      c.beginPath();c.moveTo(-5,10);c.lineTo(5,10);c.stroke();
+      c.beginPath();c.moveTo(-5,11);c.lineTo(5,11);c.stroke();
       // Glow at tip
       const gl=Math.sin(t/200)*0.3+0.7;
-      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(0,10+sLen,6*raise,0,Math.PI*2);c.fill();
+      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(0,11+sLen,8*raise,0,Math.PI*2);c.fill();
       c.lineCap="butt";c.restore();
       // Right arm — raised in fist
-      c.save();c.translate(hx+7,hy+10);c.rotate(0.3+raise*1.1);
-      c.fillStyle=tL;c.fillRect(-2,-1,4,10);
+      c.save();c.translate(hx+5,hy+10);c.rotate(Math.PI/2*raise);
+      c.fillStyle=tL;c.fillRect(-2,0,4,10);
       c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
       c.restore();
       // Head
@@ -3316,8 +3317,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       {text:"Paul Boren",font:"bold 14px monospace",color:"#ddd",gap:28},
       {text:"Publishing",font:"bold 11px monospace",color:"#888",gap:4},
       {text:"Banana Corp",font:"bold 14px monospace",color:"#fd3",gap:50},
-      {text:"Thank you for playing!",font:"bold 13px monospace",color:"rgba(255,255,255,0.6)",gap:30},
-      {text:"Tab or click to return to title screen",font:"10px monospace",color:"rgba(255,255,255,0.3)",gap:0},
+      {text:"Thank you for playing!",font:"bold 13px monospace",color:"rgba(255,255,255,0.6)",gap:0},
     ];
     const scrollSpeed=0.025;// pixels per ms
     const scrollStart=3000;// ms before credits start scrolling
@@ -3336,6 +3336,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       }
       cy+=cr.gap+(cr.font.includes("22")?0:14);
     }
+    // "The End" + blinking return message after credits scroll past
+    const totalH=credits.reduce((a,cr)=>a+cr.gap+(cr.font.includes("22")?0:14),0);
+    const creditsEnd=scrollStart+(FH+40+totalH)/scrollSpeed;
+    if(et>creditsEnd){
+      c.fillStyle="#fd3";c.font="bold 24px monospace";c.fillText("The End",W2/2,FH*0.42);
+      c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-60,FH*0.42+6,120,1);
+      // Blinking return message
+      if(Math.floor(et/600)%2===0){
+        c.fillStyle="rgba(255,255,255,0.5)";c.font="10px monospace";
+        c.fillText("Press Tab or click to return to title screen",W2/2,FH*0.55);}}
     c.textAlign="left";
   }else if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("Tap to play again",W2/2,FH2/2+25);c.textAlign="left";}}
 
