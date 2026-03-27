@@ -512,10 +512,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;}
     return;}
   // Final boss death cinematic — slow-mo death, hero celebration, fade to end
-  if(s.finalDeath){const fd=s.finalDeath;fd.t+=dt*0.6;// slow-mo (60% speed)
+  if(s.finalDeath){const fd=s.finalDeath;fd.t+=dt*0.4;// slow-mo (40% speed)
     fd.flash=Math.sin(fd.t/80)*0.5+0.5;// boss flashing
-    if(fd.t>1000)fd.fallY=Math.min(20,(fd.t-1000)*0.02);// boss sinks
-    if(fd.t>1800)fd.heroRaise=Math.min(1,(fd.t-1800)/800);// hero raises sword
+    if(fd.t>1500)fd.fallY=Math.min(20,(fd.t-1500)*0.015);// boss sinks
+    if(fd.t>2500)fd.heroRaise=Math.min(1,(fd.t-2500)/800);// hero raises sword
     if(fd.t>3500)fd.fadeAlpha=Math.min(1,(fd.t-3500)/1500);// fade to black
     // Particles from dying boss
     if(fd.t<2500&&Math.random()<0.3){s.pt.push({x:fd.bx+(Math.random()-.5)*20,y:fd.by-fd.fallY+(Math.random()-.5)*20,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:600,c:Math.random()>.5?"#f0f":"#fd3"});}
