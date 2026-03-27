@@ -451,7 +451,7 @@ function cTr(s){const p=s.p,loc=s.loc;
                 {tx:3,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
                 {tx:6,ty:7,name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;},collected:false},
                 {tx:9,ty:7,name:"Lantern",cost:30,once:"hasLantern",action:s2=>{s2.hasLantern=true;},collected:false},
-                {tx:12,ty:7,name:"Shield+",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
+                {tx:12,ty:7,name:"Mirror Shield",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
               ];
               if(s.p.hasBanana&&!s.p.redArmor){
                 s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:100,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});

@@ -407,12 +407,11 @@ function drawPaperDoll(c,s,t){
         c.fillStyle="#8a6830";c.fillRect(cx-3,cy+3,7,3);
       }
     }},
-    {x:pcx-48,y:pcy-20,label:"SHIELD",has:s.p.shield||s.hasShieldUp,draw:(cx,cy)=>{
-      if(s.p.shield||s.hasShieldUp){
-        const col=s.hasShieldUp?"#4488ff":"#4466aa";
-        c.fillStyle=col;c.beginPath();c.moveTo(cx,cy-7);c.lineTo(cx+6,cy-3);c.lineTo(cx+5,cy+5);c.lineTo(cx,cy+8);c.lineTo(cx-5,cy+5);c.lineTo(cx-6,cy-3);c.closePath();c.fill();
+    {x:pcx-48,y:pcy-20,label:"M.SHIELD",has:s.hasShieldUp,draw:(cx,cy)=>{
+      if(s.hasShieldUp){
+        c.fillStyle="#4488ff";c.beginPath();c.moveTo(cx,cy-7);c.lineTo(cx+6,cy-3);c.lineTo(cx+5,cy+5);c.lineTo(cx,cy+8);c.lineTo(cx-5,cy+5);c.lineTo(cx-6,cy-3);c.closePath();c.fill();
         c.strokeStyle="#fd3";c.lineWidth=1;c.stroke();
-        if(s.hasShieldUp){c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-2);c.lineTo(cx+3,cy+3);c.lineTo(cx-3,cy+3);c.closePath();c.fill();}
+        c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-2);c.lineTo(cx+3,cy+3);c.lineTo(cx-3,cy+3);c.closePath();c.fill();
       }else{
         c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx+5,cy-2);c.lineTo(cx+4,cy+4);c.lineTo(cx,cy+7);c.lineTo(cx-4,cy+4);c.lineTo(cx-5,cy-2);c.closePath();c.stroke();
         c.fillStyle="#444";c.font="bold 8px monospace";c.textAlign="center";c.fillText("?",cx,cy+3);c.textAlign="left";
@@ -465,14 +464,13 @@ function drawEquipGrid(c,s,t){
     {name:"Sword",has:true,draw:(cx,cy)=>{c.fillStyle="#b8b8c8";c.fillRect(cx-1,cy-6,3,10);c.fillStyle="#8a6830";c.fillRect(cx-3,cy+3,7,2);}},
     {name:"Bow",has:s.p.hasBow,draw:(cx,cy)=>{c.strokeStyle=s.p.hasBow?"#8a6a2a":"#444";c.lineWidth=1.5;c.beginPath();c.arc(cx+1,cy,5,Math.PI*0.7,Math.PI*1.3);c.stroke();}},
     {name:"Bombs",has:s.p.hasBombs,draw:(cx,cy)=>{const col=s.p.hasBombs?"#88f":"#444";c.fillStyle=col;c.beginPath();c.arc(cx,cy+1,4,0,Math.PI*2);c.fill();}},
-    {name:"Shield",has:s.p.shield,draw:(cx,cy)=>{const col=s.p.shield?"#4466aa":"#444";c.fillStyle=col;c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();}},
     {name:"Lantern",has:s.hasLantern,draw:(cx,cy)=>{if(s.hasLantern){c.fillStyle="#fa3";c.beginPath();c.arc(cx,cy-2,3,0,Math.PI*2);c.fill();c.fillStyle="#8a6a2a";c.fillRect(cx-2,cy+1,4,5);}else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.arc(cx,cy-2,3,0,Math.PI*2);c.stroke();c.strokeRect(cx-2,cy+1,4,5);}}},
     {name:s.p.redArmor?"Red Armor":s.p.hasBanana?"Banana":"Armor",has:s.p.redArmor||s.p.hasBanana,draw:(cx,cy)=>{
       if(s.p.redArmor){c.fillStyle="#cc3333";c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.fill();}
       else if(s.p.hasBanana){c.fillStyle="#fd3";c.beginPath();c.arc(cx,cy,5,0.3,Math.PI-0.3);c.lineWidth=3;c.strokeStyle="#fa0";c.stroke();c.fillStyle="#e8b020";c.beginPath();c.arc(cx,cy,4,0.4,Math.PI-0.4);c.fill();}
       else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.stroke();}}},
     {name:"M.Sword",has:s.p.hasMasterSword,draw:(cx,cy)=>{if(s.p.hasMasterSword){c.fillStyle="#88ccff";c.fillRect(cx-1,cy-6,3,10);c.fillStyle="#ffd633";c.fillRect(cx-3,cy+3,7,2);c.fillStyle="rgba(136,204,255,0.3)";c.beginPath();c.arc(cx,cy,8,0,Math.PI*2);c.fill();}else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx,cy+4);c.stroke();c.beginPath();c.moveTo(cx-3,cy+3);c.lineTo(cx+3,cy+3);c.stroke();}}},
-    {name:"Shield+",has:s.hasShieldUp,draw:(cx,cy)=>{c.fillStyle=s.hasShieldUp?"#4488ff":"#444";c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();if(s.hasShieldUp){c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-1);c.lineTo(cx+2,cy+3);c.lineTo(cx-2,cy+3);c.closePath();c.fill();}}},
+    {name:"M.Shield",has:s.hasShieldUp,draw:(cx,cy)=>{c.fillStyle=s.hasShieldUp?"#4488ff":"#444";c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();if(s.hasShieldUp){c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-1);c.lineTo(cx+2,cy+3);c.lineTo(cx-2,cy+3);c.closePath();c.fill();}}},
     {name:"Jar",has:s.hasJar,draw:(cx,cy)=>{
       const col=s.hasJar?"#6a9abc":"#444";c.fillStyle=col;
       c.beginPath();c.moveTo(cx-4,cy-4);c.quadraticCurveTo(cx-5,cy+2,cx-3,cy+5);c.lineTo(cx+3,cy+5);c.quadraticCurveTo(cx+5,cy+2,cx+4,cy-4);c.closePath();c.fill();
