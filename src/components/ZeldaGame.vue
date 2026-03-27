@@ -568,8 +568,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(ss.onLadder){
       if(upKey)p.y-=hspd*0.8;if(downKey)p.y+=hspd*0.8;
       ss.vy=0;
-      // Exit check — at top of ladder near left or right edge
-      if(upKey&&p.y<2*TL){
+      // Exit check — at top of any ladder (within 1 tile of ladder top)
+      let atLadderTop=false;
+      for(const[lx,ly]of psg.ladders){if(Math.abs(pcx-(lx*TL+TL/2))<TL&&p.y<=ly*TL+TL/2){atLadderTop=true;break;}}
+      if(upKey&&atLadderTop){
         const isLeft=p.x<W2/2;
         const exit=isLeft?psg.exitL:psg.exitR;
         s.fade={a:true,alpha:0,dir:1,t:0,spd:400,cb:()=>{
