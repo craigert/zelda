@@ -629,7 +629,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.4;if(Math.abs(d2.vy)<0.3)d2.vy=0;}
       if(Math.abs(pcx-d2.x)<14&&Math.abs(pcy-d2.y)<14){
         if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
-        else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");}
+        else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+1",c:"#4f4"});}
+        else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+5",c:"#44f"});}
+        else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
         s.drops.splice(i,1);continue;}
       if(d2.t>6000)s.drops.splice(i,1);}
     // Particles & damage numbers
