@@ -143,6 +143,7 @@ function init() {
     bossWarps:[], // persistent: [{di,bossScr,bossX,bossY,entryScr}] — cleared dungeon portals
     pushAnim:null, // {fx,fy,tx,ty,t,dur,reveal,rx,ry,isDg} — smooth block slide
     endScreen:null, // {t:0} end credits cinematic
+    finalDeath:null, // {t,dur,bx,by,flash,fallY,fadeAlpha} — final boss death cinematic
   };
 }
 
@@ -506,6 +507,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.respawnTimers[rk2]<=0){s.cl.delete(rk2);delete s.respawnTimers[rk2];}}}
   // End screen cinematic — just advance timer
   if(s.endScreen){s.endScreen.t+=dt;return;}
+  // Final boss death cinematic — slow-mo death, hero celebration, fade to end
+  if(s.finalDeath){const fd=s.finalDeath;fd.t+=dt*0.4;// slow-mo (40% speed)
+    fd.flash=Math.sin(fd.t/80)*0.5+0.5;// boss flashing
+    if(fd.t>1500)fd.fallY=Math.min(20,(fd.t-1500)*0.015);// boss sinks
+    if(fd.t>2500)fd.heroRaise=Math.min(1,(fd.t-2500)/800);// hero raises sword
+    if(fd.t>3500)fd.fadeAlpha=Math.min(1,(fd.t-3500)/1500);// fade to black
+    // Particles from dying boss
+    if(fd.t<2500&&Math.random()<0.3){s.pt.push({x:fd.bx+(Math.random()-.5)*20,y:fd.by-fd.fallY+(Math.random()-.5)*20,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:600,c:Math.random()>.5?"#f0f":"#fd3"});}
+    // Transition to end screen
+    if(fd.t>=fd.dur){s.won=true;s.endScreen={t:0};s.finalDeath=null;}
+    // Still update particles
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    return;}
   // Freeze gameplay during chest presentation
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
@@ -1379,7 +1393,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
-        if(s.loc.di===3){s.won=true;s.endScreen={t:0};s.msg={text:"",t:0};}
+        if(s.loc.di===3){s.finalDeath={t:0,dur:5000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
         // Spawn warp portal after boss death (delayed so drops land first)
         if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
           s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
@@ -2860,6 +2874,56 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.textAlign="left";}
   if(s.mapOpen){drawInventoryScreen(c,s,t);}
   if(s.go){c.fillStyle="rgba(10,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#e33";c.font="bold 36px monospace";c.textAlign="center";c.fillText("GAME OVER",W2/2,FH2/2-20);c.fillStyle="#ccc";c.font="16px monospace";c.fillText("Tap to respawn",W2/2,FH2/2+25);c.textAlign="left";}
+  // Final boss death cinematic overlay
+  if(s.finalDeath){const fd=s.finalDeath,p2=s.p;
+    // Darken screen edges (vignette)
+    const vig=c.createRadialGradient(W2/2,H2/2,H2*0.2,W2/2,H2/2,H2*0.7);
+    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(1,"rgba(0,0,0,0.6)");
+    c.fillStyle=vig;c.fillRect(0,0,W2,FH2);
+    // Boss — flashing and sinking
+    if(fd.t<3000){
+      const bAlpha=fd.t>2200?1-(fd.t-2200)/800:1;
+      c.globalAlpha=bAlpha;
+      // Flash between white and dark
+      const fc=fd.flash>0.5?"rgba(255,255,255,0.7)":"rgba(150,0,150,0.5)";
+      c.fillStyle=fc;c.beginPath();c.ellipse(fd.bx,fd.by+fd.fallY,14,12-fd.fallY*0.3,0,0,Math.PI*2);c.fill();
+      // Burning red eyes fading
+      if(fd.t<2200){c.fillStyle=`rgba(255,0,0,${bAlpha*0.8})`;
+        c.beginPath();c.arc(fd.bx-5,fd.by-4+fd.fallY,2,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(fd.bx+5,fd.by-4+fd.fallY,2,0,Math.PI*2);c.fill();}
+      c.globalAlpha=1;
+      // Disintegration particles
+      if(fd.t>1800){const intensity=(fd.t-1800)/1200;
+        if(Math.random()<intensity*0.6){s.pt.push({x:fd.bx+(Math.random()-.5)*24,y:fd.by+fd.fallY+(Math.random()-.5)*24,
+          dx:(Math.random()-.5)*3,dy:-Math.random()*3-1,l:800,c:Math.random()>.5?"#f0f":"#fa0"});}}
+    }
+    // Hero raises sword in celebration
+    if(fd.heroRaise>0){const hx=p2.x+PS/2,hy=p2.y;
+      const raise=fd.heroRaise;
+      // Sword held above head
+      const swordY=hy-8-raise*20;
+      c.strokeStyle="#c0d8ff";c.lineWidth=3;c.lineCap="round";
+      c.beginPath();c.moveTo(hx+2,hy-4);c.lineTo(hx+2,swordY);c.stroke();
+      // Blade shine
+      c.strokeStyle="rgba(255,255,255,0.6)";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(hx+2.5,hy-6);c.lineTo(hx+2.5,swordY+2);c.stroke();
+      // Crossguard
+      c.strokeStyle="#d4b040";c.lineWidth=2.5;
+      c.beginPath();c.moveTo(hx-5,hy-4);c.lineTo(hx+9,hy-4);c.stroke();
+      // Glow at tip
+      const gl=Math.sin(t/200)*0.3+0.7;
+      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(hx+2,swordY,8*raise,0,Math.PI*2);c.fill();
+      c.lineCap="butt";
+    }
+    // Fade to black
+    if(fd.fadeAlpha>0){c.fillStyle=`rgba(0,0,0,${fd.fadeAlpha})`;c.fillRect(0,0,W2,FH2);}
+    // "DARK KING DEFEATED" text
+    if(fd.t>1000&&fd.t<3500){const ta=fd.t<1500?(fd.t-1000)/500:fd.t>3000?1-(fd.t-3000)/500:1;
+      c.globalAlpha=ta;c.textAlign="center";c.fillStyle="#fd3";c.font="bold 16px monospace";
+      c.fillText("DARK KING DEFEATED",W2/2,H2*0.2);
+      c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-90,H2*0.2+4,180,1);
+      c.textAlign="left";c.globalAlpha=1;}
+  }
   if(s.won&&s.endScreen){const es=s.endScreen,et=es.t;
     const FH=FH2;
     // Fade in from white
