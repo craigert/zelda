@@ -407,6 +407,7 @@ function cTr(s){const p=s.p,loc=s.loc;
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);
             if(cv.shop){s.shop={sel:0,items:[
+              {name:"Key",cost:20,req:null,action:s2=>{s2.p.keys++;}},
               {name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;}},
               {name:"Lantern",cost:30,req:null,once:"hasLantern",action:s2=>{s2.hasLantern=true;}},
               {name:"Shield+",cost:50,req:null,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;}},
