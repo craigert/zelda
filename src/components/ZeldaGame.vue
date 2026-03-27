@@ -1767,8 +1767,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalTorches++;const lit=isDkRm?s.litTorches.has(`${x},${y}`):true;torches.push([x*TL+16,y*TL+16,lit]);}
     // Lit torches glow
     for(const[tx2,ty2,lit]of torches){if(!lit)continue;
-      const flk=Math.sin(t/200+tx2)*0.08+Math.sin(t/130+ty2)*0.05;
-      const r2=90+Math.sin(t/180+tx2*0.1)*15;
+      const ts2=tx2*0.37+ty2*0.53;// per-torch seed
+      const flk=Math.sin(t/197+ts2)*0.06+Math.sin(t/131+ts2*1.3)*0.04+Math.sin(t/67+ts2*0.7)*0.03;
+      const r2=85+Math.sin(t/173+ts2)*12+Math.sin(t/97+ts2*1.4)*8;
       const tg=c.createRadialGradient(tx2,ty2,4,tx2,ty2,r2);
       tg.addColorStop(0,`rgba(255,200,100,${0.18+flk})`);tg.addColorStop(0.5,`rgba(255,150,50,${0.06+flk*0.3})`);tg.addColorStop(1,"rgba(255,100,30,0)");
       c.fillStyle=tg;c.fillRect(tx2-r2,ty2-r2,r2*2,r2*2);}}

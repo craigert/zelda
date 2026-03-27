@@ -1036,10 +1036,39 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
         c.fillStyle="#aa3333";c.beginPath();c.arc(px+20,py+18,5,Math.PI,0);c.fill();
         c.fillStyle="#fff";c.fillRect(px+8,py+13,2,2);c.fillRect(px+12,py+12,2,2);c.fillRect(px+19,py+15,2,2);
       }break;}
-    case T.TORCH:{c.fillStyle=iD?(dg.fc||dg.color):"#8b7355";c.fillRect(px,py,TL,TL);c.fillStyle="#5a3818";c.fillRect(px+13,py+12,6,18);
-      const flicker=Math.sin(t/100)*2;const fg2=Math.sin(t/80)*0.15+0.35;
-      c.fillStyle=`rgba(255,150,30,${fg2})`;c.beginPath();c.arc(px+16,py+10,10,0,Math.PI*2);c.fill();
-      c.fillStyle="#ff8820";c.fillRect(px+12+flicker,py+4,8,10);c.fillStyle="#ffcc44";c.fillRect(px+13+flicker,py+6,6,6);c.fillStyle="#ffe888";c.fillRect(px+14+flicker*.5,py+7,4,4);break;}
+    case T.TORCH:{c.fillStyle=iD?(dg.fc||dg.color):"#8b7355";c.fillRect(px,py,TL,TL);
+      // Torch post with bracket
+      c.fillStyle="#4a2a10";c.fillRect(px+14,py+14,4,18);
+      c.fillStyle="#5a3818";c.fillRect(px+13,py+12,6,16);
+      c.fillStyle="#6a4820";c.fillRect(px+12,py+11,8,3);// bracket top
+      // Per-torch seed for unique flicker pattern
+      const ts=hs(px,py,42)*1000;
+      const f1=Math.sin(t/97+ts)*1.8,f2=Math.sin(t/63+ts*1.3)*1.2,f3=Math.sin(t/41+ts*0.7)*0.8;
+      const flicker=f1+f2*0.5+f3*0.3;
+      const bright=0.3+Math.sin(t/83+ts)*0.1+Math.sin(t/127+ts*1.5)*0.08+Math.sin(t/37+ts*0.4)*0.12;
+      const sz=8+Math.sin(t/71+ts)*1.5+Math.sin(t/113+ts*1.2)*1;
+      // Outer glow
+      c.fillStyle=`rgba(255,140,20,${bright*0.6})`;c.beginPath();c.arc(px+16+flicker*0.3,py+9,sz+4,0,Math.PI*2);c.fill();
+      // Flame body — irregular shape
+      c.fillStyle="#ff7710";c.beginPath();
+      c.moveTo(px+16+flicker,py+2+f3);
+      c.quadraticCurveTo(px+21+f2,py+6,px+20+f1*0.5,py+12);
+      c.lineTo(px+12-f1*0.5,py+12);
+      c.quadraticCurveTo(px+11-f2,py+6,px+16+flicker,py+2+f3);c.fill();
+      // Inner flame — brighter, smaller
+      c.fillStyle="#ffaa30";c.beginPath();
+      c.moveTo(px+16+flicker*0.7,py+4+f3*0.5);
+      c.quadraticCurveTo(px+19+f2*0.5,py+7,px+18+f1*0.3,py+11);
+      c.lineTo(px+14-f1*0.3,py+11);
+      c.quadraticCurveTo(px+13-f2*0.5,py+7,px+16+flicker*0.7,py+4+f3*0.5);c.fill();
+      // Core — hottest part
+      c.fillStyle="#ffe860";c.beginPath();
+      c.ellipse(px+16+flicker*0.4,py+8+f3*0.3,2.5+f2*0.3,3.5+f1*0.2,0,0,Math.PI*2);c.fill();
+      // Sparks — occasional random embers rising
+      const sparkPhase=(t+ts)%800;
+      if(sparkPhase<400){const sy2=py+2-sparkPhase*0.015,sx2=px+16+Math.sin(sparkPhase/60+ts)*4;
+        c.fillStyle=`rgba(255,200,60,${0.7-sparkPhase/600})`;c.beginPath();c.arc(sx2,sy2,0.8,0,Math.PI*2);c.fill();}
+      break;}
     case T.CRACK:{// Cracked wall — looks like wall but with visible cracks
       c.fillStyle=iD?dg.wc:"#4a3728";c.fillRect(px,py,TL,TL);
       c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+8,TL,1);c.fillRect(px,py+16,TL,1);c.fillRect(px,py+24,TL,1);
