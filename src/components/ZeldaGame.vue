@@ -824,7 +824,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(m2[yy][xx]===T.SPIKE){hasSpikes=true;spikePos.push([xx,yy]);
             m2[yy][xx]=T.FLOOR;
             s.pt.push({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:300,c:"#aaa"});}}
-        s.msg={text:hasDoors?"Timed switch! Hurry!":hasSpikes?"Spikes retracted! Hurry!":"Switch activated!",t:1500};
+        if(hasDoors||hasSpikes)s.msg={text:hasDoors?"Timed switch! Hurry!":"Spikes retracted! Hurry!",t:1500};
         s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,spikes:spikePos});}}}
   for(let i=s.timedDoors.length-1;i>=0;i--){const td=s.timedDoors[i];td.t-=dt;
     if(td.t<=0){
