@@ -313,7 +313,13 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
     if(rm2?.traps)s.bladeTraps=rm2.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
-  if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+  if(s.cl.has(rk)){s.en=[];s.combatLock=false;
+    // Re-spawn uncollected boss drops when re-entering a cleared boss room
+    if(s.loc.ty==="dg"){const di2=s.loc.di;const rm2b=s.dg[di2]?.rooms[s.loc.scr];const boss=rm2b?.enemies?.find(e=>e.type==="boss");
+      if(boss&&di2>=0&&di2<3){const bossId=`${di2}:${boss.name}`;const cx=W2/2,cy=H2/2;
+        if(!s.heartContainers.includes(bossId))s.drops.push({x:cx-20,y:cy,vy:0,ground:cy,type:"heartcontainer",t:0,spin:0});
+        if(!s.p.tri[di2])s.drops.push({x:cx+20,y:cy,vy:0,ground:cy,type:"triforce",t:0,spin:0});}}
+    return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
