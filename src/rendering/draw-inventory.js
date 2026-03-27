@@ -566,7 +566,7 @@ function drawTriforceAndHearts(c,s,t){
   if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",leftCx,cy+triS+40);}
 
   // ===== HEART PIECES (right, same scale as triforce) =====
-  const hsz=42,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
+  const hsz=58,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
   const hp=s.p.heartPieces;
   // Glow
   const hglow=Math.sin(t/800)*0.06+0.1;
