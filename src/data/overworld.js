@@ -96,14 +96,15 @@ export const OW={
   m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
   m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
   m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
-  // Rocky ring around heart piece
+  // Rocky ring around heart piece — one pushable boulder to enter
   m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
   m[5][6]=T.ROCK;m[5][9]=T.ROCK;
   m[6][6]=T.ROCK;m[6][9]=T.ROCK;
-  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[7][9]=T.ROCK;
-  // Heart piece at the peak, one gap to reach it
+  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][9]=T.ROCK;
+  m[7][8]=T.PUSH;// Push this boulder south to open a gap into the ring
+  // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
-  // Path to the gap
+  // Path leading to the pushable boulder
   m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
   // Hidden banana cave entrance
