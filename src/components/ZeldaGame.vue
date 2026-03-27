@@ -325,20 +325,25 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   if(ty<0){return SOLID.has(gts(s,`${sx},${sy-1}`,tx,RO+ty));}
   if(ty>=RO){return SOLID.has(gts(s,`${sx},${sy+1}`,tx,ty-RO));}
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
-  // Ledge tiles -- one-way passage (solid from wrong direction)
+  // Ledge tiles -- one-way drop (solid wall unless dropping in the correct direction)
   if(tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W){
-    // Ladders let you pass through ledges — check if player is on or adjacent to a ladder
     const ptx2=Math.floor((s.p.x+PS/2)/TL),pty2=Math.floor((s.p.y+PS/2)/TL);
-    let nearLadder=false;
-    if(m){for(let dy2=-1;dy2<=1;dy2++)for(let dx2=-1;dx2<=1;dx2++){
-      const lx=ptx2+dx2,ly=pty2+dy2;
-      if(ly>=0&&ly<RO&&lx>=0&&lx<CO&&m[ly][lx]===T.LADDER){nearLadder=true;break;}
-    }if(nearLadder)nearLadder=true;}
-    if(!nearLadder){const md=s._moveDir||0;
-      if(tl===T.LEDGE_S&&md!==2)return true;
-      if(tl===T.LEDGE_N&&md!==0)return true;
-      if(tl===T.LEDGE_E&&md!==1)return true;
-      if(tl===T.LEDGE_W&&md!==3)return true;}
+    // Check if player is currently ON a ladder tile — ladders let you climb through the adjacent ledge
+    const onLadder=m&&ptx2>=0&&ptx2<CO&&pty2>=0&&pty2<RO&&m[pty2][ptx2]===T.LADDER;
+    if(onLadder){
+      // Only pass through the ledge directly adjacent to this ladder
+      const ldx=tx-ptx2,ldy=ty-pty2;
+      if(Math.abs(ldx)+Math.abs(ldy)<=1)return false; // adjacent ledge — passable
+    }
+    // Check if player is on LOW_FLOOR — ledges are solid walls from below (can't jump back out)
+    const onLowFloor=m&&ptx2>=0&&ptx2<CO&&pty2>=0&&pty2<RO&&m[pty2][ptx2]===T.LOW_FLOOR;
+    if(onLowFloor)return true; // trapped in lower area, use ladder
+    // Normal one-way: only passable in the drop direction
+    const md=s._moveDir??0;
+    if(tl===T.LEDGE_S&&md!==2)return true;
+    if(tl===T.LEDGE_N&&md!==0)return true;
+    if(tl===T.LEDGE_E&&md!==1)return true;
+    if(tl===T.LEDGE_W&&md!==3)return true;
   }
   if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
