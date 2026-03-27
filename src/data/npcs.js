@@ -76,4 +76,12 @@ export const NPC_DATA = {
       "Stay on the path!"
     ]},
   ],
+  "2,2": [
+    { tx: 6, ty: 5, name: "Sign", fixed: true, lines: [
+      "~ HEALING SPRING ~",
+      "Wade into the warm waters",
+      "to restore your health.",
+      "Cures burns, poison & frost."
+    ]},
+  ],
 };

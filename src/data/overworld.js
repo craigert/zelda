@@ -381,19 +381,14 @@ export const OW={
 // Beach — sand and water coast
 "2,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
   for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
-  // Coastal water on south and east
-  for(let r=7;r<=10;r++)for(let c=1;c<=14;c++)m[r][c]=T.WATER;
+  // Healing hot spring — all water is walkable hot spring
+  for(let r=7;r<=10;r++)for(let c=1;c<=14;c++)m[r][c]=T.HOT_SPRING;
   // Beach sand strip
   for(let c=1;c<=14;c++){m[6][c]=T.SAND;}
-  // Bridge across water
-  m[7][7]=T.BRIDGE;m[7][8]=T.BRIDGE;m[8][7]=T.BRIDGE;m[8][8]=T.BRIDGE;
-  m[3][9]=T.TALLGRASS;m[4][6]=T.FLOWER;m[5][11]=T.STUMP;
+  // Dock/bridge into the spring
+  m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[7][7]=T.BRIDGE;m[7][8]=T.BRIDGE;
+  m[3][9]=T.TALLGRASS;m[4][6]=T.FLOWER;m[5][4]=T.BUSH;m[5][11]=T.STUMP;
   m[2][7]=T.PATH;m[2][8]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;
-  // Hot spring pool — surrounded by rocks
-  m[2][2]=T.ROCK;m[2][3]=T.ROCK;m[2][4]=T.ROCK;m[2][5]=T.ROCK;
-  m[5][2]=T.ROCK;m[5][3]=T.ROCK;m[5][4]=T.ROCK;m[5][5]=T.ROCK;
-  m[3][2]=T.ROCK;m[4][2]=T.ROCK;m[3][5]=T.ROCK;m[4][5]=T.ROCK;
-  m[3][3]=T.HOT_SPRING;m[3][4]=T.HOT_SPRING;m[4][3]=T.HOT_SPRING;m[4][4]=T.HOT_SPRING;
   oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"E",T.SAND);return m;})(),
 
 // D3 Dark Sanctum — final gate (ROCK blocks entrance, opened by game code)
