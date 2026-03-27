@@ -872,7 +872,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
       else if(d2.type==="key_drop"){p.keys++;sfx("itemget");s.msg={text:"Got a key!",t:1500};
         s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
-      else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.msg={text:`+1 Rupee (${p.rupees} total)`,t:800};s.dmgNums.push({x:d2.x,y:d2.y-8,t:800,val:"+1",c:"#4f4"});}
+      else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:d2.x,y:d2.y-8,t:800,val:"+1",c:"#4f4"});}
       else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+5",c:"#44f"});}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+10",c:"#a4f"});}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+20",c:"#f44"});}
