@@ -333,7 +333,8 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
-  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
+  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];
+    if(rm?.sign)s.msg={text:rm.sign,t:3000};}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Boss intro -- cinematic sequence if room has a boss
@@ -879,9 +880,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.ty==="ow")s.freeze=pushDur;
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){s.shake.t=200;
-          // Check if room has stairsReveal — if so, reveal STAIRS_DOWN instead of key
+          // Check if room has stairsReveal (but not squarePuzzle — those handle it separately)
           const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
-          if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
+          if(roomD3?.squarePuzzle){/* handled after animation */}
+          else if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
             m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"A stairway appeared!",t:2000};
             s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
           }else{sfx("pickup");s.msg={text:"A key appeared!",t:1500};
@@ -921,6 +923,14 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         }
       }
       s.pushCd=false;s.pushAnim=null;
+      // Square puzzle: check if all plate positions have ROCK on them (pushed blocks)
+      if(m3&&s.loc.ty==="dg"){const roomD5=s.dg[s.loc.di]?.rooms[s.loc.scr];
+        if(roomD5?.squarePuzzle&&roomD5?.stairsReveal&&roomD5?.squarePlates&&!s._squareSolved){
+          const allFilled=roomD5.squarePlates.every(([px2,py2])=>m3[py2][px2]===T.ROCK);
+          if(allFilled){s._squareSolved=true;
+            const[srx,sry]=roomD5.stairsReveal;m3[sry][srx]=T.STAIRS_DOWN;
+            sfx("secret");s.shake.t=500;s.msg={text:"The square is complete! A stairway appeared!",t:2500};
+            s.pt.push(...Array.from({length:20},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:1000,c:Math.random()>.5?"#fa0":"#fd3"})));}}}
     }
   }
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);

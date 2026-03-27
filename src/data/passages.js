@@ -68,13 +68,13 @@ export const PASSAGES = [
       { x: 11*TL, y: 5*TL, hp: 4, type: "ghost" },
     ],
   },
-  { // D3 Dark Sanctum: far east to far west bridge
-    // "2,-1" (east dead-end) ↔ "-2,-1" (west dead-end)
+  { // D3 Dark Sanctum: puzzle room to shadow vault
+    // "1,-1" (four corners puzzle) ↔ "-2,-1" (shadow corridor with master key)
     di: 3,
-    from: { scr: "2,-1", tile: [12, 9] },
-    to:   { scr: "-2,-1", tile: [3, 9] },
-    exitL: { scr: "2,-1", px: 12*TL, py: 8*TL },
-    exitR: { scr: "-2,-1", px: 3*TL, py: 8*TL },
+    from: { scr: "1,-1", tile: [7, 9] },
+    to:   { scr: "-2,-1", tile: [2, 9] },
+    exitL: { scr: "1,-1", px: 7*TL, py: 8*TL },
+    exitR: { scr: "-2,-1", px: 2*TL, py: 8*TL },
     platforms: [
       [2, 10, 4],    // left ground
       [10, 10, 4],   // right ground
