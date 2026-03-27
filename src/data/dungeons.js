@@ -484,27 +484,24 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"knight"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
 
-  // BOSS ROOM — Shadow Lord (checkerboard pit + floor islands)
+  // BOSS ROOM — Shadow Lord (pit border with open center arena)
   "-1,-4":{tiles:mr(m=>{
     m[RO-1][7]=T.BOSS_DOOR;m[RO-1][8]=T.BOSS_DOOR;
-    // Checkerboard PIT pattern
-    for(let y=2;y<=9;y++)for(let x=2;x<=13;x++){
-      if((x+y)%2===0)m[y][x]=T.PIT;
-    }
-    // Floor islands (larger platforms)
-    for(let y=3;y<=4;y++)for(let x=4;x<=5;x++)m[y][x]=T.FLOOR;
-    for(let y=3;y<=4;y++)for(let x=10;x<=11;x++)m[y][x]=T.FLOOR;
-    for(let y=7;y<=8;y++)for(let x=4;x<=5;x++)m[y][x]=T.FLOOR;
-    for(let y=7;y<=8;y++)for(let x=10;x<=11;x++)m[y][x]=T.FLOOR;
-    for(let y=5;y<=6;y++)for(let x=7;x<=8;x++)m[y][x]=T.FLOOR;
-    // Spike borders
-    m[2][7]=T.SPIKE;m[2][8]=T.SPIKE;m[9][7]=T.SPIKE;m[9][8]=T.SPIKE;
-    m[5][2]=T.SPIKE;m[6][2]=T.SPIKE;m[5][13]=T.SPIKE;m[6][13]=T.SPIKE;
-    // Torches
-    m[3][3]=T.TORCH;m[3][12]=T.TORCH;m[8][3]=T.TORCH;m[8][12]=T.TORCH;
-    // Triforce reward
-    m[2][12]=T.FLOOR;
-  }),enemies:[{x:7.5*TL,y:5*TL,hp:16,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
+    // Pit border ring — dangerous edges but open center for combat
+    for(let x=2;x<=13;x++){m[2][x]=T.PIT;m[9][x]=T.PIT;}
+    for(let y=3;y<=8;y++){m[y][2]=T.PIT;m[y][13]=T.PIT;}
+    // Corner pits for extra danger
+    m[3][3]=T.PIT;m[3][12]=T.PIT;m[8][3]=T.PIT;m[8][12]=T.PIT;
+    // Open arena floor in center (plenty of room to fight and collect drops)
+    for(let y=4;y<=7;y++)for(let x=5;x<=10;x++)m[y][x]=T.FLOOR;
+    for(let y=3;y<=8;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
+    m[3][6]=T.FLOOR;m[3][9]=T.FLOOR;m[8][6]=T.FLOOR;m[8][9]=T.FLOOR;
+    // Spike accents in corners of arena
+    m[3][4]=T.SPIKE;m[3][11]=T.SPIKE;m[8][4]=T.SPIKE;m[8][11]=T.SPIKE;
+    // Torches — eerie purple light
+    m[4][4]=T.TORCH;m[4][11]=T.TORCH;m[7][4]=T.TORCH;m[7][11]=T.TORCH;
+    m[2][7]=T.TORCH;m[9][7]=T.TORCH;
+  }),enemies:[{x:7.5*TL,y:5*TL,hp:18,type:"boss",name:"Shadow Lord",pattern:"teleport"}]},
 }};
 
 // ═══════════════════════════════════════════════════════════════

@@ -1115,13 +1115,33 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.en.push({x:e.x,y:e.y,hp:2,mhp:2,type:"fire_bat",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}
           if(Math.floor(e.mt/1500)!==Math.floor((e.mt-dt)/1500)){
             const fa=Math.atan2(pcy-ecy,pcx-ecx);s.bProj.push({x:ecx,y:ecy,dx:Math.cos(fa)*3,dy:Math.sin(fa)*3,type:"fire",l:1200});sfx("bomb");}
-        }else if(e.pattern==="teleport"){const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
-          if(Math.floor(e.mt/4000)!==Math.floor((e.mt-dt)/4000)){
-            e.x=TL*2+Math.random()*(W2-TL*4);e.y=TL*2+Math.random()*(H2-TL*4);
-            for(let a=0;a<8;a++){const sa=a*Math.PI/4;s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*2,dy:Math.sin(sa)*2,type:"shadow",l:1000});}
-            s.pt.push(...Array.from({length:8},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#a0a0ff"})));sfx("bomb");}
-          if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
-            const sa=Math.atan2(pcy-ecy,pcx-ecx);s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*1.8,dy:Math.sin(sa)*1.8,type:"shadow",l:1500});}
+        }else if(e.pattern==="teleport"){
+          // Shadow Lord phases: 0=solid(hittable,3s), 1=shadow(invulnerable,2.5s), 2=teleport+burst(0.5s)
+          const cycle=6000,ct=e.mt%cycle;
+          if(ct<3000){// Phase 0: Solid — chase player, can be hit
+            e.shadowForm=false;
+            const bsp=es*(1.2+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            // Shoot shadow bolts periodically
+            if(Math.floor(e.mt/1800)!==Math.floor((e.mt-dt)/1800)){
+              const sa=Math.atan2(pcy-ecy,pcx-ecx);s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*2,dy:Math.sin(sa)*2,type:"shadow",l:1500});}
+          }else if(ct<5500){// Phase 1: Shadow form — invulnerable, fast, menacing
+            e.shadowForm=true;
+            const bsp=es*2.2;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            // Rapid shadow bolts in spiral
+            if(Math.floor(e.mt/800)!==Math.floor((e.mt-dt)/800)){
+              for(let a=0;a<4;a++){const sa=e.mt/300+a*Math.PI/2;
+                s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*2.2,dy:Math.sin(sa)*2.2,type:"shadow",l:1200});}
+              sfx("bomb");}
+            // Shadow trail particles
+            s.pt.push({x:ecx+(Math.random()-.5)*10,y:ecy+(Math.random()-.5)*10,dx:(Math.random()-.5)*1.5,dy:(Math.random()-.5)*1.5,l:400,c:"rgba(100,60,180,0.7)"});
+          }else{// Phase 2: Teleport + burst
+            e.shadowForm=false;
+            moveX=0;moveY=0;
+            if(Math.floor(ct/500)!==Math.floor((ct-dt)/500)){
+              e.x=TL*3+Math.random()*(W2-TL*6);e.y=TL*3+Math.random()*(H2-TL*6);
+              for(let a=0;a<8;a++){const sa=a*Math.PI/4;s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*2.5,dy:Math.sin(sa)*2.5,type:"shadow",l:1000});}
+              s.pt.push(...Array.from({length:10},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:500,c:"#a0a0ff"})));sfx("bomb");}
+          }
         }else if(e.pattern==="all"){const phase=Math.floor(e.mt/3000)%4;
           if(phase===0){const bsp=es*2.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
           else if(phase===1){const ca=e.mt/600;moveX=Math.cos(ca)*es*1.5;moveY=Math.sin(ca)*es*1.5;
@@ -1215,6 +1235,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.sw.a){const sOff=SR*0.7,sR2=SR*0.85;let sx2=p.x+PS/2,sy2=p.y+PS/2;if(p.dir===0)sy2-=sOff;if(p.dir===2)sy2+=sOff;if(p.dir===3)sx2-=sOff;if(p.dir===1)sx2+=sOff;
       const sDist=Math.hypot(sx2-ecx,sy2-ecy);
       if(sDist<sR2+ES*0.4&&e.fl<=0){
+        // Shadow form — boss is invulnerable, sword passes through
+        if(e.shadowForm){e.fl=200;
+          s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#606"})));
+          s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"SHADOW!",c:"#a060ff"});
+          continue;}
         if(e.type==="knight"&&e.shieldDir!==undefined){
           const atkAng=Math.atan2(ecy-pcy,ecx-pcx);
           const shieldDiff=Math.abs(((atkAng-e.shieldDir+Math.PI*3)%(Math.PI*2))-Math.PI);
@@ -1297,6 +1322,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(pa.l<=0||pa.x<0||pa.x>W2||pa.y<0||pa.y>H2){s.pArrows.splice(i,1);continue;}
     for(let j=s.en.length-1;j>=0;j--){const e=s.en[j];
       if(Math.hypot(pa.x-(e.x+ES/2),pa.y-(e.y+ES/2))<ES*0.5){
+        // Arrows pass through shadow form
+        if(e.shadowForm){s.pt.push({x:pa.x,y:pa.y,dx:0,dy:-1,l:200,c:"#606"});continue;}
         if(e.type==="knight"&&e.shieldDir!==undefined){
           const atkAng=Math.atan2(pa.dy,pa.dx);
           const shieldDiff=Math.abs(((atkAng-e.shieldDir+Math.PI*3)%(Math.PI*2))-Math.PI);
@@ -1930,7 +1957,17 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.globalAlpha=1;c.restore();continue;}
     const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+3,e.y+ES-1,sz/2+1,4,0.1,0,Math.PI*2);c.fill();
-    if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);else if(e.type==="boss")dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
+    if(e.type==="ghost")dGh(c,ex,ey,sz,fl,t);
+    else if(e.type==="boss"){
+      // Shadow form: translucent purple ghost effect
+      if(e.shadowForm){
+        c.globalAlpha=0.35+Math.sin(t/150)*0.15;
+        c.fillStyle=`rgba(100,40,180,${0.2+Math.sin(t/200)*0.1})`;
+        c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.8,0,Math.PI*2);c.fill();
+      }
+      dBo(c,ex,ey,sz,fl,t,e.hp,e.mhp,loc.di);
+      if(e.shadowForm)c.globalAlpha=1;
+    }
     else if(e.type==="miniboss"){
       // Draw miniboss -- armored skeleton, larger, with HP bar and aura
       const mbPh=Math.floor(e.mt/2500)%3;const charging=mbPh===2;
