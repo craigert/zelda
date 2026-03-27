@@ -355,6 +355,11 @@ export const OW={
   m[4][7]=T.PATH;m[4][8]=T.PATH;
   m[6][4]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[5][11]=T.TALLGRASS;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;
+  // Clear path from entrance south to east exit
+  m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;m[8][11]=T.PATH;
+  m[9][11]=T.PATH;m[9][12]=T.PATH;
+  // Remove blocking trees/water on the escape path
+  m[8][12]=T.PATH;m[9][3]=T.GRASS;
   oe(m,"N");oe(m,"E");return m;})(),
 
 // Southern forest — crack cave
