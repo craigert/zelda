@@ -745,19 +745,28 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         m2[by][bx]=T.PUSH;m2[fty][ftx]=T.FLOOR;
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
-        if(wasPlate){sfx("pickup");s.msg={text:"A key appeared!",t:1500};s.shake.t=200;
-          // Plates spawn a key -- never open locked doors directly
-          m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
+        if(wasPlate){s.shake.t=200;
+          // Check if room has stairsReveal — if so, reveal STAIRS_DOWN instead of key
+          const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+          if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
+            m2[sry][srx]=T.STAIRS_DOWN;sfx("itemget");s.msg={text:"A stairway appeared!",t:2000};
+            s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
+          }else{sfx("pickup");s.msg={text:"A key appeared!",t:1500};
+            m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}
       }}}}
   if(s.sw.a&&s.sw.t>SD*0.5){const m2=gm(s);if(m2&&!s.leverCd){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
     const ftx=pcx+(p.dir===1?1:p.dir===3?-1:0),fty=pcy+(p.dir===0?-1:p.dir===2?1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO&&m2[fty][ftx]===T.LEVER){
       m2[fty][ftx]=T.FLOOR;s.leverCd=true;setTimeout(()=>{if(stR.value)stR.value.leverCd=false;},1000);
-      sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};s.shake.t=200;
+      s.shake.t=200;
       s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#f88"})));
-      // Levers spawn a key -- never open locked doors directly
-      m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}
+      const roomD4=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+      if(roomD4?.stairsReveal){const[srx,sry]=roomD4.stairsReveal;
+        m2[sry][srx]=T.STAIRS_DOWN;sfx("itemget");s.msg={text:"Lever pulled! A stairway appeared!",t:2000};
+        s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
+      }else{sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};
+        m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}
 
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){

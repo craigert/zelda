@@ -25,12 +25,12 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
   }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"archer"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
 
   // East wing upper — lever puzzle room
-  "1,-1":{tiles:mr(m=>{ae(m,["S","E","W"]);
+  "1,-1":{stairsReveal:[13,8],tiles:mr(m=>{ae(m,["S","E","W"]);
     for(let y=2;y<=4;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     for(let y=7;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][6]=T.PUSH;m[5][9]=T.PUSH;
     m[3][7]=T.RUPEE;
-    m[8][13]=T.STAIRS_DOWN;// Underground passage to hidden room
+    m[8][13]=T.PLATE;// Push block onto plate → reveals hidden stairway
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;m[9][2]=T.TORCH;m[9][13]=T.TORCH;
   }),enemies:[{x:6*TL,y:3*TL,hp:3,type:"bat"},{x:9*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
@@ -102,12 +102,19 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
 
   // Secret room (bomb south wall of -1,-2) — treasure cache
   "-1,-1":{tiles:mr(m=>{
-    m[0][5]=T.FLOOR;m[0][6]=T.FLOOR;
-    m[5][7]=T.HEART;m[5][8]=T.HEART;
-    m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
-    m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
-    m[6][7]=T.BOMB;m[6][8]=T.BOMB;
-    m[9][2]=T.STAIRS_DOWN;// Passage back to main dungeon
+    // Walled-off area with key — only reachable via underground passage
+    for(let y=2;y<=9;y++){m[y][6]=T.WALL;} // wall divides room
+    m[5][6]=T.FLOOR;m[6][6]=T.FLOOR; // gap to see through but not reach normally
+    // Left side (passage arrival) — has the key
+    m[5][3]=T.KEY;m[4][3]=T.TORCH;m[7][3]=T.TORCH;
+    m[3][2]=T.RUPEE;m[8][2]=T.RUPEE;m[6][4]=T.HEART;
+    m[9][2]=T.STAIRS_DOWN;// Passage exit back to main dungeon
+    // Right side (visible from bomb entrance but key is unreachable)
+    m[0][9]=T.FLOOR;m[0][10]=T.FLOOR; // bomb entrance from -1,-2
+    m[5][8]=T.HEART;m[5][9]=T.HEART;
+    m[3][10]=T.TORCH;m[8][10]=T.TORCH;
+    m[4][9]=T.RUPEE;m[7][9]=T.RUPEE;
+    m[6][8]=T.BOMB;m[6][9]=T.BOMB;
   }),enemies:[]},
 
   // Northwest passage — Vine Guardian mini-boss guards the Bow
@@ -210,14 +217,14 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
   }),enemies:[{x:3*TL,y:3*TL,hp:3,type:"mage"},{x:12*TL,y:3*TL,hp:3,type:"skeleton"},{x:7*TL,y:8*TL,hp:3,type:"fire_bat"}]},
 
   // East of zigzag — divided chambers with water channel (east of 1,1)
-  "2,1":{tiles:mr(m=>{ae(m,["W"]);
+  "2,1":{stairsReveal:[11,9],tiles:mr(m=>{ae(m,["W"]);
     // Central water channel dividing the room
     for(let y=2;y<=9;y++)m[y][7]=T.WALL;
     m[5][7]=T.FLOOR;m[6][7]=T.FLOOR;
     m[3][4]=T.SPIKE;m[3][10]=T.SPIKE;m[8][4]=T.SPIKE;m[8][10]=T.SPIKE;
     m[5][4]=T.RUPEE;m[6][11]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-    m[9][11]=T.STAIRS_DOWN;// Passage to west wing
+    m[8][12]=T.LEVER;// Hit lever → reveals hidden stairway
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"fire_bat"},{x:11*TL,y:5*TL,hp:4,type:"fire_bat"}]},
 
   // West branch — first locked door with blade traps
@@ -227,7 +234,9 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[7][3]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;m[7][12]=T.SPIKE;
     m[5][13]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;
     m[8][7]=T.KEY;
-    m[9][3]=T.STAIRS_DOWN;// Passage from east wing
+    // Walled-off alcove in bottom-left — reachable only via passage
+    for(let x=1;x<=4;x++)m[8][x]=T.WALL;m[8][2]=T.FLOOR;// gap to peek
+    m[9][2]=T.KEY;m[9][3]=T.STAIRS_DOWN;// Passage arrival + extra key
   }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
   traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:2,dir:"v",range:7}]},
 
@@ -379,18 +388,20 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     for(let y=7;y<=8;y++)for(let x=3;x<=12;x++)m[y][x]=T.PIT;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
     m[5][7]=T.HEART;m[2][7]=T.HEART;
-    m[9][3]=T.STAIRS_DOWN;// Passage from east wing
+    // Walled-off alcove — key only reachable via passage
+    for(let x=1;x<=4;x++)m[9][x]=T.WALL;m[9][2]=T.FLOOR;// small gap to see key
+    m[10][2]=T.KEY;m[10][3]=T.STAIRS_DOWN;// Passage arrival + key
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}]},
 
   // East of north — spike corridor with key
-  "1,-1":{tiles:mr(m=>{ae(m,["W"]);
+  "1,-1":{stairsReveal:[12,7],tiles:mr(m=>{ae(m,["W"]);
     for(let y=2;y<=3;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
     for(let y=8;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
     m[5][4]=T.SPIKE;m[5][6]=T.SPIKE;m[5][8]=T.SPIKE;m[5][10]=T.SPIKE;m[5][12]=T.SPIKE;
     m[6][3]=T.SPIKE;m[6][5]=T.SPIKE;m[6][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][11]=T.SPIKE;
     m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-    m[7][12]=T.STAIRS_DOWN;// Passage to far west wing
+    m[7][12]=T.PUSH;m[7][13]=T.PLATE;// Push block onto plate → reveals stairway
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
   traps:[{x:3,y:5,dir:"h",range:8},{x:8,y:2,dir:"v",range:7}]},
 
@@ -526,8 +537,8 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
     m[7][4]=T.TORCH;m[7][11]=T.TORCH;
-    m[9][12]=T.STAIRS_DOWN;// Passage to far west wing
-  }),enemies:[{x:7*TL,y:4*TL,hp:8,type:"ghost"},{x:7*TL,y:7*TL,hp:8,type:"ghost"},{x:4*TL,y:5*TL,hp:6,type:"ghost"}],reward:"master_key"},
+    m[9][12]=T.LEVER;// Hit lever after clearing room → reveals stairway
+  }),stairsReveal:[12,9],enemies:[{x:7*TL,y:4*TL,hp:8,type:"ghost"},{x:7*TL,y:7*TL,hp:8,type:"ghost"},{x:4*TL,y:5*TL,hp:6,type:"ghost"}],reward:"master_key"},
 
   // North room — lever & push puzzle
   "0,-1":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
@@ -557,7 +568,9 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shad
     for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[5][7]=T.RUPEE;m[6][8]=T.HEART;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
-    m[9][3]=T.STAIRS_DOWN;// Passage from east wing
+    // Walled-off alcove bottom-left — key only via passage
+    for(let x=1;x<=4;x++)m[9][x]=T.WALL;m[9][2]=T.FLOOR;
+    m[10][2]=T.KEY;m[10][3]=T.STAIRS_DOWN;// Passage arrival + key
   }),enemies:[{x:5*TL,y:5*TL,hp:6,type:"skeleton"},{x:10*TL,y:5*TL,hp:6,type:"skeleton"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
 
   // North depth — locked door passage
