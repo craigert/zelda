@@ -543,6 +543,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       p.x=ex;p.y=ey;s.msg={text:"Fell into a pit!",t:1000};
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
     return;}
+  // Fade transition — must run before shop/NPC/freeze checks
+  if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
+    if(s.fade.alpha>=1&&s.fade.cb){try{s.fade.cb();}catch(e){console.error("Fade callback error:",e);}s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
+    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
   // Shop menu interaction
   if(s.shop){const ky=kyR.value;
     if(ky.has("arrowup")||ky.has("w")){s.shop.sel=(s.shop.sel-1+s.shop.items.length)%s.shop.items.length;ky.delete("arrowup");ky.delete("w");}
@@ -594,9 +598,6 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
-  if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
-    if(s.fade.alpha>=1&&s.fade.cb){try{s.fade.cb();}catch(e){console.error("Fade callback error:",e);}s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
-    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
   if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur){s.slide.a=false;
     // Trigger boss intro after room transition completes
     if(s._pendingBoss){const pb=s._pendingBoss;s._pendingBoss=null;
