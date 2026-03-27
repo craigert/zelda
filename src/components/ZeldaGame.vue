@@ -356,7 +356,10 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   }
   if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
-    if(s.dr.has(dk))return false;
+    if(s.dr.has(dk)){
+      // Boss door re-seals during boss fight — can't escape
+      if(tl===T.BOSS_DOOR&&s.bossFight)return true;
+      return false;}
     if(tl===T.BOSS_DOOR){if(s.p.masterKey[s.loc.di]){s.dr.add(dk);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
       s.pt.push(...Array.from({length:12},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));return false;}
       s.msg={text:"Locked! Find the Master Key...",t:1500};return true;}
