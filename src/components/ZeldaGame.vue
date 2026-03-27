@@ -2128,21 +2128,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle=`rgba(255,100,0,${fa*0.3})`;c.beginPath();c.arc(ft.x,ft.y,10,0,Math.PI*2);c.fill();
     c.fillStyle=`rgba(255,200,50,${fa*0.2+Math.sin(t/100+ft.x)*0.1})`;c.beginPath();c.arc(ft.x,ft.y,6,0,Math.PI*2);c.fill();
     c.fillStyle=`rgba(255,255,150,${fa*0.15})`;c.beginPath();c.arc(ft.x+(Math.sin(t/80+ft.y)*2),ft.y-2,3,0,Math.PI*2);c.fill();}}
-  // Dungeon wall sign
+  // Dungeon wall sign — mounted on the wall surface
   if(iD&&loc.ty==="dg"){const rmSign=s.dg[loc.di]?.rooms[loc.scr];
     if(rmSign?.sign&&rmSign?.signPos){const[sx,sy]=rmSign.signPos;const spx=sx*TL,spy=sy*TL;
-      // Sign board on wall
-      c.fillStyle="#8a6a30";c.fillRect(spx+4,spy+6,24,16);
-      c.fillStyle="#a08040";c.fillRect(spx+5,spy+7,22,14);
-      // Nails
-      c.fillStyle="#888";c.fillRect(spx+6,spy+8,2,2);c.fillRect(spx+24,spy+8,2,2);
-      // Text lines on sign
-      c.fillStyle="#543820";c.font="bold 4px monospace";c.textAlign="center";
-      c.fillText("READ",spx+16,spy+14);c.fillText("ME",spx+16,spy+19);
+      // Sign board mounted on bottom edge of wall tile
+      c.fillStyle="#6a4a20";c.fillRect(spx+4,spy+20,24,12);// frame
+      c.fillStyle="#8a6a30";c.fillRect(spx+5,spy+21,22,10);// board
+      c.fillStyle="#a08040";c.fillRect(spx+6,spy+22,20,8);// face
+      // Nails in corners
+      c.fillStyle="#999";c.fillRect(spx+7,spy+22,2,2);c.fillRect(spx+23,spy+22,2,2);
+      // Text on sign
+      c.fillStyle="#543820";c.font="bold 5px monospace";c.textAlign="center";
+      c.fillText("READ ME",spx+16,spy+28);
       c.textAlign="left";
-      // Exclamation when player is nearby
-      const pdS=Math.hypot(p.x+PS/2-spx-16,p.y+PS/2-spy-16);
-      if(pdS<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("!",spx+16,spy-2+bob);c.textAlign="left";}
+      // Exclamation when player is within range (player is one tile below wall)
+      const pdS=Math.hypot(p.x+PS/2-spx-16,p.y+PS/2-spy-TL);
+      if(pdS<TL*2){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("!",spx+16,spy+18+bob);c.textAlign="left";}
     }}
   for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:e.type==="miniboss"?ES*1.3:ES;
     if(e.spawnT>0){
