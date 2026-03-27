@@ -1004,6 +1004,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(p.freeze>0){p.freeze=0;s.msg={text:"The warm water thaws you...",t:1200};}
       // Fill jar with spring water
       if(s.hasJar&&s.springWater<3){s.springWater=3;s.msg={text:"Jar filled with spring water!",t:1500};}
+      // Hidden heart piece in lower-left corner of hot spring (screen 2,2, tile 2,10)
+      const hpk="ow:-1:2,2:2,10";
+      if(s.loc.scr==="2,2"&&ptx3===2&&pty3===10&&!s.pk.has(hpk)){
+        s.pk.add(hpk);p.heartPieces++;sfx("heartpiece");s.freeze=500;s.shake.t=400;
+        if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
+        else{s.msg={text:`Found a hidden Heart Piece! (${p.heartPieces}/4)`,t:2000};}
+        s.pt.push(...Array.from({length:12},()=>({x:ptx3*TL+16,y:pty3*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#8ff"})));}
     }else{s._hotSpringT=0;}}
   if(moved&&Math.random()<0.15){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){const ft=m2[pty][ptx];
@@ -2030,6 +2037,11 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         }
       }
     }}
+  // Faint heart piece outline hidden in hot spring (screen 2,2, tile 2,10)
+  if(!iD&&loc.scr==="2,2"&&!s.pk.has("ow:-1:2,2:2,10")){
+    const hpx=2*TL+16,hpy=10*TL+16;const ha=0.12+Math.sin(t/800)*0.05;
+    c.fillStyle=`rgba(255,51,102,${ha})`;c.beginPath();
+    c.moveTo(hpx,hpy+4);c.lineTo(hpx-5,hpy-1);c.arc(hpx-3,hpy-3,3,Math.PI,0);c.arc(hpx+3,hpy-3,3,Math.PI,0);c.lineTo(hpx+5,hpy-1);c.closePath();c.fill();}
   // Ambient dungeon decorations -- sparse, theme-aware, deterministic
   if(iD&&m){const th=dg?.th||"forest";
     for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
