@@ -280,6 +280,12 @@ function deleteSlot(idx) {
   try { localStorage.removeItem('zelda_save_'+idx); } catch(e) {}
 }
 
+// --- Volume helper ---
+function applyVolume(vol){
+  try{Tone.getDestination().volume.value=vol<=0?-Infinity:-30+vol*0.3;}catch(e){}
+  if(customAuRef.value){try{customAuRef.value.volume=vol/100;}catch(e){}}
+}
+
 // --- Game logic functions ---
 function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.fireTrails=[];s.bossFight=false;
   // Restore lit torches for this room (persists between visits)
@@ -2434,12 +2440,14 @@ onMounted(() => {
   stR.value = init();
   let unlocked = false;
   const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
+    // Apply saved volume level
+    const s = stR.value; if(s)applyVolume(s.volume);
     // Force music to start now that audio is unlocked
-    const s = stR.value; if (!s || !muOn.value) return;
+    if (!s || !muOn.value) return;
     const th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
     ltRef.value = th;
-    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
+    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = (stR.value?.volume??80)/100; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
     else { playTh(th); }
   }); };
   const kd = e => {
@@ -2474,8 +2482,8 @@ onMounted(() => {
       const k = e.key.toLowerCase();
       if (k === "arrowup" || k === "w") { s.pauseSel = (s.pauseSel - 1 + 4) % 4; e.preventDefault(); }
       if (k === "arrowdown" || k === "s") { s.pauseSel = (s.pauseSel + 1) % 4; e.preventDefault(); }
-      if (k === "arrowleft" || k === "a") { if (s.pauseSel === 0) { s.volume = Math.max(0, s.volume - 10); try{Tone.getDestination().volume.value=s.volume<=0?-Infinity:-30+s.volume*0.3;}catch(e2){} } }
-      if (k === "arrowright" || k === "d") { if (s.pauseSel === 0) { s.volume = Math.min(100, s.volume + 10); try{Tone.getDestination().volume.value=-30+s.volume*0.3;}catch(e2){} } }
+      if (k === "arrowleft" || k === "a") { if (s.pauseSel === 0) { s.volume = Math.max(0, s.volume - 10); applyVolume(s.volume); } }
+      if (k === "arrowright" || k === "d") { if (s.pauseSel === 0) { s.volume = Math.min(100, s.volume + 10); applyVolume(s.volume); } }
       if (k === " " || k === "enter") {
         if (s.pauseSel === 1) { muOn.value = !muOn.value; }
         else if (s.pauseSel === 2) { saveGame(s); s.msg = { text: "Game saved!", t: 1500 }; s.paused = false; }
@@ -2544,7 +2552,7 @@ watch([muOn, customMu], () => {
       ltRef.value = th;
       const gen = ++_muGen; // capture generation for async check
       if (customMu.value[th]) {
-        const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5;
+        const a = new Audio(customMu.value[th]); a.loop = true; a.volume = (stR.value?.volume??80)/100;
         a.play().then(() => { if(_muGen===gen)customAuRef.value = a; else a.pause(); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
       } else {
         Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
