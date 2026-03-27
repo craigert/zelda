@@ -2510,19 +2510,20 @@ watch([muOn, customMu], () => {
     ltRef.value = null;
     return;
   }
+  let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
     let th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
-      ltRef.value = th; // set immediately to prevent duplicate plays from next ck() tick
-      const wanted = th; // capture for async check
+      ltRef.value = th;
+      const gen = ++_muGen; // capture generation for async check
       if (customMu.value[th]) {
         const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5;
-        a.play().then(() => { if(ltRef.value===wanted)customAuRef.value = a; else a.pause(); }).catch(() => { if(ltRef.value===wanted)ltRef.value = null; });
+        a.play().then(() => { if(_muGen===gen)customAuRef.value = a; else a.pause(); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
       } else {
-        Tone.start().then(() => { if(ltRef.value!==wanted)return; if (!au.i) initAu(); playTh(wanted); }).catch(() => { if(ltRef.value===wanted)ltRef.value = null; });
+        Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
       }
     }
   };
