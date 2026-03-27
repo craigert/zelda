@@ -740,7 +740,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(!pitsLeft){sfx("itemget");s.shake.t=300;s.msg={text:"A key appeared!",t:1500};
           s.drops.push({x:W2/2,y:-20,vy:0.5,ground:H2/2,type:"key_drop",t:0});}
       }
-      else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP){
+      else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP&&m2[by][bx]!==T.PIT&&m2[by][bx]!==T.STAIRS_DOWN&&m2[by][bx]!==T.LEVER&&m2[by][bx]!==T.TORCH){
         const wasPlate=m2[by][bx]===T.PLATE;
         m2[by][bx]=T.PUSH;
         // Check if stairway is hidden under this block
