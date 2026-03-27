@@ -8,6 +8,7 @@ export const DEFAULT_MUSIC = {
   triforce: "music/triforce.mp3",
   guardian: "music/guardian.mp3",
   end: "music/end.mp3",
+  shop: null,
   sanctum: "music/sanctum.mp3",
   finalbattle: "music/finalbattle.mp3",
 };
