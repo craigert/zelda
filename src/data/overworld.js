@@ -96,17 +96,22 @@ export const OW={
   m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
   m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
   m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
-  // Rocky ring around heart piece — one pushable boulder to enter
+  // Rocky ring around heart piece — blends with surrounding boulder field
   m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
   m[5][6]=T.ROCK;m[5][9]=T.ROCK;
   m[6][6]=T.ROCK;m[6][9]=T.ROCK;
   m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][9]=T.ROCK;
-  m[7][8]=T.PUSH;// Push this boulder south to open a gap into the ring
+  m[7][8]=T.PUSH;// Pushable — hidden among other rocks
   // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
-  // Path leading to the pushable boulder
-  m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+  // Boulder field below the ring — hides the pushable one
+  m[8][6]=T.ROCK;m[8][7]=T.ROCK;m[8][9]=T.ROCK;m[8][10]=T.ROCK;
+  m[9][5]=T.ROCK;m[9][6]=T.ROCK;m[9][9]=T.ROCK;m[9][10]=T.ROCK;
+  m[8][8]=T.PATH;// Narrow path between boulders to reach the pushable one
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
+  // Scattered rocks elsewhere to make the area feel naturally rocky
+  m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[5][3]=T.ROCK;m[5][12]=T.ROCK;
+  m[9][3]=T.ROCK;m[9][12]=T.ROCK;
   // Hidden banana cave entrance
   m[9][13]=T.CRACK;
   oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
