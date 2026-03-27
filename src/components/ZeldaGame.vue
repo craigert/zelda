@@ -814,18 +814,28 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TSWITCH){
       const tk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:tswitch`;
       if(!s.timedDoors.find(td=>td.key===tk)){
-        sfx("pickup");s.msg={text:"Timed switch! Hurry!",t:1500};s.shake.t=200;
-        // Open all DOOR tiles in the room temporarily
-        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-          const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
-          s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}}
-        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty});}}}
+        sfx("pickup");s.shake.t=200;
+        // Open all DOOR tiles and deactivate SPIKE tiles temporarily
+        let hasDoors=false,hasSpikes=false;const spikePos=[];
+        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){
+          if(m2[yy][xx]===T.DOOR){hasDoors=true;
+            const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
+            s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
+          if(m2[yy][xx]===T.SPIKE){hasSpikes=true;spikePos.push([xx,yy]);
+            m2[yy][xx]=T.FLOOR;
+            s.pt.push({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:300,c:"#aaa"});}}
+        s.msg={text:hasDoors?"Timed switch! Hurry!":hasSpikes?"Spikes retracted! Hurry!":"Switch activated!",t:1500};
+        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,spikes:spikePos});}}}
   for(let i=s.timedDoors.length-1;i>=0;i--){const td=s.timedDoors[i];td.t-=dt;
-    if(td.t<=0){// Re-lock all DOOR tiles in the room
+    if(td.t<=0){
       const m2=td.ty==="dg"?s.dg[td.di]?.rooms[td.scr]?.tiles:null;
-      if(m2){for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
-        const dk=`${td.ty}:${td.di}:${td.scr}:${xx},${yy}`;s.dr.delete(dk);}}}
-      s.timedDoors.splice(i,1);sfx("door");s.msg={text:"Doors closed!",t:1000};}}
+      if(m2){// Re-lock doors
+        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
+          const dk=`${td.ty}:${td.di}:${td.scr}:${xx},${yy}`;s.dr.delete(dk);}}
+        // Restore spikes
+        if(td.spikes){for(const[sx2,sy2]of td.spikes)m2[sy2][sx2]=T.SPIKE;}}
+      s.timedDoors.splice(i,1);sfx("door");
+      s.msg={text:td.spikes?.length?"Spikes returned!":"Doors closed!",t:1000};}}
   {const m2=gm(s);if(m2){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
     const ftx=pcx+(p.dir===1?1:p.dir===3?-1:0),fty=pcy+(p.dir===0?-1:p.dir===2?1:0);
@@ -881,11 +891,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(wasPlate){s.shake.t=200;
           // Check if room has stairsReveal (but not squarePuzzle — those handle it separately)
           const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
-          if(roomD3?.squarePuzzle){
-            // Count how many plates are filled so far
-            const sp=roomD3.squarePlates||[];const fc=sp.filter(([px2,py2])=>m2[py2]&&(m2[py2][px2]===T.PUSH||m2[py2][px2]===T.ROCK)).length;
-            sfx("pickup");s.msg={text:`${fc} of ${sp.length} in place...`,t:1500};
-            s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
+          if(roomD3?.squarePuzzle){sfx("pickup");}
           else if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
             m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"A stairway appeared!",t:2000};
             s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
