@@ -314,7 +314,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
   // Init NPC runtime state
   const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
-  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:n.name.includes("Tree")})):[];}
+  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;if(s.loc.ty==="passage")return null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
