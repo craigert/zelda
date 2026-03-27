@@ -97,10 +97,11 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][6]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
     m[5][7]=T.RUPEE;m[6][8]=T.RUPEE;
-    m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;
+    m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;// bomb south to left side of -1,-1
+    m[RO-1][9]=T.CRACK;m[RO-1][10]=T.CRACK;// bomb south to right side of -1,-1 (needs bombs from D1)
   }),enemies:[{x:7*TL,y:4*TL,hp:3,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"bat"},{x:4*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
-  // Secret room (bomb south wall of -1,-2) — treasure cache
+  // Secret room (bomb south wall of -1,-2) — treasure cache, divided by wall
   "-1,-1":{tiles:mr(m=>{
     // Walled-off area with key — only reachable via underground passage
     for(let y=2;y<=9;y++){m[y][6]=T.WALL;} // wall divides room
@@ -109,8 +110,8 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][3]=T.KEY;m[4][3]=T.TORCH;m[7][3]=T.TORCH;
     m[3][2]=T.RUPEE;m[8][2]=T.RUPEE;m[6][4]=T.HEART;
     m[9][2]=T.STAIRS_DOWN;// Passage exit back to main dungeon
-    // Right side (visible from bomb entrance but key is unreachable)
-    m[0][9]=T.FLOOR;m[0][10]=T.FLOOR; // bomb entrance from -1,-2
+    // Right side — crack wall at top (bombable later, not accessible in D0)
+    m[1][9]=T.CRACK;m[1][10]=T.CRACK; // bomb wall — leads north to -1,-2
     m[5][8]=T.HEART;m[5][9]=T.HEART;
     m[3][10]=T.TORCH;m[8][10]=T.TORCH;
     m[4][9]=T.RUPEE;m[7][9]=T.RUPEE;
