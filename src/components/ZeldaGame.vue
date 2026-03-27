@@ -555,6 +555,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
       const tc3=s.p.tri.filter(Boolean).length;
       s.msg={text:tc3>=3?"The Dark Sanctum has opened!":`Triforce piece ${tc3}/3!`,t:2000};}
+    // Sanctum reveal — rumble and smoke during triforce hold
+    if(s.sanctumReveal){s.sanctumReveal.t+=dt;
+      // Screen rumble
+      if(s.sanctumReveal.t<3000)s.shake.t=Math.max(s.shake.t,100);
+      // Smoke particles rising from ground
+      if(s.sanctumReveal.t>500&&s.sanctumReveal.t<3500&&Math.random()<0.4){
+        const sx=s.p.x+PS/2+(Math.random()-.5)*80,sy=s.p.y+(Math.random()-.5)*40;
+        s.pt.push({x:sx,y:sy,dx:(Math.random()-.5)*2,dy:-Math.random()*3-1,l:800+Math.random()*400,c:Math.random()>.5?"#888":"#666"});}
+      // Dark energy particles
+      if(s.sanctumReveal.t>1000&&s.sanctumReveal.t<3000&&Math.random()<0.3){
+        const sx=s.p.x+PS/2+(Math.random()-.5)*60,sy=s.p.y+(Math.random()-.5)*30;
+        s.pt.push({x:sx,y:sy,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:600,c:Math.random()>.5?"#a060ff":"#606"});}
+      if(s.sanctumReveal.t>=s.sanctumReveal.dur)s.sanctumReveal=null;}
     // Only warp after portal appeared and 500ms passed
     if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur){
       const di2=s.loc.di;const dg3=s.dg[di2];if(dg3){
@@ -1061,10 +1074,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;s.triMu=false;
         const tc2=p.tri.filter(Boolean).length;
-        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
+        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;s.sanctumReveal={t:0,dur:4000};
           const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}}
         // Hold-up animation + warp portal
-        s.triforceHold={t:0,dur:2500,piece:tc2,px:p.x,py:p.y,warp:false};
+        s.triforceHold={t:0,dur:tc2>=3?5000:2500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
@@ -2699,6 +2712,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
       for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
         c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
+    // Sanctum reveal — ground rumble + smoke + dark temple rising
+    if(s.sanctumReveal){const sr=s.sanctumReveal,sp=Math.min(1,sr.t/3000);
+      // Dark vignette pulses
+      c.fillStyle=`rgba(40,0,60,${0.15+Math.sin(sr.t/300)*0.08})`;c.fillRect(0,0,W2,H2);
+      // Screen crack lines radiating from center
+      if(sr.t>500&&sr.t<2500){c.strokeStyle=`rgba(200,100,255,${0.3*(1-sp)})`;c.lineWidth=1.5;
+        for(let i=0;i<6;i++){const ca=i*Math.PI/3+sr.t/2000;const cl=sp*80;
+          c.beginPath();c.moveTo(W2/2,H2/2);c.lineTo(W2/2+Math.cos(ca)*cl,H2/2+Math.sin(ca)*cl);c.stroke();}}
+      // Rising smoke columns
+      if(sr.t>800){const smokeA=Math.min(1,(sr.t-800)/1000);
+        for(let i=0;i<3;i++){const sx=W2*0.3+i*W2*0.2,sy=H2*0.7-sp*H2*0.3;
+          c.fillStyle=`rgba(80,40,100,${smokeA*0.15*(1+Math.sin(t/200+i))})`;
+          c.beginPath();c.arc(sx+(Math.sin(t/300+i*2))*8,sy,12+sp*8,0,Math.PI*2);c.fill();}}
+      // "The earth trembles..." text
+      if(sr.t>1500&&sr.t<3500){const ta=sr.t<2000?(sr.t-1500)/500:sr.t>3000?1-(sr.t-3000)/500:1;
+        c.globalAlpha=ta;c.textAlign="center";c.fillStyle="#c080ff";c.font="bold 11px monospace";
+        c.fillText("The earth trembles...",W2/2,H2*0.15);c.textAlign="left";c.globalAlpha=1;}}
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
