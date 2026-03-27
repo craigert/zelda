@@ -8,15 +8,13 @@ function makePool(factory,n){const pool=[];for(let i=0;i<n;i++)pool.push(factory
 export function initSfx(){if(sfxReady)return;
   // Tonal synths — use PolySynth for overlapping notes
   sfxSynths.hit=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"sawtooth"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.05},volume:-12}}).toDestination();
-  // Metallic clang layer for sword hits
-  sfxSynths.clang=new Tone.MetalSynth({frequency:120,envelope:{attack:0.001,decay:0.06,release:0.04},harmonicity:3.1,modulationIndex:16,resonance:2000,octaves:1,volume:-20}).toDestination();
-  // Thud layer for impact feel
-  sfxSynths.thud=new Tone.MembraneSynth({pitchDecay:0.03,octaves:3,oscillator:{type:"sine"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.03},volume:-16}).toDestination();
+  // Impact noise layer for sword hits — short burst of filtered noise
+  sfxSynths.hitNoise=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.04,sustain:0,release:0.02},volume:-14}).toDestination(),2);
   sfxSynths.pickup=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.12,sustain:0.1,release:0.1},volume:-14}}).toDestination();
   sfxSynths.hurt=new Tone.PolySynth(Tone.Synth,{maxPolyphony:2,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.15,sustain:0,release:0.1},volume:-10}}).toDestination();
   sfxSynths.fanfare=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.01,decay:0.2,sustain:0.3,release:0.3},volume:-12}}).toDestination();
   // Noise synths — pool of instances for overlapping
-  sfxSynths.sword=makePool(()=>{const n=new Tone.NoiseSynth({noise:{type:"pink"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.04},volume:-16});const f=new Tone.Filter(3000,"highpass");n.connect(f);f.toDestination();return n;},2);
+  sfxSynths.sword=makePool(()=>new Tone.NoiseSynth({noise:{type:"pink"},envelope:{attack:0.001,decay:0.1,sustain:0,release:0.05},volume:-15}).toDestination(),2);
   sfxSynths.door=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1},volume:-14}).toDestination(),2);
   sfxSynths.bomb=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.4,sustain:0.05,release:0.2},volume:-8}).toDestination(),3);
   sfxReady=true;}
@@ -25,7 +23,7 @@ export function sfx(name,note){if(!sfxReady)return;
   const now=performance.now();if(lastPlay[name]&&now-lastPlay[name]<MIN_INTERVAL)return;lastPlay[name]=now;
   try{
   if(name==="sword")sfxSynths.sword.trigger("16n");
-  else if(name==="hit"){const t=Tone.now();sfxSynths.hit.triggerAttackRelease(note||"C3","16n",t);sfxSynths.clang.triggerAttackRelease("16n",t);sfxSynths.thud.triggerAttackRelease("C2","32n",t+0.01);}
+  else if(name==="hit"){const t=Tone.now();sfxSynths.hit.triggerAttackRelease(note||"C3","16n",t);sfxSynths.hitNoise.trigger("32n");}
   else if(name==="pickup"){const t=Tone.now();sfxSynths.pickup.triggerAttackRelease("E5","16n",t);sfxSynths.pickup.triggerAttackRelease("G5","16n",t+0.08);sfxSynths.pickup.triggerAttackRelease("C6","8n",t+0.16);}
   else if(name==="door")sfxSynths.door.trigger("8n");
   else if(name==="bomb")sfxSynths.bomb.trigger("4n");
