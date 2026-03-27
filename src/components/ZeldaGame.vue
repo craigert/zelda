@@ -138,7 +138,8 @@ function init() {
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
     ss:null, // side-scroll passage state: {vy,grounded,onLadder,jumping,facing,pi}
-    bossWarp:null, // {x,y,t,ready,di} — warp portal after boss death
+    bossWarp:null, // {x,y,t,ready,di} — warp portal after boss death (temporary animation)
+    bossWarps:[], // persistent: [{di,bossScr,bossX,bossY,entryScr}] — cleared dungeon portals
     pushAnim:null, // {fx,fy,tx,ty,t,dur,reveal,rx,ry,isDg} — smooth block slide
   };
 }
@@ -230,7 +231,8 @@ function saveGame(s) {
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
-      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp,
+      bossWarps: s.bossWarps||[]
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
   } catch (e) {}
@@ -255,6 +257,7 @@ function applySave(s, save) {
   s.heartContainers = [...save.heartContainers];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false;
   s.respawn = { ...save.respawn };
+  s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if (s.finalOpen) {
     const fm = OW["3,2"];
     if (fm) { fm[5][7] = T.ENTRANCE; fm[5][8] = T.ENTRANCE; fm[6][7] = T.ENTRANCE; fm[6][8] = T.ENTRANCE; }
@@ -537,7 +540,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
     if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
@@ -949,12 +952,39 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       const wx=s.bossWarp.x*TL,wy=s.bossWarp.y*TL;
       // Check if player stepped on the portal
       if(p.x+PS/2>wx&&p.x+PS/2<wx+TL&&p.y+PS/2>wy&&p.y+PS/2<wy+TL){
-        const di=s.bossWarp.di;s.bossWarp=null;
+        const di=s.bossWarp.di;const bx=s.bossWarp.x,by=s.bossWarp.y;
+        const bossScr=s.loc.scr;
+        // Find the dungeon entry room (the one with STAIRS_UP)
+        const dg2=s.dg[di];let entryScr="0,0";
+        for(const rk of Object.keys(dg2.rooms)){if(dg2.rooms[rk].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk;break;}}
+        // Make this warp permanent
+        if(!s.bossWarps.find(w=>w.di===di)){
+          s.bossWarps.push({di,bossScr,bossX:bx,bossY:by,entryScr});
+        }
+        s.bossWarp=null;
+        // Warp to dungeon entrance room
         s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
-          const ent=DE[di];s.loc.ty="ow";s.loc.scr=ent.s;s.loc.di=-1;
-          const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;
-          s.triMu=false;s.ec=500;le(s);s.msg={text:"Warped to entrance!",t:1500};
+          s.loc.scr=entryScr;p.x=7*TL;p.y=9*TL;
+          s.triMu=false;s.ec=500;le(s);s.msg={text:"Warped to dungeon entrance!",t:1500};
         }};
+      }
+    }
+  }
+  // Persistent warp portals — check if player steps on one
+  if(s.loc.ty==="dg"&&s.bossWarps.length>0&&!s.bossWarp){
+    const di=s.loc.di;const scr=s.loc.scr;
+    for(const w of s.bossWarps){if(w.di!==di)continue;
+      let wx=-1,wy=-1,destScr=null;
+      if(scr===w.bossScr){wx=w.bossX;wy=w.bossY;destScr=w.entryScr;}
+      else if(scr===w.entryScr){wx=7;wy=5;destScr=w.bossScr;} // portal at center of entry room
+      if(wx>=0&&destScr&&p.x+PS/2>wx*TL&&p.x+PS/2<(wx+1)*TL&&p.y+PS/2>wy*TL&&p.y+PS/2<(wy+1)*TL){
+        s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+          s.loc.scr=destScr;
+          if(destScr===w.entryScr){p.x=7*TL;p.y=9*TL;}
+          else{p.x=w.bossX*TL;p.y=(w.bossY+1)*TL;}
+          s.ec=500;le(s);sfx("door");
+          s.msg={text:destScr===w.entryScr?"Warped to entrance!":"Warped to boss room!",t:1500};
+        }};break;
       }
     }
   }
@@ -2186,6 +2216,26 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Sparkle particles around portal
     for(let i=0;i<4;i++){const a=spin*2+i*Math.PI/2,r=12+Math.sin(s.gt/200+i)*4;
       c.fillStyle=`rgba(200,230,255,${0.5*pulse})`;c.beginPath();c.arc(wx+Math.cos(a)*r,wy+Math.sin(a)*r,1.5,0,Math.PI*2);c.fill();}
+  }
+  // Persistent warp portals
+  if(s.loc.ty==="dg"&&s.bossWarps.length>0&&!s.bossWarp){
+    for(const w of s.bossWarps){if(w.di!==s.loc.di)continue;
+      let pwx=-1,pwy=-1;
+      if(s.loc.scr===w.bossScr){pwx=w.bossX;pwy=w.bossY;}
+      else if(s.loc.scr===w.entryScr){pwx=7;pwy=5;}
+      if(pwx>=0){const wx2=pwx*TL+16,wy2=pwy*TL+16;
+        const pulse2=Math.sin(s.gt/200)*0.2+0.8;const spin2=s.gt/500;
+        const wg2=c.createRadialGradient(wx2,wy2,4,wx2,wy2,18);
+        wg2.addColorStop(0,`rgba(100,180,255,${0.4*pulse2})`);wg2.addColorStop(0.5,`rgba(60,120,255,${0.25*pulse2})`);wg2.addColorStop(1,"rgba(40,60,200,0)");
+        c.fillStyle=wg2;c.beginPath();c.arc(wx2,wy2,18,0,Math.PI*2);c.fill();
+        c.strokeStyle=`rgba(150,200,255,${0.6*pulse2})`;c.lineWidth=1.5;
+        c.beginPath();c.arc(wx2,wy2,8+Math.sin(s.gt/300)*2,spin2,spin2+Math.PI*1.5);c.stroke();
+        c.fillStyle=`rgba(220,240,255,${0.5*pulse2})`;c.beginPath();c.arc(wx2,wy2,3,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(255,255,255,${0.7*pulse2})`;c.beginPath();c.arc(wx2,wy2,1.5,0,Math.PI*2);c.fill();
+        for(let i=0;i<3;i++){const a=spin2*2+i*Math.PI*2/3,r=10+Math.sin(s.gt/200+i)*3;
+          c.fillStyle=`rgba(200,230,255,${0.4*pulse2})`;c.beginPath();c.arc(wx2+Math.cos(a)*r,wy2+Math.sin(a)*r,1.2,0,Math.PI*2);c.fill();}
+      }
+    }
   }
   for(const d2 of s.drops){const bob2=Math.sin(t/200)*2;
     if(d2.type==="heart"){c.fillStyle="#ee3333";dH(c,d2.x-6,d2.y-6+bob2,12);c.fillStyle="#ff8888";dH(c,d2.x-3,d2.y-4+bob2,6);}
