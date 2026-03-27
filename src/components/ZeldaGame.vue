@@ -98,7 +98,7 @@ function init() {
   return {
     p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
-    en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),// bc = bombed cracks "ty:di:scr:x,y" → replacement tile id
+    en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),// bc = bombed cracks, mb = moved boulders "scr:fx,fy:tx,ty:reveal"
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
     title:true,saveSelect:false,saveSelIdx:0,
     fade:{a:false,alpha:0,dir:1,cb:null,t:0},
@@ -230,7 +230,7 @@ function saveGame(s) {
       pk: [...s.pk],
       dr: [...s.dr],
       cl: [...s.cl].filter(k=>!k.startsWith("ow:")),
-      bc: [...(s.bc||[])],
+      bc: [...(s.bc||[])],mb: [...(s.mb||[])],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
@@ -257,7 +257,7 @@ function applySave(s, save) {
   s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false;
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
-  s.bc = new Set(save.bc||[]);
+  s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);
   s.heartContainers = [...save.heartContainers];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false;
   s.respawn = { ...save.respawn };
@@ -273,6 +273,12 @@ function applySave(s, save) {
     else if(ty2==="dg"&&s.dg[parseInt(di2)])m2=s.dg[parseInt(di2)].rooms[scr2]?.tiles;
     if(m2&&ty3>=0&&ty3<RO&&tx2>=0&&tx2<CO)m2[ty3][tx2]=repl;
   }
+  // Re-apply moved boulders to overworld maps
+  for(const mbk of s.mb){const pts=mbk.split(":");const scr3=pts[0];
+    const[fx,fy]=pts[1].split(",").map(Number);const[tx2,ty3]=pts[2].split(",").map(Number);const rev=parseInt(pts[3]);
+    const m3=OW[scr3];
+    if(m3){if(fy>=0&&fy<RO&&fx>=0&&fx<CO)m3[fy][fx]=rev;
+      if(ty3>=0&&ty3<RO&&tx2>=0&&tx2<CO)m3[ty3][tx2]=T.PUSH;}}
   return true;
 }
 
@@ -884,6 +890,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         }else if(pa.reveal===T.ENTRANCE){sfx("secret");s.shake.t=400;
           s.msg={text:"A hidden cave entrance!",t:2000};
           s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+          // Persist boulder move so cave stays revealed
+          const bScr=s.loc.scr;const bTx=Math.round(pa.tx/TL),bTy=Math.round(pa.ty/TL);
+          s.mb.add(`${bScr}:${pa.rx},${pa.ry}:${bTx},${bTy}:${T.ENTRANCE}`);
         }
       }
       s.pushCd=false;s.pushAnim=null;
@@ -1337,8 +1346,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
-        // Track respawn timer for overworld screens (30s)
-        if(s.loc.ty==="ow"){if(!s.respawnTimers)s.respawnTimers={};s.respawnTimers[rk]=30000;}
+        // Track respawn timer for overworld screens (60s)
+        if(s.loc.ty==="ow"){if(!s.respawnTimers)s.respawnTimers={};s.respawnTimers[rk]=60000;}
         if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;}else{sfx("pickup");}
         // Spawn reward chest -- room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
