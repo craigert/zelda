@@ -52,10 +52,10 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=4;y<=7;y++){m[y][4]=T.LEDGE_E;m[y][11]=T.LEDGE_W;}
     // Sunken lower floor
     for(let y=4;y<=7;y++)for(let x=5;x<=10;x++)m[y][x]=T.LOW_FLOOR;
-    // Ladder in center of lower area to climb back out
-    m[4][7]=T.LADDER;m[5][7]=T.LADDER;m[6][7]=T.LADDER;m[7][7]=T.LADDER;
-    // Treasure in the pit (away from ladder)
-    m[5][9]=T.HEART;m[6][6]=T.RUPEE;
+    // Small ladder on north wall — replaces one ledge tile so player can climb out
+    m[3][8]=T.LADDER;m[4][8]=T.LADDER;
+    // Treasure in the pit
+    m[5][7]=T.HEART;m[6][6]=T.RUPEE;
   }),enemies:[{x:6*TL,y:5*TL,hp:3,type:"vine_creeper"},{x:9*TL,y:6*TL,hp:2,type:"bat"}]},
 
   // Central north — pit maze with bridges
@@ -86,7 +86,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
     // One-way ledge drop with ladder to climb back up
     m[6][6]=T.LEDGE_S;m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[6][9]=T.LEDGE_S;
-    m[7][7]=T.LADDER;m[8][7]=T.LADDER;// ladder in center to climb back up
+    m[6][9]=T.LADDER;m[7][9]=T.LADDER;// small ladder on right side of ledge
     m[9][8]=T.HEART;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"bat"},{x:8*TL,y:6*TL,hp:3,type:"skeleton"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
   traps:[{x:4,y:3,dir:"h",range:6},{x:10,y:2,dir:"v",range:6}]},
@@ -258,7 +258,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[4][4]=T.FLOOR;m[4][5]=T.FLOOR;m[4][6]=T.FLOOR;m[7][9]=T.FLOOR;m[7][10]=T.FLOOR;m[7][11]=T.FLOOR;
     m[4][4]=T.SPIKE;m[7][11]=T.SPIKE;
     // One-way ledge drop with ladder
-    m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[7][7]=T.LADDER;m[8][7]=T.LADDER;
+    m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[6][8]=T.LADDER;m[7][8]=T.LADDER;// ladder on right of ledge
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
   }),enemies:[{x:7*TL,y:3*TL,hp:3,type:"fire_bat"},{x:7*TL,y:6*TL,hp:4,type:"magma_slug"},{x:7*TL,y:9*TL,hp:3,type:"skeleton"}]},
 
@@ -359,8 +359,8 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     // Sunken lower floor
     for(let y=4;y<=7;y++)for(let x=6;x<=9;x++)m[y][x]=T.LOW_FLOOR;
     m[5][6]=T.RUPEE;m[6][9]=T.HEART;
-    // Ladder in center of pit to climb out
-    m[4][7]=T.LADDER;m[5][7]=T.LADDER;m[6][7]=T.LADDER;m[7][7]=T.LADDER;
+    // Small ladder on east wall of pit to climb out
+    m[5][10]=T.LADDER;m[6][10]=T.LADDER;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:8*TL,y:6*TL,hp:4,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"wallmaster"}]},
 
@@ -462,8 +462,8 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[3][4]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
     // One-way ledges with ladders to climb back
-    m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[4][9]=T.LADDER;
-    m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;m[7][6]=T.LADDER;
+    m[4][7]=T.LEDGE_E;m[4][8]=T.LEDGE_E;m[4][8]=T.LADDER;m[5][8]=T.LADDER;// ladder on ledge edge
+    m[7][7]=T.LEDGE_W;m[7][8]=T.LEDGE_W;m[7][7]=T.LADDER;m[6][7]=T.LADDER;// ladder on ledge edge
     m[5][7]=T.HEART;m[5][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"knight"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
