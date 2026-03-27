@@ -2426,7 +2426,7 @@ onMounted(() => {
       }
       if (k === "escape") { s.saveSelect = false; s.title = true; }
       if (k === "x" || k === "delete" || k === "backspace") {
-        if (s.saveSelIdx < 3 && loadSlot(s.saveSelIdx)) { deleteSlot(s.saveSelIdx); sfx("hurt"); }
+        if (s.saveSelIdx < 3 && loadSlot(s.saveSelIdx)) { deleteSlot(s.saveSelIdx); sfx("delete"); }
         e.preventDefault();
       }
       return;
