@@ -520,7 +520,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     // Particles from dying boss
     if(fd.t<2500&&Math.random()<0.3){s.pt.push({x:fd.bx+(Math.random()-.5)*20,y:fd.by-fd.fallY+(Math.random()-.5)*20,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:600,c:Math.random()>.5?"#f0f":"#fd3"});}
     // Transition to end screen
-    if(fd.t>=fd.dur){s.won=true;s.endScreen={t:0};s.finalDeath=null;}
+    if(fd.t>=fd.dur){
+      // Save completed game — player returns to start with all items on next load
+      s.loc.ty="ow";s.loc.scr="1,1";s.loc.di=-1;s.p.x=7*TL;s.p.y=9*TL;s.p.hp=s.p.mhp;
+      s.respawn={ty:"ow",scr:"1,1",di:-1,x:7*TL,y:9*TL};
+      saveGame(s);
+      s.won=true;s.endScreen={t:0};s.finalDeath=null;}
     // Still update particles
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
