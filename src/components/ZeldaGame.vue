@@ -229,7 +229,7 @@ function saveGame(s) {
       loc: { ...s.loc },
       pk: [...s.pk],
       dr: [...s.dr],
-      cl: [...s.cl],
+      cl: [...s.cl].filter(k=>!k.startsWith("ow:")),
       bc: [...(s.bc||[])],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
@@ -1337,8 +1337,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
-        // Track respawn timer for overworld screens (60s)
-        if(s.loc.ty==="ow"){if(!s.respawnTimers)s.respawnTimers={};s.respawnTimers[rk]=60000;}
+        // Track respawn timer for overworld screens (30s)
+        if(s.loc.ty==="ow"){if(!s.respawnTimers)s.respawnTimers={};s.respawnTimers[rk]=30000;}
         if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;}else{sfx("pickup");}
         // Spawn reward chest -- room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
