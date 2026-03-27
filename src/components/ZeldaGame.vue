@@ -370,7 +370,7 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
     else if(tl===T.MASTER_KEY){s.pk.add(pk);if(s.loc.di>=0)p.masterKey[s.loc.di]=true;s.msg={text:"Got the Master Key!",t:2000};sfx("pickup");s.shake.t=300;
       s.pt.push(...Array.from({length:12},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#ffd633"})));}
     else if(tl===T.KEY){s.pk.add(pk);p.keys++;s.msg={text:"Got a key!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
-    else if(tl===T.BOMB){s.pk.add(pk);p.bombs+=3;s.msg={text:"Got bombs!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#88f"})));}
+    else if(tl===T.BOMB){if(!p.hasBombs){s.msg={text:"Need a Bomb Bag first!",t:1500};}else{s.pk.add(pk);p.bombs+=3;s.msg={text:"Got bombs!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#88f"})));}}
     else if(tl===T.HEART_PIECE){s.pk.add(pk);p.heartPieces++;sfx("heartpiece");s.freeze=500;
       if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
       else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
@@ -644,7 +644,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
         else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+1",c:"#4f4"});}
         else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+5",c:"#44f"});}
-        else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
+        else if(d2.type==="bomb"){if(p.hasBombs){p.bombs++;sfx("pickup");}}
         s.drops.splice(i,1);continue;}
       if(d2.t>6000)s.drops.splice(i,1);}
     // Particles & damage numbers
@@ -871,7 +871,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     else if(mdist<40&&mdist>1){const pull=2.5*(1-mdist/40);d2.x+=mdx/mdist*pull*(dt/16);d2.y+=mdy/mdist*pull*(dt/16);}
     if(Math.abs(p.x+PS/2-d2.x)<14&&Math.abs(p.y+PS/2-d2.y)<14){
       if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
-      else if(d2.type==="bomb"){p.bombs++;sfx("pickup");}
+      else if(d2.type==="bomb"){if(p.hasBombs){p.bombs++;sfx("pickup");}}
       else if(d2.type==="key_drop"){p.keys++;sfx("itemget");s.msg={text:"Got a key!",t:1500};
         s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
       else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:d2.x,y:d2.y-8,t:800,val:"+1",c:"#4f4"});}
