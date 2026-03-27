@@ -742,14 +742,21 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       }
       else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP){
         const wasPlate=m2[by][bx]===T.PLATE;
-        m2[by][bx]=T.PUSH;m2[fty][ftx]=T.FLOOR;
+        m2[by][bx]=T.PUSH;
+        // Check if stairway is hidden under this block
+        const roomDSU=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
+        if(roomDSU?.stairsUnder&&roomDSU.stairsUnder[0]===ftx&&roomDSU.stairsUnder[1]===fty){
+          m2[fty][ftx]=T.STAIRS_DOWN;sfx("secret");s.shake.t=400;
+          s.msg={text:"A hidden stairway!",t:2000};
+          s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+        }else{m2[fty][ftx]=T.FLOOR;}
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){s.shake.t=200;
           // Check if room has stairsReveal — if so, reveal STAIRS_DOWN instead of key
           const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
           if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
-            m2[sry][srx]=T.STAIRS_DOWN;sfx("itemget");s.msg={text:"A stairway appeared!",t:2000};
+            m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"A stairway appeared!",t:2000};
             s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
           }else{sfx("pickup");s.msg={text:"A key appeared!",t:1500};
             m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}
@@ -763,7 +770,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#f88"})));
       const roomD4=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
       if(roomD4?.stairsReveal){const[srx,sry]=roomD4.stairsReveal;
-        m2[sry][srx]=T.STAIRS_DOWN;sfx("itemget");s.msg={text:"Lever pulled! A stairway appeared!",t:2000};
+        m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"Lever pulled! A stairway appeared!",t:2000};
         s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
       }else{sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};
         m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}

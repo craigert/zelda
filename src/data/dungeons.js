@@ -25,12 +25,12 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
   }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"archer"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
 
   // East wing upper — lever puzzle room
-  "1,-1":{stairsReveal:[13,8],tiles:mr(m=>{ae(m,["S","E","W"]);
+  "1,-1":{stairsUnder:[7,8],tiles:mr(m=>{ae(m,["S","E","W"]);
     for(let y=2;y<=4;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     for(let y=7;y<=9;y++){m[y][4]=T.WALL;m[y][11]=T.WALL;}
     m[5][6]=T.PUSH;m[5][9]=T.PUSH;
     m[3][7]=T.RUPEE;
-    m[8][13]=T.PLATE;// Push block onto plate → reveals hidden stairway
+    m[8][7]=T.PUSH;// Push this block to reveal hidden stairway beneath
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;m[9][2]=T.TORCH;m[9][13]=T.TORCH;
   }),enemies:[{x:6*TL,y:3*TL,hp:3,type:"bat"},{x:9*TL,y:3*TL,hp:3,type:"bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 

@@ -10,9 +10,9 @@ export const PASSAGES = [
   { // D0 Forest Temple: east wing shortcut
     // "1,-1" (central crossroads) ↔ "-1,-1" (hidden heart room, currently no exits)
     di: 0,
-    from: { scr: "1,-1", tile: [13, 8] },    // STAIRS_DOWN in corner
+    from: { scr: "1,-1", tile: [7, 8] },     // Hidden under push block
     to:   { scr: "-1,-1", tile: [2, 9] },     // STAIRS_DOWN always present
-    exitL: { scr: "1,-1", px: 13*TL, py: 7*TL },
+    exitL: { scr: "1,-1", px: 7*TL, py: 7*TL },
     exitR: { scr: "-1,-1", px: 2*TL, py: 8*TL },
     platforms: [
       [2, 10, 12],   // main ground (gap at edges for ladders)
