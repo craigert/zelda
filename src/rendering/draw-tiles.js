@@ -1098,17 +1098,31 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       break;}
     case T.PUSH:{// Pushable block
       if(!iD){
-        // Overworld: looks like a natural boulder with subtle scratch marks
-        c.fillStyle="#4aaa3a";c.fillRect(px,py,TL,TL);// grass base
-        const rg=c.createRadialGradient(px+14,py+12,3,px+16,py+16,14);
-        rg.addColorStop(0,"#9a9080");rg.addColorStop(0.6,"#7a7060");rg.addColorStop(1,"#605848");
-        c.fillStyle=rg;c.beginPath();c.ellipse(px+16,py+16,13,11,0,0,Math.PI*2);c.fill();
-        c.fillStyle="rgba(255,255,255,0.15)";c.beginPath();c.ellipse(px+13,py+12,7,5,-.3,0,Math.PI*2);c.fill();
-        c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(px+19,py+20,8,4,.2,0,Math.PI*2);c.fill();
-        // Subtle scratch marks hinting it can move
-        c.strokeStyle="rgba(255,255,200,0.12)";c.lineWidth=0.5;
-        c.beginPath();c.moveTo(px+10,py+20);c.lineTo(px+22,py+20);c.stroke();
-        c.beginPath();c.moveTo(px+16,py+10);c.lineTo(px+16,py+22);c.stroke();
+        // Overworld: identical to ROCK except one subtle crack
+        c.fillStyle="#3a9830";c.fillRect(px,py,TL,TL);
+        c.fillStyle="rgba(50,120,30,0.2)";
+        c.beginPath();c.arc(px+8,py+8,4,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(px+24,py+24,3,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(0,0,0,0.18)";
+        c.beginPath();c.ellipse(px+18,py+24,12,4,0.1,0,Math.PI*2);c.fill();
+        const prg=c.createRadialGradient(px+13,py+11,3,px+16,py+16,15);
+        prg.addColorStop(0,"#aaa8a0");prg.addColorStop(0.3,"#908880");prg.addColorStop(0.6,"#787068");prg.addColorStop(1,"#585048");
+        c.fillStyle=prg;c.beginPath();c.ellipse(px+16,py+15,14,11,0,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(255,255,255,0.2)";
+        c.beginPath();c.ellipse(px+11,py+10,6,4,-.4,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(255,255,255,0.12)";
+        c.beginPath();c.ellipse(px+9,py+8,3,2,-.3,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(200,195,185,0.15)";
+        c.beginPath();c.ellipse(px+14,py+13,4,3,0,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(0,0,0,0.25)";
+        c.beginPath();c.ellipse(px+20,py+20,8,5,0.2,0,Math.PI*2);c.fill();
+        // Same texture lines as ROCK
+        c.strokeStyle="rgba(0,0,0,0.1)";c.lineWidth=0.5;
+        c.beginPath();c.moveTo(px+10,py+14);c.lineTo(px+18,py+16);c.stroke();
+        c.beginPath();c.moveTo(px+14,py+10);c.lineTo(px+16,py+18);c.stroke();
+        // One extra subtle crack — the only visual difference
+        c.strokeStyle="rgba(40,30,10,0.18)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px+8,py+18);c.quadraticCurveTo(px+14,py+15,px+22,py+12);c.stroke();
       }else{
         // Dungeon: gray stone block with bevel
         const pbg=c.createLinearGradient(px,py,px+TL,py+TL);pbg.addColorStop(0,"#7a7a88");pbg.addColorStop(1,"#5a5a68");

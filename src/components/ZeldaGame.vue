@@ -139,6 +139,7 @@ function init() {
     combatLock:false, // true when room has enemies and exits are sealed
     ss:null, // side-scroll passage state: {vy,grounded,onLadder,jumping,facing,pi}
     bossWarp:null, // {x,y,t,ready,di} — warp portal after boss death
+    pushAnim:null, // {fx,fy,tx,ty,t,dur,reveal,rx,ry,isDg} — smooth block slide
   };
 }
 
@@ -766,23 +767,20 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       }
       else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP&&m2[by][bx]!==T.PIT&&m2[by][bx]!==T.STAIRS_DOWN&&m2[by][bx]!==T.LEVER&&m2[by][bx]!==T.TORCH){
         const wasPlate=m2[by][bx]===T.PLATE;
-        m2[by][bx]=T.PUSH;
-        // Check if stairway is hidden under this block
+        // Determine what tile to reveal under the block
+        let revealTile=s.loc.ty==="dg"?T.FLOOR:T.GRASS;
         const roomDSU=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
         if(roomDSU?.stairsUnder&&roomDSU.stairsUnder[0]===ftx&&roomDSU.stairsUnder[1]===fty){
-          m2[fty][ftx]=T.STAIRS_DOWN;sfx("secret");s.shake.t=400;
-          s.msg={text:"A hidden stairway!",t:2000};
-          s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+          revealTile=T.STAIRS_DOWN;
         }else if(s.loc.ty==="ow"){
-          // Check if a cave entrance is hidden under this boulder
-          let caveFound=false;
-          for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){caveFound=true;break;}}if(caveFound)break;}}
-          if(caveFound){m2[fty][ftx]=T.ENTRANCE;sfx("secret");s.shake.t=400;
-            s.msg={text:"A hidden cave entrance!",t:2000};
-            s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
-          }else{m2[fty][ftx]=T.GRASS;}
-        }else{m2[fty][ftx]=T.FLOOR;}
-        s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
+          for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){revealTile=T.ENTRANCE;break;}}if(revealTile===T.ENTRANCE)break;}}
+        }
+        // Start smooth slide animation
+        m2[by][bx]=T.PUSH;// destination tile becomes push block immediately (collision)
+        m2[fty][ftx]=T.FLOOR;// temp clear source for rendering (animation overlays)
+        s.pushAnim={fx:ftx*TL,fy:fty*TL,tx:bx*TL,ty:by*TL,t:0,dur:250,
+          reveal:revealTile,rx:ftx,ry:fty,isDg:s.loc.ty==="dg",wasPlate};
+        s.pushCd=true;
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){s.shake.t=200;
           // Check if room has stairsReveal — if so, reveal STAIRS_DOWN instead of key
@@ -806,7 +804,24 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
       }else{sfx("pickup");s.msg={text:"Lever pulled! A key appeared!",t:1500};
         m2[5][8]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:8*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}}}
-
+  // Push block slide animation
+  if(s.pushAnim){s.pushAnim.t+=dt;
+    if(s.pushAnim.t>=s.pushAnim.dur){
+      // Animation complete — reveal tile under original position
+      const pa=s.pushAnim,m3=gm(s);
+      if(m3){
+        m3[pa.ry][pa.rx]=pa.reveal;
+        if(pa.reveal===T.STAIRS_DOWN){sfx("secret");s.shake.t=400;
+          s.msg={text:"A hidden stairway!",t:2000};
+          s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+        }else if(pa.reveal===T.ENTRANCE){sfx("secret");s.shake.t=400;
+          s.msg={text:"A hidden cave entrance!",t:2000};
+          s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+        }
+      }
+      s.pushCd=false;s.pushAnim=null;
+    }
+  }
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){
       if(m2[pty][ptx]===T.SPIKE&&Math.sin(s.gt/750)>0&&p.ifr<=0){if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
@@ -1873,6 +1888,30 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="vine_creeper")dVc(c,ex,ey,sz,fl,t);
     else if(e.type==="stalfos")dSf(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
+  // Draw push block slide animation
+  if(s.pushAnim){const pa=s.pushAnim,pr=Math.min(1,pa.t/pa.dur);
+    // Ease-out curve for smooth deceleration
+    const ep=1-Math.pow(1-pr,2);
+    const ax=pa.fx+(pa.tx-pa.fx)*ep,ay=pa.fy+(pa.ty-pa.fy)*ep;
+    // Draw the sliding block at interpolated position
+    if(!iD){
+      // Overworld boulder (same as ROCK rendering)
+      c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(ax+18,ay+24,12,4,0.1,0,Math.PI*2);c.fill();
+      const prg2=c.createRadialGradient(ax+13,ay+11,3,ax+16,ay+16,15);
+      prg2.addColorStop(0,"#aaa8a0");prg2.addColorStop(0.3,"#908880");prg2.addColorStop(0.6,"#787068");prg2.addColorStop(1,"#585048");
+      c.fillStyle=prg2;c.beginPath();c.ellipse(ax+16,ay+15,14,11,0,0,Math.PI*2);c.fill();
+      c.fillStyle="rgba(255,255,255,0.2)";c.beginPath();c.ellipse(ax+11,ay+10,6,4,-.4,0,Math.PI*2);c.fill();
+      c.fillStyle="rgba(0,0,0,0.25)";c.beginPath();c.ellipse(ax+20,ay+20,8,5,0.2,0,Math.PI*2);c.fill();
+    }else{
+      // Dungeon push block
+      const pbg2=c.createLinearGradient(ax,ay,ax+TL,ay+TL);pbg2.addColorStop(0,"#7a7a88");pbg2.addColorStop(1,"#5a5a68");
+      c.fillStyle=pbg2;c.fillRect(ax+2,ay+2,TL-4,TL-4);
+      c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(ax+2,ay+2,TL-4,3);c.fillRect(ax+2,ay+2,3,TL-4);
+      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(ax+2,ay+TL-5,TL-4,3);c.fillRect(ax+TL-5,ay+2,3,TL-4);
+    }
+    // Dust particles while sliding
+    if(pr<0.8&&Math.random()<0.4){s.pt.push({x:ax+16+(Math.random()-.5)*10,y:ay+TL-2,dx:(Math.random()-.5)*1.5,dy:-Math.random()*1,l:200,c:iD?"#888":"#a89060"});}
+  }
   // Draw blade traps
   for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
     // Shadow
