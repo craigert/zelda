@@ -1888,7 +1888,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillText("!",nx+16,ny+13);c.textAlign="left";
       // Exclamation when near
       const pdist3=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
-      if(pdist3<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("READ",nx+16,ny-4+bob);c.textAlign="left";}
+      if(pdist3<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 12px monospace";c.textAlign="center";c.fillText("!",nx+16,ny-4+bob);c.textAlign="left";}
       continue;}
     // Shadow
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+29,10,3,0,0,Math.PI*2);c.fill();
