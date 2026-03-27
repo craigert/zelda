@@ -1867,6 +1867,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const pdist2=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
       if(pdist2<TL*3){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("!",nx+16,ny-10+bob);c.textAlign="left";}
       continue;}
+    // Sign post
+    if(npc.name==="Sign"){
+      // Post
+      c.fillStyle="#5a3a18";c.fillRect(nx+14,ny+12,4,20);
+      // Sign board
+      c.fillStyle="#8a6a30";c.fillRect(nx+4,ny+4,24,14);
+      c.fillStyle="#a08040";c.fillRect(nx+5,ny+5,22,12);
+      // Nails
+      c.fillStyle="#888";c.fillRect(nx+6,ny+6,2,2);c.fillRect(nx+24,ny+6,2,2);
+      // Text hint
+      c.fillStyle="#543820";c.font="bold 5px monospace";c.textAlign="center";
+      c.fillText("!",nx+16,ny+13);c.textAlign="left";
+      // Exclamation when near
+      const pdist3=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
+      if(pdist3<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("READ",nx+16,ny-4+bob);c.textAlign="left";}
+      continue;}
     // Shadow
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+29,10,3,0,0,Math.PI*2);c.fill();
     // Body/robe

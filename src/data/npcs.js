@@ -70,5 +70,10 @@ export const NPC_DATA = {
       "Light dim torches with your sword...",
       "and the darkness will reward you."
     ]},
+    { tx: 8, ty: 8, name: "Sign", fixed: true, lines: [
+      "BEWARE OF SWAMP!",
+      "Poisonous bog lies ahead.",
+      "Stay on the path!"
+    ]},
   ],
 };
