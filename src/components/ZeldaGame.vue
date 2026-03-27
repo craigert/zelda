@@ -550,7 +550,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(ky.has("arrowright")||ky.has("d")||tc.dir==="right"){dx2=1;ss.facing=1;}
     const upKey=ky.has("arrowup")||ky.has("w")||tc.dir==="up";
     const downKey=ky.has("arrowdown")||ky.has("s")||tc.dir==="down";
-    const jumpKey=ky.has(" ")||ky.has("z")||tc.atk;
+    const jumpKey=upKey; // Up/W to jump in side-scroll (Space/Z reserved for sword)
     // Horizontal movement
     const hspd=p.spd*1.2*(dt/16);
     p.x+=dx2*hspd;
