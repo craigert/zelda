@@ -280,13 +280,15 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[3][7]=T.RUPEE;m[8][7]=T.RUPEE;m[3][8]=T.RUPEE;m[8][8]=T.RUPEE;
   }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:10,type:"miniboss",name:"Flame Sentinel"}],reward:"bomb_bag"},
 
-  // East of lava crossing — timed switch & ice
+  // East of lava crossing — timed switch opens doors to treasure across ice
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);
     m[9][3]=T.TSWITCH;m[9][12]=T.TSWITCH;
+    // Doors blocking the top section — opened by timed switch
+    m[3][6]=T.DOOR;m[3][7]=T.DOOR;m[3][8]=T.DOOR;m[3][9]=T.DOOR;
     for(let x=4;x<=11;x++){m[4][x]=T.SPIKE;m[7][x]=T.SPIKE;}
     m[5][5]=T.ICE;m[5][6]=T.ICE;m[5][7]=T.ICE;m[5][8]=T.ICE;m[5][9]=T.ICE;m[5][10]=T.ICE;
     m[6][5]=T.ICE;m[6][6]=T.ICE;m[6][7]=T.ICE;m[6][8]=T.ICE;m[6][9]=T.ICE;m[6][10]=T.ICE;
-    m[2][7]=T.HEART;m[2][8]=T.HEART;
+    m[2][7]=T.KEY;m[2][8]=T.HEART;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"fire_bat"},{x:9*TL,y:6*TL,hp:4,type:"fire_bat"}]},
 

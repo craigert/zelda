@@ -723,20 +723,17 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       const tk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:tswitch`;
       if(!s.timedDoors.find(td=>td.key===tk)){
         sfx("pickup");s.msg={text:"Timed switch! Hurry!",t:1500};s.shake.t=200;
-        // Open walls temporarily (not locked doors) -- creates timed passages
-        const openedWalls=[];
-        for(let yy=1;yy<RO-1;yy++)for(let xx=1;xx<CO-1;xx++){if(m2[yy][xx]===T.WALL){
-          // Only open walls adjacent to floor on both sides (passageway walls)
-          const adjFloor=(yy>0&&m2[yy-1]&&m2[yy-1][xx]===T.FLOOR)||(yy<RO-1&&m2[yy+1]&&m2[yy+1][xx]===T.FLOOR)||(xx>0&&m2[yy][xx-1]===T.FLOOR)||(xx<CO-1&&m2[yy][xx+1]===T.FLOOR);
-          const adjFloor2=(yy>0&&m2[yy-1]&&(m2[yy-1][xx]===T.FLOOR||m2[yy-1][xx]===T.SPIKE))&&(yy<RO-1&&m2[yy+1]&&(m2[yy+1][xx]===T.FLOOR||m2[yy+1][xx]===T.SPIKE))||
-            ((xx>0&&(m2[yy][xx-1]===T.FLOOR||m2[yy][xx-1]===T.SPIKE))&&(xx<CO-1&&(m2[yy][xx+1]===T.FLOOR||m2[yy][xx+1]===T.SPIKE)));
-          if(adjFloor&&adjFloor2){m2[yy][xx]=T.FLOOR;openedWalls.push([xx,yy]);
-            s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}}}
-        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,walls:openedWalls});}}}
+        // Open all DOOR tiles in the room temporarily
+        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
+          const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
+          s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}}
+        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty});}}}
   for(let i=s.timedDoors.length-1;i>=0;i--){const td=s.timedDoors[i];td.t-=dt;
-    if(td.t<=0){const m2=td.ty==="dg"?s.dg[td.di]?.rooms[td.scr]?.tiles:null;
-      if(m2&&td.walls){for(const[wx,wy]of td.walls)m2[wy][wx]=T.WALL;}
-      s.timedDoors.splice(i,1);sfx("door");}}
+    if(td.t<=0){// Re-lock all DOOR tiles in the room
+      const m2=td.ty==="dg"?s.dg[td.di]?.rooms[td.scr]?.tiles:null;
+      if(m2){for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.DOOR){
+        const dk=`${td.ty}:${td.di}:${td.scr}:${xx},${yy}`;s.dr.delete(dk);}}}
+      s.timedDoors.splice(i,1);sfx("door");s.msg={text:"Doors closed!",t:1000};}}
   {const m2=gm(s);if(m2){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
     const ftx=pcx+(p.dir===1?1:p.dir===3?-1:0),fty=pcy+(p.dir===0?-1:p.dir===2?1:0);
