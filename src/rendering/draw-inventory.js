@@ -356,10 +356,10 @@ function countSecrets(s){
   let found=0,total=7;
   // 4 heart pieces in the overworld
   if(s.p.heartPieces>=1)found++;if(s.p.heartPieces>=2)found++;if(s.p.heartPieces>=3)found++;if(s.p.heartPieces>=4)found++;
-  // 3 special items: banana (red armor), shop discovery, magic jar
-  if(s.p.redArmor)found++;// banana
-  if(s.hasLantern||s.hasShieldUp)found++;// shop (bought something)
-  if(s.hasJar)found++;// magic jar
+  // 3 special discoveries: banana (red armor), shop, magic jar
+  if(s.p.redArmor)found++;// banana cave
+  if(s.shopVisited)found++;// found the shop
+  if(s.hasJar)found++;// magic jar cave
   return{found,total};
 }
 
