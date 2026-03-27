@@ -676,7 +676,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[5][4]=T.TORCH;m[5][11]=T.TORCH;m[6][4]=T.TORCH;m[6][11]=T.TORCH;
     // Triforce reward
     m[2][7]=T.FLOOR;
-  }),enemies:[{x:7.5*TL,y:5*TL,hp:24,type:"boss",name:"Dark King",pattern:"all"}]},
+  }),enemies:[{x:7.5*TL,y:5*TL,hp:36,type:"boss",name:"Dark King",pattern:"all"}]},
 }};
 
 export const DG=[d1,d2,d3,d4];

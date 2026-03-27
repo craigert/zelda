@@ -1266,51 +1266,59 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(e.hitCount>=2&&e.phase!=="vanish"){e.phase="vanish";e.phaseT=0;e.hitCount=0;e.shadowForm=true;
             s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:600,c:"#606"})));sfx("bomb");}
           // Phase machine
+          // Gets more aggressive below half HP
+          const enraged=e.hp<e.mhp*0.5;
           if(e.phase==="stalk"){
-            // Circle player menacingly, face them
-            const ca=e.mt/800;const orbR=80+Math.sin(e.mt/1200)*20;
-            moveX=Math.cos(ca)*es*0.8;moveY=Math.sin(ca)*es*0.8;
-            // Throw spear at player periodically
-            if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
+            // Circle player menacingly
+            const ca=e.mt/600;
+            moveX=Math.cos(ca)*es*(enraged?1.2:0.8);moveY=Math.sin(ca)*es*(enraged?1.2:0.8);
+            // Throw spears at player — faster when enraged
+            const spearRate=enraged?1000:1500;
+            if(Math.floor(e.mt/spearRate)!==Math.floor((e.mt-dt)/spearRate)){
               const sa=Math.atan2(pcy-ecy,pcx-ecx);
-              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*4,dy:Math.sin(sa)*4,type:"shadow",l:1200});sfx("sword");}
-            // Transition to vanish after 4s
-            if(e.phaseT>4000){e.phase="vanish";e.phaseT=0;e.shadowForm=true;
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*4.5,dy:Math.sin(sa)*4.5,type:"shadow",l:1200});
+              // Enraged: throw a spread of 3
+              if(enraged){for(let i=-1;i<=1;i+=2)s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa+i*0.25)*4,dy:Math.sin(sa+i*0.25)*4,type:"shadow",l:1000});}
+              sfx("sword");}
+            // Transition to vanish after 3s (was 4s)
+            if(e.phaseT>(enraged?2000:3000)){e.phase="vanish";e.phaseT=0;e.shadowForm=true;
               s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:600,c:"#606"})));sfx("bomb");}
           }else if(e.phase==="vanish"){
             // Invisible — teleport to random spots, throw spears from darkness
             moveX=0;moveY=0;e.shadowForm=true;
             // Shadow trail
             s.pt.push({x:ecx+(Math.random()-.5)*20,y:ecy+(Math.random()-.5)*20,dx:(Math.random()-.5)*1,dy:(Math.random()-.5)*1,l:300,c:"rgba(100,0,150,0.5)"});
-            // Teleport every 800ms
-            if(Math.floor(e.phaseT/800)!==Math.floor((e.phaseT-dt)/800)){
+            // Teleport faster when enraged
+            const tpRate=enraged?500:800;
+            if(Math.floor(e.phaseT/tpRate)!==Math.floor((e.phaseT-dt)/tpRate)){
               e.x=TL*2+Math.random()*(W2-TL*5);e.y=TL*2+Math.random()*(H2-TL*5);
               s.pt.push(...Array.from({length:8},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#a0a"})));}
-            // Spear from darkness every 1.2s
-            if(Math.floor(e.phaseT/1200)!==Math.floor((e.phaseT-dt)/1200)){
+            // Triple spear from darkness
+            const darkSpearRate=enraged?800:1200;
+            if(Math.floor(e.phaseT/darkSpearRate)!==Math.floor((e.phaseT-dt)/darkSpearRate)){
               const sa=Math.atan2(pcy-(e.y+ES/2),pcx-(e.x+ES/2));
-              s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*3.5,dy:Math.sin(sa)*3.5,type:"shadow",l:1500});sfx("sword");}
-            // Reappear after 3s
-            if(e.phaseT>3000){e.phase="dash";e.phaseT=0;e.shadowForm=false;e.hitCount=0;
-              // Reappear with burst
-              for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"shadow",l:800});}
+              for(let i=-1;i<=1;i++){s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa+i*0.2)*3.5,dy:Math.sin(sa+i*0.2)*3.5,type:"shadow",l:1500});}sfx("sword");}
+            // Reappear after 3.5s
+            if(e.phaseT>3500){e.phase="dash";e.phaseT=0;e.shadowForm=false;e.hitCount=0;
+              // Reappear with 12-bolt burst
+              for(let a=0;a<12;a++){const ra=a*Math.PI/6;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.8,dy:Math.sin(ra)*2.8,type:"shadow",l:900});}
               s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:500,c:"#f0f"})));sfx("bomb");}
           }else if(e.phase==="dash"){
             // Fast aggressive charge at player
-            const bsp=es*3.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            const bsp=es*(enraged?4.5:3.5);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
             // Block incoming sword strikes during dash
             e.blocking=200;
             // Trail particles
             s.pt.push({x:ecx+(Math.random()-.5)*6,y:ecy+(Math.random()-.5)*6,dx:-moveX*0.3,dy:-moveY*0.3,l:200,c:"#f0f"});
-            // Spear thrust when close
-            if(dist<60&&Math.floor(e.phaseT/600)!==Math.floor((e.phaseT-dt)/600)){
-              const sa=Math.atan2(pcy-ecy,pcx-ecx);
-              for(let i=-1;i<=1;i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa+i*0.3)*4.5,dy:Math.sin(sa+i*0.3)*4.5,type:"shadow",l:600});}sfx("bomb");}
-            // Back to stalk after 2.5s
-            if(e.phaseT>2500){e.phase="stalk";e.phaseT=0;e.blocking=0;}
+            // Spear thrust when close — wider spread when enraged
+            if(dist<70&&Math.floor(e.phaseT/500)!==Math.floor((e.phaseT-dt)/500)){
+              const sa=Math.atan2(pcy-ecy,pcx-ecx);const sp=enraged?5:3;
+              for(let i=-(sp>>1);i<=(sp>>1);i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa+i*0.2)*5,dy:Math.sin(sa+i*0.2)*5,type:"shadow",l:700});}sfx("bomb");}
+            // Back to stalk after 2s (was 2.5s)
+            if(e.phaseT>2000){e.phase="stalk";e.phaseT=0;e.blocking=0;}
           }
-          // Spawn ghost minions periodically regardless of phase
-          if(Math.floor(e.mt/5000)!==Math.floor((e.mt-dt)/5000)&&s.en.length<5){
+          // Spawn ghost minions more often — every 3.5s (was 5s)
+          if(Math.floor(e.mt/3500)!==Math.floor((e.mt-dt)/3500)&&s.en.length<(enraged?6:4)){
             s.en.push({x:TL*2+Math.random()*(W2-TL*4),y:TL*2+Math.random()*(H2-TL*4),hp:3,mhp:3,type:"ghost",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}
         }else{const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
       }else if(e.type==="archer"){
