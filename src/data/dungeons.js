@@ -111,7 +111,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][2]=T.RUPEE;m[8][2]=T.RUPEE;m[6][4]=T.HEART;
     m[9][2]=T.STAIRS_DOWN;// Passage exit back to main dungeon
     // Right side — crack wall at top (bombable later, not accessible in D0)
-    m[1][9]=T.CRACK;m[1][10]=T.CRACK; // bomb wall — leads north to -1,-2
+    m[0][9]=T.CRACK;m[0][10]=T.CRACK; // bomb wall in north wall — leads to -1,-2
     m[5][8]=T.HEART;m[5][9]=T.HEART;
     m[3][10]=T.TORCH;m[8][10]=T.TORCH;
     m[4][9]=T.RUPEE;m[7][9]=T.RUPEE;
