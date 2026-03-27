@@ -1122,15 +1122,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");p.burn=1500;p.burnTick=0;
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
   // NPC wandering
-  for(const ns2 of s.npcState){ns2.mt+=dt;if(ns2.fixed)continue;ns2.wait-=dt;
-    if(ns2.st==="idle"&&ns2.wait<=0){ns2.st="walk";ns2.wait=800+Math.random()*1500;
+  {const npcsD=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
+  for(let ni2=0;ni2<s.npcState.length;ni2++){const ns2=s.npcState[ni2];ns2.mt+=dt;if(ns2.fixed)continue;
+    const isDog=npcsD&&npcsD[ni2]&&npcsD[ni2].name==="Dog";
+    ns2.wait-=dt;
+    if(ns2.st==="idle"&&ns2.wait<=0){ns2.st="walk";ns2.wait=isDog?400+Math.random()*600:800+Math.random()*1500;
       ns2.dir=[0,1,2,3][Math.random()*4|0];}
-    else if(ns2.st==="walk"){const nsp=0.5*(dt/16);
+    else if(ns2.st==="walk"){const nsp=(isDog?1.5:0.5)*(dt/16);
       let nx2=ns2.x,ny2=ns2.y;
       if(ns2.dir===0)ny2-=nsp;if(ns2.dir===2)ny2+=nsp;if(ns2.dir===1)nx2+=nsp;if(ns2.dir===3)nx2-=nsp;
-      // Stay within 2 tiles of home
-      if(Math.abs(nx2-ns2.hx)<TL*2&&Math.abs(ny2-ns2.hy)<TL*2&&nx2>TL&&nx2<W2-TL*2&&ny2>TL&&ny2<H2-TL*2){ns2.x=nx2;ns2.y=ny2;}
-      ns2.wait-=dt;if(ns2.wait<=0){ns2.st="idle";ns2.wait=1500+Math.random()*3000;}}}
+      const wander=isDog?TL*3:TL*2;
+      if(Math.abs(nx2-ns2.hx)<wander&&Math.abs(ny2-ns2.hy)<wander&&nx2>TL&&nx2<W2-TL*2&&ny2>TL&&ny2<H2-TL*2){ns2.x=nx2;ns2.y=ny2;}
+      ns2.wait-=dt;if(ns2.wait<=0){ns2.st="idle";ns2.wait=isDog?300+Math.random()*800:1500+Math.random()*3000;}}}}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];
     if(e.spawnT>0){e.spawnT-=dt;continue;}
@@ -2118,6 +2121,41 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Exclamation when near
       const pdist3=Math.hypot(p.x+PS/2-nx-16,p.y+PS/2-ny-16);
       if(pdist3<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 12px monospace";c.textAlign="center";c.fillText("!",nx+16,ny-4+bob);c.textAlign="left";}
+      continue;}
+    // Dog
+    if(npc.name==="Dog"){
+      const run=walking?Math.sin(ns2.mt/80):0;const tailWag=Math.sin(ns2.mt/100)*0.6;
+      const flip=ndir===3?-1:1;const cx=nx+16;
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.12)";c.beginPath();c.ellipse(cx,ny+28,8,2.5,0,0,Math.PI*2);c.fill();
+      // Body
+      c.fillStyle="#b08040";c.beginPath();c.ellipse(cx,ny+20,8,5,0,0,Math.PI*2);c.fill();
+      // Belly
+      c.fillStyle="#d0a860";c.beginPath();c.ellipse(cx,ny+22,5,3,0,0,Math.PI*2);c.fill();
+      // Legs
+      c.fillStyle="#956830";
+      const legF=walking?run*3:0;
+      c.fillRect(cx-6,ny+23+legF,2,5-legF*0.3);c.fillRect(cx-2,ny+23-legF,2,5+legF*0.3);
+      c.fillRect(cx+2,ny+23+legF,2,5-legF*0.3);c.fillRect(cx+5,ny+23-legF,2,5+legF*0.3);
+      // Head
+      const hx2=ndir===1?5:ndir===3?-5:0,hy2=ndir===0?-3:ndir===2?2:0;
+      c.fillStyle="#b08040";c.beginPath();c.arc(cx+hx2,ny+14+hy2,5,0,Math.PI*2);c.fill();
+      // Snout
+      c.fillStyle="#c89850";c.beginPath();c.ellipse(cx+hx2+(ndir===1?3:ndir===3?-3:0),ny+16+hy2+(ndir===0?-2:ndir===2?2:0),3,2,0,0,Math.PI*2);c.fill();
+      // Nose
+      c.fillStyle="#222";c.beginPath();c.arc(cx+hx2+(ndir===1?5:ndir===3?-5:0),ny+15+hy2+(ndir===0?-3:ndir===2?3:0),1.2,0,Math.PI*2);c.fill();
+      // Eyes
+      c.fillStyle="#222";
+      if(ndir===0||ndir===2){c.beginPath();c.arc(cx+hx2-2,ny+13+hy2,1,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+hx2+2,ny+13+hy2,1,0,Math.PI*2);c.fill();}
+      else{const ex=ndir===1?2:-2;c.beginPath();c.arc(cx+hx2+ex,ny+13+hy2,1.2,0,Math.PI*2);c.fill();}
+      // Ears
+      c.fillStyle="#8a5a20";
+      if(ndir===1||ndir===0||ndir===2){c.beginPath();c.ellipse(cx+hx2-3,ny+11+hy2,2,4,-.3,0,Math.PI*2);c.fill();}
+      if(ndir===3||ndir===0||ndir===2){c.beginPath();c.ellipse(cx+hx2+3,ny+11+hy2,2,4,.3,0,Math.PI*2);c.fill();}
+      // Tail
+      c.strokeStyle="#b08040";c.lineWidth=2;c.beginPath();
+      const tx2=ndir===1?-7:ndir===3?7:flip*-6;
+      c.moveTo(cx+tx2,ny+17);c.quadraticCurveTo(cx+tx2+Math.sin(tailWag)*4,ny+10,cx+tx2+Math.sin(tailWag)*6,ny+12);c.stroke();
       continue;}
     // Shadow
     c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(nx+16,ny+29,10,3,0,0,Math.PI*2);c.fill();

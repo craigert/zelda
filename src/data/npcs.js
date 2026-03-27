@@ -8,6 +8,11 @@ export const NPC_DATA = {
       "hidden in the Forest Temple, Fire Cavern,",
       "and Shadow Keep. Beware the Dark Sanctum!"
     ]},
+    { tx: 10, ty: 7, name: "Dog", lines: [
+      "Arf! Arf arf!",
+      "*wags tail happily*",
+      "Bark!!"
+    ]},
   ],
   "0,0": [
     { tx: 12, ty: 3, name: "Forest Guide", lines: [
