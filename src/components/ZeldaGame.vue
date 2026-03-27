@@ -1,6 +1,6 @@
 <template>
   <div ref="wrapRef" :style="{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#060608',fontFamily:'monospace',color:'#ccc',padding:0,width:'100%',height:'100vh',overflow:'hidden',userSelect:'none',WebkitUserSelect:'none'}">
-    <canvas ref="cvRef" :width="W2*4" :height="(H2+HH)*4" @click="onCanvasClick" :style="{border:'none',width:'100%',maxHeight:'70vh',aspectRatio:`${W2}/${H2+HH}`}"/>
+    <canvas ref="cvRef" :width="W2*4" :height="(H2+HH)*4" @click="onCanvasClick" :style="{border:'none',maxWidth:'100%',maxHeight:'70vh',width:'auto',height:'auto',aspectRatio:`${W2}/${H2+HH}`}"/>
     <div :style="{display:'flex',gap:'48px',marginTop:'14px',alignItems:'center'}">
       <div :style="{position:'relative',width:'104px',height:'104px'}">
         <button v-for="[d,l,tt,ch] in [['up',36,0,'▲'],['down',36,70,'▼'],['left',0,35,'◀'],['right',70,35,'▶']]" :key="d"
