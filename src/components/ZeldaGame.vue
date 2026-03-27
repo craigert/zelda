@@ -138,6 +138,7 @@ function init() {
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
     ss:null, // side-scroll passage state: {vy,grounded,onLadder,jumping,facing,pi}
+    bossWarp:null, // {x,y,t,ready,di} — warp portal after boss death
   };
 }
 
@@ -896,6 +897,27 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
+  // Boss warp portal — appears after boss death, warps player to overworld
+  if(s.bossWarp){s.bossWarp.t+=dt;
+    if(!s.bossWarp.ready&&s.bossWarp.t>3000){
+      // Portal appears after 3 seconds (time for drops to land)
+      s.bossWarp.ready=true;sfx("secret");s.msg={text:"A warp portal appeared!",t:2500};
+      const wx=s.bossWarp.x,wy=s.bossWarp.y;
+      s.pt.push(...Array.from({length:20},()=>({x:wx*TL+16,y:wy*TL+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));
+    }
+    if(s.bossWarp.ready){
+      const wx=s.bossWarp.x*TL,wy=s.bossWarp.y*TL;
+      // Check if player stepped on the portal
+      if(p.x+PS/2>wx&&p.x+PS/2<wx+TL&&p.y+PS/2>wy&&p.y+PS/2<wy+TL){
+        const di=s.bossWarp.di;s.bossWarp=null;
+        s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
+          const ent=DE[di];s.loc.ty="ow";s.loc.scr=ent.s;s.loc.di=-1;
+          const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;
+          s.triMu=false;s.ec=500;le(s);s.msg={text:"Warped to entrance!",t:1500};
+        }};
+      }
+    }
+  }
   // Chest update -- requires action button to open
   if(s.chest){const ch=s.chest;ch.t+=dt;const ky=kyR.value;
     if(ch.state==="closed"){const cdx=p.x+PS/2-(ch.x+12),cdy=p.y+PS/2-(ch.y+12);
@@ -1131,6 +1153,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
         if(s.loc.di===3){s.won=true;s.msg={text:"The Dark King is defeated! Peace restored!",t:99999};}
+        // Spawn warp portal after boss death (delayed so drops land first)
+        if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
+          s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
       }else if(e.type==="miniboss"){sfx("bossdeath");s.shake.t=400;s.freeze=300;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0});
         s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
@@ -2078,6 +2103,25 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle="#5B2A0B";c.fillRect(cx2+2,cy2+10,20,12);
       c.fillStyle="#8A582C";c.fillRect(cx2-1,cy2-2,26,6);
       c.fillStyle="#cc9922";c.fillRect(cx2+10,cy2+12,4,6);}}
+  // Boss warp portal rendering
+  if(s.bossWarp&&s.bossWarp.ready){const wx=s.bossWarp.x*TL+16,wy=s.bossWarp.y*TL+16;
+    const pulse=Math.sin(s.gt/200)*0.2+0.8;const spin=s.gt/500;
+    // Outer glow
+    const wg=c.createRadialGradient(wx,wy,4,wx,wy,20);
+    wg.addColorStop(0,`rgba(100,180,255,${0.5*pulse})`);wg.addColorStop(0.5,`rgba(60,120,255,${0.3*pulse})`);wg.addColorStop(1,"rgba(40,60,200,0)");
+    c.fillStyle=wg;c.beginPath();c.arc(wx,wy,20,0,Math.PI*2);c.fill();
+    // Swirling ring
+    c.strokeStyle=`rgba(150,200,255,${0.7*pulse})`;c.lineWidth=2;
+    c.beginPath();c.arc(wx,wy,10+Math.sin(s.gt/300)*2,spin,spin+Math.PI*1.5);c.stroke();
+    c.strokeStyle=`rgba(200,230,255,${0.5*pulse})`;c.lineWidth=1.5;
+    c.beginPath();c.arc(wx,wy,6+Math.sin(s.gt/250)*2,spin+Math.PI,spin+Math.PI*2.5);c.stroke();
+    // Center bright core
+    c.fillStyle=`rgba(220,240,255,${0.6*pulse})`;c.beginPath();c.arc(wx,wy,4,0,Math.PI*2);c.fill();
+    c.fillStyle=`rgba(255,255,255,${0.8*pulse})`;c.beginPath();c.arc(wx,wy,2,0,Math.PI*2);c.fill();
+    // Sparkle particles around portal
+    for(let i=0;i<4;i++){const a=spin*2+i*Math.PI/2,r=12+Math.sin(s.gt/200+i)*4;
+      c.fillStyle=`rgba(200,230,255,${0.5*pulse})`;c.beginPath();c.arc(wx+Math.cos(a)*r,wy+Math.sin(a)*r,1.5,0,Math.PI*2);c.fill();}
+  }
   for(const d2 of s.drops){const bob2=Math.sin(t/200)*2;
     if(d2.type==="heart"){c.fillStyle="#ee3333";dH(c,d2.x-6,d2.y-6+bob2,12);c.fillStyle="#ff8888";dH(c,d2.x-3,d2.y-4+bob2,6);}
     else if(d2.type==="heartcontainer"){
