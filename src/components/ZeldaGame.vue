@@ -33,7 +33,7 @@
     </div>
     <div v-if="showMuPicker" :style="{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:1000,background:'rgba(6,6,8,0.95)',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'8px',padding:'12px',maxWidth:'480px',width:'90%',maxHeight:'80vh',overflowY:'auto'}">
       <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC -- Pick files or paste URLs</div>
-      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['sanctum','🏰 Dark Sanctum'],['finalbattle','💀 Final Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
+      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['shop','🛒 Shop'],['sanctum','🏰 Dark Sanctum'],['finalbattle','💀 Final Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
           <span :style="{color:'#888',fontSize:'10px',fontFamily:'monospace',width:'100px',flexShrink:0}">{{ label }}</span>
@@ -2060,18 +2060,26 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw push block slide animation
   if(s.pushAnim){const pa=s.pushAnim,pr=Math.min(1,pa.t/pa.dur);
-    // Ease-out curve for smooth deceleration
-    const ep=1-Math.pow(1-pr,2);
+    // Ease: slow start, accelerate, then brake at end (cubic bezier feel)
+    const ep=pr<0.15?pr*pr*22.2:pr<0.85?0.05+(pr-0.15)*1.285:1-Math.pow(1-pr,3)*2.96;
     const ax=pa.fx+(pa.tx-pa.fx)*ep,ay=pa.fy+(pa.ty-pa.fy)*ep;
+    // Screen shake while sliding (subtle rumble)
+    if(pr>0.05&&pr<0.9){const rum=(1-Math.abs(pr-0.5)*2)*1.5;
+      c.save();c.translate((Math.random()-.5)*rum,(Math.random()-.5)*rum);}
     // Draw the sliding block at interpolated position
     if(!iD){
-      // Overworld boulder (same as ROCK rendering)
-      c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(ax+18,ay+24,12,4,0.1,0,Math.PI*2);c.fill();
+      // Shadow stretches during movement
+      const shadowStr=1+Math.sin(pr*Math.PI)*0.3;
+      c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(ax+18,ay+24,12*shadowStr,4,0.1,0,Math.PI*2);c.fill();
+      // Overworld boulder
       const prg2=c.createRadialGradient(ax+13,ay+11,3,ax+16,ay+16,15);
       prg2.addColorStop(0,"#aaa8a0");prg2.addColorStop(0.3,"#908880");prg2.addColorStop(0.6,"#787068");prg2.addColorStop(1,"#585048");
       c.fillStyle=prg2;c.beginPath();c.ellipse(ax+16,ay+15,14,11,0,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(255,255,255,0.2)";c.beginPath();c.ellipse(ax+11,ay+10,6,4,-.4,0,Math.PI*2);c.fill();
       c.fillStyle="rgba(0,0,0,0.25)";c.beginPath();c.ellipse(ax+20,ay+20,8,5,0.2,0,Math.PI*2);c.fill();
+      // Scrape marks on ground behind boulder
+      if(pr>0.1&&pr<0.95){const sx2=pa.fx+(pa.tx-pa.fx)*(ep*0.6),sy2=pa.fy+(pa.ty-pa.fy)*(ep*0.6);
+        c.strokeStyle="rgba(80,60,30,0.3)";c.lineWidth=2;c.beginPath();c.moveTo(pa.fx+16,pa.fy+22);c.lineTo(sx2+16,sy2+22);c.stroke();}
     }else{
       // Dungeon push block
       const pbg2=c.createLinearGradient(ax,ay,ax+TL,ay+TL);pbg2.addColorStop(0,"#7a7a88");pbg2.addColorStop(1,"#5a5a68");
@@ -2079,8 +2087,14 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(ax+2,ay+2,TL-4,3);c.fillRect(ax+2,ay+2,3,TL-4);
       c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(ax+2,ay+TL-5,TL-4,3);c.fillRect(ax+TL-5,ay+2,3,TL-4);
     }
-    // Dust particles while sliding
-    if(pr<0.8&&Math.random()<0.4){s.pt.push({x:ax+16+(Math.random()-.5)*10,y:ay+TL-2,dx:(Math.random()-.5)*1.5,dy:-Math.random()*1,l:200,c:iD?"#888":"#a89060"});}
+    // Restore from screen shake
+    if(pr>0.05&&pr<0.9)c.restore();
+    // Dust particles — more frequent and varied while sliding
+    if(pr>0.05&&pr<0.9){const dustRate=iD?0.5:0.7;
+      if(Math.random()<dustRate){const dx2=pa.tx-pa.fx,dy2=pa.ty-pa.fy;
+        s.pt.push({x:ax+16+(Math.random()-.5)*12,y:ay+TL-2+Math.random()*4,dx:(Math.random()-.5)*2-(dx2>0?0.5:dx2<0?-0.5:0),dy:-Math.random()*1.5-0.5,l:300+Math.random()*200,c:iD?"#888":"#a89060"});
+      }if(Math.random()<0.2){// Larger debris chunks
+        s.pt.push({x:ax+16+(Math.random()-.5)*8,y:ay+TL,dx:(Math.random()-.5)*3,dy:-Math.random()*2-1,l:400,c:iD?"#666":"#887050"});}}
   }
   // Draw blade traps
   for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
@@ -3073,7 +3087,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? (s.shopGround?"shop":"forest") : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
