@@ -1097,13 +1097,25 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       if(sp>0){c.fillStyle="#ff8";c.fillRect(px+21,py+6,3,3);}
       break;}
     case T.PUSH:{// Pushable block
-      const pbg=c.createLinearGradient(px,py,px+TL,py+TL);pbg.addColorStop(0,"#7a7a88");pbg.addColorStop(1,"#5a5a68");
-      c.fillStyle=pbg;c.fillRect(px+2,py+2,TL-4,TL-4);
-      c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(px+2,py+2,TL-4,3);c.fillRect(px+2,py+2,3,TL-4);
-      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+2,py+TL-5,TL-4,3);c.fillRect(px+TL-5,py+2,3,TL-4);
-      // Arrow marks showing it can be pushed
-      c.fillStyle="rgba(255,255,150,0.3)";c.font="10px monospace";c.textAlign="center";c.fillText("\u2B26",px+16,py+19);c.textAlign="left";
-      break;}
+      if(!iD){
+        // Overworld: looks like a natural boulder with subtle scratch marks
+        c.fillStyle="#4aaa3a";c.fillRect(px,py,TL,TL);// grass base
+        const rg=c.createRadialGradient(px+14,py+12,3,px+16,py+16,14);
+        rg.addColorStop(0,"#9a9080");rg.addColorStop(0.6,"#7a7060");rg.addColorStop(1,"#605848");
+        c.fillStyle=rg;c.beginPath();c.ellipse(px+16,py+16,13,11,0,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(255,255,255,0.15)";c.beginPath();c.ellipse(px+13,py+12,7,5,-.3,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(px+19,py+20,8,4,.2,0,Math.PI*2);c.fill();
+        // Subtle scratch marks hinting it can move
+        c.strokeStyle="rgba(255,255,200,0.12)";c.lineWidth=0.5;
+        c.beginPath();c.moveTo(px+10,py+20);c.lineTo(px+22,py+20);c.stroke();
+        c.beginPath();c.moveTo(px+16,py+10);c.lineTo(px+16,py+22);c.stroke();
+      }else{
+        // Dungeon: gray stone block with bevel
+        const pbg=c.createLinearGradient(px,py,px+TL,py+TL);pbg.addColorStop(0,"#7a7a88");pbg.addColorStop(1,"#5a5a68");
+        c.fillStyle=pbg;c.fillRect(px+2,py+2,TL-4,TL-4);
+        c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(px+2,py+2,TL-4,3);c.fillRect(px+2,py+2,3,TL-4);
+        c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px+2,py+TL-5,TL-4,3);c.fillRect(px+TL-5,py+2,3,TL-4);
+      }break;}
     case T.LEVER:{// Lever switch on floor
       c.fillStyle=iD?(dg.fc||dg.color):"#38982e";c.fillRect(px,py,TL,TL);
       if(iD){c.strokeStyle="rgba(255,255,255,0.03)";c.strokeRect(px+1,py+1,TL-2,TL-2);}
