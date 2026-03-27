@@ -772,6 +772,14 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           m2[fty][ftx]=T.STAIRS_DOWN;sfx("secret");s.shake.t=400;
           s.msg={text:"A hidden stairway!",t:2000};
           s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+        }else if(s.loc.ty==="ow"){
+          // Check if a cave entrance is hidden under this boulder
+          let caveFound=false;
+          for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){caveFound=true;break;}}if(caveFound)break;}}
+          if(caveFound){m2[fty][ftx]=T.ENTRANCE;sfx("secret");s.shake.t=400;
+            s.msg={text:"A hidden cave entrance!",t:2000};
+            s.pt.push(...Array.from({length:15},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
+          }else{m2[fty][ftx]=T.GRASS;}
         }else{m2[fty][ftx]=T.FLOOR;}
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));

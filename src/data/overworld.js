@@ -187,8 +187,8 @@ export const OW={
   m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
   m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
   m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
-  // Crack cave entrance
-  m[2][2]=T.TREE;m[2][3]=T.CRACK;
+  // Hidden cave under boulder — push to reveal
+  m[2][2]=T.TREE;m[2][3]=T.PUSH;
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Desert border — sand meets grass
@@ -374,8 +374,8 @@ export const OW={
   m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
   m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
   m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
-  // Crack cave
-  m[9][3]=T.CRACK;m[8][3]=T.ROCK;
+  // Hidden cave under boulder — push to reveal
+  m[9][3]=T.PUSH;m[8][3]=T.ROCK;
   oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
 
 // Beach — sand and water coast
