@@ -98,7 +98,7 @@ function init() {
   return {
     p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
-    en:[],pk:new Set(),dr:new Set(),cl:new Set(),
+    en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),// bc = bombed cracks "ty:di:scr:x,y" → replacement tile id
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
     title:true,saveSelect:false,saveSelIdx:0,
     fade:{a:false,alpha:0,dir:1,cb:null,t:0},
@@ -228,6 +228,7 @@ function saveGame(s) {
       pk: [...s.pk],
       dr: [...s.dr],
       cl: [...s.cl],
+      bc: [...(s.bc||[])],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
@@ -254,6 +255,7 @@ function applySave(s, save) {
   s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false;
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
+  s.bc = new Set(save.bc||[]);
   s.heartContainers = [...save.heartContainers];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0;
   s.respawn = { ...save.respawn };
@@ -261,6 +263,13 @@ function applySave(s, save) {
   if (s.finalOpen) {
     const fm = OW["3,2"];
     if (fm) { fm[5][7] = T.ENTRANCE; fm[5][8] = T.ENTRANCE; fm[6][7] = T.ENTRANCE; fm[6][8] = T.ENTRANCE; }
+  }
+  // Re-apply bombed cracks to tile maps
+  for(const bck of s.bc){const pts=bck.split(":");const[ty2,di2,scr2]=pts;const[tx2,ty3]=pts[3].split(",").map(Number);const repl=parseInt(pts[4]);
+    let m2=null;
+    if(ty2==="ow")m2=OW[scr2];
+    else if(ty2==="dg"&&s.dg[parseInt(di2)])m2=s.dg[parseInt(di2)].rooms[scr2]?.tiles;
+    if(m2&&ty3>=0&&ty3<RO&&tx2>=0&&tx2<CO)m2[ty3][tx2]=repl;
   }
   return true;
 }
@@ -545,7 +554,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
     if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
@@ -1014,7 +1023,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(mp2&&cy2>=0&&cy2<RO&&cx2>=0&&cx2<CO&&mp2[cy2][cx2]===T.CRACK){
           let isCave=false;
           if(s.loc.ty==="ow"){for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cvx,cvy]of cv.t){if(cvx===cx2&&cvy===cy2){isCave=true;break;}}if(isCave)break;}}}
-          mp2[cy2][cx2]=isCave?T.ENTRANCE:T.FLOOR;
+          const repl=isCave?T.ENTRANCE:T.FLOOR;
+          mp2[cy2][cx2]=repl;
+          s.bc.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${cx2},${cy2}:${repl}`);
           s.msg={text:isCave?"A hidden cave!":(s.loc.ty==="dg"?"Bombed a wall! Secret passage!":"Secret passage!"),t:2000};}}
       // Damage nearby enemies (3 tile radius)
       const blastR=TL*3;
