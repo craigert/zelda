@@ -522,6 +522,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     // Transition to end screen
     if(fd.t>=fd.dur){
       // Save completed game — player returns to start with all items on next load
+      // Clear the Dark Sanctum boss room so the boss respawns on replay
+      s.cl.delete("dg:3:0,-4");
       s.loc.ty="ow";s.loc.scr="1,1";s.loc.di=-1;s.p.x=7*TL;s.p.y=9*TL;s.p.hp=s.p.mhp;
       s.respawn={ty:"ow",scr:"1,1",di:-1,x:7*TL,y:9*TL};
       saveGame(s);
