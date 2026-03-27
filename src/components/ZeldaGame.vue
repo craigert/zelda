@@ -447,10 +447,10 @@ function cTr(s){const p=s.p,loc=s.loc;
             loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);
             if(cv.shop){s.shopVisited=true;
               s.shopGround=[
-                {tx:5,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
-                {tx:7,ty:7,name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;},collected:false},
-                {tx:8,ty:7,name:"Lantern",cost:30,once:"hasLantern",action:s2=>{s2.hasLantern=true;},collected:false},
-                {tx:10,ty:7,name:"Shield+",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
+                {tx:3,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
+                {tx:6,ty:7,name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;},collected:false},
+                {tx:9,ty:7,name:"Lantern",cost:30,once:"hasLantern",action:s2=>{s2.hasLantern=true;},collected:false},
+                {tx:12,ty:7,name:"Shield+",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
               ];
               if(s.p.hasBanana&&!s.p.redArmor){
                 s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:100,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});
@@ -2736,34 +2736,46 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Draw ground items with price tags
     for(const si of s.shopGround){
       if(si.collected)continue;
-      const ix=si.tx*TL,iy=si.ty*TL;
-      // Draw item sprite based on name
+      const ix=si.tx*TL,iy=si.ty*TL,cx2=ix+16,cy2=iy+16;
+      const bob=Math.sin(t/500+si.tx)*2;
+      // Glow pedestal under item
+      c.fillStyle="rgba(253,211,51,0.08)";c.beginPath();c.ellipse(cx2,iy+28,14,5,0,0,Math.PI*2);c.fill();
+      // Draw item sprite based on name (larger, centered)
       if(si.name==="Key"){
-        c.fillStyle="#fd3";c.fillRect(ix+12,iy+10,8,4);c.fillRect(ix+18,iy+8,4,8);c.fillRect(ix+12,iy+12,4,6);
+        c.fillStyle="#fd3";c.fillRect(ix+9,iy+12+bob,6,5);c.fillRect(ix+14,iy+10+bob,6,9);
+        c.fillStyle="#da0";c.fillRect(ix+9,iy+16+bob,4,5);c.fillRect(ix+9,iy+13+bob,3,3);
+        c.fillStyle="rgba(255,255,255,0.4)";c.fillRect(ix+15,iy+11+bob,3,2);
       }else if(si.name.includes("Bomb")){
-        c.fillStyle="#335";c.beginPath();c.arc(ix+16,iy+18,7,0,Math.PI*2);c.fill();
-        c.fillStyle="#555";c.fillRect(ix+14,iy+8,4,6);c.fillStyle="#f80";c.fillRect(ix+15,iy+6,2,4);
+        c.fillStyle="#334";c.beginPath();c.arc(cx2,iy+20+bob,9,0,Math.PI*2);c.fill();
+        c.fillStyle="#445";c.beginPath();c.arc(cx2-2,iy+18+bob,5,0,Math.PI*2);c.fill();
+        c.fillStyle="#666";c.fillRect(ix+13,iy+8+bob,6,7);
+        c.fillStyle="#f80";const ft=Math.sin(t/100)*0.5+1;c.beginPath();c.arc(cx2,iy+6+bob,2*ft,0,Math.PI*2);c.fill();
+        c.fillStyle="#ff4";c.beginPath();c.arc(cx2,iy+6+bob,ft,0,Math.PI*2);c.fill();
       }else if(si.name==="Lantern"){
-        c.fillStyle="#654321";c.fillRect(ix+14,iy+8,4,10);
-        c.fillStyle="#fa0";c.beginPath();c.arc(ix+16,iy+22,6,0,Math.PI*2);c.fill();
-        c.fillStyle="#ff8";c.beginPath();c.arc(ix+16,iy+21,3,0,Math.PI*2);c.fill();
+        c.fillStyle="#654321";c.fillRect(ix+13,iy+6+bob,6,14);
+        c.fillStyle="#543210";c.fillRect(ix+11,iy+18+bob,10,4);
+        const fg=c.createRadialGradient(cx2,iy+24+bob,1,cx2,iy+24+bob,8);
+        fg.addColorStop(0,"#ff8");fg.addColorStop(0.4,"#fa0");fg.addColorStop(1,"rgba(255,160,0,0)");
+        c.fillStyle=fg;c.beginPath();c.arc(cx2,iy+24+bob,8,0,Math.PI*2);c.fill();
       }else if(si.name.includes("Shield")){
-        c.fillStyle="#4466cc";c.beginPath();c.moveTo(ix+8,iy+8);c.lineTo(ix+24,iy+8);c.lineTo(ix+24,iy+22);c.lineTo(ix+16,iy+28);c.lineTo(ix+8,iy+22);c.fill();
-        c.fillStyle="#6688ee";c.beginPath();c.moveTo(ix+11,iy+11);c.lineTo(ix+21,iy+11);c.lineTo(ix+21,iy+20);c.lineTo(ix+16,iy+24);c.lineTo(ix+11,iy+20);c.fill();
-        c.fillStyle="#fd3";c.beginPath();c.arc(ix+16,iy+16,3,0,Math.PI*2);c.fill();
+        c.fillStyle="#3355bb";c.beginPath();c.moveTo(ix+5,iy+6+bob);c.lineTo(ix+27,iy+6+bob);c.lineTo(ix+27,iy+22+bob);c.lineTo(cx2,iy+29+bob);c.lineTo(ix+5,iy+22+bob);c.fill();
+        c.fillStyle="#5577dd";c.beginPath();c.moveTo(ix+8,iy+9+bob);c.lineTo(ix+24,iy+9+bob);c.lineTo(ix+24,iy+20+bob);c.lineTo(cx2,iy+26+bob);c.lineTo(ix+8,iy+20+bob);c.fill();
+        c.fillStyle="#fd3";c.beginPath();c.arc(cx2,iy+16+bob,4,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(255,255,255,0.3)";c.fillRect(ix+8,iy+9+bob,6,3);
       }else if(si.name.includes("Red Armor")){
-        c.fillStyle="#aa2222";c.beginPath();c.moveTo(ix+8,iy+10);c.lineTo(ix+24,iy+10);c.lineTo(ix+24,iy+26);c.lineTo(ix+16,iy+30);c.lineTo(ix+8,iy+26);c.fill();
-        c.fillStyle="#cc4444";c.fillRect(ix+11,iy+12,10,6);
-        c.fillStyle="#fd3";c.beginPath();c.arc(ix+16,iy+20,2,0,Math.PI*2);c.fill();
+        c.fillStyle="#992222";c.beginPath();c.moveTo(ix+5,iy+8+bob);c.lineTo(ix+27,iy+8+bob);c.lineTo(ix+27,iy+24+bob);c.lineTo(cx2,iy+30+bob);c.lineTo(ix+5,iy+24+bob);c.fill();
+        c.fillStyle="#cc3333";c.fillRect(ix+9,iy+10+bob,14,8);
+        c.fillStyle="#fd3";c.beginPath();c.arc(cx2,iy+22+bob,3,0,Math.PI*2);c.fill();
+        c.fillStyle="rgba(255,255,255,0.2)";c.fillRect(ix+9,iy+10+bob,5,3);
       }
-      // Price tag above item
-      const bob=Math.sin(t/400+si.tx)*2;
-      c.font="bold 7px monospace";c.textAlign="center";
+      // Name label above item (larger font)
+      c.font="bold 8px monospace";c.textAlign="center";
+      c.fillStyle="#ddd";
+      c.fillText(si.name,cx2,iy-4);
+      // Price tag below item
+      c.font="bold 9px monospace";
       c.fillStyle=s.p.rupees>=si.cost?"#4f4":"#f66";
-      c.fillText(`${si.cost}r`,ix+16,iy+bob);
-      // Item name below
-      c.fillStyle="#aaa";c.font="5px monospace";
-      c.fillText(si.name,ix+16,iy+TL+6);
+      c.fillText(`${si.cost}r`,cx2,iy+TL+8);
     }
     c.textAlign="left";
   }
