@@ -833,6 +833,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   {const m2=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(s.loc.ty==="ow"&&s.loc.scr==="0,1"&&m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TALLGRASS&&p.poison<=0){
       p.poison=3000;p.poisonTick=0;s.msg={text:"Poisonous swamp!",t:1000};}}
+  // Hot spring healing — slowly restores HP
+  {const m3=gm(s);const ptx3=Math.floor((p.x+PS/2)/TL),pty3=Math.floor((p.y+PS/2)/TL);
+    if(m3&&pty3>=0&&pty3<RO&&ptx3>=0&&ptx3<CO&&m3[pty3][ptx3]===T.HOT_SPRING){
+      if(!s._hotSpringT)s._hotSpringT=0;s._hotSpringT+=dt;
+      if(s._hotSpringT>=1500&&p.hp<p.mhp){s._hotSpringT=0;p.hp++;sfx("pickup");
+        s.pt.push(...Array.from({length:4},()=>({x:p.x+PS/2+(Math.random()-.5)*10,y:p.y+PS/2,dx:(Math.random()-.5)*1.5,dy:-Math.random()*2,l:400,c:Math.random()>.5?"#8ff":"#afa"})));
+        if(p.hp>=p.mhp)s.msg={text:"Fully healed!",t:1000};
+        else if(!s.msg.t||s.msg.t<=0)s.msg={text:"The warm water soothes you...",t:1200};}
+      // Cure status effects
+      if(p.burn>0){p.burn=0;s.msg={text:"The water cools your burns...",t:1200};}
+      if(p.poison>0){p.poison=0;s.msg={text:"The water cleanses the poison...",t:1200};}
+      if(p.freeze>0){p.freeze=0;s.msg={text:"The warm water thaws you...",t:1200};}
+    }else{s._hotSpringT=0;}}
   if(moved&&Math.random()<0.15){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){const ft=m2[pty][ptx];
       if(ft===T.PATH||ft===T.SAND)s.pt.push({x:p.x+PS/2+(Math.random()-0.5)*6,y:p.y+PS-2,dx:(Math.random()-.5)*0.5,dy:-Math.random()*0.8,l:400,c:ft===T.SAND?"#c8b060":"#a89060"});}}

@@ -1400,6 +1400,30 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       sg2.addColorStop(0,`rgba(180,140,80,${sg})`);sg2.addColorStop(1,"rgba(180,140,80,0)");
       c.fillStyle=sg2;c.fillRect(px+4,py+4,TL-8,TL-8);
       break;}
+    case T.HOT_SPRING:{
+      // Warm healing pool — walkable
+      const hsg=c.createRadialGradient(px+16,py+16,2,px+16,py+16,20);
+      hsg.addColorStop(0,"#40a8a0");hsg.addColorStop(0.4,"#308888");hsg.addColorStop(1,"#206868");
+      c.fillStyle=hsg;c.fillRect(px,py,TL,TL);
+      // Warm ripples
+      const ht=t||0;
+      c.strokeStyle="rgba(150,230,220,0.25)";c.lineWidth=0.8;
+      const hr=6+Math.sin(ht/400+px*0.1)*3;
+      c.beginPath();c.arc(px+16+Math.sin(ht/500+py)*3,py+16+Math.cos(ht/600+px)*3,hr,0,Math.PI*2);c.stroke();
+      const hr2=10+Math.sin(ht/350+py*0.1)*3;
+      c.beginPath();c.arc(px+16+Math.cos(ht/700)*4,py+16+Math.sin(ht/450)*4,hr2,0,Math.PI*2);c.stroke();
+      // Steam wisps rising
+      for(let si=0;si<2;si++){
+        const sx=px+8+si*16+Math.sin(ht/300+si*3)*4;
+        const sy=py+4-((ht/80+si*40)%24);
+        const sa=Math.max(0,1-((ht/80+si*40)%24)/24)*0.25;
+        c.fillStyle=`rgba(220,240,240,${sa})`;
+        c.beginPath();c.arc(sx,sy,2+Math.sin(ht/200+si)*1,0,Math.PI*2);c.fill();
+      }
+      // Warm glow shimmer
+      c.fillStyle=`rgba(255,200,150,${0.04+Math.sin(ht/500+px*0.2)*0.03})`;
+      c.fillRect(px,py,TL,TL);
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }
