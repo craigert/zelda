@@ -385,12 +385,12 @@ function drawPaperDoll(c,s,t){
   c.save();
   c.translate(pcx-36,pcy-36);
   c.scale(3,3);
-  dP(c,0,0,2,t);
+  dP(c,0,0,2,t,s.p.redArmor);
   c.restore();
 
-  // Red armor overlay if equipped
+  // Red armor glow if equipped
   if(s.p.redArmor){
-    c.fillStyle="rgba(200,40,40,0.15)";
+    c.fillStyle="rgba(200,40,40,0.08)";
     c.beginPath();c.arc(pcx,pcy,30,0,Math.PI*2);c.fill();
   }
 

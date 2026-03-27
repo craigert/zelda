@@ -1701,7 +1701,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const p2=s.p,vis=p2.ifr<=0||Math.floor(p2.ifr/80)%2;
     if(vis&&!s.death.a){
       c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p2.x+PS/2+2,p2.y+PS-1,10,3,0,0,Math.PI*2);c.fill();
-      dP(c,p2.x,p2.y,s.ss.facing>0?1:3,t);
+      dP(c,p2.x,p2.y,s.ss.facing>0?1:3,t,s.p.redArmor);
     }
     if(s.sw.a)dSw(c,p2.x,p2.y,s.ss.facing>0?1:3,s.sw.t);
     // Particles
@@ -1721,7 +1721,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Death overlay
     if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
       c.save();c.translate(p2.x+PS/2,p2.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
-      dP(c,0,0,2,t);c.restore();c.globalAlpha=1;}
+      dP(c,0,0,2,t,s.p.redArmor);c.restore();c.globalAlpha=1;}
     c.restore();// clip
     c.restore();// translate
     // Fade
@@ -2318,7 +2318,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const rx2=d2.x,ry2=d2.y+bob2;c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-5);c.lineTo(rx2+3,ry2-1);c.lineTo(rx2+3,ry2+1);c.lineTo(rx2,ry2+5);c.lineTo(rx2-3,ry2+1);c.lineTo(rx2-3,ry2-1);c.closePath();c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
     c.save();c.translate(p.x+PS/2,p.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
-    dP(c,0,0,p.dir,t);c.restore();c.globalAlpha=1;
+    dP(c,0,0,p.dir,t,s.p.redArmor);c.restore();c.globalAlpha=1;
   }else if(s.triforceHold){// Holding triforce above head
     const th2=s.triforceHold,hp2=Math.min(1,th2.t/500);
     const hx=th2.px,hy=th2.py;
@@ -2383,14 +2383,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
     c.save();c.translate(fx,fy);c.rotate(spin);c.scale(sc,sc);c.globalAlpha=1-fp;
-    dP(c,-PS/2,-PS/2,p.dir,t);c.restore();
+    dP(c,-PS/2,-PS/2,p.dir,t,p.redArmor);c.restore();
   }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;
     if(vis){
       const hopY=s.ledgeHop>0?-Math.sin(s.ledgeHop/250*Math.PI)*8:0;
       c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,10,3,0.08,0,Math.PI*2);c.fill();
-      dP(c,p.x,p.y+hopY,p.dir,t);
-      // Red armor tint overlay
-      if(p.redArmor){c.globalCompositeOperation="source-atop";c.fillStyle="rgba(200,40,40,0.25)";c.fillRect(p.x,p.y+hopY,PS,PS);c.globalCompositeOperation="source-over";}
+      dP(c,p.x,p.y+hopY,p.dir,t,p.redArmor);
       if(s.p.shield){
         const sx=p.x+PS/2,sy=p.y+PS/2;
         const sd=p.dir,so=12;
