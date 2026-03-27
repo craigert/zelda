@@ -110,26 +110,55 @@ export function dBo(c,x,y,sz,fl,t,hp,mh,di){
     // Dark aura
     if(!fl){const ag=c.createRadialGradient(x+sz/2,y+sz/2+drift,sz*.15,x+sz/2,y+sz/2+drift,sz*.6);
       ag.addColorStop(0,"rgba(80,40,160,0)");ag.addColorStop(1,`rgba(60,20,120,${0.08+Math.sin(t/600)*0.04})`);c.fillStyle=ag;c.fillRect(x-6,y-6,sz+12,sz+12);}
-  }else{// DARK KING (dungeon 3) — armored demon king
-    const bc=fl?"#fff":"#440044";
-    const bg=c.createRadialGradient(x+sz*.4,y+sz*.3,2,x+sz/2,y+sz*.5,sz*.4);
-    bg.addColorStop(0,fl?"#fff":"#880088");bg.addColorStop(1,bc);
-    c.fillStyle=bg;c.beginPath();c.ellipse(x+sz/2,y+sz*.45,sz*.38,sz*.4,0,0,Math.PI*2);c.fill();
-    // Crown
-    c.fillStyle=fl?"#eee":"#fd3";
-    c.beginPath();c.moveTo(x+sz*.2,y+sz*.15);c.lineTo(x+sz*.15,y-2);c.lineTo(x+sz*.3,y+sz*.08);c.lineTo(x+sz*.4,y-4);c.lineTo(x+sz*.5,y+sz*.08);
-    c.lineTo(x+sz*.6,y-4);c.lineTo(x+sz*.7,y+sz*.08);c.lineTo(x+sz*.85,y-2);c.lineTo(x+sz*.8,y+sz*.15);c.fill();
-    // Armor
-    if(!fl){c.strokeStyle="rgba(255,200,50,0.3)";c.lineWidth=1.5;c.beginPath();c.moveTo(x+sz*.22,y+sz*.4);c.lineTo(x+sz*.78,y+sz*.4);c.stroke();
-      c.beginPath();c.moveTo(x+sz*.28,y+sz*.55);c.lineTo(x+sz*.72,y+sz*.55);c.stroke();}
-    // Eyes
-    c.fillStyle=fl?"#333":"#f0f";c.shadowColor="#f0f";c.shadowBlur=fl?0:6;
-    c.beginPath();c.arc(x+sz*.35,y+sz*.3+eg,3.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+sz*.65,y+sz*.3+eg,3.5,0,Math.PI*2);c.fill();
-    c.shadowBlur=0;
-    if(!fl){c.fillStyle="#fff";c.beginPath();c.arc(x+sz*.35,y+sz*.3+eg,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+sz*.65,y+sz*.3+eg,1.5,0,Math.PI*2);c.fill();}
-    // Dark aura
-    if(!fl){const ag=c.createRadialGradient(x+sz/2,y+sz/2,sz*.15,x+sz/2,y+sz/2,sz*.7);
-      ag.addColorStop(0,"rgba(200,0,200,0)");ag.addColorStop(1,`rgba(150,0,150,${0.08+Math.sin(t/400)*0.04})`);c.fillStyle=ag;c.fillRect(x-6,y-6,sz+12,sz+12);}
+  }else{// DARK KING (dungeon 3) — Ganon-like demon king with cape and trident
+    const cx=x+sz/2,cy=y+sz/2;
+    // Dark pulsing aura
+    if(!fl){const ag=c.createRadialGradient(cx,cy,sz*.1,cx,cy,sz*.8);
+      ag.addColorStop(0,"rgba(180,0,180,0)");ag.addColorStop(0.6,`rgba(120,0,80,${0.12+Math.sin(t/300)*0.06})`);ag.addColorStop(1,"rgba(60,0,40,0)");
+      c.fillStyle=ag;c.fillRect(x-10,y-10,sz+20,sz+20);}
+    // Cape billowing
+    if(!fl){const capeS=Math.sin(t/350)*3;
+      c.fillStyle="#2a0030";c.beginPath();c.moveTo(x+sz*.2,y+sz*.3);
+      c.bezierCurveTo(x+sz*.1,y+sz*.6,x+sz*.05+capeS,y+sz*.85,x+sz*.15+capeS,y+sz);
+      c.lineTo(x+sz*.85-capeS,y+sz);c.bezierCurveTo(x+sz*.95-capeS,y+sz*.85,x+sz*.9,y+sz*.6,x+sz*.8,y+sz*.3);c.fill();
+      c.fillStyle="#3a0040";c.beginPath();c.moveTo(x+sz*.25,y+sz*.35);
+      c.bezierCurveTo(x+sz*.18,y+sz*.6,x+sz*.15+capeS*.5,y+sz*.8,x+sz*.22+capeS*.5,y+sz*.95);
+      c.lineTo(x+sz*.78-capeS*.5,y+sz*.95);c.bezierCurveTo(x+sz*.85-capeS*.5,y+sz*.8,x+sz*.82,y+sz*.6,x+sz*.75,y+sz*.35);c.fill();}
+    // Body — large imposing torso
+    const bodyG=c.createRadialGradient(cx,y+sz*.4,2,cx,y+sz*.45,sz*.3);
+    bodyG.addColorStop(0,fl?"#fff":"#1a4a1a");bodyG.addColorStop(1,fl?"#ddd":"#0a2a0a");
+    c.fillStyle=bodyG;c.beginPath();c.ellipse(cx,y+sz*.45,sz*.32,sz*.3,0,0,Math.PI*2);c.fill();
+    // Armor plate
+    if(!fl){c.fillStyle="#2a1a00";c.beginPath();c.moveTo(x+sz*.25,y+sz*.28);c.lineTo(x+sz*.75,y+sz*.28);
+      c.lineTo(x+sz*.72,y+sz*.58);c.lineTo(x+sz*.28,y+sz*.58);c.fill();
+      c.strokeStyle="#fd3";c.lineWidth=1;c.beginPath();c.moveTo(x+sz*.28,y+sz*.3);c.lineTo(x+sz*.72,y+sz*.3);c.stroke();
+      c.beginPath();c.moveTo(x+sz*.3,y+sz*.42);c.lineTo(x+sz*.7,y+sz*.42);c.stroke();
+      // Gold emblem
+      c.fillStyle="#fd3";c.beginPath();c.arc(cx,y+sz*.36,3,0,Math.PI*2);c.fill();}
+    // Head — pig-like snout (Ganon)
+    const hg=c.createRadialGradient(cx,y+sz*.18,2,cx,y+sz*.2,sz*.16);
+    hg.addColorStop(0,fl?"#fff":"#2a6a2a");hg.addColorStop(1,fl?"#ddd":"#1a4a1a");
+    c.fillStyle=hg;c.beginPath();c.ellipse(cx,y+sz*.2,sz*.18,sz*.16,0,0,Math.PI*2);c.fill();
+    // Snout
+    if(!fl){c.fillStyle="#1a5a1a";c.beginPath();c.ellipse(cx,y+sz*.26,sz*.08,sz*.05,0,0,Math.PI*2);c.fill();
+      c.fillStyle="#0a3a0a";c.beginPath();c.arc(cx-3,y+sz*.26,1.5,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(cx+3,y+sz*.26,1.5,0,Math.PI*2);c.fill();}
+    // Horns
+    c.fillStyle=fl?"#ccc":"#8a6a20";
+    c.beginPath();c.moveTo(x+sz*.3,y+sz*.1);c.lineTo(x+sz*.18,y-4);c.lineTo(x+sz*.35,y+sz*.14);c.fill();
+    c.beginPath();c.moveTo(x+sz*.7,y+sz*.1);c.lineTo(x+sz*.82,y-4);c.lineTo(x+sz*.65,y+sz*.14);c.fill();
+    // Eyes — burning red
+    c.fillStyle=fl?"#333":"#ff2200";c.shadowColor="#ff0000";c.shadowBlur=fl?0:8;
+    c.beginPath();c.arc(x+sz*.38,y+sz*.18+eg,3,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(x+sz*.62,y+sz*.18+eg,3,0,Math.PI*2);c.fill();c.shadowBlur=0;
+    if(!fl){c.fillStyle="#ff8800";c.beginPath();c.arc(x+sz*.38,y+sz*.18+eg,1.5,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(x+sz*.62,y+sz*.18+eg,1.5,0,Math.PI*2);c.fill();}
+    // Trident/spear in hand
+    if(!fl){const spX=x+sz*.85,spY=y+sz*.1;
+      c.strokeStyle="#888";c.lineWidth=2;c.beginPath();c.moveTo(spX,spY);c.lineTo(spX,y+sz*.75);c.stroke();
+      c.fillStyle="#aaa";c.beginPath();c.moveTo(spX,spY-2);c.lineTo(spX-4,spY+8);c.lineTo(spX,spY+5);c.lineTo(spX+4,spY+8);c.fill();
+      c.fillStyle="#ccc";c.beginPath();c.moveTo(spX-6,spY+2);c.lineTo(spX-3,spY-4);c.lineTo(spX-2,spY+4);c.fill();
+      c.beginPath();c.moveTo(spX+6,spY+2);c.lineTo(spX+3,spY-4);c.lineTo(spX+2,spY+4);c.fill();}
   }
   // HP bar (all bosses)
   const bw=sz+8;c.fillStyle="rgba(0,0,0,0.7)";c.beginPath();c.arc(x-4+4,y-14+4,4,Math.PI,Math.PI*1.5);c.arc(x+bw-4,y-14+4,4,Math.PI*1.5,0);c.arc(x+bw-4,y-14+8-4,4,0,Math.PI*.5);c.arc(x-4+4,y-14+8-4,4,Math.PI*.5,Math.PI);c.fill();

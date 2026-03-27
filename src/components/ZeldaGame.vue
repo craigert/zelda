@@ -601,7 +601,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pushCd=false;s.pushAnim=null;}}
     return;}
   if(s.death.a){s.death.t+=dt;s.death.spin+=dt*0.015;if(s.death.t>1500&&!s.go){s.go=true;s.msg={text:"Tap to respawn",t:99999};}if(!s.go)return;}
-  if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||s.respawnClick){s.respawnClick=false;
+  if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||kyR.value.has("tab")||s.respawnClick){s.respawnClick=false;
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;
@@ -1204,15 +1204,57 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
               for(let a=0;a<8;a++){const sa=a*Math.PI/4;s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*2.5,dy:Math.sin(sa)*2.5,type:"shadow",l:1000});}
               s.pt.push(...Array.from({length:10},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:500,c:"#a0a0ff"})));sfx("bomb");}
           }
-        }else if(e.pattern==="all"){const phase=Math.floor(e.mt/3000)%4;
-          if(phase===0){const bsp=es*2.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
-          else if(phase===1){const ca=e.mt/600;moveX=Math.cos(ca)*es*1.5;moveY=Math.sin(ca)*es*1.5;
-            if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)&&s.en.length<6){
-              s.en.push({x:e.x,y:e.y,hp:3,mhp:3,type:"ghost",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}}
-          else if(phase===2){moveX=0;moveY=0;
-            if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)){
-              e.x=TL*2+Math.random()*(W2-TL*4);e.y=TL*2+Math.random()*(H2-TL*4);}}
-          else{const bsp=es*(1+Math.sin(e.mt/300)*.5);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
+        }else if(e.pattern==="all"){
+          // Dark King — Ganon-like: teleport, spear throw, fast dash, sword block
+          if(!e.phase)e.phase="stalk";if(!e.phaseT)e.phaseT=0;e.phaseT+=dt;
+          if(!e.blocking)e.blocking=0;if(e.blocking>0)e.blocking-=dt;
+          // Phase machine
+          if(e.phase==="stalk"){
+            // Circle player menacingly, face them
+            const ca=e.mt/800;const orbR=80+Math.sin(e.mt/1200)*20;
+            moveX=Math.cos(ca)*es*0.8;moveY=Math.sin(ca)*es*0.8;
+            // Throw spear at player periodically
+            if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
+              const sa=Math.atan2(pcy-ecy,pcx-ecx);
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa)*4,dy:Math.sin(sa)*4,type:"shadow",l:1200});sfx("sword");}
+            // Transition to vanish after 4s
+            if(e.phaseT>4000){e.phase="vanish";e.phaseT=0;e.shadowForm=true;
+              s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:600,c:"#606"})));sfx("bomb");}
+          }else if(e.phase==="vanish"){
+            // Invisible — teleport to random spots, throw spears from darkness
+            moveX=0;moveY=0;e.shadowForm=true;
+            // Shadow trail
+            s.pt.push({x:ecx+(Math.random()-.5)*20,y:ecy+(Math.random()-.5)*20,dx:(Math.random()-.5)*1,dy:(Math.random()-.5)*1,l:300,c:"rgba(100,0,150,0.5)"});
+            // Teleport every 800ms
+            if(Math.floor(e.phaseT/800)!==Math.floor((e.phaseT-dt)/800)){
+              e.x=TL*2+Math.random()*(W2-TL*5);e.y=TL*2+Math.random()*(H2-TL*5);
+              s.pt.push(...Array.from({length:8},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#a0a"})));}
+            // Spear from darkness every 1.2s
+            if(Math.floor(e.phaseT/1200)!==Math.floor((e.phaseT-dt)/1200)){
+              const sa=Math.atan2(pcy-(e.y+ES/2),pcx-(e.x+ES/2));
+              s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*3.5,dy:Math.sin(sa)*3.5,type:"shadow",l:1500});sfx("sword");}
+            // Reappear after 3s
+            if(e.phaseT>3000){e.phase="dash";e.phaseT=0;e.shadowForm=false;
+              // Reappear with burst
+              for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"shadow",l:800});}
+              s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:500,c:"#f0f"})));sfx("bomb");}
+          }else if(e.phase==="dash"){
+            // Fast aggressive charge at player
+            const bsp=es*3.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            // Block incoming sword strikes during dash
+            e.blocking=200;
+            // Trail particles
+            s.pt.push({x:ecx+(Math.random()-.5)*6,y:ecy+(Math.random()-.5)*6,dx:-moveX*0.3,dy:-moveY*0.3,l:200,c:"#f0f"});
+            // Spear thrust when close
+            if(dist<60&&Math.floor(e.phaseT/600)!==Math.floor((e.phaseT-dt)/600)){
+              const sa=Math.atan2(pcy-ecy,pcx-ecx);
+              for(let i=-1;i<=1;i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa+i*0.3)*4.5,dy:Math.sin(sa+i*0.3)*4.5,type:"shadow",l:600});}sfx("bomb");}
+            // Back to stalk after 2.5s
+            if(e.phaseT>2500){e.phase="stalk";e.phaseT=0;e.blocking=0;}
+          }
+          // Spawn ghost minions periodically regardless of phase
+          if(Math.floor(e.mt/5000)!==Math.floor((e.mt-dt)/5000)&&s.en.length<5){
+            s.en.push({x:TL*2+Math.random()*(W2-TL*4),y:TL*2+Math.random()*(H2-TL*4),hp:3,mhp:3,type:"ghost",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}
         }else{const bsp=es*(1+Math.sin(e.mt/400)*.4);moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
       }else if(e.type==="archer"){
         if(dist<80){moveX=-Math.cos(ang)*es*1.5;moveY=-Math.sin(ang)*es*1.5;}
@@ -1302,6 +1344,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#606"})));
           s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"SHADOW!",c:"#a060ff"});
           continue;}
+        // Dark King blocks sword during dash
+        if(e.type==="boss"&&e.blocking>0){e.fl=200;sfx("door");
+          s.pt.push(...Array.from({length:4},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:250,c:"#f0f"})));
+          s.dmgNums.push({x:ecx,y:ecy-8,t:700,val:"BLOCKED!",c:"#f0f"});continue;}
         if(e.type==="knight"&&e.shieldDir!==undefined){
           const atkAng=Math.atan2(ecy-pcy,ecx-pcx);
           const shieldDiff=Math.abs(((atkAng-e.shieldDir+Math.PI*3)%(Math.PI*2))-Math.PI);
@@ -2969,7 +3015,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       {text:"Publishing",font:"bold 11px monospace",color:"#888",gap:4},
       {text:"Banana Corp",font:"bold 14px monospace",color:"#fd3",gap:50},
       {text:"Thank you for playing!",font:"bold 13px monospace",color:"rgba(255,255,255,0.6)",gap:30},
-      {text:"Press Space to return",font:"10px monospace",color:"rgba(255,255,255,0.3)",gap:0},
+      {text:"Tab or click to return to title screen",font:"10px monospace",color:"rgba(255,255,255,0.3)",gap:0},
     ];
     const scrollSpeed=0.025;// pixels per ms
     const scrollStart=3000;// ms before credits start scrolling
@@ -3006,6 +3052,7 @@ onMounted(() => {
   const kd = e => {
     kyR.value.add(e.key.toLowerCase());
     if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key === "Tab" && stR.value && (stR.value.won || stR.value.go)) e.preventDefault();
     const s = stR.value;
     doUnlock();
     if (s && s.title && (e.key === " " || e.key === "Enter" || e.key === "z")) {
