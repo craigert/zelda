@@ -324,10 +324,14 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   const tl=m[ty][tx];if(SOLID.has(tl))return true;
   // Ledge tiles -- one-way passage (solid from wrong direction)
   if(tl===T.LEDGE_S||tl===T.LEDGE_N||tl===T.LEDGE_E||tl===T.LEDGE_W){
-    // Ladders let you pass through ledges in any direction
+    // Ladders let you pass through ledges — check if player is on or adjacent to a ladder
     const ptx2=Math.floor((s.p.x+PS/2)/TL),pty2=Math.floor((s.p.y+PS/2)/TL);
-    const onLadder=m&&pty2>=0&&pty2<RO&&ptx2>=0&&ptx2<CO&&m[pty2][ptx2]===T.LADDER;
-    if(!onLadder){const md=s._moveDir||0;
+    let nearLadder=false;
+    if(m){for(let dy2=-1;dy2<=1;dy2++)for(let dx2=-1;dx2<=1;dx2++){
+      const lx=ptx2+dx2,ly=pty2+dy2;
+      if(ly>=0&&ly<RO&&lx>=0&&lx<CO&&m[ly][lx]===T.LADDER){nearLadder=true;break;}
+    }if(nearLadder)nearLadder=true;}
+    if(!nearLadder){const md=s._moveDir||0;
       if(tl===T.LEDGE_S&&md!==2)return true;
       if(tl===T.LEDGE_N&&md!==0)return true;
       if(tl===T.LEDGE_E&&md!==1)return true;

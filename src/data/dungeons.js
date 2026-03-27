@@ -346,8 +346,8 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     // Sunken lower floor
     for(let y=4;y<=7;y++)for(let x=6;x<=9;x++)m[y][x]=T.LOW_FLOOR;
     m[5][7]=T.RUPEE;m[6][8]=T.HEART;
-    // Ladder to climb out
-    m[3][10]=T.LADDER;
+    // Ladder on east wall of pit — replaces LEDGE_W so player can climb out
+    m[7][10]=T.LADDER;m[4][10]=T.LADDER;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:8*TL,y:6*TL,hp:4,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"wallmaster"}]},
 

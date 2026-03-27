@@ -1176,66 +1176,73 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Base floor (upper level)
       const lfc2=iD?(dg.fc||dg.color):"#2d6a1e";
       c.fillStyle=lfc2;c.fillRect(px,py,TL,TL);
-      // Stone cliff face with 3D depth — the "wall" you drop off
-      const cw=10;// cliff face width
+      // Natural stone cliff face — no arrows, just realistic rock wall
+      const cw=11;
+      const h1=hs(px,py,90),h2=hs(px,py,91),h3=hs(px,py,92);
       if(tl===T.LEDGE_S){
-        // Dark cliff face at top — you drop southward
+        // Dark cliff face at top edge — looks like a wall viewed from above
         const cg=c.createLinearGradient(px,py,px,py+cw);
-        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        cg.addColorStop(0,"#0e0e0e");cg.addColorStop(0.15,"#1a1815");cg.addColorStop(0.4,"#2a2620");cg.addColorStop(0.7,"#3a3530");cg.addColorStop(1,lfc2);
         c.fillStyle=cg;c.fillRect(px,py,TL,cw);
-        // Stone block lines
-        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        // Stone block mortar lines
+        c.strokeStyle="rgba(0,0,0,0.35)";c.lineWidth=0.6;
         c.beginPath();c.moveTo(px,py+4);c.lineTo(px+TL,py+4);c.stroke();
-        c.beginPath();c.moveTo(px+8,py);c.lineTo(px+8,py+4);c.moveTo(px+24,py);c.lineTo(px+24,py+4);c.stroke();
-        c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+16,py+cw-2);c.stroke();
-        // Highlight edge (top of cliff = lit)
-        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py,TL,1);
-        // Drop shadow on floor below
-        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px,py+cw,TL,4);
-        // Chevron arrow hint
-        const pulse=Math.sin(t/400)*0.08+0.15;
-        c.fillStyle=`rgba(255,255,255,${pulse})`;
-        c.beginPath();c.moveTo(px+16,py+24);c.lineTo(px+11,py+18);c.lineTo(px+21,py+18);c.fill();
-        c.beginPath();c.moveTo(px+16,py+28);c.lineTo(px+13,py+24);c.lineTo(px+19,py+24);c.fill();
+        c.beginPath();c.moveTo(px+8+h1*4,py);c.lineTo(px+8+h1*4,py+4);c.stroke();
+        c.beginPath();c.moveTo(px+24-h2*4,py);c.lineTo(px+24-h2*4,py+4);c.stroke();
+        c.beginPath();c.moveTo(px+16+h3*3,py+4);c.lineTo(px+16+h3*3,py+cw-1);c.stroke();
+        c.beginPath();c.moveTo(px+5,py+4);c.lineTo(px+5,py+cw-2);c.stroke();
+        c.beginPath();c.moveTo(px+27,py+4);c.lineTo(px+27,py+cw-2);c.stroke();
+        // Lit top edge highlight
+        c.fillStyle="rgba(255,255,220,0.06)";c.fillRect(px,py,TL,1);
+        // Soft drop shadow below cliff
+        const sh=c.createLinearGradient(px,py+cw,px,py+cw+6);
+        sh.addColorStop(0,"rgba(0,0,0,0.15)");sh.addColorStop(1,"rgba(0,0,0,0)");
+        c.fillStyle=sh;c.fillRect(px,py+cw,TL,6);
+        // Tiny moss/lichen patches on rock face
+        if(h1>0.4){c.fillStyle="rgba(50,80,40,0.2)";c.beginPath();c.arc(px+6+h2*8,py+2+h3*3,1.5+h1,0,Math.PI*2);c.fill();}
+        if(h3>0.5){c.fillStyle="rgba(40,70,35,0.15)";c.beginPath();c.arc(px+20+h1*6,py+5+h2*2,1+h3,0,Math.PI*2);c.fill();}
       }else if(tl===T.LEDGE_N){
         const cg=c.createLinearGradient(px,py+TL,px,py+TL-cw);
-        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        cg.addColorStop(0,"#0e0e0e");cg.addColorStop(0.15,"#1a1815");cg.addColorStop(0.4,"#2a2620");cg.addColorStop(0.7,"#3a3530");cg.addColorStop(1,lfc2);
         c.fillStyle=cg;c.fillRect(px,py+TL-cw,TL,cw);
-        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.strokeStyle="rgba(0,0,0,0.35)";c.lineWidth=0.6;
         c.beginPath();c.moveTo(px,py+TL-4);c.lineTo(px+TL,py+TL-4);c.stroke();
-        c.beginPath();c.moveTo(px+8,py+TL-4);c.lineTo(px+8,py+TL);c.moveTo(px+24,py+TL-4);c.lineTo(px+24,py+TL);c.stroke();
-        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py+TL-1,TL,1);
-        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px,py+TL-cw-4,TL,4);
-        const pulse=Math.sin(t/400)*0.08+0.15;
-        c.fillStyle=`rgba(255,255,255,${pulse})`;
-        c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+11,py+14);c.lineTo(px+21,py+14);c.fill();
-        c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+13,py+8);c.lineTo(px+19,py+8);c.fill();
+        c.beginPath();c.moveTo(px+8+h1*4,py+TL-4);c.lineTo(px+8+h1*4,py+TL);c.stroke();
+        c.beginPath();c.moveTo(px+24-h2*4,py+TL-4);c.lineTo(px+24-h2*4,py+TL);c.stroke();
+        c.beginPath();c.moveTo(px+16+h3*3,py+TL-cw+1);c.lineTo(px+16+h3*3,py+TL-4);c.stroke();
+        c.fillStyle="rgba(255,255,220,0.06)";c.fillRect(px,py+TL-1,TL,1);
+        const sh=c.createLinearGradient(px,py+TL-cw-6,px,py+TL-cw);
+        sh.addColorStop(0,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,0.15)");
+        c.fillStyle=sh;c.fillRect(px,py+TL-cw-6,TL,6);
+        if(h1>0.4){c.fillStyle="rgba(50,80,40,0.2)";c.beginPath();c.arc(px+6+h2*8,py+TL-3-h3*3,1.5+h1,0,Math.PI*2);c.fill();}
       }else if(tl===T.LEDGE_E){
         const cg=c.createLinearGradient(px,py,px+cw,py);
-        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        cg.addColorStop(0,"#0e0e0e");cg.addColorStop(0.15,"#1a1815");cg.addColorStop(0.4,"#2a2620");cg.addColorStop(0.7,"#3a3530");cg.addColorStop(1,lfc2);
         c.fillStyle=cg;c.fillRect(px,py,cw,TL);
-        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.strokeStyle="rgba(0,0,0,0.35)";c.lineWidth=0.6;
         c.beginPath();c.moveTo(px+4,py);c.lineTo(px+4,py+TL);c.stroke();
-        c.beginPath();c.moveTo(px,py+8);c.lineTo(px+4,py+8);c.moveTo(px,py+24);c.lineTo(px+4,py+24);c.stroke();
-        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px,py,1,TL);
-        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px+cw,py,4,TL);
-        const pulse=Math.sin(t/400)*0.08+0.15;
-        c.fillStyle=`rgba(255,255,255,${pulse})`;
-        c.beginPath();c.moveTo(px+24,py+16);c.lineTo(px+18,py+11);c.lineTo(px+18,py+21);c.fill();
-        c.beginPath();c.moveTo(px+28,py+16);c.lineTo(px+24,py+13);c.lineTo(px+24,py+19);c.fill();
+        c.beginPath();c.moveTo(px,py+8+h1*4);c.lineTo(px+4,py+8+h1*4);c.stroke();
+        c.beginPath();c.moveTo(px,py+24-h2*4);c.lineTo(px+4,py+24-h2*4);c.stroke();
+        c.beginPath();c.moveTo(px+4,py+16+h3*3);c.lineTo(px+cw-1,py+16+h3*3);c.stroke();
+        c.fillStyle="rgba(255,255,220,0.06)";c.fillRect(px,py,1,TL);
+        const sh=c.createLinearGradient(px+cw,py,px+cw+6,py);
+        sh.addColorStop(0,"rgba(0,0,0,0.15)");sh.addColorStop(1,"rgba(0,0,0,0)");
+        c.fillStyle=sh;c.fillRect(px+cw,py,6,TL);
+        if(h2>0.5){c.fillStyle="rgba(50,80,40,0.2)";c.beginPath();c.arc(px+2+h1*3,py+10+h3*8,1.5+h2,0,Math.PI*2);c.fill();}
       }else{// LEDGE_W
         const cg=c.createLinearGradient(px+TL,py,px+TL-cw,py);
-        cg.addColorStop(0,"#1a1a1a");cg.addColorStop(0.3,"#2a2520");cg.addColorStop(0.6,"#3a3530");cg.addColorStop(1,lfc2);
+        cg.addColorStop(0,"#0e0e0e");cg.addColorStop(0.15,"#1a1815");cg.addColorStop(0.4,"#2a2620");cg.addColorStop(0.7,"#3a3530");cg.addColorStop(1,lfc2);
         c.fillStyle=cg;c.fillRect(px+TL-cw,py,cw,TL);
-        c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.7;
+        c.strokeStyle="rgba(0,0,0,0.35)";c.lineWidth=0.6;
         c.beginPath();c.moveTo(px+TL-4,py);c.lineTo(px+TL-4,py+TL);c.stroke();
-        c.beginPath();c.moveTo(px+TL-4,py+8);c.lineTo(px+TL,py+8);c.moveTo(px+TL-4,py+24);c.lineTo(px+TL,py+24);c.stroke();
-        c.fillStyle="rgba(255,255,200,0.08)";c.fillRect(px+TL-1,py,1,TL);
-        c.fillStyle="rgba(0,0,0,0.12)";c.fillRect(px+TL-cw-4,py,4,TL);
-        const pulse=Math.sin(t/400)*0.08+0.15;
-        c.fillStyle=`rgba(255,255,255,${pulse})`;
-        c.beginPath();c.moveTo(px+8,py+16);c.lineTo(px+14,py+11);c.lineTo(px+14,py+21);c.fill();
-        c.beginPath();c.moveTo(px+4,py+16);c.lineTo(px+8,py+13);c.lineTo(px+8,py+19);c.fill();
+        c.beginPath();c.moveTo(px+TL-4,py+8+h1*4);c.lineTo(px+TL,py+8+h1*4);c.stroke();
+        c.beginPath();c.moveTo(px+TL-4,py+24-h2*4);c.lineTo(px+TL,py+24-h2*4);c.stroke();
+        c.beginPath();c.moveTo(px+TL-cw+1,py+16+h3*3);c.lineTo(px+TL-4,py+16+h3*3);c.stroke();
+        c.fillStyle="rgba(255,255,220,0.06)";c.fillRect(px+TL-1,py,1,TL);
+        const sh=c.createLinearGradient(px+TL-cw-6,py,px+TL-cw,py);
+        sh.addColorStop(0,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,0.15)");
+        c.fillStyle=sh;c.fillRect(px+TL-cw-6,py,6,TL);
+        if(h2>0.5){c.fillStyle="rgba(50,80,40,0.2)";c.beginPath();c.arc(px+TL-3-h1*3,py+10+h3*8,1.5+h2,0,Math.PI*2);c.fill();}
       }
       break;}
     case T.BANANA:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
@@ -1257,32 +1264,37 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Sunken floor underneath
       const ldc=iD?(dg.fc||dg.color):"#1a2a16";
       c.fillStyle=ldc;c.fillRect(px,py,TL,TL);
-      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(px,py,TL,TL);
+      c.fillStyle="rgba(0,0,0,0.18)";c.fillRect(px,py,TL,TL);
       // Side rails — thick wooden beams with bevel
-      const railW=4,railL=px+7,railR=px+TL-11;
-      // Rail shadows
-      c.fillStyle="#3a2a10";c.fillRect(railL+1,py,railW,TL);c.fillRect(railR+1,py,railW,TL);
-      // Rails
+      const railW=4,railL=px+8,railR=px+TL-12;
+      // Rail shadows (depth)
+      c.fillStyle="#2a1a08";c.fillRect(railL+1,py,railW,TL);c.fillRect(railR+1,py,railW,TL);
+      // Rails with wood grain gradient
       const rg=c.createLinearGradient(railL,py,railL+railW,py);
-      rg.addColorStop(0,"#8a6a3a");rg.addColorStop(0.3,"#a0824a");rg.addColorStop(0.7,"#7a5a2a");rg.addColorStop(1,"#5a4020");
+      rg.addColorStop(0,"#9a7a44");rg.addColorStop(0.3,"#b0904e");rg.addColorStop(0.7,"#8a6a34");rg.addColorStop(1,"#6a5024");
       c.fillStyle=rg;c.fillRect(railL,py,railW,TL);c.fillRect(railR,py,railW,TL);
-      // Rungs with wood grain
+      // Wood grain streaks on rails
+      c.strokeStyle="rgba(60,40,15,0.3)";c.lineWidth=0.4;
+      for(let g=0;g<3;g++){const gy=py+4+g*10+hs(px,py,93+g)*4;
+        c.beginPath();c.moveTo(railL+1,gy);c.lineTo(railL+3,gy+8);c.stroke();
+        c.beginPath();c.moveTo(railR+1,gy);c.lineTo(railR+3,gy+8);c.stroke();}
+      // Rungs with wood texture
       for(let r=0;r<4;r++){
-        const ry=py+5+r*7;
-        c.fillStyle="#5a4020";c.fillRect(railL+railW-1,ry+1,railR-railL-railW+2,3);
+        const ry=py+4+r*7;
+        c.fillStyle="#4a3518";c.fillRect(railL+railW-1,ry+1,railR-railL-railW+2,3);
         const rung=c.createLinearGradient(px,ry,px,ry+3);
-        rung.addColorStop(0,"#a0824a");rung.addColorStop(0.5,"#8a6a3a");rung.addColorStop(1,"#6a5028");
+        rung.addColorStop(0,"#b0904e");rung.addColorStop(0.5,"#9a7a3e");rung.addColorStop(1,"#7a5a2a");
         c.fillStyle=rung;c.fillRect(railL+railW-1,ry,railR-railL-railW+2,2.5);
+        // Worn center
+        c.fillStyle="rgba(180,150,100,0.15)";c.fillRect(railL+railW+2,ry+0.5,railR-railL-railW-4,1);
       }
-      // Nail dots at rung intersections
-      c.fillStyle="#555";
-      for(let r=0;r<4;r++){const ry=py+5+r*7;
-        c.beginPath();c.arc(railL+railW,ry+1,0.8,0,Math.PI*2);c.fill();
-        c.beginPath();c.arc(railR,ry+1,0.8,0,Math.PI*2);c.fill();}
-      // Subtle climb arrow hint
-      const lp2=Math.sin(t/500)*0.06+0.1;
-      c.fillStyle=`rgba(255,255,200,${lp2})`;
-      c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+12,py+10);c.lineTo(px+20,py+10);c.fill();
+      // Nail/bolt dots at rung intersections
+      c.fillStyle="#666";
+      for(let r=0;r<4;r++){const ry=py+4+r*7;
+        c.beginPath();c.arc(railL+railW,ry+1.2,0.9,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(railR,ry+1.2,0.9,0,Math.PI*2);c.fill();}
+      // Subtle highlight at top (light catching the wood)
+      c.fillStyle="rgba(200,180,120,0.08)";c.fillRect(railL,py,railW,2);c.fillRect(railR,py,railW,2);
       break;}
     case T.LOW_FLOOR:{// Sunken floor — darker, depressed area with 3D indentation
       const lfc=iD?(dg.fc||dg.color):"#1a2a16";
