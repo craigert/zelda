@@ -362,8 +362,8 @@ export const OW={
   m[1][3]=T.TREE;m[1][4]=T.TREE;m[2][2]=T.TREE;m[3][2]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
   m[9][2]=T.TREE;m[9][3]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;
   m[5][5]=T.TALLGRASS;m[5][6]=T.TALLGRASS;m[6][9]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
-  // Crack cave
-  m[8][8]=T.CRACK;m[7][8]=T.BUSH;
+  // Hidden cave under boulder — push to reveal
+  m[8][8]=T.PUSH;m[7][8]=T.BUSH;
   m[3][7]=T.FLOWER;m[3][8]=T.FLOWER;m[4][9]=T.STUMP;m[7][4]=T.STUMP;
   oe(m,"W");oe(m,"N");oe(m,"E");return m;})(),
 
