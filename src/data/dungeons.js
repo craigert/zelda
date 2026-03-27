@@ -97,8 +97,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][6]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
     m[5][7]=T.RUPEE;m[6][8]=T.RUPEE;
-    m[RO-1][5]=T.CRACK;m[RO-1][6]=T.CRACK;// bomb south to left side of -1,-1
-    m[RO-1][9]=T.CRACK;m[RO-1][10]=T.CRACK;// bomb south to right side of -1,-1 (needs bombs from D1)
+    m[RO-1][9]=T.CRACK;m[RO-1][10]=T.CRACK;// bomb south to right side of -1,-1
   }),enemies:[{x:7*TL,y:4*TL,hp:3,type:"bat"},{x:7*TL,y:7*TL,hp:3,type:"bat"},{x:4*TL,y:6*TL,hp:3,type:"skeleton"}]},
 
   // Secret room (bomb south wall of -1,-2) — treasure cache, divided by wall
