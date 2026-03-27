@@ -299,8 +299,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     roomData2?.reward||roomData2?.lock||s.en.some(e=>e.type==="boss"||e.type==="miniboss"));
   if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
-    if(boss){s.bossIntro={name:boss.name||"???",t:0,dur:3000,bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;sfx("bossdeath");
-      // Force music switch immediately
+    if(boss){s._pendingBoss={name:boss.name||"???",bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;
       ltRef.value=null;}
   }
   // Load blade traps from room data
@@ -453,6 +452,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     // Still update particles during freeze
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
+  // Deferred boss intro — trigger if no slide was active (e.g. entering via fade/stairs)
+  if(s._pendingBoss&&!s.slide.a){const pb=s._pendingBoss;s._pendingBoss=null;
+    s.bossIntro={name:pb.name,t:0,dur:3000,bx:pb.bx,by:pb.by};sfx("bossdeath");}
   // Boss intro sequence -- freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
@@ -527,7 +529,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
     if(s.fade.alpha>=1&&s.fade.cb){s.fade.cb();s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
     if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
-  if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur)s.slide.a=false;return;}
+  if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur){s.slide.a=false;
+    // Trigger boss intro after room transition completes
+    if(s._pendingBoss){const pb=s._pendingBoss;s._pendingBoss=null;
+      s.bossIntro={name:pb.name,t:0,dur:3000,bx:pb.bx,by:pb.by};sfx("bossdeath");}}return;}
   // ===== SIDE-SCROLL PASSAGE PHYSICS =====
   if(s.loc.ty==="passage"&&s.ss){
     const ky=kyR.value,tc=tcR.value,p=s.p,ss=s.ss;
