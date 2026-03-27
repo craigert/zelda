@@ -33,7 +33,7 @@
     </div>
     <div v-if="showMuPicker" :style="{background:'rgba(0,0,0,0.85)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'8px',padding:'12px',marginTop:'8px',maxWidth:'480px',width:'100%'}">
       <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC -- Pick files or paste URLs</div>
-      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['triforce','✨ Triforce Moment']]" :key="key"
+      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
           <span :style="{color:'#888',fontSize:'10px',fontFamily:'monospace',width:'100px',flexShrink:0}">{{ label }}</span>
@@ -141,6 +141,7 @@ function init() {
     bossWarp:null, // {x,y,t,ready,di} — warp portal after boss death (temporary animation)
     bossWarps:[], // persistent: [{di,bossScr,bossX,bossY,entryScr}] — cleared dungeon portals
     pushAnim:null, // {fx,fy,tx,ty,t,dur,reveal,rx,ry,isDg} — smooth block slide
+    endScreen:null, // {t:0} end credits cinematic
   };
 }
 
@@ -420,7 +421,7 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
     else if(tl===T.TRIFORCE){s.pk.add(pk);p.tri[s.loc.di]=true;const c2=p.tri.filter(Boolean).length;sfx("triforce");
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:1000,c:"#fd3"})));
-      if(c2>=3){s.won=true;s.msg={text:"All Triforce pieces! YOU WIN!",t:99999};}else s.msg={text:`Triforce piece ${c2}/3!`,t:2500};}}}
+      if(c2>=3){s.won=true;s.endScreen={t:0};s.msg={text:"",t:0};}else s.msg={text:`Triforce piece ${c2}/3!`,t:2500};}}}
 
 function cTr(s){const p=s.p,loc=s.loc;
   if(loc.ty==="ow"){
@@ -493,6 +494,8 @@ function cTr(s){const p=s.p,loc=s.loc;
   saveGame(s);}
 
 function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return;s.gt+=dt;
+  // End screen cinematic — just advance timer
+  if(s.endScreen){s.endScreen.t+=dt;return;}
   // Freeze gameplay during chest presentation
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
@@ -572,8 +575,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   }
   if(s.freeze>0){s.freeze-=dt;return;}
   if(s.death.a){s.death.t+=dt;s.death.spin+=dt*0.015;if(s.death.t>1500&&!s.go){s.go=true;s.msg={text:"Tap to respawn",t:99999};}if(!s.go)return;}
-  if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
-    if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
+  if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||s.respawnClick){s.respawnClick=false;
+    if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
+      const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
@@ -1298,7 +1302,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
-        if(s.loc.di===3){s.won=true;s.msg={text:"The Dark King is defeated! Peace restored!",t:99999};}
+        if(s.loc.di===3){s.won=true;s.endScreen={t:0};s.msg={text:"",t:0};}
         // Spawn warp portal after boss death (delayed so drops land first)
         if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
           s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
@@ -2680,7 +2684,182 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.textAlign="left";}
   if(s.mapOpen){drawInventoryScreen(c,s,t);}
   if(s.go){c.fillStyle="rgba(10,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#e33";c.font="bold 36px monospace";c.textAlign="center";c.fillText("GAME OVER",W2/2,FH2/2-20);c.fillStyle="#ccc";c.font="16px monospace";c.fillText("Tap to respawn",W2/2,FH2/2+25);c.textAlign="left";}
-  if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("All Triforce pieces collected!",W2/2,FH2/2+10);c.fillText("Tap to play again",W2/2,FH2/2+35);c.textAlign="left";}}
+  if(s.won&&s.endScreen){const es=s.endScreen,et=es.t;
+    const FH=FH2;
+    // Fade in from white
+    const fadeIn=Math.min(1,et/2000);
+    c.fillStyle=`rgba(0,0,0,${fadeIn})`;c.fillRect(0,0,W2,FH);
+    if(fadeIn<1){c.fillStyle=`rgba(255,255,240,${1-fadeIn})`;c.fillRect(0,0,W2,FH);}
+    if(et<500){c.textAlign="left";return;}
+    // ===== LANDSCAPE =====
+    // Sky gradient — golden sunset
+    const skyG=c.createLinearGradient(0,0,0,FH*0.55);
+    skyG.addColorStop(0,"#1a1040");skyG.addColorStop(0.2,"#2a1850");
+    skyG.addColorStop(0.4,"#804020");skyG.addColorStop(0.55,"#e8a040");
+    skyG.addColorStop(0.7,"#f0d060");skyG.addColorStop(0.85,"#e8c040");
+    skyG.addColorStop(1,"#80a040");
+    c.fillStyle=skyG;c.fillRect(0,0,W2,FH*0.55);
+    // Sun
+    const sunX=W2*0.3,sunY=FH*0.32;
+    const sunG=c.createRadialGradient(sunX,sunY,8,sunX,sunY,80);
+    sunG.addColorStop(0,"rgba(255,240,200,0.9)");sunG.addColorStop(0.3,"rgba(255,200,100,0.4)");sunG.addColorStop(1,"rgba(255,150,50,0)");
+    c.fillStyle=sunG;c.beginPath();c.arc(sunX,sunY,80,0,Math.PI*2);c.fill();
+    c.fillStyle="rgba(255,230,180,0.7)";c.beginPath();c.arc(sunX,sunY,16,0,Math.PI*2);c.fill();
+    // Stars (fading as scene brightens)
+    const starAlpha=Math.max(0,0.6-et/15000);
+    if(starAlpha>0){let seed=777;const sr=()=>{seed=(seed*16807)%2147483647;return(seed&0xffff)/0xffff;};
+      for(let i=0;i<30;i++){const sx=sr()*W2,sy=sr()*FH*0.35;
+        c.fillStyle=`rgba(255,255,220,${starAlpha*(0.3+sr()*0.7)})`;c.beginPath();c.arc(sx,sy,0.5+sr(),0,Math.PI*2);c.fill();}}
+    // Distant mountains
+    c.fillStyle="#2a4038";c.beginPath();c.moveTo(0,FH*0.50);
+    c.lineTo(W2*0.1,FH*0.38);c.lineTo(W2*0.2,FH*0.42);c.lineTo(W2*0.35,FH*0.34);
+    c.lineTo(W2*0.5,FH*0.40);c.lineTo(W2*0.65,FH*0.36);c.lineTo(W2*0.8,FH*0.42);
+    c.lineTo(W2,FH*0.38);c.lineTo(W2,FH*0.55);c.lineTo(0,FH*0.55);c.fill();
+    // Rolling green hills
+    const landG=c.createLinearGradient(0,FH*0.48,0,FH);
+    landG.addColorStop(0,"#3a8830");landG.addColorStop(0.3,"#2a6820");landG.addColorStop(1,"#1a4a14");
+    c.fillStyle=landG;c.beginPath();c.moveTo(0,FH*0.50);
+    c.bezierCurveTo(W2*0.2,FH*0.47,W2*0.4,FH*0.54,W2*0.6,FH*0.50);
+    c.bezierCurveTo(W2*0.8,FH*0.46,W2*0.9,FH*0.52,W2,FH*0.48);
+    c.lineTo(W2,FH);c.lineTo(0,FH);c.fill();
+    // Trees in distance
+    for(let i=0;i<8;i++){const tx=W2*0.05+i*W2*0.12+hs(i,0,10)*20,ty=FH*0.46+hs(i,0,11)*FH*0.06;
+      const ts=3+hs(i,0,12)*3;c.fillStyle="#1a5010";c.beginPath();c.arc(tx,ty,ts,0,Math.PI*2);c.fill();
+      c.fillStyle="#3a2010";c.fillRect(tx-0.8,ty+ts-1,1.6,ts*0.8);}
+    // River
+    c.strokeStyle="rgba(60,140,200,0.35)";c.lineWidth=4;c.beginPath();
+    c.moveTo(W2*0.1,FH*0.58);c.bezierCurveTo(W2*0.3,FH*0.62,W2*0.5,FH*0.56,W2*0.7,FH*0.65);
+    c.bezierCurveTo(W2*0.85,FH*0.72,W2*0.9,FH*0.60,W2,FH*0.68);c.stroke();
+    // ===== CLIFF EDGE (hero stands on) =====
+    const cliffY=FH*0.52;
+    c.fillStyle="#5a5040";c.beginPath();
+    c.moveTo(W2*0.35,cliffY);c.lineTo(W2*0.75,cliffY);c.lineTo(W2*0.78,FH);c.lineTo(W2*0.32,FH);c.fill();
+    c.fillStyle="#3a8830";c.fillRect(W2*0.34,cliffY-2,W2*0.42,6);
+    // ===== HERO — back to camera, holding sword aloft =====
+    const hx=W2*0.55,hy=cliffY-50;
+    const wind=Math.sin(t/500)*2;const capeSway=Math.sin(t/350)*10;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx,cliffY-1,16,4,0,0,Math.PI*2);c.fill();
+    // Cape — billowing in wind
+    const capeG=c.createLinearGradient(hx,hy+10,hx-30+capeSway,hy+55);
+    capeG.addColorStop(0,"#1a6a1a");capeG.addColorStop(1,"#0a4a0a");
+    c.fillStyle=capeG;c.beginPath();c.moveTo(hx-6,hy+10);
+    c.bezierCurveTo(hx-18,hy+28,hx-30+capeSway,hy+42,hx-24+capeSway*1.2,hy+56);
+    c.lineTo(hx-14+capeSway*0.5,hy+52);
+    c.bezierCurveTo(hx-10,hy+38,hx-4,hy+22,hx+2,hy+12);c.fill();
+    c.strokeStyle="rgba(100,200,80,0.2)";c.lineWidth=1;c.beginPath();
+    c.moveTo(hx-6,hy+10);c.bezierCurveTo(hx-18,hy+28,hx-30+capeSway,hy+42,hx-24+capeSway*1.2,hy+56);c.stroke();
+    // Right cape side
+    c.fillStyle=capeG;c.beginPath();c.moveTo(hx+6,hy+10);
+    c.bezierCurveTo(hx+14,hy+28,hx+22+capeSway*0.3,hy+42,hx+18+capeSway*0.4,hy+54);
+    c.lineTo(hx+10+capeSway*0.2,hy+50);
+    c.bezierCurveTo(hx+6,hy+36,hx+2,hy+22,hx+2,hy+12);c.fill();
+    // Boots
+    c.fillStyle="#5a3018";c.beginPath();c.ellipse(hx-6,cliffY-3,5,4,0,0,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(hx+6,cliffY-3,5,4,0,0,Math.PI*2);c.fill();
+    // Legs
+    c.fillStyle="#c8b080";c.fillRect(hx-7,hy+35,5,14);c.fillRect(hx+2,hy+35,5,14);
+    // Tunic body (back view)
+    const tunicG=c.createLinearGradient(hx-12,hy+12,hx+12,hy+36);
+    tunicG.addColorStop(0,"#48bb48");tunicG.addColorStop(1,"#2a8a2a");
+    c.fillStyle=tunicG;c.beginPath();c.moveTo(hx-12,hy+14);c.lineTo(hx+12,hy+14);
+    c.lineTo(hx+11,hy+36);c.lineTo(hx-11,hy+36);c.closePath();c.fill();
+    // Belt
+    c.fillStyle="#a87a2a";c.fillRect(hx-11,hy+28,22,3);c.fillStyle="#d4b040";c.fillRect(hx-3,hy+28,6,3);
+    // Left arm (at side)
+    c.fillStyle="#48aa48";c.fillRect(hx-16,hy+16+wind*0.3,5,12);
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx-14,hy+29+wind*0.3,2.5,0,Math.PI*2);c.fill();
+    // Right arm (raised holding sword)
+    c.fillStyle="#48aa48";c.save();c.translate(hx+12,hy+16);c.rotate(-0.3);c.fillRect(0,-2,5,14);c.restore();
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+14,hy+4,3,0,Math.PI*2);c.fill();
+    // Head (back of head)
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx,hy+6,9,0,Math.PI*2);c.fill();
+    // Hair — flowing in wind
+    const hairG=c.createLinearGradient(hx-10,hy-4,hx+10,hy+4);
+    hairG.addColorStop(0,"#e8c040");hairG.addColorStop(1,"#c8a030");
+    c.fillStyle=hairG;c.beginPath();c.arc(hx,hy+4,9.5,0,Math.PI*2);c.fill();
+    // Hair strands blowing in wind
+    c.fillStyle="#d8b030";
+    for(let i=0;i<4;i++){const sx=hx-6+i*4,sy=hy-2+i*1;
+      c.beginPath();c.moveTo(sx,sy);
+      c.bezierCurveTo(sx-8+wind*1.5,sy+4+i*2,sx-14+wind*2,sy+10+i*3,sx-12+wind*2.5,sy+16+i*3);
+      c.lineTo(sx-10+wind*2,sy+14+i*3);
+      c.bezierCurveTo(sx-10+wind*1.5,sy+8+i*2,sx-4+wind,sy+2+i,sx+2,sy+1);c.fill();}
+    // Hat (green, pointy, blowing in wind)
+    c.fillStyle="#2aaa2a";c.beginPath();c.moveTo(hx-8,hy+2);c.lineTo(hx+2,hy-10);
+    c.bezierCurveTo(hx-12+wind*3,hy-16,hx-20+wind*4,hy-10,hx-22+wind*4.5,hy-6);c.fill();
+    // ===== MASTER SWORD — held aloft =====
+    const swordX=hx+14,swordBaseY=hy+4;
+    // Blade
+    c.strokeStyle="#c0d8ff";c.lineWidth=3;c.lineCap="round";
+    c.beginPath();c.moveTo(swordX,swordBaseY);c.lineTo(swordX+2,swordBaseY-28);c.stroke();
+    // Blade shine
+    c.strokeStyle="rgba(255,255,255,0.6)";c.lineWidth=1.5;
+    c.beginPath();c.moveTo(swordX+0.5,swordBaseY-2);c.lineTo(swordX+1.5,swordBaseY-26);c.stroke();
+    // Crossguard
+    c.strokeStyle="#d4b040";c.lineWidth=3;
+    c.beginPath();c.moveTo(swordX-7,swordBaseY+2);c.lineTo(swordX+7,swordBaseY+2);c.stroke();
+    // Grip
+    c.strokeStyle="#6a3a18";c.lineWidth=3.5;
+    c.beginPath();c.moveTo(swordX,swordBaseY+3);c.lineTo(swordX,swordBaseY+9);c.stroke();
+    // Pommel
+    c.fillStyle="#ffd633";c.beginPath();c.arc(swordX,swordBaseY+10,2.5,0,Math.PI*2);c.fill();
+    // Sword glow
+    const sGlow=Math.sin(t/200)*0.3+0.5;
+    c.fillStyle=`rgba(180,210,255,${sGlow*0.4})`;c.beginPath();c.arc(swordX+2,swordBaseY-28,6,0,Math.PI*2);c.fill();
+    // Light rays from sword tip
+    for(let i=0;i<5;i++){const ra=t/800+i*Math.PI*2/5;const rl=12+Math.sin(t/300+i)*4;
+      c.strokeStyle=`rgba(200,220,255,${sGlow*0.15})`;c.lineWidth=1;
+      c.beginPath();c.moveTo(swordX+2,swordBaseY-28);c.lineTo(swordX+2+Math.cos(ra)*rl,swordBaseY-28+Math.sin(ra)*rl);c.stroke();}
+    c.lineCap="butt";
+    // ===== GOLDEN TRIFORCE above hero =====
+    const triY=hy-40+Math.sin(t/600)*3;const triGlow=Math.sin(t/400)*0.15+0.5;
+    c.fillStyle=`rgba(253,211,51,${triGlow*0.3})`;c.beginPath();c.arc(hx,triY,20,0,Math.PI*2);c.fill();
+    c.fillStyle="#ffd633";c.beginPath();c.moveTo(hx,triY-12);c.lineTo(hx+12,triY+8);c.lineTo(hx-12,triY+8);c.closePath();c.fill();
+    c.fillStyle="#ffe866";c.beginPath();c.moveTo(hx,triY-7);c.lineTo(hx+6,triY+4);c.lineTo(hx-6,triY+4);c.closePath();c.fill();
+    // ===== VIGNETTE =====
+    const vig=c.createRadialGradient(W2/2,FH/2,FH*0.2,W2/2,FH/2,FH*0.7);
+    vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(1,"rgba(0,0,0,0.4)");
+    c.fillStyle=vig;c.fillRect(0,0,W2,FH);
+    // ===== CREDITS — scroll up slowly =====
+    c.textAlign="center";
+    const credits=[
+      {text:"THE LEGEND OF LINK",font:"bold 22px monospace",color:"#ffd633",gap:20},
+      {text:"Quest for the Triforce",font:"13px monospace",color:"rgba(255,220,180,0.7)",gap:50},
+      {text:"- CREDITS -",font:"bold 14px monospace",color:"#b8962a",gap:30},
+      {text:"Producer",font:"bold 11px monospace",color:"#888",gap:4},
+      {text:"Craig Boren",font:"bold 14px monospace",color:"#ddd",gap:28},
+      {text:"Developer",font:"bold 11px monospace",color:"#888",gap:4},
+      {text:"Craig Boren",font:"bold 14px monospace",color:"#ddd",gap:28},
+      {text:"Music",font:"bold 11px monospace",color:"#888",gap:4},
+      {text:"Craig Boren",font:"bold 14px monospace",color:"#ddd",gap:28},
+      {text:"Testing",font:"bold 11px monospace",color:"#888",gap:4},
+      {text:"Craig Boren",font:"bold 14px monospace",color:"#ddd",gap:6},
+      {text:"Paul Boren",font:"bold 14px monospace",color:"#ddd",gap:28},
+      {text:"Publishing",font:"bold 11px monospace",color:"#888",gap:4},
+      {text:"Banana Corp",font:"bold 14px monospace",color:"#fd3",gap:50},
+      {text:"Thank you for playing!",font:"bold 13px monospace",color:"rgba(255,255,255,0.6)",gap:30},
+      {text:"Press Space to return",font:"10px monospace",color:"rgba(255,255,255,0.3)",gap:0},
+    ];
+    const scrollSpeed=0.025;// pixels per ms
+    const scrollStart=3000;// ms before credits start scrolling
+    const scrollY=et>scrollStart?(et-scrollStart)*scrollSpeed:0;
+    let cy=FH+40-scrollY;// start below screen
+    for(const cr of credits){
+      c.font=cr.font;c.fillStyle=cr.color;
+      // Fade out near top and bottom edges
+      const screenY=cy;
+      if(screenY>10&&screenY<FH-5){
+        const topFade=Math.min(1,(screenY-10)/40);
+        const botFade=Math.min(1,(FH-5-screenY)/40);
+        c.globalAlpha=Math.min(topFade,botFade);
+        c.fillText(cr.text,W2/2,screenY);
+        c.globalAlpha=1;
+      }
+      cy+=cr.gap+(cr.font.includes("22")?0:14);
+    }
+    c.textAlign="left";
+  }else if(s.won){c.fillStyle="rgba(0,0,0,0.75)";c.fillRect(0,0,W2,FH2);c.fillStyle="#fd3";c.font="bold 36px monospace";c.textAlign="center";c.fillText("VICTORY!",W2/2,FH2/2-30);c.fillStyle="#fff";c.font="15px monospace";c.fillText("Tap to play again",W2/2,FH2/2+25);c.textAlign="left";}}
 
 // --- Lifecycle ---
 let _cleanup = null;
@@ -2789,7 +2968,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
