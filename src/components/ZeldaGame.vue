@@ -951,6 +951,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     }
     if(b.exploded&&b.t>=b.fuse+400)s.activeBombs.splice(i,1);}
   // Blade traps update
+  if(s.loc.ty!=="dg")s.bladeTraps=[];
   for(const bt of s.bladeTraps){const pcx=p.x+PS/2,pcy=p.y+PS/2,bcx=bt.x+TL/2,bcy=bt.y+TL/2;
     if(bt.st==="idle"){bt.wait-=dt;if(bt.wait>0)continue;
       // Detect player in line of sight (same row or column, within range)
