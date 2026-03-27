@@ -292,7 +292,15 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
-  s.litTorches=s.litTorchesAll[trk]||(s.litTorchesAll[trk]=new Set());const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
+  s.litTorches=s.litTorchesAll[trk]||(s.litTorchesAll[trk]=new Set());const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
+  // Always load NPCs for overworld (even if room is cleared of enemies)
+  const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
+  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];
+  // Always load blade traps for dungeons (even if room is cleared)
+  s.bladeTraps=[];
+  if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
+    if(rm2?.traps)s.bladeTraps=rm2.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
+  if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
@@ -309,13 +317,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     if(boss){s._pendingBoss={name:boss.name||"???",bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;
       ltRef.value=null;}
   }
-  // Load blade traps from room data
-  s.bladeTraps=[];
-  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];
-    if(rm?.traps)s.bladeTraps=rm.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
-  // Init NPC runtime state
-  const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
-  s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];}
+}
 
 function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;if(s.loc.ty==="passage")return null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
