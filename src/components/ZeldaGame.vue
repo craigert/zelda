@@ -122,7 +122,7 @@ function init() {
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[],
     shop:null,shopGround:null, // active shop
-    hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0,shopVisited:false,dogDug:false, // shop upgrades + jar + dog
+    hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0,shopVisited:false,dogDug:false,treeGift:false, // shop upgrades + jar + dog + tree
     pArrows:[],
     chest:null,
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
@@ -237,7 +237,7 @@ function saveGame(s) {
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
-      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, sanctumRevealed: s.sanctumRevealed||false,
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, treeGift: s.treeGift||false, sanctumRevealed: s.sanctumRevealed||false,
       bossWarps: s.bossWarps||[]
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
@@ -263,7 +263,7 @@ function applySave(s, save) {
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);
   s.heartContainers = [...save.heartContainers];
-  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.sanctumRevealed = save.sanctumRevealed || false;
+  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if (s.finalOpen) {
@@ -616,13 +616,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       s.respawnClick=false;
       if(s.npcTalk.charIdx>=s.npcTalk.lines[s.npcTalk.idx].length){
         s.npcTalk.idx++;
-        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;s.npcTalk=null;
+        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;const wasTreeGift=s.npcTalk.treeGift;s.npcTalk=null;
           for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;
           // Dog dug up a heart piece!
           if(wasDogDig){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
             s.drops.push({x:dx2,y:dy2-20,vy:-3,ground:dy2,type:"heartpiece_drop",t:0});
             sfx("heartpiece");s.shake.t=400;s.msg={text:"The dog dug up a Heart Piece!",t:2500};
-            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#ff3366":"#fd3"})));}}
+            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#ff3366":"#fd3"})));}
+          // Ancient Tree drops a heart piece from its canopy
+          if(wasTreeGift){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
+            s.drops.push({x:dx2,y:dy2-30,vy:-2,ground:dy2,type:"heartpiece_drop",t:0});
+            sfx("heartpiece");s.shake.t=400;s.msg={text:"The Ancient Tree gave you a Heart Piece!",t:2500};
+            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2-20,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#2a6a18":"#fd3"})));}}
         else{s.npcTalk.charIdx=0;s.npcTalk.timer=0;}
       }else{s.npcTalk.charIdx=s.npcTalk.lines[s.npcTalk.idx].length;s.npcTalk.timer=99999;}
       ky.delete(" ");ky.delete("enter");ky.delete("e");ky.delete("z");
@@ -665,7 +670,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;ns.p.hasBone=old.p.hasBone;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;ns.treeGift=old.treeGift;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
@@ -1027,6 +1032,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             p.hasBone=false;s.dogDug=true;sfx("itemget");s.shake.t=400;
             s.npcTalk={name:"Dog",lines:["Arf!! *takes bone excitedly*","*sniff sniff* *digs furiously*","*digs up something shiny!*"],idx:0,charIdx:0,timer:0,dogDig:true};
             npcHit=true;ns2.st="idle";ns2.wait=9999;ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);break;}
+          // Ancient Tree + Master Sword = heart piece gift
+          if(npc.name==="Ancient Tree"&&p.hasMasterSword&&!s.treeGift){
+            s.treeGift=true;sfx("itemget");s.shake.t=400;
+            s.npcTalk={name:npc.name,lines:["...*creak*... You carry the Master Sword!","The blade of legend... I can feel its power.","You are truly the hero of Hyrule.","Take this gift I have guarded for ages..."],idx:0,charIdx:0,timer:0,treeGift:true};
+            npcHit=true;ns2.st="idle";ns2.wait=9999;break;}
           s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
           ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
           // NPC faces player
