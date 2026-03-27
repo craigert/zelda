@@ -517,7 +517,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     fd.flash=Math.sin(fd.t/80)*0.5+0.5;// boss flashing
     if(fd.t>1500)fd.fallY=Math.min(20,(fd.t-1500)*0.015);// boss sinks
     if(fd.t>2500)fd.heroRaise=Math.min(1,(fd.t-2500)/800);// hero raises sword
-    if(fd.t>3500)fd.fadeAlpha=Math.min(1,(fd.t-3500)/1500);// fade to black
+    if(fd.t>5000)fd.fadeAlpha=Math.min(1,(fd.t-5000)/1500);// fade to black (after hold)
     // Particles from dying boss
     if(fd.t<2500&&Math.random()<0.3){s.pt.push({x:fd.bx+(Math.random()-.5)*20,y:fd.by-fd.fallY+(Math.random()-.5)*20,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:600,c:Math.random()>.5?"#f0f":"#fd3"});}
     // Transition to end screen
@@ -1437,7 +1437,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
-        if(s.loc.di===3){s.triMu=true;s.finalDeath={t:0,dur:5000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
+        if(s.loc.di===3){s.triMu=true;s.finalDeath={t:0,dur:7000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
         // Spawn warp portal after boss death (delayed so drops land first)
         if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
           s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
