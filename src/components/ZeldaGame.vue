@@ -2975,9 +2975,52 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#5a5040";c.beginPath();
     c.moveTo(W2*0.35,cliffY);c.lineTo(W2*0.75,cliffY);c.lineTo(W2*0.78,FH);c.lineTo(W2*0.32,FH);c.fill();
     c.fillStyle="#3a8830";c.fillRect(W2*0.34,cliffY-2,W2*0.42,6);
-    // ===== HERO — back to camera, holding sword aloft =====
-    const hx=W2*0.55,hy=cliffY-50;
+    // ===== PRINCESS — standing beside hero, looking at sunset =====
+    const px2=W2*0.48,py2=cliffY-46;
     const wind=Math.sin(t/500)*2;const capeSway=Math.sin(t/350)*10;
+    const hairSway=Math.sin(t/400)*4;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(px2,cliffY-1,14,3.5,0,0,Math.PI*2);c.fill();
+    // Dress
+    const dressG=c.createLinearGradient(px2,py2+12,px2,cliffY);
+    dressG.addColorStop(0,"#d8a0d8");dressG.addColorStop(0.5,"#c080c0");dressG.addColorStop(1,"#a060a0");
+    c.fillStyle=dressG;c.beginPath();c.moveTo(px2-8,py2+14);c.lineTo(px2+8,py2+14);
+    c.lineTo(px2+14,cliffY-2);c.lineTo(px2-14,cliffY-2);c.closePath();c.fill();
+    // Dress trim
+    c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(px2-13,cliffY-4,26,2);
+    // Bodice detail
+    c.fillStyle="#b870b8";c.fillRect(px2-6,py2+14,12,8);
+    c.fillStyle="#d4b040";c.fillRect(px2-6,py2+14,12,2);// gold trim
+    // Arms at side
+    c.fillStyle="#f0c8a0";
+    c.fillRect(px2-12,py2+16+wind*0.2,4,10);c.fillRect(px2+8,py2+16-wind*0.2,4,10);
+    // Hands
+    c.beginPath();c.arc(px2-10,py2+27+wind*0.2,2.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(px2+10,py2+27-wind*0.2,2.5,0,Math.PI*2);c.fill();
+    // Shoes
+    c.fillStyle="#8060a0";c.beginPath();c.ellipse(px2-5,cliffY-2,4,3,0,0,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(px2+5,cliffY-2,4,3,0,0,Math.PI*2);c.fill();
+    // Head
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(px2,py2+6,8,0,Math.PI*2);c.fill();
+    // Long flowing hair
+    const phG=c.createLinearGradient(px2-10,py2-4,px2+hairSway,py2+30);
+    phG.addColorStop(0,"#c08030");phG.addColorStop(1,"#a06820");
+    c.fillStyle=phG;c.beginPath();c.arc(px2,py2+4,9,0,Math.PI*2);c.fill();
+    // Long hair strands flowing in wind
+    c.fillStyle="#b07028";
+    for(let i=0;i<3;i++){const sx=px2-4+i*4,sy=py2+2+i;
+      c.beginPath();c.moveTo(sx,sy);
+      c.bezierCurveTo(sx-6+hairSway,sy+10+i*3,sx-10+hairSway*1.5,sy+20+i*4,sx-8+hairSway*1.8,sy+28+i*4);
+      c.lineTo(sx-6+hairSway*1.5,sy+26+i*4);
+      c.bezierCurveTo(sx-7+hairSway,sy+16+i*3,sx-3+hairSway*.5,sy+6+i,sx+2,sy+1);c.fill();}
+    // Tiara/crown
+    c.fillStyle="#fd3";c.beginPath();
+    c.moveTo(px2-7,py2);c.lineTo(px2-5,py2-4);c.lineTo(px2-2,py2-1);c.lineTo(px2,py2-5);
+    c.lineTo(px2+2,py2-1);c.lineTo(px2+5,py2-4);c.lineTo(px2+7,py2);c.fill();
+    // Tiara jewel
+    c.fillStyle="#f44";c.beginPath();c.arc(px2,py2-3,1.5,0,Math.PI*2);c.fill();
+    // ===== HERO — back to camera, holding sword aloft =====
+    const hx=W2*0.58,hy=cliffY-50;
     // Shadow
     c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx,cliffY-1,16,4,0,0,Math.PI*2);c.fill();
     // Cape — billowing in wind
