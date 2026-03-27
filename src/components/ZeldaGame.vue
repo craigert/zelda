@@ -871,7 +871,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){revealTile=T.ENTRANCE;break;}}if(revealTile===T.ENTRANCE)break;}}
         }
         // Start smooth slide animation
-        m2[by][bx]=T.ROCK;// destination tile becomes immovable rock (can't push again)
+        m2[by][bx]=s.loc.ty==="ow"?T.ROCK:T.PUSH;// overworld: permanent; dungeon: still pushable
         m2[fty][ftx]=T.FLOOR;// temp clear source for rendering (animation overlays)
         const pushDur=s.loc.ty==="ow"?800:250;
         s.pushAnim={fx:ftx*TL,fy:fty*TL,tx:bx*TL,ty:by*TL,t:0,dur:pushDur,
@@ -926,7 +926,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       // Square puzzle: check if all plate positions have ROCK on them (pushed blocks)
       if(m3&&s.loc.ty==="dg"){const roomD5=s.dg[s.loc.di]?.rooms[s.loc.scr];
         if(roomD5?.squarePuzzle&&roomD5?.stairsReveal&&roomD5?.squarePlates&&!s._squareSolved){
-          const allFilled=roomD5.squarePlates.every(([px2,py2])=>m3[py2][px2]===T.ROCK);
+          const allFilled=roomD5.squarePlates.every(([px2,py2])=>m3[py2][px2]===T.PUSH||m3[py2][px2]===T.ROCK);
           if(allFilled){s._squareSolved=true;
             const[srx,sry]=roomD5.stairsReveal;m3[sry][srx]=T.STAIRS_DOWN;
             sfx("secret");s.shake.t=500;s.msg={text:"The square is complete! A stairway appeared!",t:2500};
