@@ -391,45 +391,35 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][7]=T.PUSH;m[6][8]=T.PUSH;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"knight"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
 
-  // Far west shadow vault — shadow corridor leading to master key chest
-  "-2,-1":{dark:true,tiles:mr(m=>{
-    // No normal exits — only reachable via passage stairs
-    // Shadow-surrounded narrow path from stairs to chest
-    // Fill with PIT (shadow void) everywhere
-    for(let y=1;y<=10;y++)for(let x=1;x<=14;x++)m[y][x]=T.PIT;
-    // Narrow winding floor path through the shadow
-    // Entry from stairs (bottom-left)
-    m[9][2]=T.FLOOR;m[9][3]=T.FLOOR;m[8][3]=T.FLOOR;m[7][3]=T.FLOOR;
-    m[7][4]=T.FLOOR;m[7][5]=T.FLOOR;m[7][6]=T.FLOOR;m[7][7]=T.FLOOR;
-    m[6][7]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;
-    m[4][8]=T.FLOOR;m[3][8]=T.FLOOR;m[3][9]=T.FLOOR;m[3][10]=T.FLOOR;
-    m[3][11]=T.FLOOR;m[4][11]=T.FLOOR;m[5][11]=T.FLOOR;
-    m[5][12]=T.FLOOR;m[5][13]=T.FLOOR;
-    // Wider area at the end for the chest
-    m[3][12]=T.FLOOR;m[3][13]=T.FLOOR;m[4][12]=T.FLOOR;m[4][13]=T.FLOOR;
-    // Stairs arrival point
-    m[9][2]=T.STAIRS_DOWN;
-    // Torches along the path (faint light in darkness)
-    m[8][3]=T.TORCH;m[7][6]=T.TORCH;m[4][8]=T.TORCH;m[4][11]=T.TORCH;
-    // Master key at the end of the path
-    m[4][13]=T.MASTER_KEY;
-    // Hearts along the way
-    m[7][5]=T.HEART;m[3][10]=T.HEART;
-  }),enemies:[{x:7*TL,y:7*TL,hp:5,type:"ghost"},{x:8*TL,y:3*TL,hp:5,type:"ghost"},{x:11*TL,y:5*TL,hp:5,type:"ghost"},{x:3*TL,y:9*TL,hp:4,type:"bat"},{x:5*TL,y:5*TL,hp:4,type:"bat"}]},
+  // Far west shadow vault — dark room, key only reachable via underground passage
+  "-2,-1":{dark:true,tiles:mr(m=>{ae(m,["E"]);
+    // PIT surrounding a small floor island — can't reach from the door
+    for(let y=2;y<=9;y++)for(let x=1;x<=5;x++)m[y][x]=T.PIT;
+    // Small floor island in the abyss — only reachable from passage stairs
+    m[5][2]=T.FLOOR;m[5][3]=T.FLOOR;m[6][2]=T.FLOOR;m[6][3]=T.FLOOR;
+    m[4][2]=T.FLOOR;m[4][3]=T.FLOOR;
+    // Master key and passage arrival on the island
+    m[5][3]=T.MASTER_KEY;m[6][2]=T.STAIRS_DOWN;
+    // Torches on the island (only light source in the dark room)
+    m[4][2]=T.TORCH;m[4][3]=T.TORCH;
+    // Spike border along the east walkway
+    m[3][8]=T.SPIKE;m[3][10]=T.SPIKE;m[8][8]=T.SPIKE;m[8][10]=T.SPIKE;
+    m[5][12]=T.SPIKE;m[6][12]=T.SPIKE;
+    // Hearts for surviving the spike gauntlet from east entrance
+    m[5][7]=T.HEART;m[2][7]=T.HEART;
+  }),enemies:[{x:9*TL,y:5*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"},{x:8*TL,y:3*TL,hp:4,type:"ghost"}]},
 
-  // East of north — "Four Corners" push block puzzle room
-  "1,-1":{squarePuzzle:true,stairsReveal:[7,9],tiles:mr(m=>{ae(m,["W"]);
-    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-    // Four push blocks scattered around the room
-    m[3][4]=T.PUSH;m[3][11]=T.PUSH;m[8][4]=T.PUSH;m[8][11]=T.PUSH;
-    // Four plates marking the target square (2x2 in center)
-    m[5][7]=T.PLATE;m[5][8]=T.PLATE;m[6][7]=T.PLATE;m[6][8]=T.PLATE;
-    // Sign with clue
-    m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
-    // Decorative walls
-    m[2][4]=T.WALL;m[2][11]=T.WALL;m[9][4]=T.WALL;m[9][11]=T.WALL;
+  // East of north — spike gauntlet hiding secret stairway (clear enemies + push puzzle)
+  "1,-1":{lock:true,stairsReveal:[12,7],tiles:mr(m=>{ae(m,["W"]);
+    for(let y=2;y<=3;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
+    for(let y=8;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
+    m[5][4]=T.SPIKE;m[5][6]=T.SPIKE;m[5][8]=T.SPIKE;m[5][10]=T.SPIKE;m[5][12]=T.SPIKE;
+    m[6][3]=T.SPIKE;m[6][5]=T.SPIKE;m[6][7]=T.SPIKE;m[6][9]=T.SPIKE;m[6][11]=T.SPIKE;
     m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
-  }),enemies:[{x:6*TL,y:4*TL,hp:4,type:"ghost"},{x:10*TL,y:7*TL,hp:4,type:"ghost"}],sign:"Four corners of a square reveals the secret.",squarePlates:[[7,5],[8,5],[7,6],[8,6]]},
+    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
+    m[7][12]=T.PUSH;m[7][13]=T.PLATE;// Push block onto plate → reveals stairway
+  }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
+  traps:[{x:3,y:5,dir:"h",range:8},{x:8,y:2,dir:"v",range:7}]},
 
   // Secret room east of spike corridor — bombs and supplies
   "2,-1":{tiles:mr(m=>{
@@ -546,22 +536,24 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
   }),enemies:[]},
 
   // East upper — ghost arena (east leads to master key)
-  "1,-1":{tiles:mr(m=>{ae(m,["S","W","E"]);
-    m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;
-    m[8][3]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;
-    m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
-    m[5][7]=T.HEART;m[6][8]=T.HEART;
-    m[2][7]=T.TORCH;m[9][7]=T.TORCH;
-  }),enemies:[{x:4*TL,y:5*TL,hp:6,type:"knight"},{x:11*TL,y:6*TL,hp:6,type:"mage"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"}]},
+  // "Four Corners" push block puzzle — move 4 blocks into a square to reveal stairs
+  "1,-1":{squarePuzzle:true,stairsReveal:[7,9],tiles:mr(m=>{ae(m,["S","W","E"]);
+    // Four push blocks scattered randomly around the room
+    m[3][3]=T.PUSH;m[3][12]=T.PUSH;m[8][4]=T.PUSH;m[8][11]=T.PUSH;
+    // Four plates marking the target 2x2 square in center
+    m[5][7]=T.PLATE;m[5][8]=T.PLATE;m[6][7]=T.PLATE;m[6][8]=T.PLATE;
+    // Torches and decoration
+    m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+    m[2][4]=T.WALL;m[2][11]=T.WALL;m[9][4]=T.WALL;m[9][11]=T.WALL;
+    m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
+  }),enemies:[{x:6*TL,y:4*TL,hp:5,type:"ghost"},{x:10*TL,y:7*TL,hp:5,type:"ghost"}],sign:"Four corners of a square reveals the secret.",squarePlates:[[7,5],[8,5],[7,6],[8,6]]},
 
-  // MASTER_KEY room (east of 1,-1)
+  // East room (east of 1,-1) — supplies
   "2,-1":{tiles:mr(m=>{ae(m,["W"]);
-    for(let x=4;x<=11;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
-    m[5][5]=T.WALL;m[5][10]=T.WALL;m[6][5]=T.WALL;m[6][10]=T.WALL;
-    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
-    m[7][4]=T.TORCH;m[7][11]=T.TORCH;
-    m[9][12]=T.LEVER;// Hit lever after clearing room → reveals stairway
-  }),stairsReveal:[12,9],enemies:[{x:7*TL,y:4*TL,hp:8,type:"ghost"},{x:7*TL,y:7*TL,hp:8,type:"ghost"},{x:4*TL,y:5*TL,hp:6,type:"ghost"}],reward:"master_key"},
+    m[5][7]=T.BOMB;m[5][8]=T.BOMB;m[6][7]=T.HEART;m[6][8]=T.HEART;
+    m[4][5]=T.TORCH;m[4][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;
+    m[3][7]=T.RUPEE;m[3][8]=T.RUPEE;
+  }),enemies:[]},
 
   // North room — lever & push puzzle
   "0,-1":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
@@ -581,20 +573,29 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}]},
 
-  // Far west ambush — skeleton ambush with alternating floor/spike (west of -1,-1)
-  "-2,-1":{tiles:mr(m=>{ae(m,["E"]);
-    // Alternating spike/floor checkerboard pattern
-    for(let y=3;y<=8;y++)for(let x=3;x<=12;x++){
-      if((x+y)%2===0)m[y][x]=T.SPIKE;
-    }
-    // Safe path down the center
-    for(let y=2;y<=9;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
-    m[5][7]=T.RUPEE;m[6][8]=T.HEART;
-    m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
-    // Walled-off alcove bottom-left — key only via passage
-    for(let x=1;x<=4;x++)m[9][x]=T.WALL;m[9][2]=T.FLOOR;
-    m[10][2]=T.KEY;m[10][3]=T.STAIRS_DOWN;// Passage arrival + key
-  }),enemies:[{x:5*TL,y:5*TL,hp:6,type:"skeleton"},{x:10*TL,y:5*TL,hp:6,type:"skeleton"},{x:7*TL,y:3*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
+  // Shadow vault — inaccessible room, no doors, reached only via passage stairs
+  "-2,-1":{dark:true,tiles:mr(m=>{
+    // No exits (ae not called) — only reachable via passage
+    // Fill everything with PIT (shadow void)
+    for(let y=1;y<=10;y++)for(let x=1;x<=14;x++)m[y][x]=T.PIT;
+    // Narrow winding path through the shadow
+    m[9][3]=T.FLOOR;m[9][4]=T.FLOOR;m[8][4]=T.FLOOR;m[7][4]=T.FLOOR;
+    m[7][5]=T.FLOOR;m[7][6]=T.FLOOR;m[7][7]=T.FLOOR;
+    m[6][7]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;
+    m[4][8]=T.FLOOR;m[3][8]=T.FLOOR;m[3][9]=T.FLOOR;m[3][10]=T.FLOOR;
+    m[3][11]=T.FLOOR;m[4][11]=T.FLOOR;m[5][11]=T.FLOOR;
+    m[5][12]=T.FLOOR;m[5][13]=T.FLOOR;
+    // Wider area at the end for master key
+    m[3][12]=T.FLOOR;m[3][13]=T.FLOOR;m[4][12]=T.FLOOR;m[4][13]=T.FLOOR;
+    // Stairs arrival point
+    m[9][3]=T.STAIRS_DOWN;
+    // Sparse torches (faint light in the void)
+    m[8][4]=T.TORCH;m[7][6]=T.TORCH;m[4][8]=T.TORCH;m[4][11]=T.TORCH;
+    // Master key at the end
+    m[4][13]=T.MASTER_KEY;
+    // Hearts along the path
+    m[7][5]=T.HEART;m[3][10]=T.HEART;
+  }),enemies:[{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:8*TL,y:3*TL,hp:6,type:"ghost"},{x:11*TL,y:5*TL,hp:6,type:"ghost"},{x:4*TL,y:8*TL,hp:5,type:"bat"},{x:5*TL,y:5*TL,hp:5,type:"bat"}]},
 
   // North depth — locked door passage
   "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E","W"]);

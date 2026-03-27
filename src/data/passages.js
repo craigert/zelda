@@ -72,24 +72,22 @@ export const PASSAGES = [
     // "1,-1" (four corners puzzle) ↔ "-2,-1" (shadow corridor with master key)
     di: 3,
     from: { scr: "1,-1", tile: [7, 9] },
-    to:   { scr: "-2,-1", tile: [2, 9] },
+    to:   { scr: "-2,-1", tile: [3, 9] },
     exitL: { scr: "1,-1", px: 7*TL, py: 8*TL },
-    exitR: { scr: "-2,-1", px: 2*TL, py: 8*TL },
+    exitR: { scr: "-2,-1", px: 3*TL, py: 8*TL },
     platforms: [
       [2, 10, 4],    // left ground
       [10, 10, 4],   // right ground
-      [5, 9, 2],     // stepping stone left
-      [9, 9, 2],     // stepping stone right
-      [7, 8, 2],     // center stepping stone
-      [4, 6, 3],     // left mid
-      [9, 6, 3],     // right mid
+      [5, 8, 6],     // center bridge
+      [3, 6, 3],     // left mid
+      [10, 6, 3],    // right mid
       [6, 4, 4],     // top center
     ],
     ladders: [[1, 3, 8], [14, 3, 8]],
     enemies: [
-      { x: 7*TL, y: 7*TL, hp: 5, type: "knight" },
-      { x: 4*TL, y: 9*TL, hp: 4, type: "ghost" },
-      { x: 11*TL, y: 5*TL, hp: 4, type: "fire_bat" },
+      { x: 7*TL, y: 9*TL, hp: 5, type: "ghost" },
+      { x: 5*TL, y: 5*TL, hp: 5, type: "ghost" },
+      { x: 10*TL, y: 7*TL, hp: 4, type: "bat" },
     ],
   },
 ];
