@@ -2060,14 +2060,14 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw push block slide animation
   if(s.pushAnim){const pa=s.pushAnim,pr=Math.min(1,pa.t/pa.dur);
-    // Ease: slow start, accelerate, then brake at end (cubic bezier feel)
-    const ep=pr<0.15?pr*pr*22.2:pr<0.85?0.05+(pr-0.15)*1.285:1-Math.pow(1-pr,3)*2.96;
+    const isOW=!pa.isDg&&!iD;
+    // Easing: heavy slow-start for overworld boulders, simple ease-out for dungeon blocks
+    const ep=isOW?(pr<0.15?pr*pr*22.2:pr<0.85?0.05+(pr-0.15)*1.285:1-Math.pow(1-pr,3)*2.96):(1-Math.pow(1-pr,2));
     const ax=pa.fx+(pa.tx-pa.fx)*ep,ay=pa.fy+(pa.ty-pa.fy)*ep;
-    // Screen shake while sliding (subtle rumble)
-    if(pr>0.05&&pr<0.9){const rum=(1-Math.abs(pr-0.5)*2)*1.5;
+    // Screen rumble — overworld only (dungeon push is too fast)
+    if(isOW&&pr>0.05&&pr<0.9){const rum=(1-Math.abs(pr-0.5)*2)*1.5;
       c.save();c.translate((Math.random()-.5)*rum,(Math.random()-.5)*rum);}
-    // Draw the sliding block at interpolated position
-    if(!iD){
+    if(isOW){
       // Shadow stretches during movement
       const shadowStr=1+Math.sin(pr*Math.PI)*0.3;
       c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(ax+18,ay+24,12*shadowStr,4,0.1,0,Math.PI*2);c.fill();
@@ -2081,20 +2081,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       if(pr>0.1&&pr<0.95){const sx2=pa.fx+(pa.tx-pa.fx)*(ep*0.6),sy2=pa.fy+(pa.ty-pa.fy)*(ep*0.6);
         c.strokeStyle="rgba(80,60,30,0.3)";c.lineWidth=2;c.beginPath();c.moveTo(pa.fx+16,pa.fy+22);c.lineTo(sx2+16,sy2+22);c.stroke();}
     }else{
-      // Dungeon push block
+      // Dungeon push block — clean slide, no shake
       const pbg2=c.createLinearGradient(ax,ay,ax+TL,ay+TL);pbg2.addColorStop(0,"#7a7a88");pbg2.addColorStop(1,"#5a5a68");
       c.fillStyle=pbg2;c.fillRect(ax+2,ay+2,TL-4,TL-4);
       c.fillStyle="rgba(255,255,255,0.15)";c.fillRect(ax+2,ay+2,TL-4,3);c.fillRect(ax+2,ay+2,3,TL-4);
       c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(ax+2,ay+TL-5,TL-4,3);c.fillRect(ax+TL-5,ay+2,3,TL-4);
     }
-    // Restore from screen shake
-    if(pr>0.05&&pr<0.9)c.restore();
-    // Dust particles — more frequent and varied while sliding
-    if(pr>0.05&&pr<0.9){const dustRate=iD?0.5:0.7;
-      if(Math.random()<dustRate){const dx2=pa.tx-pa.fx,dy2=pa.ty-pa.fy;
-        s.pt.push({x:ax+16+(Math.random()-.5)*12,y:ay+TL-2+Math.random()*4,dx:(Math.random()-.5)*2-(dx2>0?0.5:dx2<0?-0.5:0),dy:-Math.random()*1.5-0.5,l:300+Math.random()*200,c:iD?"#888":"#a89060"});
-      }if(Math.random()<0.2){// Larger debris chunks
-        s.pt.push({x:ax+16+(Math.random()-.5)*8,y:ay+TL,dx:(Math.random()-.5)*3,dy:-Math.random()*2-1,l:400,c:iD?"#666":"#887050"});}}
+    // Restore from screen rumble (overworld only)
+    if(isOW&&pr>0.05&&pr<0.9)c.restore();
+    // Dust particles while sliding
+    if(pr>0.05&&pr<0.9){
+      if(Math.random()<(isOW?0.7:0.3)){const dx2=pa.tx-pa.fx,dy2=pa.ty-pa.fy;
+        s.pt.push({x:ax+16+(Math.random()-.5)*12,y:ay+TL-2+Math.random()*4,dx:(Math.random()-.5)*2-(dx2>0?0.5:dx2<0?-0.5:0),dy:-Math.random()*1.5-0.5,l:300+Math.random()*200,c:iD?"#888":"#a89060"});}
+      if(isOW&&Math.random()<0.2){s.pt.push({x:ax+16+(Math.random()-.5)*8,y:ay+TL,dx:(Math.random()-.5)*3,dy:-Math.random()*2-1,l:400,c:"#887050"});}}
   }
   // Draw blade traps
   for(const bt of s.bladeTraps){const bx=bt.x,by=bt.y,lunging=bt.st==="lunge";
