@@ -96,7 +96,7 @@ const saveSlot = ref(0); // active save slot 0-2
 // --- Init ---
 function init() {
   return {
-    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false},
+    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false,hasBone:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),// bc = bombed cracks, mb = moved boulders "scr:fx,fy:tx,ty:reveal"
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
@@ -122,7 +122,7 @@ function init() {
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[],
     shop:null,shopGround:null, // active shop
-    hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0,shopVisited:false, // shop upgrades + jar
+    hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0,shopVisited:false,dogDug:false, // shop upgrades + jar + dog
     pArrows:[],
     chest:null,
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
@@ -228,7 +228,7 @@ function saveGame(s) {
   try {
     const data = {
       v: 1,
-      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor, hasBanana: s.p.hasBanana },
+      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor, hasBanana: s.p.hasBanana, hasBone: s.p.hasBone },
       loc: { ...s.loc },
       pk: [...s.pk],
       dr: [...s.dr],
@@ -237,7 +237,7 @@ function saveGame(s) {
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
-      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, sanctumRevealed: s.sanctumRevealed||false,
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, sanctumRevealed: s.sanctumRevealed||false,
       bossWarps: s.bossWarps||[]
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
@@ -257,13 +257,13 @@ function applySave(s, save) {
   s.p.x = save.p.x; s.p.y = save.p.y; s.p.dir = save.p.dir;
   s.p.hp = save.p.hp; s.p.mhp = save.p.mhp; s.p.keys = save.p.keys;
   s.p.bombs = save.p.bombs; s.p.rupees = save.p.rupees;
-  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false;
+  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false; s.p.hasBone = save.p.hasBone || false;
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);
   s.heartContainers = [...save.heartContainers];
-  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.sanctumRevealed = save.sanctumRevealed || false;
+  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.sanctumRevealed = save.sanctumRevealed || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if (s.finalOpen) {
@@ -616,8 +616,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       s.respawnClick=false;
       if(s.npcTalk.charIdx>=s.npcTalk.lines[s.npcTalk.idx].length){
         s.npcTalk.idx++;
-        if(s.npcTalk.idx>=s.npcTalk.lines.length){s.npcTalk=null;
-          for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;}
+        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;s.npcTalk=null;
+          for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;
+          // Dog dug up a heart piece!
+          if(wasDogDig){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
+            s.drops.push({x:dx2,y:dy2-20,vy:-3,ground:dy2,type:"heartpiece_drop",t:0});
+            sfx("heartpiece");s.shake.t=400;s.msg={text:"The dog dug up a Heart Piece!",t:2500};
+            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#ff3366":"#fd3"})));}}
         else{s.npcTalk.charIdx=0;s.npcTalk.timer=0;}
       }else{s.npcTalk.charIdx=s.npcTalk.lines[s.npcTalk.idx].length;s.npcTalk.timer=99999;}
       ky.delete(" ");ky.delete("enter");ky.delete("e");ky.delete("z");
@@ -659,8 +664,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||kyR.value.has("tab")||s.respawnClick){s.respawnClick=false;
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
-    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;
+    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;ns.p.hasBone=old.p.hasBone;
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
@@ -1010,6 +1015,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       for(let ni=0;ni<npcs.length;ni++){const npc=npcs[ni],ns2=s.npcState[ni];if(!ns2)continue;
         const ndx=pcx2-(ns2.x+16),ndy=pcy2-(ns2.y+16),ndist=Math.hypot(ndx,ndy);
         if(ndist<TL*1.2){// Close enough -- face NPC to talk
+          // Dog + bone = dig up heart piece
+          if(npc.name==="Dog"&&p.hasBone&&!s.dogDug){
+            p.hasBone=false;s.dogDug=true;sfx("itemget");s.shake.t=400;
+            s.npcTalk={name:"Dog",lines:["Arf!! *takes bone excitedly*","*sniff sniff* *digs furiously*","*digs up something shiny!*"],idx:0,charIdx:0,timer:0,dogDig:true};
+            npcHit=true;ns2.st="idle";ns2.wait=9999;ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);break;}
           s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
           ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
           // NPC faces player
@@ -1076,6 +1086,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
       else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:d2.x,y:d2.y-8,t:800,val:"+1",c:"#4f4"});}
       else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+5",c:"#44f"});}
+      else if(d2.type==="heartpiece_drop"){p.heartPieces++;sfx("heartpiece");s.freeze=500;
+        if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
+        else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
+        s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
+      else if(d2.type==="bone"){p.hasBone=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got a Bone! The dog might like this...",t:3000};
+        s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ddd":"#aa9070"})));}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+10",c:"#a4f"});}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+20",c:"#f44"});}
       else if(d2.type==="bow"){p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
@@ -1482,9 +1498,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0});
         s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
       }else{sfx("kill");
-        const dr2=Math.random();
+        // Skeletons drop a bone (if player doesn't have one yet)
+        if((e.type==="skeleton"||e.type==="stalfos")&&!p.hasBone&&Math.random()<0.3){
+          s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:"bone",t:0});}
+        else{const dr2=Math.random();
         if(dr2<0.40){const dt2=Math.random();
-          s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
+          s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
         // Track respawn timer for overworld screens (60s)
@@ -2663,6 +2682,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(d2.type==="banana"){// Golden banana
       const bn2=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,bn2,10,0,Math.PI*2);c.fill();
       c.strokeStyle="#ffd633";c.lineWidth=3;c.lineCap="round";c.beginPath();c.arc(d2.x,bn2+3,6,-Math.PI*0.8,-Math.PI*0.15);c.stroke();c.lineCap="butt";}
+    else if(d2.type==="heartpiece_drop"){// Heart piece from dog
+      const hpx=d2.x,hpy=d2.y+bob2;c.fillStyle="#ff3366";c.beginPath();c.moveTo(hpx,hpy+4);c.lineTo(hpx-5,hpy-2);c.arc(hpx-3,hpy-4,3,Math.PI,0);c.arc(hpx+3,hpy-4,3,Math.PI,0);c.lineTo(hpx+5,hpy-2);c.closePath();c.fill();
+      c.fillStyle=`rgba(255,51,102,${0.3+Math.sin(t/200)*0.15})`;c.beginPath();c.arc(hpx,hpy-2,8,0,Math.PI*2);c.fill();}
+    else if(d2.type==="bone"){// Bone drop
+      const bx2=d2.x,by2=d2.y+bob2;
+      c.fillStyle="#e8dcc8";c.fillRect(bx2-5,by2-1,10,3);c.beginPath();c.arc(bx2-5,by2,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(bx2+5,by2,2.5,0,Math.PI*2);c.fill();}
     else{// Default -- render as green rupee
       const rx2=d2.x,ry2=d2.y+bob2;c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-5);c.lineTo(rx2+3,ry2-1);c.lineTo(rx2+3,ry2+1);c.lineTo(rx2,ry2+5);c.lineTo(rx2-3,ry2+1);c.lineTo(rx2-3,ry2-1);c.closePath();c.fill();}}
   if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;

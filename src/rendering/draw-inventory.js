@@ -478,6 +478,9 @@ function drawEquipGrid(c,s,t){
       if(s.hasJar&&s.springWater>0){c.fillStyle="rgba(100,220,255,0.5)";c.beginPath();c.arc(cx,cy+1,3,0,Math.PI*2);c.fill();
         c.fillStyle="#fff";c.font="bold 6px monospace";c.textAlign="center";c.fillText(s.springWater+"",cx,cy+6);c.textAlign="left";}
     }},
+    {name:"Bone",has:s.p.hasBone,draw:(cx,cy)=>{
+      if(s.p.hasBone){c.fillStyle="#e8dcc8";c.fillRect(cx-5,cy-1,10,3);c.beginPath();c.arc(cx-5,cy,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+5,cy,2.5,0,Math.PI*2);c.fill();}
+      else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx-5,cy);c.lineTo(cx+5,cy);c.stroke();c.beginPath();c.arc(cx-5,cy,2,0,Math.PI*2);c.stroke();c.beginPath();c.arc(cx+5,cy,2,0,Math.PI*2);c.stroke();}}},
   ];
 
   const cols=3,cellW=72,cellH=48;
