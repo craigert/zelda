@@ -96,11 +96,11 @@ export const OW={
   m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
   m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
   m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
-  // Rocky ring around heart piece — blends with surrounding boulder field
+  // Rocky ring around heart piece — 2 pushable boulders to get in
   m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
   m[5][6]=T.ROCK;m[5][9]=T.ROCK;
   m[6][6]=T.ROCK;m[6][9]=T.ROCK;
-  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[7][9]=T.ROCK;
+  m[7][6]=T.ROCK;m[7][7]=T.PUSH;m[7][8]=T.PUSH;m[7][9]=T.ROCK;
   // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   // Boulder field below — pushable one sits just below, not surrounded
