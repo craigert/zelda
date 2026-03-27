@@ -121,12 +121,13 @@ function init() {
     timedDoors:[],
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[],
-    shop:null, // active shop menu
+    shop:null,shopGround:null, // active shop
     hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0,shopVisited:false, // shop upgrades + jar
     pArrows:[],
     chest:null,
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
     activeBombs:[], // {x,y,t:0,fuse:1500,exploded:false}
+    respawnTimers:{}, // overworld enemy respawn countdown per screen
     combatLockTime:0, // safety timer for combat lock
     bladeTraps:[], // {x,y,hx,hy,dir,range,st:"idle"|"lunge"|"retract",vel:0}
     bossIntro:null, // {name,t,dur,bx,by} -- cinematic boss intro sequence
@@ -302,7 +303,7 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.fireTrails=[];s.bossFight=false;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
@@ -439,18 +440,18 @@ function cTr(s){const p=s.p,loc=s.loc;
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);
             if(cv.shop){s.shopVisited=true;
-              const shopItems=[
-                {name:"Key",cost:20,req:null,action:s2=>{s2.p.keys++;}},
-                {name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;}},
-                {name:"Lantern",cost:30,req:null,once:"hasLantern",action:s2=>{s2.hasLantern=true;}},
-                {name:"Shield+",cost:50,req:null,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;}},
+              s.shopGround=[
+                {tx:5,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
+                {tx:7,ty:7,name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;},collected:false},
+                {tx:8,ty:7,name:"Lantern",cost:30,once:"hasLantern",action:s2=>{s2.hasLantern=true;},collected:false},
+                {tx:10,ty:7,name:"Shield+",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
               ];
-              // Special: if player has the golden banana, offer red armor crafting
               if(s.p.hasBanana&&!s.p.redArmor){
-                shopItems.push({name:"Red Armor (banana+craft)",cost:100,req:null,once:null,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};}});
+                s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:100,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});
               }
-              s.shop={sel:0,items:shopItems};
-              s.msg={text:s.p.hasBanana&&!s.p.redArmor?"Ooh, a Golden Banana! I can forge Red Armor for 100 rupees!":"Welcome to my shop!",t:s.p.hasBanana&&!s.p.redArmor?3000:1500};
+              // Mark already-purchased once items
+              for(const si of s.shopGround){if(si.once&&s[si.once])si.collected=true;}
+              s.msg={text:s.p.hasBanana&&!s.p.redArmor?"I can forge Red Armor for that banana!":"Welcome! Walk over items to buy!",t:2000};
             }
             else{s.msg={text:"Hidden Cave!",t:1500};}}};sfx("door");return;}}}
     }
@@ -494,6 +495,9 @@ function cTr(s){const p=s.p,loc=s.loc;
   saveGame(s);}
 
 function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return;s.gt+=dt;
+  // Overworld enemy respawn timers
+  if(s.respawnTimers){for(const rk2 in s.respawnTimers){s.respawnTimers[rk2]-=dt;
+    if(s.respawnTimers[rk2]<=0){s.cl.delete(rk2);delete s.respawnTimers[rk2];}}}
   // End screen cinematic — just advance timer
   if(s.endScreen){s.endScreen.t+=dt;return;}
   // Freeze gameplay during chest presentation
@@ -547,20 +551,21 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
     if(s.fade.alpha>=1&&s.fade.cb){try{s.fade.cb();}catch(e){console.error("Fade callback error:",e);}s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
     if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
-  // Shop menu interaction
-  if(s.shop){const ky=kyR.value;
-    if(ky.has("arrowup")||ky.has("w")){s.shop.sel=(s.shop.sel-1+s.shop.items.length)%s.shop.items.length;ky.delete("arrowup");ky.delete("w");}
-    if(ky.has("arrowdown")||ky.has("s")){s.shop.sel=(s.shop.sel+1)%s.shop.items.length;ky.delete("arrowdown");ky.delete("s");}
-    if(ky.has(" ")||ky.has("enter")||ky.has("z")){
-      const item=s.shop.items[s.shop.sel];
-      if(item.once&&s[item.once]){s.msg={text:"Already purchased!",t:1000};}
-      else if(item.req&&!s.p[item.req]){s.msg={text:"You need the right equipment first!",t:1500};}
-      else if(s.p.rupees>=item.cost){s.p.rupees-=item.cost;item.action(s);sfx("triforce");s.shake.t=200;
-        s.msg={text:`Bought ${item.name}!`,t:1500};}
-      else{s.msg={text:"Not enough rupees!",t:1000};}
-      ky.delete(" ");ky.delete("enter");ky.delete("z");}
-    if(ky.has("escape")||ky.has("p")){s.shop=null;ky.delete("escape");ky.delete("p");}
-    return;}
+  // Shop ground items — player walks over to buy
+  if(s.shopGround){const p=s.p;
+    for(const si of s.shopGround){
+      if(si.collected)continue;if(si.once&&s[si.once]){si.collected=true;continue;}
+      if(si._cd>0){si._cd-=dt;continue;}
+      const cx=si.tx*TL,cy=si.ty*TL;
+      if(p.x<cx+TL&&p.x+PS>cx&&p.y<cy+TL&&p.y+PS>cy){
+        if(si.req&&!p[si.req]){s.msg={text:"Need equipment first!",t:1500};si._cd=1000;continue;}
+        if(p.rupees>=si.cost){p.rupees-=si.cost;si.action(s);si.collected=true;
+          sfx("triforce");s.shake.t=200;s.msg={text:`Bought ${si.name}!`,t:1500};
+          s.pt.push(...Array.from({length:8},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));
+        }else{s.msg={text:"Not enough rupees!",t:1000};si._cd=1000;}
+      }
+    }
+  }
   if(s.npcTalk){
     s.npcTalk.timer+=dt;
     s.npcTalk.charIdx=Math.min(s.npcTalk.lines[s.npcTalk.idx].length,Math.floor(s.npcTalk.timer/30));
@@ -1332,6 +1337,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:dt2<0.45?"heart":dt2<0.65?"bomb":dt2<0.85?"rupee_green":"rupee_blue",t:0});}}
       if(e.type==="boss")s.msg={text:`${e.name||"Boss"} defeated!`,t:2000};
       if(s.en.length===0){s.cl.add(rk);s.roomFlash=500;
+        // Track respawn timer for overworld screens (60s)
+        if(s.loc.ty==="ow"){if(!s.respawnTimers)s.respawnTimers={};s.respawnTimers[rk]=60000;}
         if(s.combatLock){s.combatLock=false;sfx("triforce");s.shake.t=300;}else{sfx("pickup");}
         // Spawn reward chest -- room reward property or detect key/heart_piece tiles
         const rm2=gm(s);const roomData=s.loc.ty==="dg"?s.dg[s.loc.di].rooms[s.loc.scr]:null;
@@ -2683,23 +2690,60 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.textAlign="left";c.globalAlpha=1;}
     // Screen shake on initial slam
     if(bi.t<200){const si=1-bi.t/200;c.save();c.translate((Math.random()-.5)*si*6,(Math.random()-.5)*si*6);c.restore();}}
-  // Shop overlay
-  if(s.shop){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
-    c.textAlign="center";c.fillStyle="#fd3";c.font="bold 20px monospace";c.fillText("SHOP",W2/2,FH2/2-80);
-    c.fillStyle="rgba(253,211,51,0.3)";c.fillRect(W2/2-80,FH2/2-72,160,1);
-    // Shopkeeper
-    c.fillStyle="#8a5a2a";c.fillRect(W2/2-8,FH2/2-65,16,20);c.fillStyle="#f0c8a0";c.beginPath();c.arc(W2/2,FH2/2-68,8,0,Math.PI*2);c.fill();
-    c.fillStyle="#654321";c.beginPath();c.arc(W2/2,FH2/2-72,9,Math.PI+0.2,-0.2);c.fill();
-    c.fillStyle="#222";c.beginPath();c.arc(W2/2-3,FH2/2-68,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(W2/2+3,FH2/2-68,1.5,0,Math.PI*2);c.fill();
-    for(let i=0;i<s.shop.items.length;i++){const it=s.shop.items[i],iy=FH2/2-30+i*30,sel=s.shop.sel===i;
-      const owned=it.once&&s[it.once];const cantBuy=it.req&&!s.p[it.req];
-      if(sel){c.fillStyle="rgba(253,211,51,0.1)";c.fillRect(W2/2-110,iy-10,220,24);
-        c.fillStyle="#fd3";c.font="bold 12px monospace";c.fillText("\u25b6",W2/2-100,iy+5);}
-      c.fillStyle=owned?"#555":cantBuy?"#664":sel?"#fff":"#aaa";c.font=sel?"bold 13px monospace":"13px monospace";
-      c.fillText(owned?"SOLD OUT":it.name,W2/2-20,iy+5);
-      if(!owned){c.fillStyle=s.p.rupees>=it.cost?"#4f4":"#f44";c.font="11px monospace";c.fillText(`${it.cost} rupees`,W2/2+60,iy+5);}}
-    c.fillStyle="#666";c.font="9px monospace";c.fillText("Space to buy \u00b7 Esc to leave",W2/2,FH2/2+70);
-    c.textAlign="left";}
+  // Shop — draw shopkeeper behind counter and price tags on ground items
+  if(s.shopGround){
+    // Shopkeeper behind counter (drawn at tile 7-8, row 3)
+    const skx=7*TL+16,sky=3*TL;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(skx,sky+29,10,3,0,0,Math.PI*2);c.fill();
+    // Body/robe
+    c.fillStyle="#8a5a2a";c.beginPath();c.moveTo(skx-8,sky+13);c.lineTo(skx+8,sky+13);c.lineTo(skx+10,sky+30);c.lineTo(skx-10,sky+30);c.fill();
+    // Robe trim
+    c.fillStyle="rgba(255,255,255,0.1)";c.fillRect(skx-9,sky+28,18,2);
+    // Head
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(skx,sky+10,7,0,Math.PI*2);c.fill();
+    // Grey hair + beard (old man)
+    c.fillStyle="#ccc";c.beginPath();c.arc(skx,sky+8,8,Math.PI,0);c.fill();
+    c.fillStyle="#bbb";c.fillRect(skx-5,sky+14,10,4);// beard
+    // Eyes (looking down at player)
+    c.fillStyle="#222";c.beginPath();c.arc(skx-3,sky+11,1.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(skx+3,sky+11,1.5,0,Math.PI*2);c.fill();
+    // "SHOP" sign above
+    c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="center";c.fillText("SHOP",skx,sky-2);
+    // Draw ground items with price tags
+    for(const si of s.shopGround){
+      if(si.collected)continue;
+      const ix=si.tx*TL,iy=si.ty*TL;
+      // Draw item sprite based on name
+      if(si.name==="Key"){
+        c.fillStyle="#fd3";c.fillRect(ix+12,iy+10,8,4);c.fillRect(ix+18,iy+8,4,8);c.fillRect(ix+12,iy+12,4,6);
+      }else if(si.name.includes("Bomb")){
+        c.fillStyle="#335";c.beginPath();c.arc(ix+16,iy+18,7,0,Math.PI*2);c.fill();
+        c.fillStyle="#555";c.fillRect(ix+14,iy+8,4,6);c.fillStyle="#f80";c.fillRect(ix+15,iy+6,2,4);
+      }else if(si.name==="Lantern"){
+        c.fillStyle="#654321";c.fillRect(ix+14,iy+8,4,10);
+        c.fillStyle="#fa0";c.beginPath();c.arc(ix+16,iy+22,6,0,Math.PI*2);c.fill();
+        c.fillStyle="#ff8";c.beginPath();c.arc(ix+16,iy+21,3,0,Math.PI*2);c.fill();
+      }else if(si.name.includes("Shield")){
+        c.fillStyle="#4466cc";c.beginPath();c.moveTo(ix+8,iy+8);c.lineTo(ix+24,iy+8);c.lineTo(ix+24,iy+22);c.lineTo(ix+16,iy+28);c.lineTo(ix+8,iy+22);c.fill();
+        c.fillStyle="#6688ee";c.beginPath();c.moveTo(ix+11,iy+11);c.lineTo(ix+21,iy+11);c.lineTo(ix+21,iy+20);c.lineTo(ix+16,iy+24);c.lineTo(ix+11,iy+20);c.fill();
+        c.fillStyle="#fd3";c.beginPath();c.arc(ix+16,iy+16,3,0,Math.PI*2);c.fill();
+      }else if(si.name.includes("Red Armor")){
+        c.fillStyle="#aa2222";c.beginPath();c.moveTo(ix+8,iy+10);c.lineTo(ix+24,iy+10);c.lineTo(ix+24,iy+26);c.lineTo(ix+16,iy+30);c.lineTo(ix+8,iy+26);c.fill();
+        c.fillStyle="#cc4444";c.fillRect(ix+11,iy+12,10,6);
+        c.fillStyle="#fd3";c.beginPath();c.arc(ix+16,iy+20,2,0,Math.PI*2);c.fill();
+      }
+      // Price tag above item
+      const bob=Math.sin(t/400+si.tx)*2;
+      c.font="bold 7px monospace";c.textAlign="center";
+      c.fillStyle=s.p.rupees>=si.cost?"#4f4":"#f66";
+      c.fillText(`${si.cost}r`,ix+16,iy+bob);
+      // Item name below
+      c.fillStyle="#aaa";c.font="5px monospace";
+      c.fillText(si.name,ix+16,iy+TL+6);
+    }
+    c.textAlign="left";
+  }
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
