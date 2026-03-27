@@ -100,14 +100,13 @@ export const OW={
   m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
   m[5][6]=T.ROCK;m[5][9]=T.ROCK;
   m[6][6]=T.ROCK;m[6][9]=T.ROCK;
-  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][9]=T.ROCK;
-  m[7][8]=T.PUSH;// Pushable — hidden among other rocks
+  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[7][9]=T.ROCK;
   // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
-  // Boulder field below the ring — hides the pushable one
-  m[8][6]=T.ROCK;m[8][7]=T.ROCK;m[8][9]=T.ROCK;m[8][10]=T.ROCK;
+  // Boulder field below — pushable one sits just below, not surrounded
+  m[8][6]=T.ROCK;m[8][9]=T.ROCK;m[8][10]=T.ROCK;
   m[9][5]=T.ROCK;m[9][6]=T.ROCK;m[9][9]=T.ROCK;m[9][10]=T.ROCK;
-  m[8][8]=T.PATH;// Narrow path between boulders to reach the pushable one
+  m[8][8]=T.PUSH;// next to boulders, push south
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
   // Scattered rocks elsewhere to make the area feel naturally rocky
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[5][3]=T.ROCK;m[5][12]=T.ROCK;
@@ -148,8 +147,9 @@ export const OW={
   m[8][12]=T.HEART_PIECE;
   m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
   m[9][7]=T.STUMP;m[3][7]=T.STUMP;
-  // Banana cave — bombable ice wall, guarded by yetis inside
-  m[8][4]=T.CRACK;m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[9][4]=T.ROCK;m[9][5]=T.ROCK;
+  // Banana cave — push boulder to reveal, guarded by yetis inside
+  m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[9][5]=T.ROCK;
+  m[8][4]=T.PUSH;// beside rocks, push south to reveal cave
   oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
 
 // ===== ROW y=0 (Main upper row) =====
@@ -193,10 +193,10 @@ export const OW={
   m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
   m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
   m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
-  // Boulder cluster with hidden cave — push one to reveal
+  // Boulders near hidden cave — pushable one sits just below cluster
   m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][4]=T.ROCK;
-  m[2][2]=T.ROCK;m[2][3]=T.PUSH;m[2][4]=T.ROCK;
-  m[3][3]=T.ROCK;m[3][4]=T.ROCK;
+  m[2][2]=T.ROCK;m[2][4]=T.ROCK;
+  m[3][2]=T.PUSH;// below cluster, push south to reveal cave
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Desert border — sand meets grass
@@ -260,8 +260,9 @@ export const OW={
   m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   m[5][9]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][6]=T.TALLGRASS;
   m[5][3]=T.FLOWER;m[3][7]=T.BUSH;
-  // Boulder cluster hiding cave entrance — push south to reveal
-  m[6][11]=T.ROCK;m[6][12]=T.ROCK;m[6][13]=T.ROCK;m[7][11]=T.ROCK;m[7][12]=T.PUSH;m[7][13]=T.ROCK;
+  // Boulders near hidden cave — pushable one below cluster
+  m[6][11]=T.ROCK;m[6][12]=T.ROCK;m[6][13]=T.ROCK;m[7][13]=T.ROCK;
+  m[8][12]=T.PUSH;// below cluster, push south
   oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
 
 // Western forest hub
@@ -317,8 +318,9 @@ export const OW={
   m[6][5]=T.BRIDGE;m[6][6]=T.BRIDGE;m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[6][9]=T.BRIDGE;m[6][10]=T.BRIDGE;m[6][11]=T.BRIDGE;
   m[2][3]=T.TALLGRASS;m[9][3]=T.TALLGRASS;m[2][12]=T.BUSH;m[9][12]=T.BUSH;
   m[4][3]=T.FLOWER;m[7][12]=T.FLOWER;
-  // Boulder cluster by the lake — push east to reveal cave
-  m[8][1]=T.ROCK;m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[9][1]=T.ROCK;m[9][2]=T.PUSH;m[9][4]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;
+  // Boulders by the lake — pushable one beside cluster
+  m[8][1]=T.ROCK;m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[9][1]=T.ROCK;m[10][2]=T.ROCK;
+  m[9][3]=T.PUSH;// beside cluster, push east
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Eastern ruins
@@ -382,10 +384,10 @@ export const OW={
   m[1][3]=T.TREE;m[1][4]=T.TREE;m[2][2]=T.TREE;m[3][2]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;
   m[9][2]=T.TREE;m[9][3]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;
   m[5][5]=T.TALLGRASS;m[5][6]=T.TALLGRASS;m[6][9]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
-  // Boulder cluster with hidden cave — push one to reveal
+  // Boulders with hidden cave — pushable one beside cluster
   m[7][7]=T.ROCK;m[7][8]=T.ROCK;m[7][9]=T.ROCK;
-  m[8][7]=T.ROCK;m[8][8]=T.PUSH;m[8][9]=T.ROCK;
-  m[9][7]=T.ROCK;m[9][8]=T.ROCK;m[9][9]=T.ROCK;
+  m[8][7]=T.ROCK;m[8][9]=T.ROCK;
+  m[8][10]=T.PUSH;// beside cluster, push east
   m[3][7]=T.FLOWER;m[3][8]=T.FLOWER;m[4][9]=T.STUMP;m[7][4]=T.STUMP;
   oe(m,"W");oe(m,"N");oe(m,"E");return m;})(),
 
@@ -396,9 +398,10 @@ export const OW={
   m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
   m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
   m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
-  // Boulder cluster with hidden cave — push one to reveal
+  // Boulders with hidden cave — pushable one beside cluster
   m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[8][4]=T.ROCK;
-  m[9][2]=T.ROCK;m[9][3]=T.PUSH;m[9][4]=T.ROCK;
+  m[9][2]=T.ROCK;m[9][4]=T.ROCK;
+  m[9][5]=T.PUSH;// beside cluster, push south
   oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
 
 // Beach — sand and water coast
