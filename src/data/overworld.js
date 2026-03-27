@@ -260,6 +260,8 @@ export const OW={
   m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   m[5][9]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][6]=T.TALLGRASS;
   m[5][3]=T.FLOWER;m[3][7]=T.BUSH;
+  // Boulder cluster hiding cave entrance — push south to reveal
+  m[6][11]=T.ROCK;m[6][12]=T.ROCK;m[6][13]=T.ROCK;m[7][11]=T.ROCK;m[7][12]=T.PUSH;m[7][13]=T.ROCK;
   oe(m,"N");oe(m,"E");oe(m,"S");return m;})(),
 
 // Western forest hub
@@ -315,6 +317,8 @@ export const OW={
   m[6][5]=T.BRIDGE;m[6][6]=T.BRIDGE;m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[6][9]=T.BRIDGE;m[6][10]=T.BRIDGE;m[6][11]=T.BRIDGE;
   m[2][3]=T.TALLGRASS;m[9][3]=T.TALLGRASS;m[2][12]=T.BUSH;m[9][12]=T.BUSH;
   m[4][3]=T.FLOWER;m[7][12]=T.FLOWER;
+  // Boulder cluster by the lake — push east to reveal cave
+  m[8][1]=T.ROCK;m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[9][1]=T.ROCK;m[9][2]=T.PUSH;m[9][4]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Eastern ruins

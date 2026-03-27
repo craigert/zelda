@@ -573,7 +573,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     }
     return;
   }
-  if(s.freeze>0){s.freeze-=dt;return;}
+  if(s.freeze>0){s.freeze-=dt;
+    // Still advance push animation during freeze (overworld boulder push)
+    if(s.pushAnim){s.pushAnim.t+=dt;
+      if(s.pushAnim.t>=s.pushAnim.dur){
+        const pa=s.pushAnim,m3=gm(s);
+        if(m3){m3[pa.ry][pa.rx]=pa.reveal;
+          if(pa.reveal===T.STAIRS_DOWN){sfx("secret");s.shake.t=400;s.msg={text:"A hidden stairway!",t:2000};
+            s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));}
+          else if(pa.reveal===T.ENTRANCE){sfx("secret");s.shake.t=400;s.msg={text:"A hidden cave entrance!",t:2000};
+            s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));}}
+        s.pushCd=false;s.pushAnim=null;}}
+    return;}
   if(s.death.a){s.death.t+=dt;s.death.spin+=dt*0.015;if(s.death.t>1500&&!s.go){s.go=true;s.msg={text:"Tap to respawn",t:99999};}if(!s.go)return;}
   if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||s.respawnClick){s.respawnClick=false;
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
@@ -826,9 +837,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         // Start smooth slide animation
         m2[by][bx]=T.PUSH;// destination tile becomes push block immediately (collision)
         m2[fty][ftx]=T.FLOOR;// temp clear source for rendering (animation overlays)
-        s.pushAnim={fx:ftx*TL,fy:fty*TL,tx:bx*TL,ty:by*TL,t:0,dur:250,
+        const pushDur=s.loc.ty==="ow"?800:250;
+        s.pushAnim={fx:ftx*TL,fy:fty*TL,tx:bx*TL,ty:by*TL,t:0,dur:pushDur,
           reveal:revealTile,rx:ftx,ry:fty,isDg:s.loc.ty==="dg",wasPlate};
         s.pushCd=true;
+        if(s.loc.ty==="ow")s.freeze=pushDur;
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){s.shake.t=200;
           // Check if room has stairsReveal — if so, reveal STAIRS_DOWN instead of key
