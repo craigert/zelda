@@ -636,19 +636,25 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   }
   if(s.freeze>0){s.freeze-=dt;
     // Sanctum reveal cinematic during freeze
-    if(s.sanctumReveal){s.sanctumReveal.t+=dt;
-      s.shake.t=Math.max(s.shake.t,100);
-      // Entrance tiles rise from ground at midpoint
-      const sr=s.sanctumReveal;
-      if(sr.t>2000&&!sr.risen){sr.risen=true;sfx("secret");
+    if(s.sanctumReveal){const sr=s.sanctumReveal;sr.t+=dt;
+      // Phase 1 (0-1s): rumble builds
+      if(sr.t<1000){const intensity=sr.t/1000;s.shake.t=Math.max(s.shake.t,50+intensity*100);}
+      // Phase 2 (1-3s): temple rises, heavy shake, debris
+      else if(sr.t<3000){s.shake.t=Math.max(s.shake.t,150);
+        if(!sr.risen&&sr.t>1500){sr.risen=true;sfx("secret");}
+        // Dirt/rock debris from ground
+        if(Math.random()<0.6){const ecx=7.5*TL,ecy=5.5*TL;
+          s.pt.push({x:ecx+(Math.random()-.5)*TL*3,y:ecy+TL+(Math.random())*TL,dx:(Math.random()-.5)*4,dy:-Math.random()*4-2,l:600+Math.random()*400,c:Math.random()>.5?"#887050":"#665040"});
+          s.pt.push({x:ecx+(Math.random()-.5)*TL*4,y:ecy+TL*2,dx:(Math.random()-.5)*2,dy:-Math.random()*3-1,l:800,c:Math.random()>.3?"#888":"#a060ff"});}}
+      // Phase 3 (3-4s): shake eases, smoke settles
+      else if(sr.t<4000){const ease=1-(sr.t-3000)/1000;s.shake.t=Math.max(s.shake.t,ease*80);
+        if(Math.random()<0.3*ease){const ecx=7.5*TL;
+          s.pt.push({x:ecx+(Math.random()-.5)*TL*2,y:5*TL,dx:(Math.random()-.5)*1,dy:-Math.random()*2,l:600,c:"#888"});}}
+      // Phase 4 (4-5s): reveal text
+      else if(sr.t>4000&&!sr.textShown){sr.textShown=true;sfx("triforce");
         s.msg={text:"The Dark Sanctum has risen!",t:2500};}
-      // Smoke particles from entrance area
-      if(sr.t>500&&sr.t<4000&&Math.random()<0.5){
-        const ex=7*TL+Math.random()*2*TL,ey=6*TL;
-        s.pt.push({x:ex,y:ey,dx:(Math.random()-.5)*3,dy:-Math.random()*3-1,l:800,c:Math.random()>.3?"#888":"#a060ff"});}
-      // NPC panic — make them run fast
-      for(const ns of s.npcState){if(ns.panic){
-        const nsp=3*(dt/16);
+      // NPC panic — run away fast
+      for(const ns of s.npcState){if(ns.panic){const nsp=2.5*(dt/16);
         if(ns.dir===1)ns.x+=nsp;else if(ns.dir===3)ns.x-=nsp;
         else if(ns.dir===0)ns.y-=nsp;else ns.y+=nsp;}}
       // Update particles during freeze
@@ -3027,27 +3033,43 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.textAlign="left";
   }
   // Sanctum reveal overlay — dark temple rising from the ground
-  if(s.sanctumReveal){const sr=s.sanctumReveal,sp=Math.min(1,sr.t/3000);
-    // Dark vignette pulses
-    c.fillStyle=`rgba(40,0,60,${0.15+Math.sin(sr.t/300)*0.08})`;c.fillRect(0,0,W2,FH2);
-    // Entrance area — rising effect (dark block slides up from below)
+  if(s.sanctumReveal){const sr=s.sanctumReveal;
     const ecx=7.5*TL,ecy=5.5*TL;
-    if(sr.t<2000){const riseP=sr.t/2000;const riseY=ecy+TL*2*(1-riseP);
-      c.fillStyle="#1a0a1a";c.fillRect(ecx-TL,riseY,TL*2,TL*2*riseP);
-      c.fillStyle="#3a1a3a";c.fillRect(ecx-TL+2,riseY+2,TL*2-4,TL*2*riseP-4);}
-    // Crack lines radiating from entrance
-    if(sr.t>300&&sr.t<3000){c.strokeStyle=`rgba(200,100,255,${0.3*(1-sp)})`;c.lineWidth=1.5;
-      for(let i=0;i<8;i++){const ca=i*Math.PI/4+sr.t/3000;const cl=sp*100;
-        c.beginPath();c.moveTo(ecx,ecy);c.lineTo(ecx+Math.cos(ca)*cl,ecy+Math.sin(ca)*cl);c.stroke();}}
-    // Smoke columns
-    if(sr.t>800){const smokeA=Math.min(1,(sr.t-800)/1000);
-      for(let i=0;i<4;i++){const sx=ecx-TL+i*TL*0.7,sy=ecy-sp*30;
-        c.fillStyle=`rgba(80,40,100,${smokeA*0.12*(1+Math.sin(t/200+i))})`;
-        c.beginPath();c.arc(sx+(Math.sin(t/300+i*2))*6,sy,10+sp*8,0,Math.PI*2);c.fill();}}
-    // "The earth trembles..." text
-    if(sr.t>500&&sr.t<2500){const ta=sr.t<1000?(sr.t-500)/500:sr.t>2000?1-(sr.t-2000)/500:1;
-      c.globalAlpha=ta;c.textAlign="center";c.fillStyle="#c080ff";c.font="bold 11px monospace";
-      c.fillText("The earth trembles...",W2/2,H2*0.12);c.textAlign="left";c.globalAlpha=1;}}
+    // Phase 1 (0-1s): screen darkens, text appears
+    if(sr.t<1000){const da=sr.t/1000*0.25;
+      c.fillStyle=`rgba(20,0,30,${da})`;c.fillRect(0,0,W2,FH2);}
+    // "The earth trembles..." text (0.3-2s)
+    if(sr.t>300&&sr.t<2000){const ta=sr.t<800?(sr.t-300)/500:sr.t>1500?1-(sr.t-1500)/500:1;
+      c.globalAlpha=ta;c.textAlign="center";c.fillStyle="#c080ff";c.font="bold 12px monospace";
+      c.fillText("The earth trembles...",W2/2,H2*0.1);c.textAlign="left";c.globalAlpha=1;}
+    // Phase 2 (1-3s): temple rises from below
+    if(sr.t>1000&&sr.t<3500){const riseP=Math.min(1,(sr.t-1000)/2000);
+      // Dark structure rising up — clipped to not draw above final position
+      const finalY=ecy-TL*0.5;const riseY=ecy+TL*2-riseP*(TL*2.5);const riseH=Math.max(0,riseP*TL*2.5);
+      c.save();c.beginPath();c.rect(ecx-TL*1.2,finalY,TL*2.4,TL*3);c.clip();
+      // Temple block
+      c.fillStyle="#0a0010";c.fillRect(ecx-TL,riseY,TL*2,riseH);
+      c.fillStyle="#1a0a20";c.fillRect(ecx-TL+3,riseY+3,TL*2-6,riseH-3);
+      // Dark archway on the front
+      if(riseP>0.5){const archA=(riseP-0.5)*2;
+        c.fillStyle=`rgba(60,20,80,${archA})`;c.fillRect(ecx-6,riseY+4,12,riseH*0.6);
+        c.fillStyle=`rgba(100,40,120,${archA*0.5})`;c.beginPath();c.arc(ecx,riseY+4,6,Math.PI,0);c.fill();}
+      c.restore();
+      // Ground crack lines
+      const crackA=Math.min(1,riseP)*(sr.t<2500?1:(1-(sr.t-2500)/1000));
+      if(crackA>0){c.strokeStyle=`rgba(180,80,220,${crackA*0.4})`;c.lineWidth=1.5;
+        for(let i=0;i<6;i++){const ca=i*Math.PI/3+0.3;const cl=riseP*60+i*10;
+          c.beginPath();c.moveTo(ecx,ecy+TL);c.lineTo(ecx+Math.cos(ca)*cl,ecy+TL+Math.sin(ca)*cl*0.4);c.stroke();}}}
+    // Phase 2-3: dust clouds around base
+    if(sr.t>1200&&sr.t<3500){const dustA=sr.t<2500?Math.min(1,(sr.t-1200)/800):1-(sr.t-2500)/1000;
+      if(dustA>0){for(let i=0;i<5;i++){const dx2=ecx-TL*1.5+i*TL*0.75,dy2=ecy+TL+Math.sin(t/200+i)*4;
+        c.fillStyle=`rgba(100,80,60,${dustA*0.15})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i*3)*6,dy2,8+Math.sin(t/300+i)*3,0,Math.PI*2);c.fill();}}}
+    // Phase 3-4: dark energy pulse from entrance
+    if(sr.t>3000&&sr.t<4500){const pa2=Math.min(1,(sr.t-3000)/500);
+      const pulseR=pa2*80;
+      c.strokeStyle=`rgba(150,50,200,${0.4*(1-pa2)})`;c.lineWidth=2;
+      c.beginPath();c.arc(ecx,ecy,pulseR,0,Math.PI*2);c.stroke();
+      c.fillStyle=`rgba(100,30,150,${0.06*(1-pa2)})`;c.beginPath();c.arc(ecx,ecy,pulseR,0,Math.PI*2);c.fill();}}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
