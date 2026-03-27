@@ -96,7 +96,7 @@ const saveSlot = ref(0); // active save slot 0-2
 // --- Init ---
 function init() {
   return {
-    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false},
+    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),// bc = bombed cracks "ty:di:scr:x,y" → replacement tile id
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
@@ -223,7 +223,7 @@ function saveGame(s) {
   try {
     const data = {
       v: 1,
-      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor },
+      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor, hasBanana: s.p.hasBanana },
       loc: { ...s.loc },
       pk: [...s.pk],
       dr: [...s.dr],
@@ -252,7 +252,7 @@ function applySave(s, save) {
   s.p.x = save.p.x; s.p.y = save.p.y; s.p.dir = save.p.dir;
   s.p.hp = save.p.hp; s.p.mhp = save.p.mhp; s.p.keys = save.p.keys;
   s.p.bombs = save.p.bombs; s.p.rupees = save.p.rupees;
-  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false;
+  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false;
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.bc = new Set(save.bc||[]);
@@ -394,8 +394,8 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
       if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
       else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
       s.pt.push(...Array.from({length:10},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
-    else if(tl===T.BANANA){s.pk.add(pk);p.redArmor=true;sfx("itemget");s.shake.t=600;s.freeze=400;s.msg={text:"Mysterious Banana! Red Armor acquired! (half damage)",t:3500};
-      s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#f44":"#fd3"})));}
+    else if(tl===T.BANANA){s.pk.add(pk);p.hasBanana=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Golden Banana! The shopkeeper might want this...",t:3500};
+      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#fa0"})));}
     else if(tl===T.BOW){s.pk.add(pk);p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
     else if(tl===T.BOMB_BAG){s.pk.add(pk);p.hasBombs=true;p.bombs+=5;sfx("triforce");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
@@ -424,12 +424,20 @@ function cTr(s){const p=s.p,loc=s.loc;
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=2*TL;s.ec=500;le(s);
-            if(cv.shop){s.shopVisited=true;s.shop={sel:0,items:[
-              {name:"Key",cost:20,req:null,action:s2=>{s2.p.keys++;}},
-              {name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;}},
-              {name:"Lantern",cost:30,req:null,once:"hasLantern",action:s2=>{s2.hasLantern=true;}},
-              {name:"Shield+",cost:50,req:null,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;}},
-            ]};s.msg={text:"Welcome to my shop!",t:1500};}
+            if(cv.shop){s.shopVisited=true;
+              const shopItems=[
+                {name:"Key",cost:20,req:null,action:s2=>{s2.p.keys++;}},
+                {name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;}},
+                {name:"Lantern",cost:30,req:null,once:"hasLantern",action:s2=>{s2.hasLantern=true;}},
+                {name:"Shield+",cost:50,req:null,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;}},
+              ];
+              // Special: if player has the golden banana, offer red armor crafting
+              if(s.p.hasBanana&&!s.p.redArmor){
+                shopItems.push({name:"Red Armor (banana+craft)",cost:100,req:null,once:null,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};}});
+              }
+              s.shop={sel:0,items:shopItems};
+              s.msg={text:s.p.hasBanana&&!s.p.redArmor?"Ooh, a Golden Banana! I can forge Red Armor for 100 rupees!":"Welcome to my shop!",t:s.p.hasBanana&&!s.p.redArmor?3000:1500};
+            }
             else{s.msg={text:"Hidden Cave!",t:1500};}}};sfx("door");return;}}}
     }
     const[sx,sy]=loc.scr.split(",").map(Number);
@@ -553,7 +561,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.death.a){s.death.t+=dt;s.death.spin+=dt*0.015;if(s.death.t>1500&&!s.go){s.go=true;s.msg={text:"Tap to respawn",t:99999};}if(!s.go)return;}
   if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
     if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
-    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;
+    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths

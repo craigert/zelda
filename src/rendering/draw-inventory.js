@@ -356,8 +356,8 @@ function countSecrets(s){
   let found=0,total=7;
   // 4 heart pieces in the overworld
   if(s.p.heartPieces>=1)found++;if(s.p.heartPieces>=2)found++;if(s.p.heartPieces>=3)found++;if(s.p.heartPieces>=4)found++;
-  // 3 special discoveries: banana (red armor), shop, magic jar
-  if(s.p.redArmor)found++;// banana cave
+  // 3 special discoveries: banana, shop, magic jar
+  if(s.p.hasBanana||s.p.redArmor)found++;// found banana (or already traded it for armor)
   if(s.shopVisited)found++;// found the shop
   if(s.hasJar)found++;// magic jar cave
   return{found,total};
@@ -467,7 +467,10 @@ function drawEquipGrid(c,s,t){
     {name:"Bombs",has:s.p.hasBombs,draw:(cx,cy)=>{const col=s.p.hasBombs?"#88f":"#444";c.fillStyle=col;c.beginPath();c.arc(cx,cy+1,4,0,Math.PI*2);c.fill();}},
     {name:"Shield",has:s.p.shield,draw:(cx,cy)=>{const col=s.p.shield?"#4466aa":"#444";c.fillStyle=col;c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();}},
     {name:"Lantern",has:s.hasLantern,draw:(cx,cy)=>{if(s.hasLantern){c.fillStyle="#fa3";c.beginPath();c.arc(cx,cy-2,3,0,Math.PI*2);c.fill();c.fillStyle="#8a6a2a";c.fillRect(cx-2,cy+1,4,5);}else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.arc(cx,cy-2,3,0,Math.PI*2);c.stroke();c.strokeRect(cx-2,cy+1,4,5);}}},
-    {name:"Red Armor",has:s.p.redArmor,draw:(cx,cy)=>{c.fillStyle=s.p.redArmor?"#cc3333":"#444";c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.fill();}},
+    {name:s.p.redArmor?"Red Armor":s.p.hasBanana?"Banana":"Armor",has:s.p.redArmor||s.p.hasBanana,draw:(cx,cy)=>{
+      if(s.p.redArmor){c.fillStyle="#cc3333";c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.fill();}
+      else if(s.p.hasBanana){c.fillStyle="#fd3";c.beginPath();c.arc(cx,cy,5,0.3,Math.PI-0.3);c.lineWidth=3;c.strokeStyle="#fa0";c.stroke();c.fillStyle="#e8b020";c.beginPath();c.arc(cx,cy,4,0.4,Math.PI-0.4);c.fill();}
+      else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx-4,cy-4);c.lineTo(cx+4,cy-4);c.lineTo(cx+5,cy+4);c.lineTo(cx-5,cy+4);c.closePath();c.stroke();}}},
     {name:"M.Sword",has:s.p.hasMasterSword,draw:(cx,cy)=>{if(s.p.hasMasterSword){c.fillStyle="#88ccff";c.fillRect(cx-1,cy-6,3,10);c.fillStyle="#ffd633";c.fillRect(cx-3,cy+3,7,2);c.fillStyle="rgba(136,204,255,0.3)";c.beginPath();c.arc(cx,cy,8,0,Math.PI*2);c.fill();}else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx,cy+4);c.stroke();c.beginPath();c.moveTo(cx-3,cy+3);c.lineTo(cx+3,cy+3);c.stroke();}}},
     {name:"Shield+",has:s.hasShieldUp,draw:(cx,cy)=>{c.fillStyle=s.hasShieldUp?"#4488ff":"#444";c.beginPath();c.moveTo(cx,cy-5);c.lineTo(cx+4,cy-1);c.lineTo(cx+3,cy+4);c.lineTo(cx,cy+6);c.lineTo(cx-3,cy+4);c.lineTo(cx-4,cy-1);c.closePath();c.fill();if(s.hasShieldUp){c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-1);c.lineTo(cx+2,cy+3);c.lineTo(cx-2,cy+3);c.closePath();c.fill();}}},
     {name:"Jar",has:s.hasJar,draw:(cx,cy)=>{
