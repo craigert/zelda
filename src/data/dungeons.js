@@ -227,16 +227,24 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[8][12]=T.LEVER;// Hit lever → reveals hidden stairway
   }),enemies:[{x:4*TL,y:5*TL,hp:4,type:"fire_bat"},{x:11*TL,y:5*TL,hp:4,type:"fire_bat"}]},
 
-  // West branch — first locked door with blade traps
+  // West branch — lava room with blade traps and hidden treasure island
   "-1,0":{tiles:mr(m=>{ae(m,["E","WD"]);
+    // Main path — zigzag through spikes
     m[3][3]=T.SPIKE;m[3][6]=T.SPIKE;m[3][9]=T.SPIKE;m[3][12]=T.SPIKE;
     m[5][4]=T.SPIKE;m[5][7]=T.SPIKE;m[5][10]=T.SPIKE;
     m[7][3]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;m[7][12]=T.SPIKE;
     m[5][13]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;
     m[8][7]=T.KEY;
-    // Walled-off alcove in bottom-left — reachable only via passage
-    for(let x=1;x<=4;x++)m[8][x]=T.WALL;m[8][2]=T.FLOOR;// gap to peek
-    m[9][2]=T.KEY;m[9][3]=T.STAIRS_DOWN;// Passage arrival + extra key
+    // Lava-surrounded treasure island (bottom-left) — only reachable via underground passage
+    for(let x=1;x<=5;x++){m[8][x]=T.PIT;m[10][x]=T.PIT;}// lava moat top & bottom
+    m[9][1]=T.PIT;m[9][5]=T.PIT;// lava moat sides
+    // The island itself
+    m[9][2]=T.FLOOR;m[9][3]=T.FLOOR;m[9][4]=T.FLOOR;
+    m[9][3]=T.KEY;// valuable key on the island
+    m[9][2]=T.STAIRS_DOWN;// passage arrival point
+    m[9][4]=T.RUPEE;
+    // Torches flanking the island (visible from above, tantalizing)
+    m[8][2]=T.TORCH;m[8][4]=T.TORCH;
   }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
   traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:2,dir:"v",range:7}]},
 

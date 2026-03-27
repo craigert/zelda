@@ -30,9 +30,9 @@ export const PASSAGES = [
     // "2,1" (isolated east room) ↔ "-1,0" (west lever room)
     di: 1,
     from: { scr: "2,1", tile: [12, 9] },
-    to:   { scr: "-1,0", tile: [3, 9] },
+    to:   { scr: "-1,0", tile: [2, 9] },
     exitL: { scr: "2,1", px: 12*TL, py: 8*TL },
-    exitR: { scr: "-1,0", px: 3*TL, py: 8*TL },
+    exitR: { scr: "-1,0", px: 2*TL, py: 8*TL },
     platforms: [
       [2, 10, 5],    // left ground
       [9, 10, 5],    // right ground (gap in middle!)
