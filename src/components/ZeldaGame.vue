@@ -279,7 +279,7 @@ function applySave(s, save) {
     const[fx,fy]=pts[1].split(",").map(Number);const[tx2,ty3]=pts[2].split(",").map(Number);const rev=parseInt(pts[3]);
     const m3=OW[scr3];
     if(m3){if(fy>=0&&fy<RO&&fx>=0&&fx<CO)m3[fy][fx]=rev;
-      if(ty3>=0&&ty3<RO&&tx2>=0&&tx2<CO)m3[ty3][tx2]=T.PUSH;}}
+      if(ty3>=0&&ty3<RO&&tx2>=0&&tx2<CO)m3[ty3][tx2]=T.ROCK;}}
   return true;
 }
 
@@ -870,7 +870,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           for(const cv of CAVES){if(cv.s===s.loc.scr){for(const[cx2,cy2]of cv.t){if(cx2===ftx&&cy2===fty){revealTile=T.ENTRANCE;break;}}if(revealTile===T.ENTRANCE)break;}}
         }
         // Start smooth slide animation
-        m2[by][bx]=T.PUSH;// destination tile becomes push block immediately (collision)
+        m2[by][bx]=T.ROCK;// destination tile becomes immovable rock (can't push again)
         m2[fty][ftx]=T.FLOOR;// temp clear source for rendering (animation overlays)
         const pushDur=s.loc.ty==="ow"?800:250;
         s.pushAnim={fx:ftx*TL,fy:fty*TL,tx:bx*TL,ty:by*TL,t:0,dur:pushDur,
@@ -913,9 +913,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         }else if(pa.reveal===T.ENTRANCE){sfx("secret");s.shake.t=400;
           s.msg={text:"A hidden cave entrance!",t:2000};
           s.pt.push(...Array.from({length:15},()=>({x:pa.rx*TL+16,y:pa.ry*TL+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:900,c:Math.random()>.5?"#fa0":"#fd3"})));
-          // Persist boulder move so cave stays revealed
+        }
+        // Persist all overworld boulder moves permanently
+        if(s.loc.ty==="ow"){
           const bScr=s.loc.scr;const bTx=Math.round(pa.tx/TL),bTy=Math.round(pa.ty/TL);
-          s.mb.add(`${bScr}:${pa.rx},${pa.ry}:${bTx},${bTy}:${T.ENTRANCE}`);
+          s.mb.add(`${bScr}:${pa.rx},${pa.ry}:${bTx},${bTy}:${pa.reveal}`);
         }
       }
       s.pushCd=false;s.pushAnim=null;
