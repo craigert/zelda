@@ -47,13 +47,13 @@ export const PASSAGES = [
       { x: 5*TL, y: 5*TL, hp: 3, type: "fire_bat" },
     ],
   },
-  { // D2 Shadow Keep: east dead-end to west dead-end
-    // "1,-1" (east room) ↔ "-2,-1" (far west room)
+  { // D2 Shadow Keep: east spike corridor to dark shadow vault
+    // "1,-1" (spike corridor) ↔ "-2,-1" (dark vault with key on island)
     di: 2,
-    from: { scr: "1,-1", tile: [12, 9] },
-    to:   { scr: "-2,-1", tile: [3, 9] },
-    exitL: { scr: "1,-1", px: 12*TL, py: 8*TL },
-    exitR: { scr: "-2,-1", px: 3*TL, py: 8*TL },
+    from: { scr: "1,-1", tile: [12, 7] },
+    to:   { scr: "-2,-1", tile: [2, 6] },
+    exitL: { scr: "1,-1", px: 12*TL, py: 6*TL },
+    exitR: { scr: "-2,-1", px: 2*TL, py: 5*TL },
     platforms: [
       [2, 10, 12],   // full ground
       [4, 8, 3],     // left step

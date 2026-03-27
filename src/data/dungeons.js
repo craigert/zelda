@@ -391,20 +391,26 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][7]=T.PUSH;m[6][8]=T.PUSH;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"ghost"},{x:4*TL,y:6*TL,hp:3,type:"knight"},{x:10*TL,y:8*TL,hp:3,type:"ghost"}]},
 
-  // Far west ghost room — pit-flanked corridor (west of -1,-1)
-  "-2,-1":{tiles:mr(m=>{ae(m,["E"]);
-    // Horizontal pit bands creating a narrow walkway
-    for(let y=3;y<=4;y++)for(let x=3;x<=12;x++)m[y][x]=T.PIT;
-    for(let y=7;y<=8;y++)for(let x=3;x<=12;x++)m[y][x]=T.PIT;
-    m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
+  // Far west shadow vault — dark room, key only reachable via underground passage
+  "-2,-1":{dark:true,tiles:mr(m=>{ae(m,["E"]);
+    // PIT surrounding a small floor island — can't reach from the door
+    for(let y=2;y<=9;y++)for(let x=1;x<=5;x++)m[y][x]=T.PIT;
+    // Small floor island in the abyss — only reachable from passage stairs
+    m[5][2]=T.FLOOR;m[5][3]=T.FLOOR;m[6][2]=T.FLOOR;m[6][3]=T.FLOOR;
+    m[4][2]=T.FLOOR;m[4][3]=T.FLOOR;
+    // The key and passage arrival on the island
+    m[5][3]=T.KEY;m[6][2]=T.STAIRS_DOWN;
+    // Torches on the island (only light source in the dark room)
+    m[4][2]=T.TORCH;m[4][3]=T.TORCH;
+    // Spike border along the east walkway
+    m[3][8]=T.SPIKE;m[3][10]=T.SPIKE;m[8][8]=T.SPIKE;m[8][10]=T.SPIKE;
+    m[5][12]=T.SPIKE;m[6][12]=T.SPIKE;
+    // Hearts for surviving the spike gauntlet from east entrance
     m[5][7]=T.HEART;m[2][7]=T.HEART;
-    // Walled-off alcove — key only reachable via passage
-    for(let x=1;x<=4;x++)m[9][x]=T.WALL;m[9][2]=T.FLOOR;// small gap to see key
-    m[10][2]=T.KEY;m[10][3]=T.STAIRS_DOWN;// Passage arrival + key
-  }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}]},
+  }),enemies:[{x:9*TL,y:5*TL,hp:5,type:"ghost"},{x:11*TL,y:7*TL,hp:5,type:"ghost"},{x:8*TL,y:3*TL,hp:4,type:"ghost"}]},
 
-  // East of north — spike corridor with key
-  "1,-1":{stairsReveal:[12,7],tiles:mr(m=>{ae(m,["W"]);
+  // East of north — spike gauntlet hiding secret stairway (clear enemies + push puzzle)
+  "1,-1":{lock:true,stairsReveal:[12,7],tiles:mr(m=>{ae(m,["W"]);
     for(let y=2;y<=3;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
     for(let y=8;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WALL;
     m[5][4]=T.SPIKE;m[5][6]=T.SPIKE;m[5][8]=T.SPIKE;m[5][10]=T.SPIKE;m[5][12]=T.SPIKE;
