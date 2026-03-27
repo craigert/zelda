@@ -507,7 +507,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
 // ═══════════════════════════════════════════════════════════════
 // DUNGEON 4 — Dark Sanctum (15 rooms)
 // ═══════════════════════════════════════════════════════════════
-const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"shadow",rooms:{
+const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanctum",rooms:{
 
   // Entry room — ominous foyer
   "0,0":{tiles:mr(m=>{ae(m,["N","E"]);

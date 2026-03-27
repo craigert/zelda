@@ -33,7 +33,7 @@
     </div>
     <div v-if="showMuPicker" :style="{background:'rgba(0,0,0,0.85)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:'8px',padding:'12px',marginTop:'8px',maxWidth:'480px',width:'100%'}">
       <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC -- Pick files or paste URLs</div>
-      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
+      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['sanctum','🏰 Dark Sanctum'],['finalbattle','💀 Final Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
           <span :style="{color:'#888',fontSize:'10px',fontFamily:'monospace',width:'100px',flexShrink:0}">{{ label }}</span>
@@ -2982,7 +2982,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
