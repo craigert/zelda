@@ -2906,23 +2906,59 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         if(Math.random()<intensity*0.6){s.pt.push({x:fd.bx+(Math.random()-.5)*24,y:fd.by+fd.fallY+(Math.random()-.5)*24,
           dx:(Math.random()-.5)*3,dy:-Math.random()*3-1,l:800,c:Math.random()>.5?"#f0f":"#fa0"});}}
     }
-    // Hero raises sword in celebration
+    // Hero raises sword in celebration — full body facing camera
     if(fd.heroRaise>0){const hx=p2.x+PS/2,hy=p2.y;
-      const raise=fd.heroRaise;
-      // Sword held above head
-      const swordY=hy-8-raise*20;
-      c.strokeStyle="#c0d8ff";c.lineWidth=3;c.lineCap="round";
-      c.beginPath();c.moveTo(hx+2,hy-4);c.lineTo(hx+2,swordY);c.stroke();
+      const raise=fd.heroRaise;const red=p2.redArmor;
+      const tL=red?"#aa4848":"#48aa48",tD=red?"#7a2a2a":"#2a7a2a";
+      // Shadow
+      c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx,hy+23,8,3,0,0,Math.PI*2);c.fill();
+      // Boots
+      c.fillStyle="#6a3a18";c.beginPath();c.arc(hx-5,hy+22,3,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(hx+5,hy+22,3,0,Math.PI*2);c.fill();
+      // Legs
+      c.fillStyle="#c8b080";c.fillRect(hx-6,hy+17,4,5);c.fillRect(hx+2,hy+17,4,5);
+      // Tunic body
+      const bg=c.createLinearGradient(hx-8,hy+8,hx+8,hy+18);bg.addColorStop(0,tL);bg.addColorStop(1,tD);
+      c.fillStyle=bg;c.beginPath();c.moveTo(hx-7,hy+9);c.lineTo(hx+7,hy+9);c.lineTo(hx+8,hy+18);c.lineTo(hx-8,hy+18);c.closePath();c.fill();
+      // Belt
+      c.fillStyle="#8a6a2a";c.fillRect(hx-8,hy+15,16,2);c.fillStyle="#d4b040";c.fillRect(hx-2,hy+15,4,2);
+      // Left arm — raised holding sword
+      const armAng=-0.3-raise*1.1;// swings from side to above head
+      c.save();c.translate(hx-7,hy+10);c.rotate(armAng);
+      c.fillStyle=tL;c.fillRect(-2,-1,4,10);
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
+      // Sword in hand
+      const sLen=18+raise*4;
+      c.strokeStyle=p2.hasMasterSword?"#88ccff":"#c0d8ff";c.lineWidth=3;c.lineCap="round";
+      c.beginPath();c.moveTo(0,10);c.lineTo(0,10+sLen);c.stroke();
       // Blade shine
-      c.strokeStyle="rgba(255,255,255,0.6)";c.lineWidth=1.5;
-      c.beginPath();c.moveTo(hx+2.5,hy-6);c.lineTo(hx+2.5,swordY+2);c.stroke();
+      c.strokeStyle="rgba(255,255,255,0.5)";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(0.5,12);c.lineTo(0.5,10+sLen-2);c.stroke();
       // Crossguard
       c.strokeStyle="#d4b040";c.lineWidth=2.5;
-      c.beginPath();c.moveTo(hx-5,hy-4);c.lineTo(hx+9,hy-4);c.stroke();
+      c.beginPath();c.moveTo(-5,10);c.lineTo(5,10);c.stroke();
       // Glow at tip
       const gl=Math.sin(t/200)*0.3+0.7;
-      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(hx+2,swordY,8*raise,0,Math.PI*2);c.fill();
-      c.lineCap="butt";
+      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(0,10+sLen,6*raise,0,Math.PI*2);c.fill();
+      c.lineCap="butt";c.restore();
+      // Right arm — raised in fist
+      c.save();c.translate(hx+7,hy+10);c.rotate(0.3+raise*1.1);
+      c.fillStyle=tL;c.fillRect(-2,-1,4,10);
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
+      c.restore();
+      // Head
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx,hy+5,6,0,Math.PI*2);c.fill();
+      // Hair
+      c.fillStyle="#c8a030";c.beginPath();c.arc(hx,hy+3,6,Math.PI+0.3,Math.PI*2-0.3);c.fill();
+      c.fillRect(hx-7,hy+2,3,4);c.fillRect(hx+4,hy+2,3,4);
+      // Hat
+      c.fillStyle="#2a9a2a";c.beginPath();c.moveTo(hx-5,hy+1);c.lineTo(hx+2,hy-8);c.lineTo(hx+6,hy+2);c.fill();
+      // Eyes — looking up triumphantly
+      c.fillStyle="#2244aa";c.beginPath();c.arc(hx-3,hy+4,1.5,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(hx+3,hy+4,1.5,0,Math.PI*2);c.fill();
+      c.fillStyle="#fff";c.fillRect(hx-3,hy+3,1,1);c.fillRect(hx+3,hy+3,1,1);
+      // Mouth — triumphant smile
+      c.strokeStyle="#aa6644";c.lineWidth=0.7;c.beginPath();c.arc(hx,hy+7,2,0.3,Math.PI-0.3);c.stroke();
     }
     // Fade to black
     if(fd.fadeAlpha>0){c.fillStyle=`rgba(0,0,0,${fd.fadeAlpha})`;c.fillRect(0,0,W2,FH2);}
