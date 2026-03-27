@@ -1909,6 +1909,47 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
     dT(c,tl,px,py,iD,dg,s.gt,ei);}
+  // Shadow vault — fill PIT areas with dark fog and blinking eyes
+  if(iD&&m&&loc.ty==="dg"){const rmSV=s.dg[loc.di]?.rooms[loc.scr];
+    if(rmSV?.dark){
+      for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+        if(m[y][x]===T.PIT){const px=x*TL,py=y*TL;
+          // Dark swirling shadow fog
+          const fog=c.createRadialGradient(px+16,py+16,2,px+16,py+16,18);
+          fog.addColorStop(0,`rgba(20,0,30,${0.7+Math.sin(t/800+x*3+y*5)*0.15})`);
+          fog.addColorStop(1,`rgba(10,0,15,${0.9+Math.sin(t/600+x*7)*0.1})`);
+          c.fillStyle=fog;c.fillRect(px,py,TL,TL);
+          // Wisps of shadow
+          const wx=Math.sin(t/1000+x*2+y)*4,wy=Math.cos(t/1200+y*3)*3;
+          c.fillStyle=`rgba(60,0,80,${0.15+Math.sin(t/500+x+y*2)*0.08})`;
+          c.beginPath();c.arc(px+16+wx,py+16+wy,6+Math.sin(t/700+x)*2,0,Math.PI*2);c.fill();
+        }}
+      // Blinking eyes in the shadow — deterministic positions based on hash
+      const eyeSeed=42;let eRng=eyeSeed;const eRn=()=>{eRng=(eRng*16807+1)%2147483647;return(eRng&0xffff)/0xffff;};
+      for(let i=0;i<12;i++){
+        const ex=1+Math.floor(eRn()*14),ey=1+Math.floor(eRn()*10);
+        if(m[ey]&&m[ey][ex]===T.PIT){
+          // Blink cycle: each eye pair has its own timing
+          const blinkCycle=3000+eRn()*4000;const blinkPhase=eRn()*blinkCycle;
+          const bt=(t+blinkPhase)%blinkCycle;
+          const open=bt<blinkCycle*0.7;// eyes open 70% of time
+          const blinkT=bt>blinkCycle*0.65&&bt<blinkCycle*0.7;// closing
+          if(open){
+            const px=ex*TL,py=ey*TL;
+            const drift=Math.sin(t/900+i*2)*2;
+            const eyeSize=blinkT?0.5:1.5;
+            // Left eye
+            c.fillStyle=`rgba(200,50,50,${0.6+Math.sin(t/400+i)*0.2})`;
+            c.beginPath();c.arc(px+10+drift,py+16,eyeSize,0,Math.PI*2);c.fill();
+            // Right eye
+            c.beginPath();c.arc(px+22+drift,py+16,eyeSize,0,Math.PI*2);c.fill();
+            // Faint glow
+            c.fillStyle=`rgba(200,0,0,${0.04+Math.sin(t/400+i)*0.02})`;
+            c.beginPath();c.arc(px+16+drift,py+16,8,0,Math.PI*2);c.fill();
+          }
+        }
+      }
+    }}
   // Ambient dungeon decorations -- sparse, theme-aware, deterministic
   if(iD&&m){const th=dg?.th||"forest";
     for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
