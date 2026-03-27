@@ -333,8 +333,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
-  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];
-    if(rm?.sign)s.msg={text:rm.sign,t:3000};}
+  if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Boss intro -- cinematic sequence if room has a boss
@@ -991,6 +990,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             // Spawn a chest as reward for lighting all torches
             s.chest={x:W2/2-12,y:H2/2-12,state:"closed",t:0,reward:"rupee_blue"};}
         }}
+      // Read dungeon wall sign with sword
+      if(s.loc.ty==="dg"){const rmS=s.dg[s.loc.di]?.rooms[s.loc.scr];
+        if(rmS?.sign&&rmS?.signPos){const[sgx,sgy]=rmS.signPos;
+          const ftx4=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
+          const fty4=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
+          if(ftx4===sgx&&fty4===sgy){sfx("pickup");s.msg={text:rmS.sign,t:3000};}}}
     }}if(tc.atk)tc.atk=false;
   if(ky.has("b")&&p.hasBombs&&p.bombs>0&&!s.bombCd&&s.activeBombs.length<2){
     const ftx=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
@@ -2119,6 +2124,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle=`rgba(255,100,0,${fa*0.3})`;c.beginPath();c.arc(ft.x,ft.y,10,0,Math.PI*2);c.fill();
     c.fillStyle=`rgba(255,200,50,${fa*0.2+Math.sin(t/100+ft.x)*0.1})`;c.beginPath();c.arc(ft.x,ft.y,6,0,Math.PI*2);c.fill();
     c.fillStyle=`rgba(255,255,150,${fa*0.15})`;c.beginPath();c.arc(ft.x+(Math.sin(t/80+ft.y)*2),ft.y-2,3,0,Math.PI*2);c.fill();}}
+  // Dungeon wall sign
+  if(iD&&loc.ty==="dg"){const rmSign=s.dg[loc.di]?.rooms[loc.scr];
+    if(rmSign?.sign&&rmSign?.signPos){const[sx,sy]=rmSign.signPos;const spx=sx*TL,spy=sy*TL;
+      // Sign board on wall
+      c.fillStyle="#8a6a30";c.fillRect(spx+4,spy+6,24,16);
+      c.fillStyle="#a08040";c.fillRect(spx+5,spy+7,22,14);
+      // Nails
+      c.fillStyle="#888";c.fillRect(spx+6,spy+8,2,2);c.fillRect(spx+24,spy+8,2,2);
+      // Text lines on sign
+      c.fillStyle="#543820";c.font="bold 4px monospace";c.textAlign="center";
+      c.fillText("READ",spx+16,spy+14);c.fillText("ME",spx+16,spy+19);
+      c.textAlign="left";
+      // Exclamation when player is nearby
+      const pdS=Math.hypot(p.x+PS/2-spx-16,p.y+PS/2-spy-16);
+      if(pdS<TL*2.5){const bob=Math.sin(t/300)*3;c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("!",spx+16,spy-2+bob);c.textAlign="left";}
+    }}
   for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=e.type==="boss"?ES*1.5:e.type==="miniboss"?ES*1.3:ES;
     if(e.spawnT>0){
       // Spawn animation -- smoke puff and scale-in
