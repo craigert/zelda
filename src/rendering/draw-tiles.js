@@ -723,7 +723,86 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
     case T.FLOOR:{const fc2=iD?(dg.fc||dg.color):"#8b7355";c.fillStyle=fc2;c.fillRect(px,py,TL,TL);
       if(iD){const fg=c.createRadialGradient(px+16,py+16,2,px+16,py+16,20);fg.addColorStop(0,"rgba(255,255,255,0.03)");fg.addColorStop(1,"rgba(0,0,0,0.03)");c.fillStyle=fg;c.fillRect(px,py,TL,TL);
         c.strokeStyle="rgba(255,255,255,0.025)";c.strokeRect(px+1,py+1,TL-2,TL-2);}break;}
-    case T.DOOR:case T.BOSS_DOOR:{const bo=tl===T.BOSS_DOOR;c.fillStyle=bo?"#4a1515":"#5a3820";c.fillRect(px,py,TL,TL);c.fillStyle=bo?"#3a0a0a":"#4a2810";c.fillRect(px+4,py+2,10,TL-4);c.fillRect(px+18,py+2,10,TL-4);c.fillStyle="#c8a020";c.fillRect(px+11,py+12,10,10);c.fillStyle="#333";c.fillRect(px+15,py+16,2,4);if(bo){c.fillStyle="#e83030";c.fillRect(px+10,py+2,12,8);}break;}
+    case T.DOOR:case T.BOSS_DOOR:{
+      const bo=tl===T.BOSS_DOOR;
+      // Determine if this is left or top half of a 2-tile door pair
+      const tx2=Math.floor(px/TL),ty2=Math.floor(py/TL);
+      // Check neighbor to determine orientation and half
+      const isHoriz=ty2===0||ty2===RO-1; // N/S wall doors are horizontal pairs
+      const isVert=tx2===0||tx2===CO-1;   // E/W wall doors are vertical pairs
+
+      // Base wall color behind door
+      c.fillStyle=iD?(dg?.wc||"#3a3a3a"):"#555";c.fillRect(px,py,TL,TL);
+
+      if(isHoriz){
+        // Horizontal 2-wide door (N or S wall)
+        // Detect if left half (x=7) or right half (x=8)
+        const isLeft=tx2===7;
+        const dc1=bo?"#6a1818":"#6a4420";const dc2=bo?"#4a0808":"#4a2a10";
+        const dc3=bo?"#8a2020":"#8a5a28";
+        // Door panel
+        c.fillStyle=dc1;
+        c.fillRect(px+(isLeft?4:0),py+3,isLeft?TL-4:TL-4,TL-6);
+        // Inset panel
+        c.fillStyle=dc2;
+        c.fillRect(px+(isLeft?6:2),py+5,TL-10,TL-10);
+        // Highlight edge
+        c.fillStyle=dc3;
+        c.fillRect(px+(isLeft?4:0),py+3,isLeft?TL-4:TL-4,2);
+        // Metal banding
+        c.fillStyle="#8a7a50";
+        c.fillRect(px,py+8,TL,2);c.fillRect(px,py+TL-10,TL,2);
+        // Rivets
+        c.fillStyle="#aa9a60";
+        if(isLeft){c.beginPath();c.arc(px+8,py+9,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(px+8,py+TL-9,1.5,0,Math.PI*2);c.fill();}
+        else{c.beginPath();c.arc(px+TL-8,py+9,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(px+TL-8,py+TL-9,1.5,0,Math.PI*2);c.fill();}
+        // Keyhole/handle on inner edges (where the two halves meet)
+        if(isLeft){
+          c.fillStyle="#c8a020";c.beginPath();c.arc(px+TL-4,py+TL/2,3,0,Math.PI*2);c.fill();
+          c.fillStyle="#333";c.fillRect(px+TL-5,py+TL/2+1,2,4);
+        }else{
+          c.fillStyle="#c8a020";c.beginPath();c.arc(px+4,py+TL/2,3,0,Math.PI*2);c.fill();
+          c.fillStyle="#333";c.fillRect(px+3,py+TL/2+1,2,4);
+        }
+        // Boss door: red gem/skull emblem
+        if(bo){
+          c.fillStyle="#e83030";c.beginPath();c.arc(px+TL/2,py+TL/2-2,4,0,Math.PI*2);c.fill();
+          c.fillStyle="#ff6060";c.beginPath();c.arc(px+TL/2-1,py+TL/2-3,2,0,Math.PI*2);c.fill();
+        }
+      }else if(isVert){
+        // Vertical 2-tall door (E or W wall)
+        const isTop=ty2===5;
+        const dc1=bo?"#6a1818":"#6a4420";const dc2=bo?"#4a0808":"#4a2a10";
+        const dc3=bo?"#8a2020":"#8a5a28";
+        c.fillStyle=dc1;
+        c.fillRect(px+3,py+(isTop?4:0),TL-6,isTop?TL-4:TL-4);
+        c.fillStyle=dc2;
+        c.fillRect(px+5,py+(isTop?6:2),TL-10,TL-10);
+        c.fillStyle=dc3;
+        c.fillRect(px+3,py+(isTop?4:0),2,isTop?TL-4:TL-4);
+        // Metal banding
+        c.fillStyle="#8a7a50";
+        c.fillRect(px+8,py,2,TL);c.fillRect(px+TL-10,py,2,TL);
+        // Rivets
+        c.fillStyle="#aa9a60";
+        if(isTop){c.beginPath();c.arc(px+9,py+8,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(px+TL-9,py+8,1.5,0,Math.PI*2);c.fill();}
+        else{c.beginPath();c.arc(px+9,py+TL-8,1.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(px+TL-9,py+TL-8,1.5,0,Math.PI*2);c.fill();}
+        // Keyhole
+        if(isTop){
+          c.fillStyle="#c8a020";c.beginPath();c.arc(px+TL/2,py+TL-4,3,0,Math.PI*2);c.fill();
+          c.fillStyle="#333";c.fillRect(px+TL/2-1,py+TL-3,2,3);
+        }else{
+          c.fillStyle="#c8a020";c.beginPath();c.arc(px+TL/2,py+4,3,0,Math.PI*2);c.fill();
+          c.fillStyle="#333";c.fillRect(px+TL/2-1,py+1,2,3);
+        }
+        if(bo){c.fillStyle="#e83030";c.beginPath();c.arc(px+TL/2,py+TL/2,4,0,Math.PI*2);c.fill();
+          c.fillStyle="#ff6060";c.beginPath();c.arc(px+TL/2-1,py+TL/2-1,2,0,Math.PI*2);c.fill();}
+      }else{
+        // Fallback for doors not on walls (shouldn't happen, but safe)
+        c.fillStyle=bo?"#6a1818":"#6a4420";c.fillRect(px+2,py+2,TL-4,TL-4);
+        c.fillStyle="#c8a020";c.beginPath();c.arc(px+TL/2,py+TL/2,3,0,Math.PI*2);c.fill();
+      }
+      break;}
     case T.KEY:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const kg=Math.sin(t/300)*.15+.2;c.fillStyle=`rgba(253,211,51,${kg})`;c.beginPath();c.arc(px+16,py+14,10,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.arc(px+14,py+9,4,0,Math.PI*2);c.fill();c.fillStyle="#e8b820";c.fillRect(px+11,py+11,4,14);c.fillRect(px+11,py+21,8,3);c.fillRect(px+11,py+16,6,3);break;}
     case T.MASTER_KEY:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
       const mg=Math.sin(t/200)*.2+.3;c.fillStyle=`rgba(180,100,255,${mg})`;c.beginPath();c.arc(px+16,py+14,13,0,Math.PI*2);c.fill();

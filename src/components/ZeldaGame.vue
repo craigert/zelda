@@ -369,13 +369,18 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
   if(s.loc.ty==="ow"&&s.npcState){for(const ns2 of s.npcState){if(tx===Math.floor((ns2.x+16)/TL)&&ty===Math.floor((ns2.y+16)/TL))return true;}}
   if(tl===T.DOOR||tl===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;
     if(s.dr.has(dk)){
-      // Boss door re-seals during boss fight — can't escape
       if(tl===T.BOSS_DOOR&&s.bossFight)return true;
       return false;}
-    if(tl===T.BOSS_DOOR){if(s.p.masterKey[s.loc.di]){s.dr.add(dk);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
+    // Find paired door tile (2-wide doors share one key)
+    const openPair=(tx2,ty2)=>{
+      const pairs=[[tx2-1,ty2],[tx2+1,ty2],[tx2,ty2-1],[tx2,ty2+1]];
+      for(const[px2,py2]of pairs){if(px2>=0&&px2<CO&&py2>=0&&py2<RO&&m[py2][px2]===tl){
+        s.dr.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${px2},${py2}`);
+        s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:tl===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
+    if(tl===T.BOSS_DOOR){if(s.p.masterKey[s.loc.di]){s.dr.add(dk);openPair(tx,ty);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
       s.pt.push(...Array.from({length:12},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));return false;}
       s.msg={text:"Locked! Find the Master Key...",t:1500};return true;}
-    if(s.p.keys>0){s.p.keys--;s.dr.add(dk);s.msg={text:"Door opened!",t:1500};sfx("door");
+    if(s.p.keys>0){s.p.keys--;s.dr.add(dk);openPair(tx,ty);s.msg={text:"Door opened!",t:1500};sfx("door");
       s.pt.push(...Array.from({length:8},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));return false;}return true;}
   return false;}
 
@@ -768,11 +773,16 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     const ftx=pcx+(p.dir===1?1:p.dir===3?-1:0),fty=pcy+(p.dir===0?-1:p.dir===2?1:0);
     if(ftx>=0&&ftx<CO&&fty>=0&&fty<RO){const ft=m2[fty][ftx];
       if(ft===T.DOOR||ft===T.BOSS_DOOR){const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${ftx},${fty}`;
+        // Open paired door tile helper
+        const openPair2=()=>{const pairs=[[ftx-1,fty],[ftx+1,fty],[ftx,fty-1],[ftx,fty+1]];
+          for(const[px2,py2]of pairs){if(px2>=0&&px2<CO&&py2>=0&&py2<RO&&m2[py2][px2]===ft){
+            s.dr.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${px2},${py2}`);
+            s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:ft===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
         if(!s.dr.has(dk)){
-          if(ft===T.BOSS_DOOR){if(p.masterKey[s.loc.di]){s.dr.add(dk);sfx("door");s.msg={text:"Master key used! Boss door opened!",t:1500};
+          if(ft===T.BOSS_DOOR){if(p.masterKey[s.loc.di]){s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Master key used! Boss door opened!",t:1500};
             s.pt.push(...Array.from({length:12},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));}
             else{s.msg={text:"Locked! Find the Master Key...",t:1500};}}
-          else if(p.keys>0){p.keys--;s.dr.add(dk);sfx("door");s.msg={text:"Door opened!",t:1500};
+          else if(p.keys>0){p.keys--;s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Door opened!",t:1500};
             s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}}}
   }}
   if(moved){const m2=gm(s);if(m2){
