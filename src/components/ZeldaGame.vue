@@ -536,6 +536,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
+    ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
   if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
     if(s.fade.alpha>=1&&s.fade.cb){s.fade.cb();s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
