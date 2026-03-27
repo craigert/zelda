@@ -62,6 +62,7 @@ import { DEFAULT_MUSIC, MUSIC } from '../data/music-data.js';
 import { OW, OW_EN } from '../data/overworld.js';
 import { CAVES } from '../data/caves.js';
 import { DG, DE } from '../data/dungeons.js';
+import { PASSAGES } from '../data/passages.js';
 import { au, initAu, playTh, stopMu } from '../audio/music-engine.js';
 import { initSfx, sfx } from '../audio/sfx.js';
 import { dc, hs } from '../utils/helpers.js';
@@ -136,6 +137,7 @@ function init() {
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
+    ss:null, // side-scroll passage state: {vy,grounded,onLadder,jumping,facing,pi}
   };
 }
 
@@ -285,6 +287,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   s.litTorches=s.litTorchesAll[trk]||(s.litTorchesAll[trk]=new Set());const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;if(s.cl.has(rk)){s.en=[];s.combatLock=false;return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
+  if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
@@ -308,7 +311,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
   s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:n.name.includes("Tree")})):[];}
 
-function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
+function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;if(s.loc.ty==="passage")return null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
 function gts(s,ns,tx,ty){let m;if(s.loc.ty==="ow")m=OW[ns];else m=s.dg[s.loc.di].rooms[ns]?.tiles;
   if(!m||ty<0||ty>=RO||tx<0||tx>=CO)return T.WALL;return m[ty][tx];}
@@ -413,6 +416,16 @@ function cTr(s){const p=s.p,loc=s.loc;
       const di2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const ent=DE[di2];loc.ty="ow";loc.scr=ent.s;loc.di=-1;
         const mxTy=Math.max(...ent.t.map(t2=>t2[1]));p.x=ent.t[0][0]*TL;p.y=(mxTy+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
+    // STAIRS_DOWN → enter side-scroll passage
+    if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_DOWN&&s.ec<=0){
+      const pi2=PASSAGES.findIndex(pg=>pg.di===loc.di&&(pg.from.scr===loc.scr||pg.to.scr===loc.scr));
+      if(pi2>=0){const pg=PASSAGES[pi2];const isFrom=pg.from.scr===loc.scr;
+        s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
+          loc.ty="passage";loc.scr=`p${pi2}`;
+          p.x=isFrom?2*TL:(W2-3*TL);p.y=9*TL-PS;
+          s.ss={vy:0,grounded:false,onLadder:false,jumping:false,facing:isFrom?1:-1,pi:pi2};
+          s.en=[];le(s);s.ec=500;
+        }};sfx("door");return;}}
     const dg=s.dg[loc.di];
     if(s.combatLock){// Block room transitions but NOT movement/collision
       if(p.y<0)p.y=0;if(p.y>H2-PS)p.y=H2-PS;if(p.x<0)p.x=0;if(p.x>W2-PS)p.x=W2-PS;
@@ -510,6 +523,117 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.fade.alpha>=1&&s.fade.cb){s.fade.cb();s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
     if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
   if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur)s.slide.a=false;return;}
+  // ===== SIDE-SCROLL PASSAGE PHYSICS =====
+  if(s.loc.ty==="passage"&&s.ss){
+    const ky=kyR.value,tc=tcR.value,p=s.p,ss=s.ss;
+    const pi=ss.pi;const psg=PASSAGES[pi];if(!psg){s.loc.ty="dg";s.ss=null;return;}
+    const GRAV=0.18,JUMP=-4.2,TVEL=5.0,PLAT_H=6;
+    // Input
+    let dx2=0;
+    if(ky.has("arrowleft")||ky.has("a")||tc.dir==="left"){dx2=-1;ss.facing=-1;}
+    if(ky.has("arrowright")||ky.has("d")||tc.dir==="right"){dx2=1;ss.facing=1;}
+    const upKey=ky.has("arrowup")||ky.has("w")||tc.dir==="up";
+    const downKey=ky.has("arrowdown")||ky.has("s")||tc.dir==="down";
+    const jumpKey=ky.has(" ")||ky.has("z")||tc.atk;
+    // Horizontal movement
+    const hspd=p.spd*1.2*(dt/16);
+    p.x+=dx2*hspd;
+    // Wall collision (left/right edges)
+    if(p.x<1*TL)p.x=1*TL;if(p.x>W2-1*TL-PS)p.x=W2-1*TL-PS;
+    // Ladder check
+    let onAnyLadder=false;
+    const pcx=p.x+PS/2,pcy=p.y+PS/2;
+    for(const[lx,ly,lh]of psg.ladders){
+      const lx1=lx*TL,ly1=ly*TL,lx2=lx1+TL,ly2=ly1+lh*TL;
+      if(pcx>lx1+4&&pcx<lx2-4&&pcy>ly1&&pcy<ly2){onAnyLadder=true;break;}
+    }
+    if(onAnyLadder&&(upKey||downKey)){ss.onLadder=true;ss.vy=0;ss.grounded=false;}
+    if(ss.onLadder&&!onAnyLadder)ss.onLadder=false;
+    if(ss.onLadder){
+      if(upKey)p.y-=hspd*0.8;if(downKey)p.y+=hspd*0.8;
+      ss.vy=0;
+      // Exit check — at top of ladder near left or right edge
+      if(upKey&&p.y<2*TL){
+        const isLeft=p.x<W2/2;
+        const exit=isLeft?psg.exitL:psg.exitR;
+        s.fade={a:true,alpha:0,dir:1,t:0,spd:400,cb:()=>{
+          s.loc.ty="dg";s.loc.scr=exit.scr;s.loc.di=psg.di;
+          p.x=exit.px;p.y=exit.py;s.ss=null;le(s);sfx("door");
+        }};return;
+      }
+    }else{
+      // Gravity
+      ss.vy+=GRAV*(dt/16);if(ss.vy>TVEL)ss.vy=TVEL;
+      // Jump
+      if(jumpKey&&ss.grounded){ss.vy=JUMP;ss.grounded=false;ss.jumping=true;sfx("door");}
+      // Apply vertical movement
+      p.y+=ss.vy*(dt/16);
+      ss.grounded=false;
+      // Floor collision (bottom rows 10-11)
+      if(p.y+PS>=10*TL&&ss.vy>=0){p.y=10*TL-PS;ss.vy=0;ss.grounded=true;ss.jumping=false;}
+      // Ceiling collision (top row 0-1)
+      if(p.y<1*TL&&ss.vy<0){p.y=1*TL;ss.vy=0;}
+      // Platform collision (one-way from above)
+      if(ss.vy>=0){for(const[px2,py2,pw]of psg.platforms){
+        const ptop=py2*TL,pleft=px2*TL,pright=(px2+pw)*TL;
+        if(pcx>pleft+2&&pcx<pright-2&&p.y+PS>=ptop&&p.y+PS<=ptop+PLAT_H+ss.vy*(dt/16)+2){
+          p.y=ptop-PS;ss.vy=0;ss.grounded=true;ss.jumping=false;break;}
+      }}
+    }
+    // Sword attack
+    if((ky.has(" ")||ky.has("z")||tc.atk)&&!s.sw.a){s.sw.a=true;s.sw.t=SD;sfx("sword");}
+    if(tc.atk)tc.atk=false;
+    if(s.sw.a){s.sw.t-=dt;if(s.sw.t<=0)s.sw.a=false;}
+    if(p.ifr>0)p.ifr-=dt;
+    // Enemy AI + combat (simplified side-scroll)
+    for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];e.mt+=dt;if(e.fl>0)e.fl-=dt;
+      const ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
+      // Simple patrol: move back and forth on platforms
+      if(e.type==="bat"||e.type==="fire_bat"){
+        e.x+=Math.cos(e.mt/600)*1.2*(dt/16);e.y+=Math.sin(e.mt/400)*0.8*(dt/16);
+      }else{
+        if(!e._ssDir)e._ssDir=1;e.x+=e._ssDir*0.8*(dt/16);
+        if(e.x<2*TL||e.x>W2-3*TL)e._ssDir*=-1;
+        // Simple gravity for ground enemies
+        let onPlat=false;
+        for(const[px2,py2,pw]of psg.platforms){if(ecx>px2*TL&&ecx<(px2+pw)*TL&&Math.abs(e.y+ES-py2*TL)<4){onPlat=true;break;}}
+        if(e.y+ES<10*TL&&!onPlat)e.y+=2*(dt/16);
+        if(e.y+ES>=10*TL)e.y=10*TL-ES;
+      }
+      // Sword hit check
+      if(s.sw.a){const sDir=ss.facing>0?1:3;let sx2=pcx,sy2=pcy;
+        if(sDir===1)sx2+=SR*0.7;else sx2-=SR*0.7;
+        if(Math.hypot(sx2-ecx,sy2-ecy)<SR+ES*0.3&&e.fl<=0){
+          const dmg=p.hasMasterSword?2:1;e.hp-=dmg;e.fl=300;
+          const kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*12;
+          sfx("hit");s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:dmg,c:"#fff"});
+          s.pt.push(...Array.from({length:4},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:300,c:"#fff"})));
+        }}
+      if(e.hp<=0){s.en.splice(i,1);sfx("kill");
+        s.pt.push(...Array.from({length:8},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:400,c:"#f88"})));
+        if(Math.random()<0.4)s.drops.push({x:ecx,y:ecy-4,vy:-2,ground:ecy,type:Math.random()<0.5?"heart":"rupee_green",t:0});
+        continue;}
+      // Player damage
+      if(p.ifr<=0&&dist<(PS+ES)*0.4){p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=200;
+        const hka=Math.atan2(pcy-ecy,pcx-ecx);p.x+=Math.cos(hka)*6;
+        if(e.type==="fire_bat"){p.burn=2000;p.burnTick=0;}
+        if(e.type==="ghost"){p.freeze=1500;}
+        if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
+    // Drops
+    for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;d2.y+=d2.vy*(dt/16);d2.vy+=0.15*(dt/16);
+      if(d2.y>d2.ground){d2.y=d2.ground;d2.vy*=-0.4;if(Math.abs(d2.vy)<0.3)d2.vy=0;}
+      if(Math.abs(pcx-d2.x)<14&&Math.abs(pcy-d2.y)<14){
+        if(d2.type==="heart"){p.hp=Math.min(p.hp+1,p.mhp);sfx("pickup");}
+        else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");}
+        s.drops.splice(i,1);continue;}
+      if(d2.t>6000)s.drops.splice(i,1);}
+    // Particles & damage numbers
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    for(let i=s.dmgNums.length-1;i>=0;i--){const dn=s.dmgNums[i];dn.y-=1.2*(dt/16);dn.t-=dt;if(dn.t<=0)s.dmgNums.splice(i,1);}
+    if(s.msg.t>0)s.msg.t-=dt;
+    if(p.burn>0){p.burn-=dt;p.burnTick+=dt;if(p.burnTick>=500){p.burnTick=0;if(p.ifr<=0){p.hp--;sfx("hurt");if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
+    return;
+  }
   if(s.shake.t>0){s.shake.t-=dt;const intensity=s.shake.t/300*4;s.shake.x=(Math.random()-.5)*intensity;s.shake.y=(Math.random()-.5)*intensity;}
   else{s.shake.x=0;s.shake.y=0;}
   if(s.p.hp<=2)s.lowHp+=dt;else s.lowHp=0;
@@ -1333,6 +1457,115 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.restore();}
     // Offset new screen
     c.translate((1-ease)*W2*sl.dx,(1-ease)*H2*sl.dy);}
+  // ===== SIDE-SCROLL PASSAGE RENDERING =====
+  if(loc.ty==="passage"&&s.ss){
+    const psg=PASSAGES[s.ss.pi];const dg2=s.dg[psg?.di]||{color:"#1a2a18",wc:"#3a5a3a",fc:"#2a3a28"};
+    // Background — cave stone
+    c.fillStyle=dg2.color;c.fillRect(0,0,W2,H2);
+    // Ceiling (row 0) and floor (rows 10-11)
+    const wc=dg2.wc||"#3a3a3a";
+    for(let x=0;x<CO;x++){
+      // Ceiling
+      c.fillStyle=wc;c.fillRect(x*TL,0,TL,TL);
+      c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.5;
+      c.beginPath();c.moveTo(x*TL,TL*0.5);c.lineTo((x+1)*TL,TL*0.5);c.stroke();
+      c.beginPath();c.moveTo(x*TL+16,0);c.lineTo(x*TL+16,TL*0.5);c.stroke();
+      // Floor
+      c.fillStyle=wc;c.fillRect(x*TL,10*TL,TL,2*TL);
+      c.strokeStyle="rgba(0,0,0,0.3)";c.lineWidth=0.5;
+      c.beginPath();c.moveTo(x*TL,10*TL+TL*0.5);c.lineTo((x+1)*TL,10*TL+TL*0.5);c.stroke();
+      c.beginPath();c.moveTo(x*TL+16,10*TL);c.lineTo(x*TL+16,10*TL+TL*0.5);c.stroke();
+    }
+    // Left and right walls
+    for(let y=1;y<10;y++){
+      c.fillStyle=wc;c.fillRect(0,y*TL,TL,TL);c.fillRect(15*TL,y*TL,TL,TL);
+      c.strokeStyle="rgba(0,0,0,0.2)";c.lineWidth=0.5;
+      c.beginPath();c.moveTo(TL*0.5,y*TL);c.lineTo(TL*0.5,(y+1)*TL);c.stroke();
+      c.beginPath();c.moveTo(15*TL+TL*0.5,y*TL);c.lineTo(15*TL+TL*0.5,(y+1)*TL);c.stroke();
+    }
+    // Exit doorways at top of ladders
+    for(const[lx,ly]of psg.ladders){
+      c.fillStyle="rgba(180,150,80,0.15)";c.fillRect(lx*TL-4,ly*TL-TL,TL+8,TL+4);
+      c.strokeStyle="rgba(180,150,80,0.3)";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(lx*TL-2,(ly-1)*TL);c.lineTo(lx*TL-2,ly*TL+4);c.stroke();
+      c.beginPath();c.moveTo(lx*TL+TL+2,(ly-1)*TL);c.lineTo(lx*TL+TL+2,ly*TL+4);c.stroke();
+      c.beginPath();c.moveTo(lx*TL-2,(ly-1)*TL);c.lineTo(lx*TL+TL+2,(ly-1)*TL);c.stroke();
+      // Stair steps inside doorway
+      for(let i=0;i<3;i++){c.fillStyle=`rgba(180,160,100,${0.1+i*0.04})`;c.fillRect(lx*TL+2,(ly-1)*TL+4+i*6,TL-4,4);}
+      // "EXIT" label
+      c.fillStyle="rgba(180,160,80,0.4)";c.font="bold 7px monospace";c.textAlign="center";
+      c.fillText("\u25b2",lx*TL+TL/2,(ly-1)*TL+TL-4);c.textAlign="left";
+    }
+    // Platforms — stone slabs
+    for(const[px2,py2,pw]of psg.platforms){
+      const plx=px2*TL,ply=py2*TL,plw=pw*TL;
+      // Platform body
+      const pg=c.createLinearGradient(plx,ply,plx,ply+8);
+      pg.addColorStop(0,wc);pg.addColorStop(0.4,dg2.fc||"#2a3a28");pg.addColorStop(1,"rgba(0,0,0,0.3)");
+      c.fillStyle=pg;c.fillRect(plx,ply,plw,8);
+      // Top highlight
+      c.fillStyle="rgba(255,255,220,0.06)";c.fillRect(plx,ply,plw,1);
+      // Bottom shadow
+      c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(plx+2,ply+8,plw-4,3);
+      // Stone block lines
+      c.strokeStyle="rgba(0,0,0,0.2)";c.lineWidth=0.5;
+      for(let bx=plx+TL;bx<plx+plw;bx+=TL){c.beginPath();c.moveTo(bx,ply);c.lineTo(bx,ply+7);c.stroke();}
+    }
+    // Ladders
+    for(const[lx,ly,lh]of psg.ladders){
+      const lx1=lx*TL,ly1=ly*TL;
+      // Rails
+      c.fillStyle="#7a5a2a";c.fillRect(lx1+6,ly1,4,lh*TL);c.fillRect(lx1+TL-10,ly1,4,lh*TL);
+      // Rungs
+      for(let r=0;r<lh*4;r++){const ry=ly1+4+r*(TL/4);
+        c.fillStyle="#8a6a3a";c.fillRect(lx1+10,ry,TL-20,2);}
+    }
+    // Background atmosphere — dust motes
+    for(let i=0;i<8;i++){const dx2=hs(i,5,77)*W2,dy2=(hs(i,9,88)*H2+t/25)%H2;
+      c.fillStyle=`rgba(200,180,140,${0.12+Math.sin(t/600+i*2)*0.08})`;
+      c.beginPath();c.arc(dx2+Math.sin(t/400+i)*6,dy2,0.8+hs(i,1,99)*0.6,0,Math.PI*2);c.fill();}
+    // Enemies
+    for(const e of s.en){const fl=e.fl>0&&Math.floor(e.fl/50)%2,sz=ES;
+      c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(e.x+ES/2+2,e.y+ES-1,ES/2,3,0,0,Math.PI*2);c.fill();
+      if(e.type==="ghost")dGh(c,e.x,e.y,sz,fl,t);
+      else if(e.type==="bat"||e.type==="fire_bat")dBt(c,e.x,e.y,sz,fl,t,e.type==="fire_bat");
+      else dSk(c,e.x,e.y,sz,fl,t);}
+    // Drops
+    for(const d2 of s.drops){const bob2=Math.sin(t/200)*2;
+      if(d2.type==="heart"){c.fillStyle="#ee3333";dH(c,d2.x-6,d2.y-6+bob2,12);}
+      else{c.fillStyle="#4f4";c.beginPath();c.moveTo(d2.x,d2.y-4+bob2);c.lineTo(d2.x+3,d2.y+bob2);c.lineTo(d2.x,d2.y+4+bob2);c.lineTo(d2.x-3,d2.y+bob2);c.closePath();c.fill();}}
+    // Player
+    const p2=s.p,vis=p2.ifr<=0||Math.floor(p2.ifr/80)%2;
+    if(vis&&!s.death.a){
+      c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p2.x+PS/2+2,p2.y+PS-1,10,3,0,0,Math.PI*2);c.fill();
+      dP(c,p2.x,p2.y,s.ss.facing>0?1:3,t);
+    }
+    if(s.sw.a)dSw(c,p2.x,p2.y,s.ss.facing>0?1:3,s.sw.t);
+    // Particles
+    for(const pt of s.pt){const pa=Math.min(1,pt.l/500);c.globalAlpha=pa;c.fillStyle=pt.c;c.beginPath();c.arc(pt.x,pt.y,1+pt.l/800,0,Math.PI*2);c.fill();}c.globalAlpha=1;
+    for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
+    // Vignette
+    const vig2=c.createRadialGradient(W2/2,H2/2,W2*0.25,W2/2,H2/2,W2*0.7);
+    vig2.addColorStop(0,"rgba(0,0,0,0)");vig2.addColorStop(0.7,"rgba(0,0,0,0.2)");vig2.addColorStop(1,"rgba(0,0,0,0.5)");
+    c.fillStyle=vig2;c.fillRect(0,0,W2,H2);
+    // HUD label
+    c.fillStyle="rgba(0,0,0,0.6)";c.fillRect(W2/2-60,4,120,16);
+    c.fillStyle="#ccc";c.font="bold 9px monospace";c.textAlign="center";c.fillText("UNDERGROUND PASSAGE",W2/2,15);c.textAlign="left";
+    // Message
+    if(s.msg.t>0){c.font="bold 14px monospace";const mw=Math.min(c.measureText(s.msg.text).width+48,W2-32),my=H2-56;
+      c.fillStyle="rgba(0,0,0,0.85)";const r2=8;c.beginPath();c.moveTo(W2/2-mw/2+r2,my);c.lineTo(W2/2+mw/2-r2,my);c.quadraticCurveTo(W2/2+mw/2,my,W2/2+mw/2,my+r2);c.lineTo(W2/2+mw/2,my+32-r2);c.quadraticCurveTo(W2/2+mw/2,my+32,W2/2+mw/2-r2,my+32);c.lineTo(W2/2-mw/2+r2,my+32);c.quadraticCurveTo(W2/2-mw/2,my+32,W2/2-mw/2,my+32-r2);c.lineTo(W2/2-mw/2,my+r2);c.quadraticCurveTo(W2/2-mw/2,my,W2/2-mw/2+r2,my);c.fill();
+      c.strokeStyle="rgba(253,211,51,0.5)";c.stroke();c.fillStyle="#fff";c.textAlign="center";c.fillText(s.msg.text,W2/2,my+20);c.textAlign="left";}
+    // Death overlay
+    if(s.death.a){const da=Math.min(1,s.death.t/1500);c.globalAlpha=1-da;
+      c.save();c.translate(p2.x+PS/2,p2.y+PS/2);c.rotate(s.death.spin);c.translate(-PS/2,-PS/2);
+      dP(c,0,0,2,t);c.restore();c.globalAlpha=1;}
+    c.restore();// clip
+    c.restore();// translate
+    // Fade
+    if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,H2+HH);}
+    if(s.go){c.fillStyle="rgba(10,0,0,0.75)";c.fillRect(0,0,W2,H2+HH);c.fillStyle="#e33";c.font="bold 36px monospace";c.textAlign="center";c.fillText("GAME OVER",W2/2,(H2+HH)/2-20);c.fillStyle="#ccc";c.font="16px monospace";c.fillText("Tap to respawn",W2/2,(H2+HH)/2+25);c.textAlign="left";}
+    return;
+  }
   c.fillStyle=iD?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
   if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
     const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
@@ -2151,7 +2384,7 @@ onMounted(() => {
   const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
     // Force music to start now that audio is unlocked
     const s = stR.value; if (!s || !muOn.value) return;
-    const th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    const th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
     ltRef.value = th;
     if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = 0.5; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
@@ -2251,7 +2484,7 @@ watch([muOn, customMu], () => {
   }
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : s.dg[s.loc.di].th));
+    let th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }

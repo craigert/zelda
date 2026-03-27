@@ -1325,6 +1325,26 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       if(h1>0.5){c.fillStyle="rgba(40,60,40,0.15)";c.beginPath();c.arc(px+10+h2*12,py+12+h3*10,3+h1*2,0,Math.PI*2);c.fill();}
       if(h3>0.6){c.fillStyle="rgba(30,50,60,0.12)";c.beginPath();c.ellipse(px+20+h1*6,py+20+h2*6,4,2.5,h3,0,Math.PI*2);c.fill();}
       break;}
+    case T.STAIRS_DOWN:{// Dark stairway descending into the floor
+      const sfc=iD?(dg.fc||dg.color):"#2d6a1e";
+      c.fillStyle=sfc;c.fillRect(px,py,TL,TL);
+      // Dark hole
+      c.fillStyle="#060606";c.fillRect(px+4,py+4,TL-8,TL-8);
+      // Stone border with 3D bevel
+      c.fillStyle="#555";c.fillRect(px+3,py+3,TL-6,2);c.fillRect(px+3,py+3,2,TL-6);// top+left lit
+      c.fillStyle="#222";c.fillRect(px+3,py+TL-5,TL-6,2);c.fillRect(px+TL-5,py+3,2,TL-6);// bottom+right shadow
+      // Descending steps (getting darker as they go down)
+      for(let i=0;i<4;i++){
+        const sy=py+6+i*5,sw=TL-12-i*2,sx=px+6+i;
+        c.fillStyle=`rgb(${50-i*10},${45-i*8},${40-i*8})`;
+        c.fillRect(sx,sy,sw,3);
+      }
+      // Subtle glow from below (mysterious)
+      const sg=Math.sin(t/600)*0.08+0.12;
+      const sg2=c.createRadialGradient(px+16,py+20,2,px+16,py+16,14);
+      sg2.addColorStop(0,`rgba(180,140,80,${sg})`);sg2.addColorStop(1,"rgba(180,140,80,0)");
+      c.fillStyle=sg2;c.fillRect(px+4,py+4,TL-8,TL-8);
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }
