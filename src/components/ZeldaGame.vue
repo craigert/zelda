@@ -1447,22 +1447,31 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(p.freeze>0){c.fillStyle="#8cf";c.fillText("FREEZE",stx,26);stx+=40;}
     if(p.poison>0){c.fillStyle="#4a4";c.fillText("POISON",stx,26);}}
   c.textAlign="left";
-  // RIGHT: Items -- icon then number, consistent spacing
-  c.font="bold 11px monospace";let ix=W2-6;
-  const drawHudItem=(icon,val,col)=>{
-    const vw=c.measureText(val).width;ix-=vw+2;
-    c.fillStyle=col;c.textAlign="left";c.fillText(val,ix,21);
-    ix-=14;c.fillText(icon,ix,21);ix-=6;};
+  // RIGHT: Items — evenly spaced, vertically centered
+  {const hudItems=[];const midY=HH/2;
+  // Build items list right-to-left
   if(s.loc.ty==="dg"&&s.loc.di>=0){const mk=p.masterKey[s.loc.di];
-    ix-=14;c.fillStyle=mk?"#c070ff":"#444";c.textAlign="left";c.fillText(mk?"\ud83d\udddd\ufe0f":"\ud83d\udd12",ix,21);ix-=6;}
-  if(p.hasBombs)drawHudItem("\ud83d\udca3",`${p.bombs}`,"#8af");
-  drawHudItem("\ud83d\udd11",`${p.keys}`,"#fd3");
-  // Rupee: hex icon then number
-  const rv=`${p.rupees}`,rvw=c.measureText(rv).width;ix-=rvw+2;
-  c.fillStyle="#4f4";c.textAlign="left";c.fillText(rv,ix,21);
-  ix-=10;const rix2=ix,riy2=15;
-  c.fillStyle="#4f4";c.beginPath();c.moveTo(rix2,riy2-5);c.lineTo(rix2+3,riy2-2);c.lineTo(rix2+3,riy2+2);c.lineTo(rix2,riy2+5);c.lineTo(rix2-3,riy2+2);c.lineTo(rix2-3,riy2-2);c.closePath();c.fill();
-  c.fillStyle="#8f8";c.beginPath();c.moveTo(rix2,riy2-3);c.lineTo(rix2+2,riy2-1);c.lineTo(rix2,riy2);c.lineTo(rix2-2,riy2-1);c.closePath();c.fill();
+    hudItems.push({type:"emoji",icon:mk?"\ud83d\udddd\ufe0f":"\ud83d\udd12",val:"",col:mk?"#c070ff":"#444"});}
+  if(p.hasBombs)hudItems.push({type:"emoji",icon:"\ud83d\udca3",val:`${p.bombs}`,col:"#8af"});
+  hudItems.push({type:"emoji",icon:"\ud83d\udd11",val:`${p.keys}`,col:"#fd3"});
+  hudItems.push({type:"rupee",val:`${p.rupees}`,col:"#4f4"});
+  // Layout: fixed slot width, right-aligned
+  const slotW=50,startX=W2-hudItems.length*slotW;
+  c.font="bold 11px monospace";c.textBaseline="middle";
+  for(let hi=0;hi<hudItems.length;hi++){
+    const it=hudItems[hi],cx=startX+hi*slotW+slotW/2;
+    if(it.type==="rupee"){
+      // Custom hex rupee icon
+      const rx=cx-12,ry=midY;
+      c.fillStyle="#4f4";c.beginPath();c.moveTo(rx,ry-5);c.lineTo(rx+3,ry-2);c.lineTo(rx+3,ry+2);c.lineTo(rx,ry+5);c.lineTo(rx-3,ry+2);c.lineTo(rx-3,ry-2);c.closePath();c.fill();
+      c.fillStyle="#8f8";c.beginPath();c.moveTo(rx,ry-3);c.lineTo(rx+2,ry-1);c.lineTo(rx,ry);c.lineTo(rx-2,ry-1);c.closePath();c.fill();
+      c.fillStyle=it.col;c.textAlign="left";c.fillText(it.val,cx-6,midY);
+    }else{
+      c.fillStyle=it.col;c.textAlign="center";c.fillText(it.icon,cx-10,midY);
+      if(it.val){c.textAlign="left";c.fillText(it.val,cx,midY);}
+    }
+  }
+  c.textBaseline="alphabetic";c.textAlign="left";}
   ix-=6;
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
