@@ -1472,7 +1472,6 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     }
   }
   c.textBaseline="alphabetic";c.textAlign="left";}
-  ix-=6;
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
