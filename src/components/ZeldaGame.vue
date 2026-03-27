@@ -881,7 +881,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(wasPlate){s.shake.t=200;
           // Check if room has stairsReveal (but not squarePuzzle — those handle it separately)
           const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
-          if(roomD3?.squarePuzzle){/* handled after animation */}
+          if(roomD3?.squarePuzzle){
+            // Count how many plates are filled so far
+            const sp=roomD3.squarePlates||[];const fc=sp.filter(([px2,py2])=>m2[py2]&&(m2[py2][px2]===T.PUSH||m2[py2][px2]===T.ROCK)).length;
+            sfx("pickup");s.msg={text:`${fc} of ${sp.length} in place...`,t:1500};
+            s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
           else if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
             m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"A stairway appeared!",t:2000};
             s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
