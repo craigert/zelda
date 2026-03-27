@@ -1617,7 +1617,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}
-    dT(c,tl,px,py,iD,dg,t,ei);}
+    dT(c,tl,px,py,iD,dg,s.gt,ei);}
   // Ambient dungeon decorations -- sparse, theme-aware, deterministic
   if(iD&&m){const th=dg?.th||"forest";
     for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
