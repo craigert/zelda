@@ -2417,11 +2417,11 @@ onMounted(() => {
     }
     if (s && s.saveSelect) {
       const k = e.key.toLowerCase();
-      if (k === "arrowup" || k === "w") { s.saveSelIdx = (s.saveSelIdx - 1 + 4) % 4; e.preventDefault(); }
-      if (k === "arrowdown" || k === "s") { s.saveSelIdx = (s.saveSelIdx + 1) % 4; e.preventDefault(); }
+      if (k === "arrowup" || k === "w") { s.saveSelIdx = (s.saveSelIdx - 1 + 4) % 4; sfx("cursor"); e.preventDefault(); }
+      if (k === "arrowdown" || k === "s") { s.saveSelIdx = (s.saveSelIdx + 1) % 4; sfx("cursor"); e.preventDefault(); }
       if (k === " " || k === "enter" || k === "z") {
-        if (s.saveSelIdx < 3) { startFromSlot(s, s.saveSelIdx); }
-        else { s.saveSelect = false; s.title = true; }
+        if (s.saveSelIdx < 3) { sfx("select"); startFromSlot(s, s.saveSelIdx); }
+        else { sfx("cursor"); s.saveSelect = false; s.title = true; }
         e.preventDefault();
       }
       if (k === "escape") { s.saveSelect = false; s.title = true; }
