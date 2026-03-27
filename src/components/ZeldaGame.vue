@@ -505,8 +505,12 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   // Overworld enemy respawn timers
   if(s.respawnTimers){for(const rk2 in s.respawnTimers){s.respawnTimers[rk2]-=dt;
     if(s.respawnTimers[rk2]<=0){s.cl.delete(rk2);delete s.respawnTimers[rk2];}}}
-  // End screen cinematic — just advance timer
-  if(s.endScreen){s.endScreen.t+=dt;return;}
+  // End screen cinematic — advance timer, check for return to title
+  if(s.endScreen){s.endScreen.t+=dt;
+    if(s.endScreen.t>3000&&(kyR.value.has("tab")||kyR.value.has(" ")||kyR.value.has("enter")||kyR.value.has("r")||s.respawnClick)){
+      s.respawnClick=false;stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
+      const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;}
+    return;}
   // Final boss death cinematic — slow-mo death, hero celebration, fade to end
   if(s.finalDeath){const fd=s.finalDeath;fd.t+=dt*0.4;// slow-mo (40% speed)
     fd.flash=Math.sin(fd.t/80)*0.5+0.5;// boss flashing
