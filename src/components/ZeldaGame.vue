@@ -2443,13 +2443,8 @@ onMounted(() => {
   const doUnlock = () => { if (unlocked) return; unlocked = true; Tone.start().then(() => { initSfx(); initAu();
     // Apply saved volume level
     const s = stR.value; if(s)applyVolume(s.volume);
-    // Force music to start now that audio is unlocked
-    if (!s || !muOn.value) return;
-    const th = (s.title||s.saveSelect) ? "title" : s.triMu ? "triforce" : s.bossFight ? "guardian" : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? "forest" : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
-    stopMu(); if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
-    ltRef.value = th;
-    if (customMu.value[th]) { const a = new Audio(customMu.value[th]); a.loop = true; a.volume = (stR.value?.volume??80)/100; a.play().then(() => { customAuRef.value = a; }).catch(() => { ltRef.value = null; }); }
-    else { playTh(th); }
+    // Reset ltRef so the music watcher picks up the correct theme on its next tick
+    ltRef.value = null;
   }); };
   const kd = e => {
     kyR.value.add(e.key.toLowerCase());
