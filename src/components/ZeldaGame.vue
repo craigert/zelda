@@ -593,7 +593,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   // Shop ground items — player walks over to buy
   if(s.shopGround){const p=s.p;
     for(const si of s.shopGround){
-      if(si.collected)continue;if(si.once&&s[si.once]){si.collected=true;continue;}
+      if(si.once&&s[si.once]){si.collected=true;continue;}
+      // Consumables (no once flag) respawn after 2s
+      if(si.collected&&!si.once){si._respawn=(si._respawn||0)+dt;if(si._respawn>=2000){si.collected=false;si._respawn=0;}else continue;}
+      if(si.collected)continue;
       if(si._cd>0){si._cd-=dt;continue;}
       const cx=si.tx*TL,cy=si.ty*TL;
       if(p.x<cx+TL&&p.x+PS>cx&&p.y<cy+TL&&p.y+PS>cy){
