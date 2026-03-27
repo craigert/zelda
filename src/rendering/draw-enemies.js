@@ -278,3 +278,40 @@ export function dWm(c,x,y,sz,fl,t){
   c.fillStyle=fl?"#fff":"#a040ff";c.beginPath();c.arc(x+sz*0.4,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
   c.beginPath();c.arc(x+sz*0.6,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
 }
+export function dYt(c,x,y,sz,fl,t){
+  // Shadow
+  c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(x+sz/2,y+sz-2,sz/2,4,0,0,Math.PI*2);c.fill();
+  // Large furry body
+  const sway=Math.sin(t/500)*1.5;
+  const bg=c.createRadialGradient(x+sz*.4,y+sz*.3,2,x+sz/2,y+sz*.45,sz*.4);
+  bg.addColorStop(0,fl?"#fff":"#e8e8f0");bg.addColorStop(1,fl?"#ddd":"#b0b8c8");
+  c.fillStyle=bg;c.beginPath();c.ellipse(x+sz/2,y+sz*.45,sz*.38,sz*.4,0,0,Math.PI*2);c.fill();
+  // Fur texture
+  if(!fl){c.strokeStyle="rgba(160,170,190,0.5)";c.lineWidth=0.8;
+    for(let i=0;i<6;i++){const fx=x+sz*0.25+i*sz*0.1,fy=y+sz*0.25+Math.sin(i+t/300)*2;
+      c.beginPath();c.moveTo(fx,fy);c.lineTo(fx+sway,fy+sz*0.15);c.stroke();}}
+  // Arms
+  c.fillStyle=fl?"#ddd":"#c0c8d8";
+  c.beginPath();c.ellipse(x+sz*0.15+sway,y+sz*0.5,sz*0.1,sz*0.2,0.3,0,Math.PI*2);c.fill();
+  c.beginPath();c.ellipse(x+sz*0.85-sway,y+sz*0.5,sz*0.1,sz*0.2,-0.3,0,Math.PI*2);c.fill();
+  // Head
+  const hg=c.createRadialGradient(x+sz*.45,y+sz*.1,1,x+sz/2,y+sz*.15,sz*.2);
+  hg.addColorStop(0,fl?"#fff":"#e0e4f0");hg.addColorStop(1,fl?"#eee":"#b8c0d0");
+  c.fillStyle=hg;c.beginPath();c.arc(x+sz/2,y+sz*.15,sz*.2,0,Math.PI*2);c.fill();
+  // Horns
+  if(!fl){c.fillStyle="#8890a0";
+    c.beginPath();c.moveTo(x+sz*0.32,y+sz*0.05);c.lineTo(x+sz*0.25,y-sz*0.08);c.lineTo(x+sz*0.38,y+sz*0.08);c.fill();
+    c.beginPath();c.moveTo(x+sz*0.68,y+sz*0.05);c.lineTo(x+sz*0.75,y-sz*0.08);c.lineTo(x+sz*0.62,y+sz*0.08);c.fill();}
+  // Eyes — glowing blue
+  if(!fl){c.fillStyle="#4488ff";c.beginPath();c.arc(x+sz*0.4,y+sz*0.14,2,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(x+sz*0.6,y+sz*0.14,2,0,Math.PI*2);c.fill();
+    c.fillStyle="#88ccff";c.beginPath();c.arc(x+sz*0.4,y+sz*0.13,1,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(x+sz*0.6,y+sz*0.13,1,0,Math.PI*2);c.fill();}
+  // Mouth
+  if(!fl){c.strokeStyle="#6a7080";c.lineWidth=1;c.beginPath();c.arc(x+sz/2,y+sz*0.22,3,0.2,Math.PI-0.2);c.stroke();}
+  // Ice crystals (showing it's an ice creature)
+  const sparkle=Math.sin(t/200)*0.4+0.6;
+  c.fillStyle=`rgba(150,200,255,${sparkle*0.4})`;
+  c.beginPath();c.arc(x+sz*0.2,y+sz*0.3,2,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*0.8,y+sz*0.35,1.5,0,Math.PI*2);c.fill();
+}

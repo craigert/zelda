@@ -112,8 +112,6 @@ export const OW={
   // Scattered rocks elsewhere to make the area feel naturally rocky
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[5][3]=T.ROCK;m[5][12]=T.ROCK;
   m[9][3]=T.ROCK;m[9][12]=T.ROCK;
-  // Hidden banana cave entrance
-  m[9][13]=T.CRACK;
   oe(m,"W");oe(m,"E");oe(m,"S");return m;})(),
 
 // Snowy highland approach
@@ -150,6 +148,8 @@ export const OW={
   m[8][12]=T.HEART_PIECE;
   m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
   m[9][7]=T.STUMP;m[3][7]=T.STUMP;
+  // Banana cave — bombable ice wall, guarded by yetis inside
+  m[8][4]=T.CRACK;m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[9][4]=T.ROCK;m[9][5]=T.ROCK;
   oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
 
 // ===== ROW y=0 (Main upper row) =====

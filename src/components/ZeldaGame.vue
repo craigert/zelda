@@ -68,7 +68,7 @@ import { initSfx, sfx } from '../audio/sfx.js';
 import { dc, hs } from '../utils/helpers.js';
 import { dP } from '../rendering/draw-player.js';
 import { dSw } from '../rendering/draw-sword.js';
-import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf } from '../rendering/draw-enemies.js';
+import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf, dYt } from '../rendering/draw-enemies.js';
 import { dH } from '../rendering/draw-hud.js';
 import { dT } from '../rendering/draw-tiles.js';
 import { drawTerrainOverlay } from '../rendering/draw-terrain.js';
@@ -1222,6 +1222,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#aaf"})));
             s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"BLOCK",c:"#88f"});
             continue;}}
+        // Yetis are immune to sword — only arrows damage them
+        if(e.type==="yeti"){e.fl=200;sfx("door");
+          s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#8cf"})));
+          s.dmgNums.push({x:ecx,y:ecy-8,t:800,val:"USE BOW",c:"#8af"});
+          continue;}
         const sdmg=p.hasMasterSword?2:1;e.hp-=sdmg;e.fl=300;const kb=isBossLike?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
         sfx("hit",e.type==="boss"?"E2":"C3");
         s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:sdmg,c:p.hasMasterSword?"#8af":e.type==="boss"?"#ff4":"#fff"});
@@ -1920,6 +1925,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       else if(e.type==="knight")dKn(c,ex,ey,sz,false,t);
       else if(e.type==="magma_slug")dMs(c,ex,ey,sz,false,t);
       else if(e.type==="wallmaster")dWm(c,ex,ey,sz,false,t);
+      else if(e.type==="yeti")dYt(c,ex,ey,sz,false,t);
       else dSk(c,ex,ey,sz,false,t);
       c.globalAlpha=1;c.restore();continue;}
     const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
@@ -1949,6 +1955,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="wallmaster")dWm(c,ex,ey,sz,fl,t);
     else if(e.type==="vine_creeper")dVc(c,ex,ey,sz,fl,t);
     else if(e.type==="stalfos")dSf(c,ex,ey,sz,fl,t);
+    else if(e.type==="yeti")dYt(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw push block slide animation
   if(s.pushAnim){const pa=s.pushAnim,pr=Math.min(1,pa.t/pa.dur);
