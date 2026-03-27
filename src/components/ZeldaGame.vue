@@ -445,7 +445,7 @@ function cTr(s){const p=s.p,loc=s.loc;
         const owm=OW[loc.scr];
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
-            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=(RO-2)*TL;s.ec=500;le(s);
+            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=(RO-3)*TL;s.ec=500;le(s);
             if(cv.shop){s.shopVisited=true;
               s.shopGround=[
                 {tx:3,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
