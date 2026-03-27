@@ -398,8 +398,8 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     // Small floor island in the abyss — only reachable from passage stairs
     m[5][2]=T.FLOOR;m[5][3]=T.FLOOR;m[6][2]=T.FLOOR;m[6][3]=T.FLOOR;
     m[4][2]=T.FLOOR;m[4][3]=T.FLOOR;
-    // The key and passage arrival on the island
-    m[5][3]=T.KEY;m[6][2]=T.STAIRS_DOWN;
+    // Master key and passage arrival on the island
+    m[5][3]=T.MASTER_KEY;m[6][2]=T.STAIRS_DOWN;
     // Torches on the island (only light source in the dark room)
     m[4][2]=T.TORCH;m[4][3]=T.TORCH;
     // Spike border along the east walkway
@@ -455,13 +455,13 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[9][7]=T.KEY;
   }),enemies:[{x:7*TL,y:3*TL,hp:5,type:"ghost"},{x:3*TL,y:6*TL,hp:5,type:"knight"},{x:12*TL,y:8*TL,hp:4,type:"ghost"}]},
 
-  // Master key room — spike gauntlet with ghost guards (west of -1,-2)
+  // Spike gauntlet with ghost guards — key reward (west of -1,-2)
   "-2,-2":{tiles:mr(m=>{ae(m,["E"]);
     for(let x=3;x<=12;x++){m[3][x]=T.SPIKE;m[8][x]=T.SPIKE;}
     m[5][5]=T.SPIKE;m[5][10]=T.SPIKE;m[6][5]=T.SPIKE;m[6][10]=T.SPIKE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[4][4]=T.TORCH;m[4][11]=T.TORCH;
     m[7][4]=T.TORCH;m[7][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:7*TL,y:7*TL,hp:5,type:"ghost"}],reward:"master_key"},
+  }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:7*TL,y:7*TL,hp:5,type:"ghost"}]},
 
   // Deep north — ice room
   "0,-3":{tiles:mr(m=>{ae(m,["S","W"]);
