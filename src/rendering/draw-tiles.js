@@ -1315,6 +1315,22 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.beginPath();c.arc(px+10+sp3,py+10,1.5,0,Math.PI*2);c.fill();
       c.beginPath();c.arc(px+22-sp3,py+14,1,0,Math.PI*2);c.fill();
       break;}
+    case T.JAR:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      // Magical glow
+      const jg=Math.sin(t/300)*.15+.25;c.fillStyle=`rgba(100,200,255,${jg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      // Jar body — rounded pot shape
+      c.fillStyle="#6a9abc";c.beginPath();c.moveTo(px+10,py+10);c.quadraticCurveTo(px+8,py+20,px+10,py+24);c.lineTo(px+22,py+24);c.quadraticCurveTo(px+24,py+20,px+22,py+10);c.closePath();c.fill();
+      // Jar highlight
+      c.fillStyle="#8ac4e8";c.beginPath();c.moveTo(px+11,py+12);c.quadraticCurveTo(px+10,py+18,px+12,py+22);c.lineTo(px+16,py+22);c.quadraticCurveTo(px+14,py+18,px+14,py+12);c.closePath();c.fill();
+      // Rim
+      c.fillStyle="#4a7a9a";c.fillRect(px+9,py+9,14,3);
+      // Cork/lid
+      c.fillStyle="#8a6a30";c.fillRect(px+11,py+7,10,3);
+      // Water shimmer inside
+      const ws=Math.sin(t/200)*0.3+0.3;c.fillStyle=`rgba(100,220,255,${ws})`;c.beginPath();c.arc(px+16,py+18,4,0,Math.PI*2);c.fill();
+      // Sparkle
+      const js=Math.sin(t/180)*2;c.fillStyle="#fff";c.beginPath();c.arc(px+12+js,py+12,1.2,0,Math.PI*2);c.fill();
+      break;}
     case T.LADDER:{// Ladder — climbable tile to get back up ledges
       // Sunken floor underneath
       const ldc=iD?(dg.fc||dg.color):"#1a2a16";

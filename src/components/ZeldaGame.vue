@@ -122,7 +122,7 @@ function init() {
     iceSlide:{active:false,dx:0,dy:0},
     npcTalk:null,npcState:[],
     shop:null, // active shop menu
-    hasLantern:false,hasShieldUp:false, // shop upgrades
+    hasLantern:false,hasShieldUp:false,hasJar:false,springWater:0, // shop upgrades + jar
     pArrows:[],
     chest:null,
     slide:{a:false,dx:0,dy:0,t:0,dur:200,prevScr:null},
@@ -231,7 +231,7 @@ function saveGame(s) {
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
-      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp,
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater,
       bossWarps: s.bossWarps||[]
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
@@ -255,7 +255,7 @@ function applySave(s, save) {
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.heartContainers = [...save.heartContainers];
-  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false;
+  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if (s.finalOpen) {
@@ -391,6 +391,8 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
     else if(tl===T.BOMB_BAG){s.pk.add(pk);p.hasBombs=true;p.bombs+=5;sfx("triforce");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
+    else if(tl===T.JAR){s.pk.add(pk);s.hasJar=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Magic Jar! Carry spring water to heal!",t:3000};
+      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#8af":"#4cf"})));}
     else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
@@ -543,7 +545,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.go||s.won){if(kyR.value.has("r")||s.respawnClick){s.respawnClick=false;
     if(s.won){stR.value=init();stR.value.title=false;le(stR.value);return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}
@@ -852,6 +854,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(p.burn>0){p.burn=0;s.msg={text:"The water cools your burns...",t:1200};}
       if(p.poison>0){p.poison=0;s.msg={text:"The water cleanses the poison...",t:1200};}
       if(p.freeze>0){p.freeze=0;s.msg={text:"The warm water thaws you...",t:1200};}
+      // Fill jar with spring water
+      if(s.hasJar&&s.springWater<3){s.springWater=3;s.msg={text:"Jar filled with spring water!",t:1500};}
     }else{s._hotSpringT=0;}}
   if(moved&&Math.random()<0.15){const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO){const ft=m2[pty][ptx];
@@ -1594,7 +1598,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=iD&&dg?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
       for(let y2=0;y2<RO;y2++)for(let x2=0;x2<CO;x2++){let tl2=oldM[y2]?oldM[y2][x2]:T.EMPTY;
         const opk=`${loc.ty}:${loc.di}:${sl.prevScr}:${x2},${y2}`;
-        if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
+        if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD||tl2===T.JAR)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
         if((tl2===T.DOOR||tl2===T.BOSS_DOOR)&&s.dr.has(opk))tl2=T.FLOOR;
         dT(c,tl2,x2*TL,y2*TL,iD,dg,t,null);}
       c.restore();}
@@ -1712,7 +1716,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.fillStyle=iD?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
   if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
     const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
-    if((tl===T.KEY||tl===T.MASTER_KEY||tl===T.HEART||tl===T.HEART_PIECE||tl===T.TRIFORCE||tl===T.BOMB||tl===T.RUPEE||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.BANANA)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
+    if((tl===T.KEY||tl===T.MASTER_KEY||tl===T.HEART||tl===T.HEART_PIECE||tl===T.TRIFORCE||tl===T.BOMB||tl===T.RUPEE||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.BANANA||tl===T.JAR)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
     if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}

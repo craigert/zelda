@@ -235,6 +235,7 @@ export const OW={
   m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;
   m[2][7]=T.STUMP;m[9][8]=T.BUSH;
+  m[8][5]=T.CRACK;// Bombable wall hides jar cave
   oe(m,"W",T.SAND);oe(m,"S",T.SAND);oe(m,"N",T.SAND);return m;})(),
 
 // ===== ROW y=1 (Main middle row) =====
