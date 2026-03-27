@@ -1258,6 +1258,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           // Dark King — Ganon-like: teleport, spear throw, fast dash, sword block
           if(!e.phase)e.phase="stalk";if(!e.phaseT)e.phaseT=0;e.phaseT+=dt;
           if(!e.blocking)e.blocking=0;if(e.blocking>0)e.blocking-=dt;
+          if(!e.hitCount)e.hitCount=0;
+          // Force vanish after 2 hits
+          if(e.hitCount>=2&&e.phase!=="vanish"){e.phase="vanish";e.phaseT=0;e.hitCount=0;e.shadowForm=true;
+            s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:600,c:"#606"})));sfx("bomb");}
           // Phase machine
           if(e.phase==="stalk"){
             // Circle player menacingly, face them
@@ -1284,7 +1288,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
               const sa=Math.atan2(pcy-(e.y+ES/2),pcx-(e.x+ES/2));
               s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa)*3.5,dy:Math.sin(sa)*3.5,type:"shadow",l:1500});sfx("sword");}
             // Reappear after 3s
-            if(e.phaseT>3000){e.phase="dash";e.phaseT=0;e.shadowForm=false;
+            if(e.phaseT>3000){e.phase="dash";e.phaseT=0;e.shadowForm=false;e.hitCount=0;
               // Reappear with burst
               for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"shadow",l:800});}
               s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:500,c:"#f0f"})));sfx("bomb");}
@@ -1411,6 +1415,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.dmgNums.push({x:ecx,y:ecy-8,t:800,val:"USE BOW",c:"#8af"});
           continue;}
         const sdmg=p.hasMasterSword?2:1;e.hp-=sdmg;e.fl=300;const kb=isBossLike?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
+        if(e.type==="boss"&&e.pattern==="all"&&e.hitCount!==undefined)e.hitCount++;
         sfx("hit",e.type==="boss"?"E2":"C3");
         s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:sdmg,c:p.hasMasterSword?"#8af":e.type==="boss"?"#ff4":"#fff"});
         s.pt.push(...Array.from({length:p.hasMasterSword?8:5},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:p.hasMasterSword?"#8af":"#fff"})));}}
@@ -1490,6 +1495,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(shieldDiff<Math.PI*0.6){e.fl=200;sfx("door");s.pArrows.splice(i,1);
             s.pt.push(...Array.from({length:3},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#aaf"})));break;}}
         e.hp-=2;e.fl=300;sfx("hit");
+        if(e.type==="boss"&&e.pattern==="all"&&e.hitCount!==undefined)e.hitCount++;
         const kb=12,kba=Math.atan2(pa.dy,pa.dx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
         s.dmgNums.push({x:e.x+ES/2,y:e.y-8,t:600,val:2,c:"#fd3"});
         s.pt.push(...Array.from({length:5},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#fd3"})));
