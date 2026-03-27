@@ -1429,7 +1429,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.di>=0&&s.loc.di<3&&!p.tri[s.loc.di]){
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
-        if(s.loc.di===3){s.finalDeath={t:0,dur:5000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
+        if(s.loc.di===3){s.triMu=true;s.finalDeath={t:0,dur:5000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
         // Spawn warp portal after boss death (delayed so drops land first)
         if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
           s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
