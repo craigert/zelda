@@ -3105,11 +3105,13 @@ watch([muOn, customMu], () => {
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
       ltRef.value = th;
       const gen = ++_muGen; // capture generation for async check
-      if (customMu.value[th]) {
-        const a = new Audio(customMu.value[th]); a.loop = true; a.volume = (stR.value?.volume??80)/100;
-        a.play().then(() => { if(_muGen===gen)customAuRef.value = a; else a.pause(); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
+      const tryMp3 = customMu.value[th];
+      const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
+      if (tryMp3) {
+        const a = new Audio(tryMp3); a.loop = true; a.volume = (stR.value?.volume??80)/100;
+        a.play().then(() => { if(_muGen===gen)customAuRef.value = a; else a.pause(); }).catch(() => { if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
       } else {
-        Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; });
+        playSynth();
       }
     }
   };
