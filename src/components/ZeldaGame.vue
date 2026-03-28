@@ -3145,30 +3145,30 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=bg;c.beginPath();c.moveTo(hx-7,hy+9);c.lineTo(hx+7,hy+9);c.lineTo(hx+8,hy+18);c.lineTo(hx-8,hy+18);c.closePath();c.fill();
       // Belt
       c.fillStyle="#8a6a2a";c.fillRect(hx-8,hy+15,16,2);c.fillStyle="#d4b040";c.fillRect(hx-2,hy+15,4,2);
-      // Left arm — raised holding sword straight up
-      const armAng=-Math.PI/2*raise;// swings from side to straight up
-      c.save();c.translate(hx-5,hy+10);c.rotate(armAng);
-      c.fillStyle=tL;c.fillRect(-2,0,4,10);
-      c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
-      // Sword in hand — extends outward from fist
-      const sLen=20;
-      c.strokeStyle=p2.hasMasterSword?"#88ccff":"#c0d8ff";c.lineWidth=3;c.lineCap="round";
-      c.beginPath();c.moveTo(0,11);c.lineTo(0,11+sLen);c.stroke();
-      // Blade shine
-      c.strokeStyle="rgba(255,255,255,0.5)";c.lineWidth=1.5;
-      c.beginPath();c.moveTo(0.5,13);c.lineTo(0.5,11+sLen-2);c.stroke();
-      // Crossguard
-      c.strokeStyle="#d4b040";c.lineWidth=2.5;
-      c.beginPath();c.moveTo(-5,11);c.lineTo(5,11);c.stroke();
-      // Glow at tip
-      const gl=Math.sin(t/200)*0.3+0.7;
-      c.fillStyle=`rgba(200,220,255,${gl*0.5*raise})`;c.beginPath();c.arc(0,11+sLen,8*raise,0,Math.PI*2);c.fill();
-      c.lineCap="butt";c.restore();
-      // Right arm — raised in fist
-      c.save();c.translate(hx+5,hy+10);c.rotate(Math.PI/2*raise);
-      c.fillStyle=tL;c.fillRect(-2,0,4,10);
-      c.fillStyle="#f0c8a0";c.beginPath();c.arc(0,10,2.5,0,Math.PI*2);c.fill();
-      c.restore();
+      // Arms and sword — interpolate from resting at sides to raised straight up
+      const armLen=10,handY=hy+10+armLen*(1-raise)-raise*20;// hand goes from hy+20 (side) to hy-10 (above head)
+      const armTopY=hy+10;// shoulder stays fixed
+      // Left arm + sword
+      c.fillStyle=tL;c.fillRect(hx-6,Math.min(armTopY,handY),4,Math.abs(handY-armTopY));
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx-4,handY,2.5,0,Math.PI*2);c.fill();
+      // Sword pointing straight up from left hand
+      const sLen=22;const swordTip=handY-sLen*raise;
+      if(raise>0.1){
+        c.strokeStyle=p2.hasMasterSword?"#88ccff":"#c0d8ff";c.lineWidth=3;c.lineCap="round";
+        c.beginPath();c.moveTo(hx-4,handY);c.lineTo(hx-4,swordTip);c.stroke();
+        // Blade shine
+        c.strokeStyle="rgba(255,255,255,0.5)";c.lineWidth=1.5;
+        c.beginPath();c.moveTo(hx-3.5,handY-2);c.lineTo(hx-3.5,swordTip+2);c.stroke();
+        // Crossguard
+        c.strokeStyle="#d4b040";c.lineWidth=2.5;
+        c.beginPath();c.moveTo(hx-9,handY);c.lineTo(hx+1,handY);c.stroke();
+        // Glow at tip
+        const gl=Math.sin(t/200)*0.3+0.7;
+        c.fillStyle=`rgba(200,220,255,${gl*0.6*raise})`;c.beginPath();c.arc(hx-4,swordTip,8*raise,0,Math.PI*2);c.fill();
+        c.lineCap="butt";}
+      // Right arm — raised fist
+      c.fillStyle=tL;c.fillRect(hx+2,Math.min(armTopY,handY),4,Math.abs(handY-armTopY));
+      c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+4,handY,2.5,0,Math.PI*2);c.fill();
       // Head
       c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx,hy+5,6,0,Math.PI*2);c.fill();
       // Hair
