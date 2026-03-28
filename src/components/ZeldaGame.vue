@@ -323,9 +323,9 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];
   // Trigger Dark Sanctum reveal when entering screen 3,2 for the first time
   if(s.loc.ty==="ow"&&s.loc.scr==="3,2"&&s.finalOpen&&!s.sanctumRevealed){
-    s.sanctumRevealed=true;s.sanctumReveal={t:-1000,dur:5000};s.freeze=6000;
+    s.sanctumRevealed=true;s.sanctumReveal={t:-2000,dur:5000};s.freeze=7000;
     // Make NPCs panic after delay
-    for(const ns of s.npcState){ns.panic=true;ns.panicDelay=1000;}}
+    for(const ns of s.npcState){ns.panic=true;ns.panicDelay=2000;}}
   // Always load blade traps for dungeons (even if room is cleared)
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
