@@ -338,6 +338,13 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
         const alreadyTF=s.drops.some(d2=>d2.type==="triforce");
         if(!s.heartContainers.includes(bossId)&&!alreadyHC)s.drops.push({x:cx-20,y:cy,vy:0,ground:cy,type:"heartcontainer",t:0,spin:0,bossId});
         if(!s.p.tri[di2]&&!alreadyTF)s.drops.push({x:cx+20,y:cy,vy:0,ground:cy,type:"triforce",t:0,spin:0});}}
+    // Re-spawn reward chest if room had one and it wasn't collected
+    if(s.loc.ty==="dg"){const rm2c=s.dg[s.loc.di]?.rooms[s.loc.scr];
+      const reward2=rm2c?.reward||null;const m2c=gm(s);
+      const hasTreasure2=reward2||m2c&&m2c.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART_PIECE));
+      if(hasTreasure2){// Check if reward was already collected (item picked up from this room)
+        const rewardPicked=reward2==="bow"?s.p.hasBow:reward2==="bomb_bag"?s.p.hasBombs:reward2==="master_sword"?s.p.hasMasterSword:reward2==="master_key"?s.p.masterKey[s.loc.di]:false;
+        if(!rewardPicked){s.chest={x:W2/2-12,y:H2/2-12,state:"closed",t:0,reward:reward2||(Math.random()<0.5?"heart":"rupee_blue")};}}}
     return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
