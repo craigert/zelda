@@ -103,10 +103,9 @@ export const OW={
   m[7][6]=T.ROCK;m[7][7]=T.PUSH;m[7][8]=T.PUSH;m[7][9]=T.ROCK;
   // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
-  // Boulder field below — pushable one sits just below, not surrounded
-  m[8][6]=T.ROCK;m[8][9]=T.ROCK;m[8][10]=T.ROCK;
+  // Boulder field below — space for pushing ring boulders south
+  m[8][6]=T.ROCK;m[8][10]=T.ROCK;
   m[9][5]=T.ROCK;m[9][6]=T.ROCK;m[9][9]=T.ROCK;m[9][10]=T.ROCK;
-  m[8][8]=T.PUSH;// next to boulders, push south
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
   // Scattered rocks elsewhere to make the area feel naturally rocky
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[5][3]=T.ROCK;m[5][12]=T.ROCK;
