@@ -353,13 +353,16 @@ function drawSecretsRow(c,s,t){
 }
 
 function countSecrets(s){
-  let found=0,total=7;
-  // 4 heart pieces in the overworld
-  if(s.p.heartPieces>=1)found++;if(s.p.heartPieces>=2)found++;if(s.p.heartPieces>=3)found++;if(s.p.heartPieces>=4)found++;
-  // 3 special discoveries: banana, shop, magic jar
-  if(s.p.hasBanana||s.p.redArmor)found++;// found banana (or already traded it for armor)
-  if(s.shopVisited)found++;// found the shop
-  if(s.hasJar)found++;// magic jar cave
+  let found=0;const total=10;
+  // 8 heart pieces: base mhp=8, bosses add 2 each (tracked in heartContainers), pieces add 2 per 4 collected
+  const bossContainers=(s.heartContainers||[]).length;
+  const pieceContainers=Math.max(0,(s.p.mhp-8)/2-bossContainers);
+  const hpFound=pieceContainers*4+s.p.heartPieces;
+  found+=Math.min(8,hpFound);
+  // Banana (or already traded for red armor)
+  if(s.p.hasBanana||s.p.redArmor)found++;
+  // Master Sword
+  if(s.p.hasMasterSword)found++;
   return{found,total};
 }
 
