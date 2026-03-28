@@ -122,7 +122,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;
     m[5][6]=T.SPIKE;m[5][9]=T.SPIKE;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][4]=T.TORCH;m[2][11]=T.TORCH;
-  }),enemies:[{x:7*TL,y:6*TL,hp:8,type:"miniboss",name:"Vine Guardian"},{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:4*TL,hp:2,type:"bat"}],reward:"bow"},
+  }),enemies:[{x:7*TL,y:6*TL,hp:12,type:"miniboss",name:"Vine Guardian"},{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:4*TL,hp:2,type:"bat"}],reward:"bow"},
 
   // North chamber — key guarded by enemies
   "0,-3":{tiles:mr(m=>{ae(m,["S","NB","E"]);
@@ -278,7 +278,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[4][6]=T.SPIKE;m[4][9]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;
     m[2][4]=T.TORCH;m[2][11]=T.TORCH;m[9][4]=T.TORCH;m[9][11]=T.TORCH;
     m[3][7]=T.RUPEE;m[8][7]=T.RUPEE;m[3][8]=T.RUPEE;m[8][8]=T.RUPEE;
-  }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:10,type:"miniboss",name:"Flame Sentinel"}],reward:"bomb_bag"},
+  }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:14,type:"miniboss",name:"Flame Sentinel"}],reward:"bomb_bag"},
 
   // East of lava crossing — timed switch opens doors to treasure across ice
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);
@@ -445,7 +445,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[4][5]=T.PIT;m[4][10]=T.PIT;m[7][5]=T.PIT;m[7][10]=T.PIT;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;
-  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:12,type:"miniboss",name:"Shadow Knight"}],reward:"master_sword"},
+  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:16,type:"miniboss",name:"Shadow Knight"}],reward:"master_sword"},
 
   // West of depth — spike+ghost gauntlet leading to master key
   "-1,-2":{tiles:mr(m=>{ae(m,["E","W"]);

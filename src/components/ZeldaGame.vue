@@ -1120,7 +1120,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
         else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
         s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
-      else if(d2.type==="bone"){p.hasBone=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got a Bone! The dog might like this...",t:3000};
+      else if(d2.type==="bone"){p.hasBone=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got a Bone! I wonder if this has any use?",t:3000};
         s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ddd":"#aa9070"})));}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+10",c:"#a4f"});}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+20",c:"#f44"});}
@@ -1287,10 +1287,27 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
     if(e.st==="chase"&&dist>loseRange&&!isBossLike&&!alwaysChase)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.2:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:1.0;
+    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.5:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:1.0;
     let moveX=0,moveY=0;
     if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
       if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
+      else if(e.type==="miniboss"){
+        // Miniboss: alternates between circling, charging, and projectile attacks
+        const mbPhase=Math.floor(e.mt/2500)%3;
+        if(mbPhase===0){// Circle and throw projectiles
+          const ca=e.mt/500;moveX=Math.cos(ca)*es;moveY=Math.sin(ca)*es;
+          if(Math.floor(e.mt/1200)!==Math.floor((e.mt-dt)/1200)){
+            const pa2=Math.atan2(pcy-ecy,pcx-ecx);
+            const projType=s.loc.di===0?"root":s.loc.di===1?"fire":"shadow";
+            s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*3,dy:Math.sin(pa2)*3,type:projType,l:1200});sfx("bomb");}}
+        else if(mbPhase===1){// Fast charge at player
+          const bsp=es*2.5;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
+          s.pt.push({x:ecx+(Math.random()-.5)*6,y:ecy+(Math.random()-.5)*6,dx:-moveX*0.2,dy:-moveY*0.2,l:150,c:"#f88"});}
+        else{// Retreat + burst attack
+          moveX=-Math.cos(ang)*es*0.8;moveY=-Math.sin(ang)*es*0.8;
+          if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)){
+            for(let a=0;a<6;a++){const ra=a*Math.PI/3;const projType=s.loc.di===0?"root":s.loc.di===1?"fire":"shadow";
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:projType,l:1000});}sfx("bomb");}}}
       else if(e.type==="boss"){
         const ang2=Math.atan2(pcy-ecy,pcx-ecx);
         if(e.pattern==="charge"){const phase=Math.floor(e.mt/2000)%3;
