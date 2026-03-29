@@ -358,7 +358,10 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
     roomData2?.reward||roomData2?.lock||s.en.some(e=>e.type==="boss"||e.type==="miniboss"));
   if(isDg&&s.en.length>0){
     const boss=s.en.find(e=>e.type==="boss");
-    if(boss){s._pendingBoss={name:boss.name||"???",bx:boss.x+ES/2,by:boss.y+ES/2};s.bossFight=true;
+    const mini=!boss&&s.en.find(e=>e.type==="miniboss");
+    if(boss){s._pendingBoss={name:boss.name||"???",bx:boss.x+ES/2,by:boss.y+ES/2,isMini:false};s.bossFight=true;
+      ltRef.value=null;}
+    else if(mini){s._pendingBoss={name:mini.name||"???",bx:mini.x+ES/2,by:mini.y+ES/2,isMini:true};s.bossFight=true;
       ltRef.value=null;}
   }
 }
@@ -408,7 +411,8 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
       for(const[px2,py2]of pairs){if(px2>=0&&px2<CO&&py2>=0&&py2<RO&&m[py2][px2]===tl){
         s.dr.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${px2},${py2}`);
         s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:tl===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
-    if(tl===T.BOSS_DOOR){if(s.p.masterKey[s.loc.di]){s.dr.add(dk);openPair(tx,ty);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
+    if(tl===T.BOSS_DOOR){if(s.bossFight){s.msg={text:"The door won't budge during battle!",t:1500};return true;}
+      if(s.p.masterKey[s.loc.di]){s.dr.add(dk);openPair(tx,ty);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
       s.pt.push(...Array.from({length:12},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));return false;}
       s.msg={text:"Locked! Find the Master Key...",t:1500};return true;}
     if(s.p.keys>0){s.p.keys--;s.dr.add(dk);openPair(tx,ty);s.msg={text:"Door opened!",t:1500};sfx("door");
@@ -558,7 +562,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     return;}
   // Deferred boss intro — trigger if no slide was active (e.g. entering via fade/stairs)
   if(s._pendingBoss&&!s.slide.a){const pb=s._pendingBoss;s._pendingBoss=null;
-    s.bossIntro={name:pb.name,t:0,dur:3000,bx:pb.bx,by:pb.by};sfx("bossdeath");}
+    s.bossIntro={name:pb.name,t:0,dur:pb.isMini?2000:3000,bx:pb.bx,by:pb.by,isMini:pb.isMini};sfx("bossdeath");}
   // Boss intro sequence -- freeze gameplay, animate camera
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
@@ -908,7 +912,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.dr.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${px2},${py2}`);
             s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:ft===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
         if(!s.dr.has(dk)){
-          if(ft===T.BOSS_DOOR){if(p.masterKey[s.loc.di]){s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Master key used! Boss door opened!",t:1500};
+          if(ft===T.BOSS_DOOR){if(s.bossFight){s.msg={text:"The door won't budge during battle!",t:1500};}
+            else if(p.masterKey[s.loc.di]){s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Master key used! Boss door opened!",t:1500};
             s.pt.push(...Array.from({length:12},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));}
             else{s.msg={text:"Locked! Find the Master Key...",t:1500};}}
           else if(p.keys>0){p.keys--;s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Door opened!",t:1500};
@@ -1548,7 +1553,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         // Spawn warp portal after boss death (delayed so drops land first)
         if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
           s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
-      }else if(e.type==="miniboss"){sfx("bossdeath");s.shake.t=400;s.freeze=300;
+      }else if(e.type==="miniboss"){sfx("bossdeath");s.shake.t=400;s.freeze=300;s.bossFight=false;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0});
         s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
       }else{sfx("kill");
@@ -2988,7 +2993,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle="#fd3";c.fillText(bi.name.toUpperCase(),W2/2,FH2/2);
       // Subtitle
       c.fillStyle="#c88";c.font="bold 11px monospace";
-      c.fillText("- DUNGEON BOSS -",W2/2,FH2/2+18);
+      c.fillText(bi.isMini?"- MINI-BOSS -":"- DUNGEON BOSS -",W2/2,FH2/2+18);
       // Decorative lines
       const lw2=c.measureText(bi.name.toUpperCase()).width+30;
       c.strokeStyle=`rgba(253,211,51,${ta*0.5})`;c.lineWidth=1;
