@@ -1190,7 +1190,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     for(const w of s.bossWarps){if(w.di!==di)continue;
       let wx=-1,wy=-1,destScr=null;
       if(scr===w.bossScr){wx=w.bossX;wy=w.bossY;destScr=w.entryScr;}
-      else if(scr===w.entryScr){wx=7;wy=5;destScr=w.bossScr;} // portal at center of entry room
+      else if(scr===w.entryScr){wx=7;wy=9;destScr=w.bossScr;} // portal near stairs in entry room
       if(wx>=0&&destScr&&p.x+PS/2>wx*TL&&p.x+PS/2<(wx+1)*TL&&p.y+PS/2>wy*TL&&p.y+PS/2<(wy+1)*TL){
         s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
           s.loc.scr=destScr;
@@ -2679,7 +2679,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     for(const w of s.bossWarps){if(w.di!==s.loc.di)continue;
       let pwx=-1,pwy=-1;
       if(s.loc.scr===w.bossScr){pwx=w.bossX;pwy=w.bossY;}
-      else if(s.loc.scr===w.entryScr){pwx=7;pwy=5;}
+      else if(s.loc.scr===w.entryScr){pwx=7;pwy=9;}
       if(pwx>=0){const wx2=pwx*TL+16,wy2=pwy*TL+16;
         const pulse2=Math.sin(s.gt/200)*0.2+0.8;const spin2=s.gt/500;
         const wg2=c.createRadialGradient(wx2,wy2,4,wx2,wy2,18);
