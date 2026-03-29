@@ -98,7 +98,7 @@ function init() {
   return {
     p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false,hasBone:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
-    en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),// bc = bombed cracks, mb = moved boulders "scr:fx,fy:tx,ty:reveal"
+    en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),co:new Set(),// bc = bombed cracks, mb = moved boulders, co = chests opened
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
     title:true,saveSelect:false,saveSelIdx:0,
     fade:{a:false,alpha:0,dir:1,cb:null,t:0},
@@ -233,7 +233,7 @@ function saveGame(s) {
       pk: [...s.pk],
       dr: [...s.dr],
       cl: [...s.cl].filter(k=>!k.startsWith("ow:")),
-      bc: [...(s.bc||[])],mb: [...(s.mb||[])],
+      bc: [...(s.bc||[])],mb: [...(s.mb||[])],co: [...(s.co||[])],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
@@ -261,7 +261,7 @@ function applySave(s, save) {
   s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
-  s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);
+  s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);s.co = new Set(save.co||[]);
   s.heartContainers = [...save.heartContainers];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false;
   s.respawn = { ...save.respawn };
@@ -338,13 +338,12 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
         const alreadyTF=s.drops.some(d2=>d2.type==="triforce");
         if(!s.heartContainers.includes(bossId)&&!alreadyHC)s.drops.push({x:cx-20,y:cy,vy:0,ground:cy,type:"heartcontainer",t:0,spin:0,bossId});
         if(!s.p.tri[di2]&&!alreadyTF)s.drops.push({x:cx+20,y:cy,vy:0,ground:cy,type:"triforce",t:0,spin:0});}}
-    // Re-spawn reward chest if room had one and it wasn't collected
-    if(s.loc.ty==="dg"){const rm2c=s.dg[s.loc.di]?.rooms[s.loc.scr];
+    // Re-spawn reward chest if room had one and it wasn't opened yet
+    const chk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
+    if(s.loc.ty==="dg"&&!s.co.has(chk)){const rm2c=s.dg[s.loc.di]?.rooms[s.loc.scr];
       const reward2=rm2c?.reward||null;const m2c=gm(s);
       const hasTreasure2=reward2||m2c&&m2c.some(row=>row.some(tl=>tl===T.KEY||tl===T.HEART_PIECE));
-      if(hasTreasure2){// Check if reward was already collected (item picked up from this room)
-        const rewardPicked=reward2==="bow"?s.p.hasBow:reward2==="bomb_bag"?s.p.hasBombs:reward2==="master_sword"?s.p.hasMasterSword:reward2==="master_key"?s.p.masterKey[s.loc.di]:false;
-        if(!rewardPicked){s.chest={x:W2/2-12,y:H2/2-12,state:"closed",t:0,reward:reward2||(Math.random()<0.5?"heart":"rupee_blue")};}}}
+      if(hasTreasure2){s.chest={x:W2/2-12,y:H2/2-12,state:"closed",t:0,reward:reward2||(Math.random()<0.5?"heart":"rupee_blue")};}}
     return;}
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
@@ -1204,6 +1203,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       ch.near=Math.abs(cdx)<24&&Math.abs(cdy)<24;
       if(ch.near&&(ky.has(" ")||ky.has("enter")||ky.has("e")||ky.has("z"))){ch.state="opening";ch.t=0;sfx("door");s.shake.t=200;}}
     else if(ch.state==="opening"&&ch.t>=600){ch.state="presenting";ch.t=0;ch.itemY=0;sfx("door");
+      s.co.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`);
       s.pt.push(...Array.from({length:12},()=>({x:ch.x+12,y:ch.y+8,dx:(Math.random()-.5)*5,dy:-Math.random()*4-1,l:600,c:"#fd3"})));}
     else if(ch.state==="open"&&ch.t>2000)s.chest=null;}
   // Active bombs update
