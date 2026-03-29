@@ -1558,7 +1558,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
       }else{sfx("kill");
         // Skeletons drop a bone (if player doesn't have one yet)
-        if((e.type==="skeleton"||e.type==="stalfos"||e.type==="knight")&&!p.hasBone&&Math.random()<0.3){
+        if((e.type==="skeleton"||e.type==="stalfos"||e.type==="knight")&&!p.hasBone&&!s.dogDug&&Math.random()<0.3){
           s.drops.push({x:ecx,y:ecy-4,vy:-3,ground:ecy,type:"bone",t:0});}
         else{const dr2=Math.random();
         if(dr2<0.40){const dt2=Math.random();
