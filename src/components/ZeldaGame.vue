@@ -1225,7 +1225,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           const repl=isCave?T.ENTRANCE:T.FLOOR;
           mp2[cy2][cx2]=repl;
           s.bc.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${cx2},${cy2}:${repl}`);
-          s.msg={text:isCave?"A hidden cave!":(s.loc.ty==="dg"?"Bombed a wall! Secret passage!":"Secret passage!"),t:2000};}}
+          sfx("secret");s.shake.t=300;
+          s.msg={text:isCave?"A hidden cave!":(s.loc.ty==="dg"?"Bombed a wall! Secret passage!":"Secret passage!"),t:2000};
+          s.pt.push(...Array.from({length:10},()=>({x:cx2*TL+16,y:cy2*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#fa0":"#fd3"})));}}
       // Damage nearby enemies (3 tile radius)
       const blastR=TL*3;
       for(const e of s.en){const ed=Math.hypot(e.x+ES/2-b.x,e.y+ES/2-b.y);
