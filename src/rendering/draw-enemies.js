@@ -291,21 +291,41 @@ export function dMs(c,x,y,sz,fl,t){
 }
 // Wallmaster — giant shadow hand
 export function dWm(c,x,y,sz,fl,t){
-  const grab=Math.sin(t/200)*0.1;
-  c.fillStyle=fl?"#fff":"#2a1a3a";
-  // Palm
-  c.beginPath();c.ellipse(x+sz/2,y+sz*0.55,sz*0.35,sz*0.25,0,0,Math.PI*2);c.fill();
-  // Fingers
-  const fingers=[[0.2,0.15],[0.35,0.08],[0.5,0.05],[0.65,0.08],[0.8,0.15]];
-  for(const[fx,fy]of fingers){
-    c.fillStyle=fl?"#eee":"#3a2a4a";
-    c.beginPath();c.ellipse(x+sz*fx,y+sz*(fy+grab),sz*0.08,sz*0.18,0,0,Math.PI*2);c.fill();}
-  // Knuckle lines
-  if(!fl){c.strokeStyle="rgba(80,50,100,0.5)";c.lineWidth=1;
-    c.beginPath();c.moveTo(x+sz*0.25,y+sz*0.45);c.lineTo(x+sz*0.75,y+sz*0.45);c.stroke();}
-  // Glowing eyes in palm
-  c.fillStyle=fl?"#fff":"#a040ff";c.beginPath();c.arc(x+sz*0.4,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
-  c.beginPath();c.arc(x+sz*0.6,y+sz*0.55,2.5,0,Math.PI*2);c.fill();
+  const grab=Math.sin(t/200)*0.15;const breathe=Math.sin(t/400)*0.03;
+  // Shadow beneath
+  if(!fl){c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(x+sz/2,y+sz*0.85,sz*0.35,sz*0.08,0,0,Math.PI*2);c.fill();}
+  // Dark aura
+  if(!fl){const ag=c.createRadialGradient(x+sz/2,y+sz*0.5,sz*0.1,x+sz/2,y+sz*0.5,sz*0.5);
+    ag.addColorStop(0,"rgba(60,20,80,0)");ag.addColorStop(1,`rgba(40,10,60,${0.15+Math.sin(t/300)*0.05})`);
+    c.fillStyle=ag;c.fillRect(x-4,y-4,sz+8,sz+8);}
+  // Palm — gradient for depth
+  const pg=fl?null:c.createRadialGradient(x+sz*0.45,y+sz*0.45,sz*0.05,x+sz/2,y+sz*0.55,sz*0.3);
+  if(pg){pg.addColorStop(0,"#4a3a5a");pg.addColorStop(1,"#2a1a3a");}
+  c.fillStyle=fl?"#fff":(pg||"#2a1a3a");
+  c.beginPath();c.ellipse(x+sz/2,y+sz*(0.55+breathe),sz*(0.36+breathe),sz*0.26,0,0,Math.PI*2);c.fill();
+  // Fingers — each animated independently with curl
+  const fingers=[[0.15,0.18,0.4],[0.3,0.08,0.7],[0.5,0.03,1.0],[0.7,0.08,0.7],[0.85,0.18,0.4]];
+  for(let i=0;i<fingers.length;i++){const[fx,fy,curl]=fingers[i];
+    const fGrab=grab*curl;const fWave=Math.sin(t/250+i*0.8)*0.02*curl;
+    const fg=fl?null:c.createLinearGradient(x+sz*fx,y+sz*(fy+fGrab),x+sz*fx,y+sz*(fy+fGrab+0.22));
+    if(fg){fg.addColorStop(0,"#4a3a5a");fg.addColorStop(1,"#2a1a3a");}
+    c.fillStyle=fl?"#eee":(fg||"#3a2a4a");
+    // Finger segment 1 (base)
+    c.beginPath();c.ellipse(x+sz*(fx+fWave),y+sz*(fy+fGrab+0.08),sz*0.07,sz*0.1,0,0,Math.PI*2);c.fill();
+    // Finger segment 2 (tip)
+    c.beginPath();c.ellipse(x+sz*(fx+fWave*1.5),y+sz*(fy+fGrab-0.02),sz*0.06,sz*0.09,0,0,Math.PI*2);c.fill();
+    // Fingernail
+    if(!fl){c.fillStyle="#1a0a2a";c.beginPath();c.ellipse(x+sz*(fx+fWave*1.5),y+sz*(fy+fGrab-0.08),sz*0.04,sz*0.03,0,0,Math.PI*2);c.fill();}}
+  // Knuckle wrinkles
+  if(!fl){c.strokeStyle="rgba(80,50,100,0.4)";c.lineWidth=0.8;
+    c.beginPath();c.moveTo(x+sz*0.22,y+sz*0.42);c.quadraticCurveTo(x+sz*0.5,y+sz*0.38,x+sz*0.78,y+sz*0.42);c.stroke();
+    c.beginPath();c.moveTo(x+sz*0.28,y+sz*0.5);c.quadraticCurveTo(x+sz*0.5,y+sz*0.47,x+sz*0.72,y+sz*0.5);c.stroke();}
+  // Glowing eye in palm center
+  const eyeGlow=0.6+Math.sin(t/250)*0.3;
+  c.fillStyle=fl?"#fff":`rgba(160,64,255,${eyeGlow})`;
+  c.shadowColor="#a040ff";c.shadowBlur=fl?0:6;
+  c.beginPath();c.arc(x+sz*0.5,y+sz*0.52,3.5,0,Math.PI*2);c.fill();c.shadowBlur=0;
+  if(!fl){c.fillStyle="#d080ff";c.beginPath();c.arc(x+sz*0.5,y+sz*0.51,1.5,0,Math.PI*2);c.fill();}
 }
 export function dYt(c,x,y,sz,fl,t){
   // Shadow

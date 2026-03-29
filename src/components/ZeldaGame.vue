@@ -955,14 +955,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(s.loc.ty==="ow")s.freeze=pushDur;
         sfx("door");s.pt.push(...Array.from({length:4},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#aaa"})));
         if(wasPlate){s.shake.t=200;
-          // Check if room has stairsReveal (but not squarePuzzle — those handle it separately)
           const roomD3=s.loc.ty==="dg"?s.dg[s.loc.di]?.rooms[s.loc.scr]:null;
           if(roomD3?.squarePuzzle){sfx("pickup");}
-          else if(roomD3?.stairsReveal){const[srx,sry]=roomD3.stairsReveal;
-            m2[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.msg={text:"A stairway appeared!",t:2000};
-            s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
-          }else{sfx("pickup");s.msg={text:"A key appeared!",t:1500};
-            m2[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}
+          else{sfx("pickup");s.pushAnim.plateTriggered=true;}}// defer stairsReveal to after animation
       }}}}
   if(s.sw.a&&s.sw.t>SD*0.5){const m2=gm(s);if(m2&&!s.leverCd){
     const pcx=Math.floor((p.x+PS/2)/TL),pcy=Math.floor((p.y+PS/2)/TL);
@@ -997,6 +992,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.mb.add(`${bScr}:${pa.rx},${pa.ry}:${bTx},${bTy}:${pa.reveal}`);
         }
       }
+      // Deferred plate trigger — stairsReveal or key after push completes
+      if(pa.plateTriggered&&m3&&s.loc.ty==="dg"){const roomD6=s.dg[s.loc.di]?.rooms[s.loc.scr];
+        if(roomD6?.stairsReveal){const[srx,sry]=roomD6.stairsReveal;
+          m3[sry][srx]=T.STAIRS_DOWN;sfx("secret");s.shake.t=400;s.msg={text:"A stairway appeared!",t:2000};
+          s.pt.push(...Array.from({length:12},()=>({x:srx*TL+16,y:sry*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#fa0":"#fd3"})));
+        }else{sfx("pickup");s.msg={text:"A key appeared!",t:1500};
+          m3[5][7]=T.KEY;s.pt.push(...Array.from({length:8},()=>({x:7*TL+16,y:5*TL+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}}
       s.pushCd=false;s.pushAnim=null;
       // Square puzzle: check if all plate positions have ROCK on them (pushed blocks)
       if(m3&&s.loc.ty==="dg"){const roomD5=s.dg[s.loc.di]?.rooms[s.loc.scr];
@@ -1477,8 +1479,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(Math.hypot(pcx-ecx,pcy-ecy)<20&&p.ifr<=0){
             if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=500;
             s.msg={text:"Wallmaster! Dragged to entrance!",t:2000};
-            // Teleport to dungeon entrance
-            const dg3=s.dg[s.loc.di];if(dg3){for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){s.loc.scr=rk3;p.x=7*TL;p.y=9*TL;le(s);break;}}}
+            // Fade to entrance (deferred to avoid mid-loop le() crash)
+            const di3=s.loc.di;
+            s.fade={a:true,alpha:0,dir:1,t:0,spd:400,cb:()=>{
+              const dg3=s.dg[di3];if(dg3){for(const rk3 of Object.keys(dg3.rooms)){
+                if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){s.loc.scr=rk3;s.p.x=7*TL;s.p.y=9*TL;le(s);break;}}}}};
           }
           if(e.wmT>2000){e.wmState="lurk";e.wmT=0;e.x=e.hx;e.y=e.hy;}
         }
