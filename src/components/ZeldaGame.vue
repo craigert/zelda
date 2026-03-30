@@ -224,7 +224,7 @@ function onUrlKeydown(e, key) {
 try{const old=localStorage.getItem('zelda_save');if(old&&!localStorage.getItem('zelda_save_0')){localStorage.setItem('zelda_save_0',old);localStorage.removeItem('zelda_save');}}catch(e){}
 
 function saveGame(s) {
-  if (!s || s.title || s.saveSelect || s.go || s.won) return;
+  if (!s || s.title || s.saveSelect || s.go || s.won || s.loc.ty==="passage") return;
   try {
     const data = {
       v: 1,
@@ -258,7 +258,11 @@ function applySave(s, save) {
   s.p.hp = save.p.hp; s.p.mhp = save.p.mhp; s.p.keys = save.p.keys;
   s.p.bombs = save.p.bombs; s.p.rupees = save.p.rupees;
   s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false; s.p.hasBone = save.p.hasBone || false;
-  s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;
+  // If saved in a passage or invalid state, fall back to respawn point
+  if(save.loc.ty==="passage"){
+    s.loc.ty=save.respawn.ty;s.loc.scr=save.respawn.scr;s.loc.di=save.respawn.di;
+    s.p.x=save.respawn.x;s.p.y=save.respawn.y;
+  }else{s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;}
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);s.co = new Set(save.co||[]);
