@@ -419,7 +419,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[7][12]=T.PUSH;m[7][13]=T.PLATE;// Push block onto plate → reveals stairway
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"ghost"},{x:9*TL,y:6*TL,hp:4,type:"ghost"}],
-  traps:[{x:3,y:5,dir:"h",range:8},{x:8,y:2,dir:"v",range:7}]},
+  traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:4,dir:"v",range:3}]},
 
   // Secret room east of spike corridor — bombs and supplies
   "2,-1":{tiles:mr(m=>{
