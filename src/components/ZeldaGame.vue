@@ -146,6 +146,7 @@ function init() {
     finalDeath:null, // {t,dur,bx,by,flash,fallY,fadeAlpha} — final boss death cinematic
     sanctumReveal:null, // {t,dur} — dark sanctum rising cinematic
     sanctumRevealed:false, // true after the reveal has played
+    heroLand:null, // {t,dur} — hero landing animation after triforce warp
   };
 }
 
@@ -571,17 +572,31 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
+  // Hero landing animation after triforce warp
+  if(s.heroLand){s.heroLand.t+=dt;
+    if(s.heroLand.t>=s.heroLand.dur){s.heroLand=null;}
+    return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
     if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
       const tc3=s.p.tri.filter(Boolean).length;
       s.msg={text:tc3>=3?"The Dark Sanctum has opened!":`Triforce piece ${tc3}/3!`,t:2000};}
-    // Only warp after portal appeared and 500ms passed
-    if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur){
-      const di2=s.loc.di;const dg3=s.dg[di2];if(dg3){
-        for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){
-          s.loc.scr=rk3;s.p.x=7*TL;s.p.y=9*TL;le(s);break;}}}
-      s.triforceHold=null;s.triMu=false;}
+    // Fade to dungeon entrance after hold-up
+    if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur&&!s.triforceHold.fading){
+      s.triforceHold.fading=true;
+      const di2=s.loc.di;const bossScr=s.loc.scr;
+      const bx2=s.bossWarp?s.bossWarp.x:Math.floor((s.p.x+PS/2)/TL);
+      const by2=s.bossWarp?s.bossWarp.y:Math.floor((s.p.y+PS/2)/TL);
+      s.bossWarp=null;// cancel temporary portal
+      s.fade={a:true,alpha:0,dir:1,t:0,spd:800,cb:()=>{
+        const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
+          for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
+          // Create permanent two-way warp
+          if(!s.bossWarps.find(w=>w.di===di2)){s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
+          s.loc.scr=entryScr;s.p.x=7*TL;s.p.y=9*TL;s.ec=500;le(s);
+          // Landing animation
+          s.heroLand={t:0,dur:1000};}
+        s.triforceHold=null;s.triMu=false;}};}
     // Update particles + drops during hold (so player can pick up remaining items)
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     // Allow drop collection during hold
@@ -1157,7 +1172,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
           const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}}
         // Hold-up animation + warp portal
-        s.triforceHold={t:0,dur:2500,piece:tc2,px:p.x,py:p.y,warp:false};
+        s.triforceHold={t:0,dur:3500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
@@ -2829,6 +2844,15 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
       for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
         c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
+  }else if(s.heroLand){// Hero descending from above
+    const hl=s.heroLand,lp=Math.min(1,hl.t/hl.dur);
+    const landY=p.y-60*(1-lp);// descend from 60px above
+    const bounce=lp>=0.9?Math.sin((lp-0.9)/0.1*Math.PI)*4:0;// small bounce at end
+    c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,4+lp*6,1+lp*2,0,0,Math.PI*2);c.fill();
+    // Light beam from above
+    if(lp<0.8){const beamA=0.15*(1-lp/0.8);
+      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-8,landY-10);c.lineTo(p.x+PS/2+8,landY-10);c.lineTo(p.x+PS/2+4,-10);c.lineTo(p.x+PS/2-4,-10);c.fill();}
+    dP(c,p.x,landY-bounce,p.dir,t,p.redArmor);
   }else if(s.finalDeath){// Hero drawn by finalDeath overlay — skip normal draw
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
