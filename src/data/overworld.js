@@ -96,16 +96,19 @@ export const OW={
   m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
   m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
   m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
-  // Rocky ring around heart piece — 2 pushable boulders to get in
+  // Rocky ring around heart piece — push 3 boulders to create a path
+  // Step 1: push (9,7) south out of the way
+  // Step 2: push (8,7) south into cleared space
+  // Step 3: push (9,6) right, walk up through gap at (7,8) into ring
   m[4][6]=T.ROCK;m[4][7]=T.ROCK;m[4][8]=T.ROCK;m[4][9]=T.ROCK;
   m[5][6]=T.ROCK;m[5][9]=T.ROCK;
   m[6][6]=T.ROCK;m[6][9]=T.ROCK;
-  m[7][6]=T.ROCK;m[7][7]=T.PUSH;m[7][8]=T.PUSH;m[7][9]=T.ROCK;
+  m[7][6]=T.ROCK;m[7][7]=T.ROCK;m[7][8]=T.PUSH;m[7][9]=T.ROCK;// push south
   // Heart piece at the peak
   m[5][7]=T.HEART_PIECE;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
-  // Boulder field below — space for pushing ring boulders south
-  m[8][6]=T.ROCK;m[8][10]=T.ROCK;
-  m[9][5]=T.ROCK;m[9][6]=T.ROCK;m[9][9]=T.ROCK;m[9][10]=T.ROCK;
+  // Below ring — 2 more pushable boulders blocking the path
+  m[8][6]=T.ROCK;m[8][8]=T.PUSH;// push south
+  m[9][5]=T.ROCK;m[9][6]=T.ROCK;m[9][8]=T.PUSH;m[9][10]=T.ROCK;// push south
   m[3][5]=T.TALLGRASS;m[3][10]=T.TALLGRASS;m[8][4]=T.BUSH;m[8][11]=T.BUSH;
   // Scattered rocks elsewhere to make the area feel naturally rocky
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[5][3]=T.ROCK;m[5][12]=T.ROCK;
