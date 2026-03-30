@@ -476,12 +476,9 @@ function cTr(s){const p=s.p,loc=s.loc;
                 {tx:9,ty:7,name:"Lantern",cost:30,once:"hasLantern",action:s2=>{s2.hasLantern=true;},collected:false},
                 {tx:12,ty:7,name:"Mirror Shield",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
               ];
-              if(s.p.hasBanana&&!s.p.redArmor){
-                s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:0,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;sfx("triforce");s2.shake.t=400;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});
-              }
               // Mark already-purchased once items
               for(const si of s.shopGround){if(si.once&&s[si.once])si.collected=true;}
-              if(s.p.hasBanana&&!s.p.redArmor){s.msg={text:"You found my lost Golden Banana!!!! I'll exchange it for this Red Armor!",t:4000};}
+              if(s.p.hasBanana&&!s.p.redArmor){s.msg={text:"You found my lost Golden Banana!!!! Talk to me for the Red Armor!",t:4000};}
               else{s.msg={text:"Welcome! Walk over items to buy!",t:2000};}
             }
             else{s.msg={text:"Hidden Cave!",t:1500};}}};sfx("door");return;}}}
@@ -646,13 +643,17 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       s.respawnClick=false;
       if(s.npcTalk.charIdx>=s.npcTalk.lines[s.npcTalk.idx].length){
         s.npcTalk.idx++;
-        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;const wasTreeGift=s.npcTalk.treeGift;s.npcTalk=null;
+        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;const wasTreeGift=s.npcTalk.treeGift;const wasShopTrade=s.npcTalk.shopTrade;s.npcTalk=null;
           for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;
           // Dog dug up a heart piece!
           if(wasDogDig){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
             s.drops.push({x:dx2,y:dy2-20,vy:-3,ground:dy2,type:"heartpiece_drop",t:0});
             sfx("heartpiece");s.shake.t=400;s.msg={text:"The dog dug up a Heart Piece!",t:2500};
             s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#ff3366":"#fd3"})));}
+          // Shopkeeper trades banana + 100 rupees for Red Armor
+          if(wasShopTrade){s.p.rupees-=100;s.p.redArmor=true;s.p.hasBanana=false;
+            sfx("triforce");s.shake.t=400;s.msg={text:"Got Red Armor! Half damage taken!",t:3000};
+            s.pt.push(...Array.from({length:15},()=>({x:s.p.x+PS/2,y:s.p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#f44":"#fd3"})));}
           // Ancient Tree drops a heart piece from its canopy
           if(wasTreeGift){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
             s.drops.push({x:dx2,y:dy2-30,vy:-2,ground:dy2,type:"heartpiece_drop",t:0});
@@ -1092,6 +1093,19 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           // NPC faces player
           ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);
           break;}}}}
+    // Shopkeeper interaction in cave
+    if(!npcHit&&s.loc.ty==="cave"&&s.shopGround&&!s.npcTalk){
+      const skx=7*TL+16,sky=3*TL+16;const sdist=Math.hypot(p.x+PS/2-skx,p.y+PS/2-sky);
+      if(sdist<TL*2){npcHit=true;
+        if(p.hasBanana&&!p.redArmor&&p.rupees>=100){
+          s.npcTalk={name:"Shopkeeper",lines:["You found my lost Golden Banana!!!!","I'll forge this into Red Armor for you!","That'll be 100 rupees for the crafting.","Here you go! Half damage from now on!"],idx:0,charIdx:0,timer:0,shopTrade:true};
+        }else if(p.hasBanana&&!p.redArmor&&p.rupees<100){
+          s.npcTalk={name:"Shopkeeper",lines:["My Golden Banana! You found it!","I can forge Red Armor for 100 rupees...","But you don't have enough rupees yet!"],idx:0,charIdx:0,timer:0};
+        }else if(p.redArmor){
+          s.npcTalk={name:"Shopkeeper",lines:["That Red Armor suits you well!","Come back anytime for supplies."],idx:0,charIdx:0,timer:0};
+        }else{
+          s.npcTalk={name:"Shopkeeper",lines:["Welcome to my shop!","Walk over items on the floor to buy.","I'm also looking for my lost Golden Banana..."],idx:0,charIdx:0,timer:0};
+        }sfx("pickup");}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
       // Light torches with sword -- only in dark rooms
       const isDkRoom=s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark;
@@ -3062,6 +3076,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.beginPath();c.arc(skx+3,sky+11,1.5,0,Math.PI*2);c.fill();
     // "SHOP" sign above
     c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="center";c.fillText("SHOP",skx,sky-2);
+    // Red Armor on display behind counter (if not yet purchased)
+    if(!s.p.redArmor){const rax=9*TL,ray=3*TL;
+      c.fillStyle="#992222";c.beginPath();c.moveTo(rax+5,ray+8);c.lineTo(rax+27,ray+8);c.lineTo(rax+27,ray+24);c.lineTo(rax+16,ray+30);c.lineTo(rax+5,ray+24);c.fill();
+      c.fillStyle="#cc3333";c.fillRect(rax+9,ray+10,14,8);
+      c.fillStyle="#fd3";c.beginPath();c.arc(rax+16,ray+22,2,0,Math.PI*2);c.fill();
+      c.fillStyle="#aaa";c.font="bold 6px monospace";c.fillText("100r",rax+16,ray+6);}
     // Draw ground items with price tags
     for(const si of s.shopGround){
       if(si.collected)continue;

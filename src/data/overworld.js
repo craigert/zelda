@@ -340,9 +340,10 @@ export const OW={
   m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
   m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
-  // Cracked wall hiding heart piece in alcove
-  m[5][11]=T.CRACK;m[5][12]=T.ROCK;m[6][11]=T.ROCK;m[6][12]=T.ROCK;
-  m[5][13]=T.HEART_PIECE;// bomb the crack to reach it
+  // Cracked wall hiding heart piece in alcove — bomb crack, walk right
+  m[5][11]=T.CRACK;m[6][11]=T.ROCK;m[6][12]=T.ROCK;m[6][13]=T.ROCK;
+  m[4][12]=T.ROCK;m[4][13]=T.ROCK;
+  m[5][13]=T.HEART_PIECE;// crack→(12,5)open→(13,5)heart piece
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // D1 Fire Cavern — desert dungeon
