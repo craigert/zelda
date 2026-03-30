@@ -260,10 +260,9 @@ export const OW={
   // Swampy water patches
   m[3][3]=T.WATER;m[3][4]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;m[4][5]=T.WATER;
   m[7][9]=T.WATER;m[7][10]=T.WATER;m[8][9]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;
-  // Crack wall hiding heart piece
-  m[3][10]=T.CRACK;m[3][11]=T.TREE;m[2][10]=T.TREE;m[2][11]=T.TREE;m[2][12]=T.TREE;
+  // Trees in corner
+  m[3][10]=T.TREE;m[2][10]=T.TREE;m[2][11]=T.TREE;m[2][12]=T.TREE;
   m[4][11]=T.TREE;m[4][12]=T.TREE;
-  m[3][12]=T.HEART_PIECE;
   // Paths
   m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
   m[5][9]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][6]=T.TALLGRASS;
@@ -341,6 +340,9 @@ export const OW={
   m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
   m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+  // Cracked wall hiding heart piece in alcove
+  m[5][11]=T.CRACK;m[5][12]=T.ROCK;m[6][11]=T.ROCK;m[6][12]=T.ROCK;
+  m[5][13]=T.HEART_PIECE;// bomb the crack to reach it
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // D1 Fire Cavern — desert dungeon
