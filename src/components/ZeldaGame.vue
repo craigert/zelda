@@ -934,9 +934,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         m2[fty][ftx]=T.FLOOR;m2[by][bx]=T.FLOOR;// block falls into pit, both become floor
         s.pushCd=true;setTimeout(()=>{if(stR.value)stR.value.pushCd=false;},300);
         sfx("bomb");s.shake.t=200;s.pt.push(...Array.from({length:6},()=>({x:bx*TL+16,y:by*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#888"})));
-        // Check if all pits in room are now filled -- if so, drop a key
+        // Check if all pits in room are now filled -- if so, drop a key (once only)
+        const pitRk=`pit:${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
         let pitsLeft=false;for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++)if(m2[yy][xx]===T.PIT)pitsLeft=true;
-        if(!pitsLeft){sfx("itemget");s.shake.t=300;s.msg={text:"A key appeared!",t:1500};
+        if(!pitsLeft&&!s.co.has(pitRk)){s.co.add(pitRk);sfx("itemget");s.shake.t=300;s.msg={text:"A key appeared!",t:1500};
           s.drops.push({x:W2/2,y:-20,vy:0.5,ground:H2/2,type:"key_drop",t:0});}
       }
       else if(bx>=0&&bx<CO&&by>=0&&by<RO&&!SOLID.has(m2[by][bx])&&m2[by][bx]!==T.DOOR&&m2[by][bx]!==T.BOSS_DOOR&&m2[by][bx]!==T.SPIKE&&m2[by][bx]!==T.STAIRS_UP&&m2[by][bx]!==T.PIT&&m2[by][bx]!==T.STAIRS_DOWN&&m2[by][bx]!==T.LEVER&&m2[by][bx]!==T.TORCH){
