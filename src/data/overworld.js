@@ -148,9 +148,10 @@ export const OW={
   m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;m[4][8]=T.WATER;m[4][9]=T.WATER;m[4][10]=T.WATER;
   m[5][5]=T.WATER;m[5][6]=T.WATER;m[5][7]=T.WATER;m[5][8]=T.WATER;m[5][9]=T.WATER;m[5][10]=T.WATER;
   m[6][5]=T.WATER;m[6][6]=T.WATER;m[6][7]=T.WATER;m[6][8]=T.WATER;m[6][9]=T.WATER;m[6][10]=T.WATER;
-  // Narrow ice path to heart piece
+  // Path leads to heart piece in corner alcove
   m[7][10]=T.PATH;m[7][11]=T.PATH;m[7][12]=T.PATH;
-  m[8][12]=T.HEART_PIECE;
+  m[8][12]=T.PATH;m[9][12]=T.PATH;
+  m[9][11]=T.HEART_PIECE;// visible in the alcove
   m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
   m[9][7]=T.STUMP;m[3][7]=T.STUMP;
   // Banana cave — push boulder to reveal, guarded by yetis inside
