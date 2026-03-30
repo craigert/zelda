@@ -477,11 +477,12 @@ function cTr(s){const p=s.p,loc=s.loc;
                 {tx:12,ty:7,name:"Mirror Shield",cost:50,once:"hasShieldUp",action:s2=>{s2.hasShieldUp=true;},collected:false},
               ];
               if(s.p.hasBanana&&!s.p.redArmor){
-                s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:100,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});
+                s.shopGround.push({tx:7,ty:9,name:"Red Armor",cost:0,action:s2=>{s2.p.redArmor=true;s2.p.hasBanana=false;sfx("triforce");s2.shake.t=400;s2.msg={text:"Red Armor forged! Half damage taken!",t:3000};},collected:false});
               }
               // Mark already-purchased once items
               for(const si of s.shopGround){if(si.once&&s[si.once])si.collected=true;}
-              s.msg={text:s.p.hasBanana&&!s.p.redArmor?"I can forge Red Armor for that banana!":"Welcome! Walk over items to buy!",t:2000};
+              if(s.p.hasBanana&&!s.p.redArmor){s.msg={text:"You found my lost Golden Banana!!!! I'll exchange it for this Red Armor!",t:4000};}
+              else{s.msg={text:"Welcome! Walk over items to buy!",t:2000};}
             }
             else{s.msg={text:"Hidden Cave!",t:1500};}}};sfx("door");return;}}}
     }
