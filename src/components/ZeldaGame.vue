@@ -700,7 +700,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.slide.a){s.slide.t+=dt;if(s.slide.t>=s.slide.dur){s.slide.a=false;
     // Trigger boss intro after room transition completes
     if(s._pendingBoss){const pb=s._pendingBoss;s._pendingBoss=null;
-      s.bossIntro={name:pb.name,t:0,dur:3000,bx:pb.bx,by:pb.by};sfx("bossdeath");}}return;}
+      s.bossIntro={name:pb.name,t:0,dur:pb.isMini?2000:3000,bx:pb.bx,by:pb.by,isMini:pb.isMini};sfx("bossdeath");}}return;}
   // ===== SIDE-SCROLL PASSAGE PHYSICS =====
   if(s.loc.ty==="passage"&&s.ss){
     const ky=kyR.value,tc=tcR.value,p=s.p,ss=s.ss;
