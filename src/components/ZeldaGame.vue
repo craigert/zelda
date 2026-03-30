@@ -892,7 +892,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.ICE){
       if(!s.iceSlide.active&&(dx!==0||dy!==0)){s.iceSlide={active:true,dx:dx>0?1:dx<0?-1:0,dy:dy>0?1:dy<0?-1:0};}
-      if(s.iceSlide.active){const isp=sp*1.1;const nx=p.x+s.iceSlide.dx*isp,ny=p.y+s.iceSlide.dy*isp;
+      // Player can change direction while sliding
+      if(s.iceSlide.active&&(dx!==0||dy!==0)){const nd=dx>0?1:dx<0?-1:0,ndy=dy>0?1:dy<0?-1:0;
+        if(nd!==s.iceSlide.dx||ndy!==s.iceSlide.dy){s.iceSlide.dx=nd||s.iceSlide.dx;s.iceSlide.dy=ndy||s.iceSlide.dy;}}
+      if(s.iceSlide.active){const isp=sp*0.55;const nx=p.x+s.iceSlide.dx*isp,ny=p.y+s.iceSlide.dy*isp;
         if(tm(nx,ny)){p.x=nx;p.y=ny;}else{s.iceSlide.active=false;s.iceSlide.dx=0;s.iceSlide.dy=0;}}
     }else{s.iceSlide.active=false;s.iceSlide.dx=0;s.iceSlide.dy=0;}}
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
