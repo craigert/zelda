@@ -96,15 +96,15 @@ export const OW={
   m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
   m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
   m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
-  // 5x5 rocky ring around heart piece
-  // Top row — gaps at 7,8 so pushed blocks can go north into them
-  m[3][6]=T.ROCK;m[3][9]=T.ROCK;m[3][10]=T.ROCK;
-  // Sides
-  m[4][6]=T.ROCK;m[4][10]=T.ROCK;
+  // 5x5 rocky ring around heart piece with rocks on right to push into
+  // Top row — solid
+  m[3][6]=T.ROCK;m[3][7]=T.ROCK;m[3][8]=T.ROCK;m[3][9]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
+  // Sides — extra rock on right for pushing into
+  m[4][6]=T.ROCK;m[4][10]=T.ROCK;m[4][11]=T.ROCK;
   m[5][6]=T.ROCK;m[5][10]=T.ROCK;
   m[6][6]=T.ROCK;m[6][10]=T.ROCK;
-  // Bottom row — middle 3 pushable (push left/right north north)
-  m[7][6]=T.ROCK;m[7][7]=T.PUSH;m[7][8]=T.PUSH;m[7][9]=T.PUSH;m[7][10]=T.ROCK;
+  // Bottom row — middle 3 pushable, extra rock on right
+  m[7][6]=T.ROCK;m[7][7]=T.PUSH;m[7][8]=T.PUSH;m[7][9]=T.PUSH;m[7][10]=T.ROCK;m[7][11]=T.ROCK;
   // Heart piece top-left inside
   m[4][7]=T.HEART_PIECE;
   // Floor inside ring
