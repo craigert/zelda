@@ -192,10 +192,10 @@ export const OW={
   m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
   m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
   m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
-  // Boulders near hidden cave — pushable one sits just below cluster
+  // Boulders near hidden cave — stand at (2,2) and push boulder south
   m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][4]=T.ROCK;
-  m[2][2]=T.ROCK;m[2][4]=T.ROCK;
-  m[3][2]=T.PUSH;// below cluster, push south to reveal cave
+  m[2][4]=T.ROCK;m[2][3]=T.ROCK;
+  m[3][2]=T.PUSH;// push south to reveal cave entrance at (2,3)
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Desert border — sand meets grass
