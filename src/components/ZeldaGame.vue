@@ -271,7 +271,7 @@ function applySave(s, save) {
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
-  if (s.finalOpen) {
+  if (s.finalOpen && s.sanctumRevealed) {
     const fm = OW["3,2"];
     if (fm) { fm[5][7] = T.ENTRANCE; fm[5][8] = T.ENTRANCE; fm[6][7] = T.ENTRANCE; fm[6][8] = T.ENTRANCE; }
   }
@@ -326,11 +326,9 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   // Always load NPCs for overworld (even if room is cleared of enemies)
   const npcs=s.loc.ty==="ow"?NPC_DATA[s.loc.scr]:null;
   s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];
-  // Trigger Dark Sanctum reveal when entering screen 3,2 for the first time
+  // Trigger Dark Sanctum reveal when entering screen 3,2 with all 3 triforce pieces
   if(s.loc.ty==="ow"&&s.loc.scr==="3,2"&&s.finalOpen&&!s.sanctumRevealed){
-    s.sanctumRevealed=true;s.sanctumReveal={t:-2000,dur:5000};s.freeze=7000;
-    // Make NPCs panic after delay
-    for(const ns of s.npcState){ns.panic=true;ns.panicDelay=2000;}}
+    s.sanctumRevealed=true;s.sanctumReveal={t:0,phase:"wait",dur:8000};}
   // Always load blade traps for dungeons (even if room is cleared)
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
@@ -665,39 +663,42 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     }
     return;
   }
+  // Dark Sanctum reveal — runs alongside gameplay then freezes for the big moment
+  if(s.sanctumReveal){const sr=s.sanctumReveal;sr.t+=dt;const ecx=7.5*TL,ecy=5.5*TL;
+    // Phase: wait (0-2s) — player walks around normally, tension builds
+    if(sr.phase==="wait"&&sr.t>=2000){sr.phase="rumble";sr.t=0;sfx("bossdeath");s.freeze=6000;
+      // NPC panics
+      for(const ns of s.npcState){ns.st="walk";ns.wait=8000;ns.dir=Math.random()<0.5?1:3;ns.panic=true;}}
+    // Phase: rumble (0-1.5s) — ground shakes, small debris
+    if(sr.phase==="rumble"){
+      s.shake.t=Math.max(s.shake.t,50+Math.min(150,sr.t/10));
+      if(Math.random()<0.3){s.pt.push({x:ecx+(Math.random()-.5)*TL*3,y:ecy+TL,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:400,c:"#887050"});}
+      if(sr.t>=1500){sr.phase="crumble";sr.t=0;sfx("bomb");}}
+    // Phase: crumble (0-2s) — rocks break apart, heavy shake, debris flies
+    if(sr.phase==="crumble"){
+      s.shake.t=Math.max(s.shake.t,180);
+      // Rock debris particles
+      if(Math.random()<0.7){s.pt.push({x:ecx+(Math.random()-.5)*TL*2,y:ecy+(Math.random()-.5)*TL,dx:(Math.random()-.5)*5,dy:-Math.random()*5-2,l:700,c:Math.random()>.5?"#887050":"#665040"});
+        s.pt.push({x:ecx+(Math.random()-.5)*TL*3,y:ecy+TL,dx:(Math.random()-.5)*3,dy:-Math.random()*3,l:600,c:"#888"});}
+      // At 1s — swap rocks to entrance tiles (temple revealed!)
+      if(sr.t>=1000&&!sr.risen){sr.risen=true;sfx("secret");
+        const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}}
+      if(sr.t>=2000){sr.phase="settle";sr.t=0;}}
+    // Phase: settle (0-1.5s) — shake dies down, dust clears
+    if(sr.phase==="settle"){
+      const ease=1-sr.t/1500;s.shake.t=Math.max(s.shake.t,ease*80);
+      if(Math.random()<0.2*ease){s.pt.push({x:ecx+(Math.random()-.5)*TL*2,y:ecy,dx:(Math.random()-.5)*1,dy:-Math.random()*1.5,l:500,c:"#aaa"});}
+      if(sr.t>=1000&&!sr.textShown){sr.textShown=true;sfx("triforce");
+        s.msg={text:"The Dark Sanctum has risen!",t:3000};}
+      if(sr.t>=1500){s.sanctumReveal=null;s.freeze=0;}}
+    // NPC panic running
+    for(const ns of s.npcState){if(ns.panic){const nsp=2.5*(dt/16);
+      if(ns.dir===1)ns.x+=nsp;else if(ns.dir===3)ns.x-=nsp;
+      else if(ns.dir===0)ns.y-=nsp;else ns.y+=nsp;}}
+    // Update particles
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    if(sr.phase!=="wait")return;}// freeze gameplay after wait phase
   if(s.freeze>0){s.freeze-=dt;
-    // Sanctum reveal cinematic during freeze
-    if(s.sanctumReveal){const sr=s.sanctumReveal;sr.t+=dt;
-      // Delay phase (t < 0): player just entered screen, let them see it
-      if(sr.t<0){/* waiting */}
-      // t=0: play the rumble sound
-      else if(!sr.started){sr.started=true;sfx("bossdeath");}
-      // Phase 1 (0-1s): rumble builds gradually
-      else if(sr.t<1000){const intensity=sr.t/1000;s.shake.t=Math.max(s.shake.t,30+intensity*120);}
-      // Phase 2 (1-3s): temple rises, heavy shake, debris
-      else if(sr.t<3000){s.shake.t=Math.max(s.shake.t,150);
-        if(!sr.risen&&sr.t>1500){sr.risen=true;sfx("secret");}
-        // Dirt/rock debris flying up from entrance area
-        if(Math.random()<0.6){const ecx=7.5*TL,ecy=5.5*TL;
-          s.pt.push({x:ecx+(Math.random()-.5)*TL*3,y:ecy+TL+(Math.random())*TL,dx:(Math.random()-.5)*4,dy:-Math.random()*4-2,l:600+Math.random()*400,c:Math.random()>.5?"#887050":"#665040"});
-          s.pt.push({x:ecx+(Math.random()-.5)*TL*4,y:ecy+TL*2,dx:(Math.random()-.5)*2,dy:-Math.random()*3-1,l:800,c:Math.random()>.3?"#888":"#a060ff"});}}
-      // Phase 3 (3-4s): shake eases, dust settles
-      else if(sr.t<4000){const ease=1-(sr.t-3000)/1000;s.shake.t=Math.max(s.shake.t,ease*80);
-        if(Math.random()<0.3*ease){const ecx=7.5*TL;
-          s.pt.push({x:ecx+(Math.random()-.5)*TL*2,y:5*TL,dx:(Math.random()-.5)*1,dy:-Math.random()*2,l:600,c:"#888"});}}
-      // Phase 4 (4-5s): reveal complete
-      else if(sr.t>4000&&!sr.textShown){sr.textShown=true;sfx("triforce");
-        s.msg={text:"The Dark Sanctum has risen!",t:2500};}
-      // NPC panic — start running after delay
-      for(const ns of s.npcState){if(ns.panic){
-        if(ns.panicDelay>0){ns.panicDelay-=dt;
-          if(ns.panicDelay<=0){ns.st="walk";ns.wait=8000;ns.dir=Math.random()<0.5?1:3;}
-        }else{const nsp=2.5*(dt/16);
-          if(ns.dir===1)ns.x+=nsp;else if(ns.dir===3)ns.x-=nsp;
-          else if(ns.dir===0)ns.y-=nsp;else ns.y+=nsp;}}}
-      // Update particles during freeze
-      for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
-      if(sr.t>=sr.dur)s.sanctumReveal=null;}
     // Still advance push animation during freeze (overworld boulder push)
     if(s.pushAnim){s.pushAnim.t+=dt;
       if(s.pushAnim.t>=s.pushAnim.dur){
@@ -1187,8 +1188,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;
         const tc2=p.tri.filter(Boolean).length;
-        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;
-          const fm=OW["3,2"];if(fm){fm[5][7]=T.ENTRANCE;fm[5][8]=T.ENTRANCE;fm[6][7]=T.ENTRANCE;fm[6][8]=T.ENTRANCE;}}
+        if(tc2>=3&&!s.finalOpen){s.finalOpen=true;}
         // Hold-up animation + warp portal
         s.triforceHold={t:0,dur:3500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
@@ -3128,44 +3128,30 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     }
     c.textAlign="left";
   }
-  // Sanctum reveal overlay — dark temple rising from the ground
-  if(s.sanctumReveal&&s.sanctumReveal.t>=0){const sr=s.sanctumReveal;
+  // Sanctum reveal overlay
+  if(s.sanctumReveal&&s.sanctumReveal.phase!=="wait"){const sr=s.sanctumReveal;
     const ecx=7.5*TL,ecy=5.5*TL;
-    // Phase 1 (0-1s): screen darkens
-    if(sr.t<1000){const da=Math.min(0.25,sr.t/1000*0.25);
-      c.fillStyle=`rgba(20,0,30,${da})`;c.fillRect(0,0,W2,FH2);}
-    // "The earth trembles..." text (0.2-2s)
-    if(sr.t>200&&sr.t<2000){const ta=sr.t<700?(sr.t-200)/500:sr.t>1500?1-(sr.t-1500)/500:1;
+    // Darken edges during rumble/crumble
+    if(sr.phase==="rumble"||sr.phase==="crumble"){
+      c.fillStyle=`rgba(20,0,30,${sr.phase==="crumble"?0.2:Math.min(0.15,sr.t/1500*0.15)})`;c.fillRect(0,0,W2,FH2);}
+    // "The earth trembles..." text during rumble
+    if(sr.phase==="rumble"&&sr.t>300){const ta=Math.min(1,(sr.t-300)/500);
       c.globalAlpha=ta;c.textAlign="center";c.fillStyle="#c080ff";c.font="bold 12px monospace";
-      c.fillText("The earth trembles...",W2/2,H2*0.1);c.textAlign="left";c.globalAlpha=1;}
-    // Phase 2 (1-3s): temple rises from below
-    if(sr.t>1000&&sr.t<3500){const riseP=Math.min(1,(sr.t-1000)/2000);
-      // Dark structure rising up — clipped to not draw above final position
-      const finalY=ecy-TL*0.5;const riseY=ecy+TL*2-riseP*(TL*2.5);const riseH=Math.max(0,riseP*TL*2.5);
-      c.save();c.beginPath();c.rect(ecx-TL*1.2,finalY,TL*2.4,TL*3);c.clip();
-      // Temple block
-      c.fillStyle="#0a0010";c.fillRect(ecx-TL,riseY,TL*2,riseH);
-      c.fillStyle="#1a0a20";c.fillRect(ecx-TL+3,riseY+3,TL*2-6,riseH-3);
-      // Dark archway on the front
-      if(riseP>0.5){const archA=(riseP-0.5)*2;
-        c.fillStyle=`rgba(60,20,80,${archA})`;c.fillRect(ecx-6,riseY+4,12,riseH*0.6);
-        c.fillStyle=`rgba(100,40,120,${archA*0.5})`;c.beginPath();c.arc(ecx,riseY+4,6,Math.PI,0);c.fill();}
-      c.restore();
-      // Ground crack lines
-      const crackA=Math.min(1,riseP)*(sr.t<2500?1:(1-(sr.t-2500)/1000));
-      if(crackA>0){c.strokeStyle=`rgba(180,80,220,${crackA*0.4})`;c.lineWidth=1.5;
-        for(let i=0;i<6;i++){const ca=i*Math.PI/3+0.3;const cl=riseP*60+i*10;
-          c.beginPath();c.moveTo(ecx,ecy+TL);c.lineTo(ecx+Math.cos(ca)*cl,ecy+TL+Math.sin(ca)*cl*0.4);c.stroke();}}}
-    // Phase 2-3: dust clouds around base
-    if(sr.t>1200&&sr.t<3500){const dustA=sr.t<2500?Math.min(1,(sr.t-1200)/800):1-(sr.t-2500)/1000;
-      if(dustA>0){for(let i=0;i<5;i++){const dx2=ecx-TL*1.5+i*TL*0.75,dy2=ecy+TL+Math.sin(t/200+i)*4;
-        c.fillStyle=`rgba(100,80,60,${dustA*0.15})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i*3)*6,dy2,8+Math.sin(t/300+i)*3,0,Math.PI*2);c.fill();}}}
-    // Phase 3-4: dark energy pulse from entrance
-    if(sr.t>3000&&sr.t<4500){const pa2=Math.min(1,(sr.t-3000)/500);
-      const pulseR=pa2*80;
+      c.fillText("The earth trembles...",W2/2,H2*0.08);c.textAlign="left";c.globalAlpha=1;}
+    // Crack lines radiating from center during crumble
+    if(sr.phase==="crumble"){const cp=Math.min(1,sr.t/2000);
+      c.strokeStyle=`rgba(180,80,220,${0.4*(1-cp*0.5)})`;c.lineWidth=1.5;
+      for(let i=0;i<8;i++){const ca=i*Math.PI/4+sr.t/3000;const cl=cp*70;
+        c.beginPath();c.moveTo(ecx,ecy);c.lineTo(ecx+Math.cos(ca)*cl,ecy+Math.sin(ca)*cl*0.5);c.stroke();}}
+    // Dust clouds during crumble and settle
+    if(sr.phase==="crumble"||sr.phase==="settle"){
+      const da2=sr.phase==="settle"?1-sr.t/1500:Math.min(1,sr.t/500);
+      if(da2>0){for(let i=0;i<4;i++){const dx2=ecx-TL+i*TL*0.7,dy2=ecy+TL+Math.sin(t/200+i)*3;
+        c.fillStyle=`rgba(100,80,60,${da2*0.12})`;c.beginPath();c.arc(dx2+Math.sin(t/400+i*3)*5,dy2,8+da2*5,0,Math.PI*2);c.fill();}}}
+    // Dark energy pulse when entrance revealed
+    if(sr.phase==="settle"&&sr.t>200&&sr.t<1200){const pa2=Math.min(1,(sr.t-200)/800);
       c.strokeStyle=`rgba(150,50,200,${0.4*(1-pa2)})`;c.lineWidth=2;
-      c.beginPath();c.arc(ecx,ecy,pulseR,0,Math.PI*2);c.stroke();
-      c.fillStyle=`rgba(100,30,150,${0.06*(1-pa2)})`;c.beginPath();c.arc(ecx,ecy,pulseR,0,Math.PI*2);c.fill();}}
+      c.beginPath();c.arc(ecx,ecy,pa2*80,0,Math.PI*2);c.stroke();}}
   if(s.fade.a){c.fillStyle=`rgba(0,0,0,${s.fade.alpha})`;c.fillRect(0,0,W2,FH2);}
   if(s.paused&&!s.mapOpen){c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(0,0,W2,FH2);
     c.textAlign="center";
