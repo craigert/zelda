@@ -199,10 +199,11 @@ export const OW={
   m[3][5]=T.FLOWER;m[3][6]=T.FLOWER;m[4][5]=T.FLOWER;m[3][10]=T.FLOWER;m[4][10]=T.FLOWER;
   m[7][3]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[8][11]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
   m[5][8]=T.BUSH;m[6][3]=T.BUSH;m[2][12]=T.STUMP;m[9][4]=T.STUMP;
-  // Boulders near hidden cave — stand north of push block (2,2 is clear)
-  m[1][3]=T.ROCK;m[1][4]=T.ROCK;
-  m[2][3]=T.ROCK;m[2][4]=T.ROCK;
-  m[3][2]=T.PUSH;// push south to reveal cave entrance at tile (2,3)
+  // Boulders near hidden cave — push bottom boulder south
+  // Player approaches from north (row 2 clear), pushes south
+  m[1][2]=T.ROCK;m[1][3]=T.ROCK;
+  m[2][3]=T.ROCK;
+  m[3][2]=T.PUSH;// cave entrance — push south to row 4 (clear grass)
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");return m;})(),
 
 // Desert border — sand meets grass
