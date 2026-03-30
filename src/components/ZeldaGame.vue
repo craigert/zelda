@@ -234,7 +234,7 @@ function saveGame(s) {
       pk: [...s.pk],
       dr: [...s.dr],
       cl: [...s.cl].filter(k=>!k.startsWith("ow:")),
-      bc: [...(s.bc||[])],mb: [...(s.mb||[])],co: [...(s.co||[])],
+      bc: [...(s.bc||[])],mb: [...(s.mb||[])],mbV2:true,co: [...(s.co||[])],
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
@@ -266,7 +266,7 @@ function applySave(s, save) {
   }else{s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;}
   s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
-  s.bc = new Set(save.bc||[]);s.mb = new Set(save.mb||[]);s.co = new Set(save.co||[]);
+  s.bc = new Set(save.bc||[]);s.mb = new Set(save.mbV2?save.mb:[]);s.co = new Set(save.co||[]);// mbV2: clear stale boulder data from old saves
   s.heartContainers = [...save.heartContainers];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false;
   s.respawn = { ...save.respawn };
