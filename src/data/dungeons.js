@@ -189,27 +189,21 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[9][12]=T.KEY;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:4,type:"magma_slug"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
-  // Upper east — timed switch room (switches open hidden door on east wall)
+  // Upper east — enemy gauntlet room
   "1,0":{tiles:mr(m=>{ae(m,["S","W"]);
     for(let y=2;y<=9;y++){m[y][5]=T.WALL;m[y][10]=T.WALL;}
     m[5][5]=T.FLOOR;m[6][5]=T.FLOOR;m[5][10]=T.FLOOR;m[6][10]=T.FLOOR;
     m[3][3]=T.SPIKE;m[3][12]=T.SPIKE;m[8][3]=T.SPIKE;m[8][12]=T.SPIKE;
     m[3][7]=T.HEART;m[8][8]=T.HEART;
-    // Two timed switches — both sides of the room
-    m[9][3]=T.TSWITCH;m[9][12]=T.TSWITCH;
-    // Hidden door on east wall — opened by timed switches
-    m[5][CO-1]=T.DOOR;m[6][CO-1]=T.DOOR;
+    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
   }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"mage"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
-  // Secret treasure room (east of 1,0) — rupees and bombs
+  // Secret room (crack east wall of 1,0) — treasure cache
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    // Rupee stash
-    m[4][6]=T.RUPEE;m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[4][9]=T.RUPEE;
-    m[5][6]=T.RUPEE;m[5][9]=T.RUPEE;
-    // Bomb stash
-    m[7][6]=T.BOMB;m[7][7]=T.BOMB;m[7][8]=T.BOMB;m[7][9]=T.BOMB;
+    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
+    m[4][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;
     m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;
   }),enemies:[]},
 
@@ -286,17 +280,28 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[3][7]=T.RUPEE;m[8][7]=T.RUPEE;m[3][8]=T.RUPEE;m[8][8]=T.RUPEE;
   }),enemies:[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:4*TL,hp:4,type:"fire_bat"},{x:7*TL,y:5*TL,hp:14,type:"miniboss",name:"Flame Sentinel"}],reward:"bomb_bag"},
 
-  // East of lava crossing — timed switch opens doors to treasure across ice
+  // East of lava crossing — timed switches open secret door on east wall
   "1,-1":{tiles:mr(m=>{ae(m,["W"]);
     m[9][3]=T.TSWITCH;m[9][12]=T.TSWITCH;
-    // Doors blocking the top section — opened by timed switch
-    m[3][6]=T.DOOR;m[3][7]=T.DOOR;m[3][8]=T.DOOR;m[3][9]=T.DOOR;
     for(let x=4;x<=11;x++){m[4][x]=T.SPIKE;m[7][x]=T.SPIKE;}
     m[5][5]=T.ICE;m[5][6]=T.ICE;m[5][7]=T.ICE;m[5][8]=T.ICE;m[5][9]=T.ICE;m[5][10]=T.ICE;
     m[6][5]=T.ICE;m[6][6]=T.ICE;m[6][7]=T.ICE;m[6][8]=T.ICE;m[6][9]=T.ICE;m[6][10]=T.ICE;
     m[2][7]=T.KEY;m[2][8]=T.HEART;
+    // Hidden door on east wall — opened by timed switches
+    m[5][CO-1]=T.DOOR;m[6][CO-1]=T.DOOR;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"fire_bat"},{x:9*TL,y:6*TL,hp:4,type:"fire_bat"}]},
+
+  // Secret treasure room (east of 1,-1) — rupees and bombs
+  "2,-1":{tiles:mr(m=>{
+    m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
+    // Rupee stash
+    m[4][6]=T.RUPEE;m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[4][9]=T.RUPEE;
+    m[5][6]=T.RUPEE;m[5][9]=T.RUPEE;
+    // Bomb stash
+    m[7][6]=T.BOMB;m[7][7]=T.BOMB;m[7][8]=T.BOMB;m[7][9]=T.BOMB;
+    m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;
+  }),enemies:[]},
 
   // North — pre-boss corridor with spikes
   "0,-2":{tiles:mr(m=>{ae(m,["S","WB"]);
