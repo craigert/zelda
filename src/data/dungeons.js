@@ -557,7 +557,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
     m[2][4]=T.WALL;m[2][11]=T.WALL;m[9][4]=T.WALL;m[9][11]=T.WALL;
     m[4][7]=T.RUPEE;m[7][8]=T.RUPEE;
-  }),enemies:[{x:6*TL,y:4*TL,hp:5,type:"ghost"},{x:10*TL,y:7*TL,hp:5,type:"ghost"}],sign:"Four corners of a square reveals the secret.",signPos:[7,0],squarePlates:[[7,5],[8,5],[7,6],[8,6]]},
+  }),enemies:[{x:6*TL,y:4*TL,hp:5,type:"ghost"},{x:10*TL,y:7*TL,hp:5,type:"ghost"}],sign:"Four corners of a square reveals the secret.",signPos:[7,0],squarePlates:[[7,5],[8,5],[7,6],[8,6]],origPush:[[3,3],[12,3],[4,8],[11,8]]},
 
   // East room (east of 1,-1) — supplies
   "2,-1":{tiles:mr(m=>{ae(m,["W"]);
@@ -575,7 +575,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
   }),enemies:[{x:3*TL,y:6*TL,hp:5,type:"fire_bat"},{x:12*TL,y:6*TL,hp:5,type:"fire_bat"},{x:7*TL,y:8*TL,hp:5,type:"ghost"}]},
 
   // West wing — ice floor challenge
-  "-1,-1":{tiles:mr(m=>{ae(m,["E","N","W"]);
+  "-1,-1":{tiles:mr(m=>{ae(m,["E","N"]);
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)m[y][x]=T.ICE;
     m[3][5]=T.WALL;m[3][10]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;
     m[5][7]=T.WALL;m[6][7]=T.WALL;

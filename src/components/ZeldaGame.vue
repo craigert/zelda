@@ -146,6 +146,7 @@ function init() {
     finalDeath:null, // {t,dur,bx,by,flash,fallY,fadeAlpha} — final boss death cinematic
     sanctumReveal:null, // {t,dur} — dark sanctum rising cinematic
     sanctumRevealed:false, // true after the reveal has played
+    sanctumDark:false, // true after sanctum rises — overworld 3,2 shrouded in darkness
     heroLand:null, // {t,dur} — hero landing animation after triforce warp
   };
 }
@@ -238,7 +239,7 @@ function saveGame(s) {
       heartContainers: [...s.heartContainers],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
-      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, treeGift: s.treeGift||false, sanctumRevealed: s.sanctumRevealed||false,
+      hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, treeGift: s.treeGift||false, sanctumRevealed: s.sanctumRevealed||false, sanctumDark: s.sanctumDark||false,
       bossWarps: s.bossWarps||[]
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
@@ -268,7 +269,7 @@ function applySave(s, save) {
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mbV2?save.mb:[]);s.co = new Set(save.co||[]);// mbV2: clear stale boulder data from old saves
   s.heartContainers = [...save.heartContainers];
-  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false;
+  s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false; s.sanctumDark = save.sanctumDark || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if (s.finalOpen && s.sanctumRevealed) {
@@ -318,7 +319,7 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
@@ -332,7 +333,14 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null
   // Always load blade traps for dungeons (even if room is cleared)
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
-    if(rm2?.traps)s.bladeTraps=rm2.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));}
+    if(rm2?.traps)s.bladeTraps=rm2.traps.map(tr=>({x:tr.x*TL,y:tr.y*TL,hx:tr.x*TL,hy:tr.y*TL,dir:tr.dir,range:tr.range*TL,st:"idle",vel:0,wait:0}));
+    // Reset push blocks in square puzzle rooms if puzzle not yet solved
+    if(rm2?.squarePuzzle&&rm2?.origPush&&rm2?.squarePlates&&rm2?.stairsReveal){
+      const m2=rm2.tiles;const[srx,sry]=rm2.stairsReveal;
+      if(m2&&m2[sry][srx]!==T.STAIRS_DOWN){s._squareSolved=false;
+        for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m2[y][x]===T.PUSH)m2[y][x]=T.FLOOR;
+        for(const[px,py]of rm2.origPush)m2[py][px]=T.PUSH;
+        for(const[px,py]of rm2.squarePlates)if(m2[py][px]===T.FLOOR)m2[py][px]=T.PLATE;}}}
   if(s.cl.has(rk)){s.en=[];s.combatLock=false;
     // Re-spawn uncollected boss drops when re-entering a cleared boss room
     if(s.loc.ty==="dg"){const di2=s.loc.di;const rm2b=s.dg[di2]?.rooms[s.loc.scr];const boss=rm2b?.enemies?.find(e=>e.type==="boss");
@@ -681,7 +689,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   // Dark Sanctum reveal — runs alongside gameplay then freezes for the big moment
   if(s.sanctumReveal){const sr=s.sanctumReveal;sr.t+=dt;const ecx=7.5*TL,ecy=5.5*TL;
     // Phase: wait (0-2s) — player walks around normally, tension builds
-    if(sr.phase==="wait"&&sr.t>=2000){sr.phase="rumble";sr.t=0;sfx("bossdeath");s.freeze=6000;
+    if(sr.phase==="wait"&&sr.t>=2000){sr.phase="rumble";sr.t=0;sfx("bossdeath");s.freeze=6000;s.triMu=false;s.sanctumRising=true;
       // NPC panics
       for(const ns of s.npcState){ns.st="walk";ns.wait=8000;ns.dir=Math.random()<0.5?1:3;ns.panic=true;}}
     // Phase: rumble (0-1.5s) — ground shakes, small debris
@@ -705,7 +713,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(Math.random()<0.2*ease){s.pt.push({x:ecx+(Math.random()-.5)*TL*2,y:ecy,dx:(Math.random()-.5)*1,dy:-Math.random()*1.5,l:500,c:"#aaa"});}
       if(sr.t>=1000&&!sr.textShown){sr.textShown=true;sfx("triforce");
         s.msg={text:"The Dark Sanctum has risen!",t:3000};}
-      if(sr.t>=1500){s.sanctumReveal=null;s.freeze=0;}}
+      if(sr.t>=1500){s.sanctumReveal=null;s.freeze=0;s.sanctumRising=false;s.sanctumDark=true;}}
     // NPC panic running
     for(const ns of s.npcState){if(ns.panic){const nsp=2.5*(dt/16);
       if(ns.dir===1)ns.x+=nsp;else if(ns.dir===3)ns.x-=nsp;
@@ -3145,6 +3153,20 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
           tgg.addColorStop(0,`rgba(0,0,0,${darkness})`);tgg.addColorStop(0.6,`rgba(0,0,0,${darkness*0.5})`);tgg.addColorStop(1,"rgba(0,0,0,0)");
           c.fillStyle=tgg;c.fillRect(tx3-tr,ty3-tr,tr*2,tr*2);}}
         c.restore();}}}
+  // Sanctum darkness — overworld screen 3,2 shrouded after the Dark Sanctum rises
+  if(!iD&&s.sanctumDark&&loc.ty==="ow"&&loc.scr==="3,2"){
+    const sdAlpha=0.45;c.fillStyle=`rgba(10,0,20,${sdAlpha})`;c.fillRect(0,0,W2,H2);
+    // Player glow so they can still see nearby
+    c.save();c.globalCompositeOperation="destination-out";
+    const plGlow=90;const pg2=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plGlow);
+    pg2.addColorStop(0,`rgba(0,0,0,${sdAlpha*0.8})`);pg2.addColorStop(0.6,`rgba(0,0,0,${sdAlpha*0.3})`);pg2.addColorStop(1,"rgba(0,0,0,0)");
+    c.fillStyle=pg2;c.fillRect(p.x+PS/2-plGlow,p.y+PS/2-plGlow,plGlow*2,plGlow*2);
+    // Eerie glow around the sanctum entrance
+    const ecx2=7.5*TL,ecy2=5.5*TL,eGlow=60+Math.sin(t/800)*8;
+    const eg=c.createRadialGradient(ecx2,ecy2,0,ecx2,ecy2,eGlow);
+    eg.addColorStop(0,`rgba(0,0,0,${sdAlpha*0.5})`);eg.addColorStop(0.7,`rgba(0,0,0,${sdAlpha*0.15})`);eg.addColorStop(1,"rgba(0,0,0,0)");
+    c.fillStyle=eg;c.fillRect(ecx2-eGlow,ecy2-eGlow,eGlow*2,eGlow*2);
+    c.restore();}
   if(!iD){const amb=Math.sin(t/15000)*0.03;
     c.fillStyle=amb>0?`rgba(255,200,100,${amb})`:`rgba(100,150,255,${-amb})`;c.fillRect(0,0,W2,H2);}
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
@@ -3813,7 +3835,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? (s.shopGround?"shop":"forest") : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? (s.shopGround?"shop":"forest") : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
