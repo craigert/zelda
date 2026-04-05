@@ -17,9 +17,8 @@ export function initSfx(){if(sfxReady)return;
   // Sword swing — crisp whoosh, not too loud
   sfxSynths.sword=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.003,decay:0.09,sustain:0,release:0.04},volume:-16}).toDestination(),3);
   sfxSynths.door=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1},volume:-14}).toDestination(),2);
-  // Door unlock — heavy grinding rumble with bold descending tone (classic Zelda style)
-  sfxSynths.dooropen=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.005,decay:0.6,sustain:0.15,release:0.25},volume:-6}).toDestination(),2);
-  sfxSynths.dooropenTone=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.005,decay:0.35,sustain:0.1,release:0.2},volume:-8}}).toDestination();
+  // Door unlock — bright ascending chime (accomplishment feel)
+  sfxSynths.dooropenTone=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.005,decay:0.18,sustain:0.15,release:0.2},volume:-10}}).toDestination();
   sfxSynths.bomb=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.4,sustain:0.05,release:0.2},volume:-8}).toDestination(),3);
   sfxReady=true;}
 
@@ -35,7 +34,7 @@ export function sfx(name,note){if(!sfxReady)return;
     sfxSynths.hitNoise.trigger("8n");}
   else if(name==="pickup"){const t=Tone.now();sfxSynths.pickup.triggerAttackRelease("E5","16n",t);sfxSynths.pickup.triggerAttackRelease("G5","16n",t+0.08);sfxSynths.pickup.triggerAttackRelease("C6","8n",t+0.16);}
   else if(name==="door")sfxSynths.door.trigger("8n");
-  else if(name==="dooropen"){const t=Tone.now();sfxSynths.dooropen.trigger("2n");sfxSynths.dooropenTone.triggerAttackRelease("E3","4n",t);sfxSynths.dooropenTone.triggerAttackRelease("D3","4n",t+0.12);sfxSynths.dooropenTone.triggerAttackRelease("B2","4n",t+0.25);sfxSynths.dooropenTone.triggerAttackRelease("A2","4n",t+0.4);}
+  else if(name==="dooropen"){const t=Tone.now();sfxSynths.dooropenTone.triggerAttackRelease("G4","8n",t);sfxSynths.dooropenTone.triggerAttackRelease("B4","8n",t+0.08);sfxSynths.dooropenTone.triggerAttackRelease("D5","8n",t+0.16);sfxSynths.dooropenTone.triggerAttackRelease("G5","4n",t+0.24);}
   else if(name==="bomb")sfxSynths.bomb.trigger("4n");
   else if(name==="hurt")sfxSynths.hurt.triggerAttackRelease("E2","8n");
   else if(name==="kill"){const t=Tone.now();sfxSynths.hit.triggerAttackRelease("A4","16n",t);sfxSynths.hit.triggerAttackRelease("E4","16n",t+0.06);}
