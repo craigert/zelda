@@ -1351,55 +1351,126 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       else if(e.type==="miniboss"){
         const mn=e.name||"";
         if(mn==="Vine Guardian"){
-          // Vine Guardian: slow, deliberate movement — shoots vine snares that root the hero
-          const ca=e.mt/900;moveX=Math.cos(ang+Math.sin(ca)*1.2)*es*0.35;moveY=Math.sin(ang+Math.sin(ca)*1.2)*es*0.35;
-          // Shoot vine snare at player (roots on hit)
-          if(Math.floor(e.mt/1800)!==Math.floor((e.mt-dt)/1800)){
-            const pa2=Math.atan2(pcy-ecy,pcx-ecx);
-            s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*2.5,dy:Math.sin(pa2)*2.5,type:"root",l:1400,snare:true});sfx("bomb");}
-          // Burst of vine tendrils in spread pattern every 4s
-          if(Math.floor(e.mt/4000)!==Math.floor((e.mt-dt)/4000)){
-            const ba=Math.atan2(pcy-ecy,pcx-ecx);
-            for(let i=-2;i<=2;i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ba+i*0.3)*2,dy:Math.sin(ba+i*0.3)*2,type:"root",l:1000,snare:true});}sfx("bomb");}
-        }else if(mn==="Flame Sentinel"){
-          // Flame Sentinel: aggressive, leaves fire trail, throws exploding fireballs
-          const mbPhase=Math.floor(e.mt/3000)%3;
-          if(mbPhase===0){// Chase with fire trail
-            const bsp=es*1.8;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
-            if(!e.trailT)e.trailT=0;e.trailT+=dt;
-            if(e.trailT>250){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
-              s.fireTrails.push({x:ecx,y:ecy,t:2500});}
-            s.pt.push({x:ecx+(Math.random()-.5)*8,y:ecy+(Math.random()-.5)*8,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:200,c:Math.random()>.5?"#f80":"#fa0"});}
-          else if(mbPhase===1){// Fireball barrage — lob exploding fireballs
-            moveX=-Math.cos(ang)*es*0.5;moveY=-Math.sin(ang)*es*0.5;
-            if(Math.floor(e.mt/800)!==Math.floor((e.mt-dt)/800)){
+          // Vine Guardian: roots in place, then burrows underground and pops up elsewhere
+          // Phase cycle: rooted(3s) → burrow(1s) → emerge(0.5s) → rooted...
+          if(!e.vinePhase){e.vinePhase="rooted";e.vineT=0;e.vineTarget=null;}
+          e.vineT+=dt;
+          if(e.vinePhase==="rooted"){
+            // Stationary — gentle sway, shoots vine snares
+            moveX=Math.sin(e.mt/600)*0.15;moveY=Math.cos(e.mt/800)*0.1;
+            // Aimed snare every 1.6s
+            if(Math.floor(e.mt/1600)!==Math.floor((e.mt-dt)/1600)){
               const pa2=Math.atan2(pcy-ecy,pcx-ecx);
-              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*3.5,dy:Math.sin(pa2)*3.5,type:"fire",l:1000,explode:true});sfx("bomb");}}
-          else{// Fire dash + ring explosion
-            const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
-            s.pt.push({x:ecx+(Math.random()-.5)*6,y:ecy+(Math.random()-.5)*6,dx:-moveX*0.3,dy:-moveY*0.3,l:150,c:"#f44"});
-            if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)){
-              for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"fire",l:900});}sfx("bomb");}}
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*2.5,dy:Math.sin(pa2)*2.5,type:"root",l:1400,snare:true});sfx("bomb");}
+            // 5-way burst every 4s
+            if(Math.floor(e.mt/4000)!==Math.floor((e.mt-dt)/4000)){
+              const ba=Math.atan2(pcy-ecy,pcx-ecx);
+              for(let i=-2;i<=2;i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ba+i*0.3)*2,dy:Math.sin(ba+i*0.3)*2,type:"root",l:1000,snare:true});}sfx("bomb");}
+            if(e.vineT>3000){e.vinePhase="burrow";e.vineT=0;
+              // Pick a spot to flank the player
+              const flankA=ang+Math.PI*(0.5+Math.random());const flankD=TL*2.5+Math.random()*TL*2;
+              e.vineTarget={x:Math.max(TL*2,Math.min(W2-TL*2,pcx+Math.cos(flankA)*flankD-ES/2)),
+                y:Math.max(TL*2,Math.min(H2-TL*2,pcy+Math.sin(flankA)*flankD-ES/2))};
+              s.pt.push(...Array.from({length:8},()=>({x:ecx,y:ecy+8,dx:(Math.random()-.5)*3,dy:Math.random()*1,l:400,c:"#654"})));sfx("door");}
+          }else if(e.vinePhase==="burrow"){
+            // Sink into ground — move toward target while invisible
+            e.burrowed=true;
+            if(e.vineTarget){const tdx=e.vineTarget.x-e.x,tdy=e.vineTarget.y-e.y,td=Math.hypot(tdx,tdy);
+              if(td>2){const bs=6*(dt/16);e.x+=tdx/td*bs;e.y+=tdy/td*bs;}}
+            // Ground disturbance particles at travel position
+            if(Math.random()<0.5)s.pt.push({x:ecx+(Math.random()-.5)*16,y:ecy+6,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:300,c:Math.random()>.5?"#654":"#483"});
+            if(e.vineT>1000){e.vinePhase="emerge";e.vineT=0;e.burrowed=false;
+              s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*3-1,l:500,c:Math.random()>.5?"#4a2":"#654"})));
+              sfx("bomb");s.shake.t=200;}
+          }else{// emerge — brief pause, then back to rooted
+            moveX=0;moveY=0;
+            if(e.vineT>500){e.vinePhase="rooted";e.vineT=0;}}
+        }else if(mn==="Flame Sentinel"){
+          // Flame Sentinel: erratic figure-8 spirals leaving fire everywhere, sudden dashes
+          if(!e.flamePhase){e.flamePhase="spiral";e.flameT=0;e.dashAng=0;}
+          e.flameT+=dt;
+          if(e.flamePhase==="spiral"){
+            // Figure-8 orbit around player — tightening spiral
+            const orbitT=e.mt/350;const lobeX=Math.sin(orbitT)*2;const lobeY=Math.sin(orbitT*2)*1.2;
+            const orbitR=TL*2.5+Math.sin(e.mt/1200)*TL;
+            const targetX=pcx+lobeX*orbitR-ES/2,targetY=pcy+lobeY*orbitR-ES/2;
+            const tdx=targetX-e.x,tdy=targetY-e.y,td=Math.max(1,Math.hypot(tdx,tdy));
+            const spd=es*2.2;moveX=tdx/td*spd;moveY=tdy/td*spd;
+            // Fire trail
+            if(!e.trailT)e.trailT=0;e.trailT+=dt;
+            if(e.trailT>200){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
+              s.fireTrails.push({x:ecx,y:ecy,t:2500});}
+            s.pt.push({x:ecx+(Math.random()-.5)*8,y:ecy+(Math.random()-.5)*8,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:200,c:Math.random()>.5?"#f80":"#fa0"});
+            // Lob exploding fireball every 2s
+            if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
+              const pa2=Math.atan2(pcy-ecy,pcx-ecx);
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*3.5,dy:Math.sin(pa2)*3.5,type:"fire",l:1000,explode:true});sfx("bomb");}
+            if(e.flameT>4000){e.flamePhase="windup";e.flameT=0;e.dashAng=ang;}
+          }else if(e.flamePhase==="windup"){
+            // Stop, spin in place gathering fire, then dash
+            moveX=0;moveY=0;
+            const spinR=8+e.flameT/50;
+            for(let i=0;i<2;i++){const sa=e.mt/60+i*Math.PI;
+              s.pt.push({x:ecx+Math.cos(sa)*spinR,y:ecy+Math.sin(sa)*spinR,dx:0,dy:0,l:200,c:Math.random()>.3?"#f80":"#ff0"});}
+            if(e.flameT>800){e.flamePhase="dash";e.flameT=0;e.dashAng=Math.atan2(pcy-ecy,pcx-ecx);sfx("bomb");s.shake.t=200;}
+          }else if(e.flamePhase==="dash"){
+            // Blazing straight-line dash leaving heavy fire trail
+            const bsp=es*4;moveX=Math.cos(e.dashAng)*bsp;moveY=Math.sin(e.dashAng)*bsp;
+            if(!e.trailT)e.trailT=0;e.trailT+=dt;
+            if(e.trailT>80){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
+              s.fireTrails.push({x:ecx,y:ecy,t:3000});}
+            s.pt.push({x:ecx+(Math.random()-.5)*10,y:ecy+(Math.random()-.5)*10,dx:-moveX*0.4,dy:-moveY*0.4,l:200,c:"#f44"});
+            if(e.flameT>700){e.flamePhase="explode";e.flameT=0;
+              // Ring explosion at end of dash
+              for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"fire",l:900});}
+              sfx("bomb");s.shake.t=300;s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:400,c:Math.random()>.3?"#f80":"#ff0"})));}
+          }else{// explode pause, then back to spiral
+            moveX=0;moveY=0;
+            if(e.flameT>600){e.flamePhase="spiral";e.flameT=0;}}
         }else{
-          // Shadow Knight: summons shadow ghosts that hunt the hero
-          const mbPhase=Math.floor(e.mt/3500)%3;
-          if(mbPhase===0){// Stalk and summon shadow ghosts
-            const ca=e.mt/700;moveX=Math.cos(ang+Math.sin(ca)*0.6)*es*0.6;moveY=Math.sin(ang+Math.sin(ca)*0.6)*es*0.6;
-            // Summon shadow ghost every 2.5s (max 3 active)
-            if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)){
+          // Shadow Knight: eerie drifting with sudden blink-teleports and afterimages
+          if(!e.shadowPhase){e.shadowPhase="drift";e.shadowT=0;e.afterimages=[];}
+          e.shadowT+=dt;
+          // Update afterimages (fade out)
+          if(!e.afterimages)e.afterimages=[];
+          for(let ai=e.afterimages.length-1;ai>=0;ai--){e.afterimages[ai].t-=dt;if(e.afterimages[ai].t<=0)e.afterimages.splice(ai,1);}
+          if(e.shadowPhase==="drift"){
+            // Slow menacing orbit — always keeping distance, circling
+            const orbitA=e.mt/500;const keepDist=TL*3;
+            const idealX=pcx+Math.cos(orbitA)*keepDist,idealY=pcy+Math.sin(orbitA)*keepDist;
+            const tdx=idealX-ecx,tdy=idealY-ecy,td=Math.max(1,Math.hypot(tdx,tdy));
+            moveX=tdx/td*es*0.8;moveY=tdy/td*es*0.8;
+            // Shadow trail while drifting
+            if(Math.random()<0.3)s.pt.push({x:ecx+(Math.random()-.5)*10,y:ecy+(Math.random()-.5)*10,dx:(Math.random()-.5)*0.5,dy:Math.random()*0.5,l:500,c:"rgba(80,40,140,0.5)"});
+            // Summon shadow ghost every 3s (max 3)
+            if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)){
               const ghosts=s.en.filter(e2=>e2.type==="ghost"&&e2.summoned);
               if(ghosts.length<3){
                 const sa=Math.random()*Math.PI*2,sr=TL*2;
                 s.en.push({x:ecx+Math.cos(sa)*sr-ES/2,y:ecy+Math.sin(sa)*sr-ES/2,hp:2,mhp:2,type:"ghost",fl:0,mt:0,st:"chase",stT:0,hx:ecx,hy:ecy,spawnT:400,summoned:true});
-                sfx("bomb");s.pt.push(...Array.from({length:8},()=>({x:ecx+Math.cos(sa)*sr,y:ecy+Math.sin(sa)*sr,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#80f"})));}}}
-          else if(mbPhase===1){// Shadow dash through player
-            const bsp=es*2.8;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
-            s.pt.push({x:ecx+(Math.random()-.5)*8,y:ecy+(Math.random()-.5)*8,dx:-moveX*0.2,dy:-moveY*0.2,l:200,c:"#60a"});}
-          else{// Retreat + shadow bolt spread
-            moveX=-Math.cos(ang)*es*0.7;moveY=-Math.sin(ang)*es*0.7;
-            if(Math.floor(e.mt/1200)!==Math.floor((e.mt-dt)/1200)){
-              const sa=Math.atan2(pcy-ecy,pcx-ecx);
-              for(let i=-1;i<=1;i++){s.bProj.push({x:ecx,y:ecy,dx:Math.cos(sa+i*0.3)*2.8,dy:Math.sin(sa+i*0.3)*2.8,type:"shadow",l:1200});}sfx("bomb");}}}
+                sfx("bomb");s.pt.push(...Array.from({length:8},()=>({x:ecx+Math.cos(sa)*sr,y:ecy+Math.sin(sa)*sr,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#80f"})));}}
+            if(e.shadowT>3500){e.shadowPhase="blink";e.shadowT=0;}
+          }else if(e.shadowPhase==="blink"){
+            // Rapid blink-teleport behind player, leaving afterimages
+            moveX=0;moveY=0;
+            if(e.shadowT<100){
+              // Save afterimage at current position
+              e.afterimages.push({x:e.x,y:e.y,t:600});
+              // Teleport behind player
+              const behindA=ang+Math.PI;const behindD=TL*1.5;
+              e.x=Math.max(TL,Math.min(W2-TL*2,pcx+Math.cos(behindA)*behindD-ES/2));
+              e.y=Math.max(TL,Math.min(H2-TL*2,pcy+Math.sin(behindA)*behindD-ES/2));
+              s.pt.push(...Array.from({length:10},()=>({x:e.x+ES/2,y:e.y+ES/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#a0f"})));sfx("door");}
+            if(e.shadowT>400){e.shadowPhase="strike";e.shadowT=0;
+              // Fire shadow bolt spread toward player from new position
+              const sa=Math.atan2(pcy-(e.y+ES/2),pcx-(e.x+ES/2));
+              for(let i=-1;i<=1;i++){s.bProj.push({x:e.x+ES/2,y:e.y+ES/2,dx:Math.cos(sa+i*0.25)*3,dy:Math.sin(sa+i*0.25)*3,type:"shadow",l:1200});}sfx("bomb");}
+          }else if(e.shadowPhase==="strike"){
+            // Quick lunge toward player after blink
+            const bsp=es*3;moveX=Math.cos(ang)*bsp;moveY=Math.sin(ang)*bsp;
+            s.pt.push({x:ecx+(Math.random()-.5)*8,y:ecy+(Math.random()-.5)*8,dx:-moveX*0.2,dy:-moveY*0.2,l:200,c:"#60a"});
+            if(e.shadowT>800){e.shadowPhase="drift";e.shadowT=0;}}
+        }
       }
       else if(e.type==="boss"){
         const ang2=Math.atan2(pcy-ecy,pcx-ecx);
@@ -1572,11 +1643,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(!s.fireTrails)s.fireTrails=[];
           s.fireTrails.push({x:ecx,y:ecy,t:3000});}
       }else if(e.type==="miniboss"){
-        // Mini-boss: use same AI as chase state (name-based)
+        // Mini-boss non-chase: gentle idle movement
         const mn=e.name||"";
-        if(mn==="Vine Guardian"){const ca=e.mt/900;moveX=Math.cos(ang+Math.sin(ca)*1.2)*es*0.35;moveY=Math.sin(ang+Math.sin(ca)*1.2)*es*0.35;}
-        else if(mn==="Flame Sentinel"){moveX=Math.cos(ang)*es*1.5;moveY=Math.sin(ang)*es*1.5;}
-        else{const ca=e.mt/700;moveX=Math.cos(ang+Math.sin(ca)*0.6)*es*0.6;moveY=Math.sin(ang+Math.sin(ca)*0.6)*es*0.6;}
+        if(mn==="Vine Guardian"){moveX=Math.sin(e.mt/600)*0.15;moveY=Math.cos(e.mt/800)*0.1;}
+        else if(mn==="Flame Sentinel"){const ca=e.mt/400;moveX=Math.cos(ca)*es;moveY=Math.sin(ca)*es;}
+        else{const ca=e.mt/600;moveX=Math.cos(ca)*es*0.5;moveY=Math.sin(ca)*es*0.5;}
       }else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
     }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
     else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
@@ -1591,10 +1662,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.sw.a){const sOff=SR*0.7,sR2=SR*0.85;let sx2=p.x+PS/2,sy2=p.y+PS/2;if(p.dir===0)sy2-=sOff;if(p.dir===2)sy2+=sOff;if(p.dir===3)sx2-=sOff;if(p.dir===1)sx2+=sOff;
       const sDist=Math.hypot(sx2-ecx,sy2-ecy);
       if(sDist<sR2+ES*0.4&&e.fl<=0){
-        // Shadow form — boss is invulnerable, sword passes through
-        if(e.shadowForm){e.fl=200;
-          s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#606"})));
-          s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"SHADOW!",c:"#a060ff"});
+        // Shadow form / burrowed — invulnerable, attacks pass through
+        if(e.shadowForm||e.burrowed){e.fl=200;
+          s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:e.burrowed?"#654":"#606"})));
+          s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:e.burrowed?"BURROWED!":"SHADOW!",c:e.burrowed?"#8a6":"#a060ff"});
           continue;}
         // Dark King blocks sword during dash
         if(e.type==="boss"&&e.blocking>0){e.fl=200;sfx("door");
@@ -1698,8 +1769,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(pa.l<=0||pa.x<0||pa.x>W2||pa.y<0||pa.y>H2){s.pArrows.splice(i,1);continue;}
     for(let j=s.en.length-1;j>=0;j--){const e=s.en[j];
       if(Math.hypot(pa.x-(e.x+ES/2),pa.y-(e.y+ES/2))<ES*0.5){
-        // Arrows pass through shadow form
-        if(e.shadowForm){s.pt.push({x:pa.x,y:pa.y,dx:0,dy:-1,l:200,c:"#606"});continue;}
+        // Arrows pass through shadow form / burrowed
+        if(e.shadowForm||e.burrowed){s.pt.push({x:pa.x,y:pa.y,dx:0,dy:-1,l:200,c:e.burrowed?"#654":"#606"});continue;}
         if(e.type==="knight"&&e.shieldDir!==undefined){
           const atkAng=Math.atan2(pa.dy,pa.dx);
           const shieldDiff=Math.abs(((atkAng-e.shieldDir+Math.PI*3)%(Math.PI*2))-Math.PI);
@@ -2413,7 +2484,20 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Draw miniboss -- unique appearance per dungeon
       const mbPh=Math.floor(e.mt/2500)%3;const charging=mbPh===2;
       const mn=e.name||"";
-      if(mn==="Vine Guardian"){
+      // Shadow Knight afterimages — drawn before main sprite
+      if(mn==="Shadow Knight"&&e.afterimages){for(const ai of e.afterimages){
+        const aix=ai.x+(ES-sz)/2,aiy=ai.y+(ES-sz)/2,aia=Math.min(1,ai.t/300)*0.4;
+        c.globalAlpha=aia;c.fillStyle="rgba(80,40,140,0.5)";c.beginPath();c.arc(aix+sz/2,aiy+sz/2,sz*0.5,0,Math.PI*2);c.fill();
+        c.globalAlpha=1;}}
+      // Vine Guardian — invisible when burrowed, just show ground disturbance
+      if(mn==="Vine Guardian"&&e.burrowed){
+        const rumble=Math.sin(t/60)*2;
+        c.fillStyle="rgba(80,60,30,0.4)";c.beginPath();c.ellipse(ex+sz/2+rumble,ey+sz*0.8,sz*0.4,sz*0.12,0,0,Math.PI*2);c.fill();
+        // Ground crack lines
+        c.strokeStyle="rgba(60,40,15,0.3)";c.lineWidth=1;
+        for(let i=0;i<3;i++){const ca=i*Math.PI*2/3+t/400;
+          c.beginPath();c.moveTo(ex+sz/2,ey+sz*0.8);c.lineTo(ex+sz/2+Math.cos(ca)*sz*0.5,ey+sz*0.8+Math.sin(ca)*sz*0.15);c.stroke();}
+      }else if(mn==="Vine Guardian"){
         // Forest miniboss — tangled vine creature with glowing core
         const pulse=Math.sin(t/250)*0.08;const sway=Math.sin(t/400)*3;
         c.fillStyle=`rgba(40,180,40,${charging?0.3:0.12+pulse})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
@@ -2505,10 +2589,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
             c.beginPath();c.moveTo(ex+sz/2+Math.cos(wa)*wr*0.3,ey+sz*.6);
             c.quadraticCurveTo(ex+sz/2+Math.cos(wa)*wr,ey+sz*.7+Math.sin(wa)*5,ex+sz/2+Math.cos(wa+0.5)*wr*0.6,ey+sz*.85);c.stroke();}}
       }
-      // HP bar (all minibosses)
-      const hbw=sz+6,hbx=ex-3,hby=ey-8;c.fillStyle="#000";c.fillRect(hbx,hby,hbw,4);
+      // HP bar (all minibosses — hidden when burrowed)
+      if(!e.burrowed){const hbw=sz+6,hbx=ex-3,hby=ey-8;c.fillStyle="#000";c.fillRect(hbx,hby,hbw,4);
       const hpCol=mn==="Vine Guardian"?"#4c4":mn==="Flame Sentinel"?"#f80":"#a060ff";
-      c.fillStyle=e.hp>e.mhp*0.3?hpCol:"#f22";c.fillRect(hbx+1,hby+1,Math.max(0,(hbw-2)*e.hp/e.mhp),2);
+      c.fillStyle=e.hp>e.mhp*0.3?hpCol:"#f22";c.fillRect(hbx+1,hby+1,Math.max(0,(hbw-2)*e.hp/e.mhp),2);}
     }
     else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,fl,t,e.type==="fire_bat");
     else if(e.type==="archer")dAr(c,ex,ey,sz,fl,t);
