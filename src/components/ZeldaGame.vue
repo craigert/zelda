@@ -415,10 +415,10 @@ function iS(s,tx,ty){const m=gm(s);if(!m)return true;
         s.dr.add(`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${px2},${py2}`);
         s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:tl===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
     if(tl===T.BOSS_DOOR){if(s.bossFight){s.msg={text:"The door won't budge during battle!",t:1500};return true;}
-      if(s.p.masterKey[s.loc.di]){s.dr.add(dk);openPair(tx,ty);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("door");
+      if(s.p.masterKey[s.loc.di]){s.dr.add(dk);openPair(tx,ty);s.msg={text:"Master key used! Boss door opened!",t:1500};sfx("dooropen");
       s.pt.push(...Array.from({length:12},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));return false;}
       s.msg={text:"Locked! Find the Master Key...",t:1500};return true;}
-    if(s.p.keys>0){s.p.keys--;s.dr.add(dk);openPair(tx,ty);s.msg={text:"Door opened!",t:1500};sfx("door");
+    if(s.p.keys>0){s.p.keys--;s.dr.add(dk);openPair(tx,ty);s.msg={text:"Door opened!",t:1500};sfx("dooropen");
       s.pt.push(...Array.from({length:8},()=>({x:tx*TL+16,y:ty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));return false;}return true;}
   return false;}
 
@@ -938,10 +938,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.pt.push(...Array.from({length:6},()=>({x:px2*TL+16,y:py2*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:ft===T.BOSS_DOOR?"#c070ff":"#fd3"})));}}};
         if(!s.dr.has(dk)){
           if(ft===T.BOSS_DOOR){if(s.bossFight){s.msg={text:"The door won't budge during battle!",t:1500};}
-            else if(p.masterKey[s.loc.di]){s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Master key used! Boss door opened!",t:1500};
+            else if(p.masterKey[s.loc.di]){s.dr.add(dk);openPair2();sfx("dooropen");s.msg={text:"Master key used! Boss door opened!",t:1500};
             s.pt.push(...Array.from({length:12},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#c070ff":"#fd3"})));}
             else{s.msg={text:"Locked! Find the Master Key...",t:1500};}}
-          else if(p.keys>0){p.keys--;s.dr.add(dk);openPair2();sfx("door");s.msg={text:"Door opened!",t:1500};
+          else if(p.keys>0){p.keys--;s.dr.add(dk);openPair2();sfx("dooropen");s.msg={text:"Door opened!",t:1500};
             s.pt.push(...Array.from({length:8},()=>({x:ftx*TL+16,y:fty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:500,c:"#fd3"})));}}}}
   }}
   if(moved){const m2=gm(s);if(m2){

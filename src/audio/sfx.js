@@ -17,6 +17,9 @@ export function initSfx(){if(sfxReady)return;
   // Sword swing — crisp whoosh, not too loud
   sfxSynths.sword=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.003,decay:0.09,sustain:0,release:0.04},volume:-16}).toDestination(),3);
   sfxSynths.door=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1},volume:-14}).toDestination(),2);
+  // Door unlock — grinding rumble with descending tone (classic Zelda style)
+  sfxSynths.dooropen=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.5,sustain:0.1,release:0.2},volume:-10}).toDestination(),2);
+  sfxSynths.dooropenTone=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.01,decay:0.3,sustain:0.05,release:0.15},volume:-18}}).toDestination();
   sfxSynths.bomb=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.4,sustain:0.05,release:0.2},volume:-8}).toDestination(),3);
   sfxReady=true;}
 
@@ -32,6 +35,7 @@ export function sfx(name,note){if(!sfxReady)return;
     sfxSynths.hitNoise.trigger("8n");}
   else if(name==="pickup"){const t=Tone.now();sfxSynths.pickup.triggerAttackRelease("E5","16n",t);sfxSynths.pickup.triggerAttackRelease("G5","16n",t+0.08);sfxSynths.pickup.triggerAttackRelease("C6","8n",t+0.16);}
   else if(name==="door")sfxSynths.door.trigger("8n");
+  else if(name==="dooropen"){const t=Tone.now();sfxSynths.dooropen.trigger("4n");sfxSynths.dooropenTone.triggerAttackRelease("D3","8n",t);sfxSynths.dooropenTone.triggerAttackRelease("C3","8n",t+0.12);sfxSynths.dooropenTone.triggerAttackRelease("A2","8n",t+0.25);}
   else if(name==="bomb")sfxSynths.bomb.trigger("4n");
   else if(name==="hurt")sfxSynths.hurt.triggerAttackRelease("E2","8n");
   else if(name==="kill"){const t=Tone.now();sfxSynths.hit.triggerAttackRelease("A4","16n",t);sfxSynths.hit.triggerAttackRelease("E4","16n",t+0.06);}
