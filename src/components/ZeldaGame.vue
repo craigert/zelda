@@ -568,40 +568,49 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
-  // Hero landing animation after triforce warp
+  // Hero landing animation after boss victory warp
   if(s.heroLand){s.heroLand.t+=dt;
+    // Sparkle particles during descent
+    if(s.heroLand.t<s.heroLand.dur*0.9&&Math.random()<0.25){
+      s.pt.push({x:s.p.x+PS/2+(Math.random()-.5)*20,y:-10+Math.random()*20,dx:(Math.random()-.5)*1.5,dy:Math.random()*0.5+0.3,l:400,c:Math.random()>.5?"#cdf":"#fff"});}
     if(s.heroLand.t>=s.heroLand.dur){s.heroLand=null;}
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
     if(s.triforceHold.t>2000&&!s.triforceHold.warp){s.triforceHold.warp=true;sfx("door");
       const tc3=s.p.tri.filter(Boolean).length;
       s.msg={text:tc3>=3?"The Dark Sanctum has opened!":`Triforce piece ${tc3}/3!`,t:2000};}
-    // Fade to dungeon entrance after hold-up
+    // After hold-up: warp only when boss defeated + triforce + heart container all collected
     if(s.triforceHold.warp&&s.triforceHold.t>=s.triforceHold.dur&&!s.triforceHold.fading){
-      s.triforceHold.fading=true;
-      const di2=s.loc.di;const bossScr=s.loc.scr;
-      const bx2=s.bossWarp?s.bossWarp.x:Math.floor((s.p.x+PS/2)/TL);
-      const by2=s.bossWarp?s.bossWarp.y:Math.floor((s.p.y+PS/2)/TL);
-      s.bossWarp=null;// cancel temporary portal
-      s.fade={a:true,alpha:0,dir:1,t:0,spd:800,cb:()=>{
-        const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
-          for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
-          // Create permanent two-way warp
-          if(!s.bossWarps.find(w=>w.di===di2)){s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
-          s.loc.scr=entryScr;s.p.x=7*TL;s.p.y=9*TL;s.ec=500;le(s);
-          // Landing animation
-          s.heroLand={t:0,dur:1000};}
-        s.triforceHold=null;s.triMu=false;}};}
+      const hcRemain=s.drops.some(d2=>d2.type==="heartcontainer");
+      if(!hcRemain&&s.bossVictory){
+        // All 3 conditions met — fade to dungeon entrance
+        s.triforceHold.fading=true;
+        const di2=s.bossVictory.di;const bossScr=s.loc.scr;
+        s.bossWarp=null;
+        s.fade={a:true,alpha:0,dir:1,t:0,spd:1000,cb:()=>{
+          const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
+            for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
+            if(!s.bossWarps.find(w=>w.di===di2)){const bx2=Math.floor((s.p.x+PS/2)/TL),by2=Math.floor((s.p.y+PS/2)/TL);
+              s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
+            s.loc.scr=entryScr;s.p.x=7*TL;s.p.y=9*TL;s.ec=500;le(s);
+            s.heroLand={t:0,dur:2000};}
+          s.triforceHold=null;s.triMu=false;s.bossVictory=null;}};
+      }else{
+        // Heart container not yet collected — end hold-up, let player collect it
+        s.triforceHold=null;
+        if(!s.bossVictory)s.triMu=false;}}
     // Update particles + drops during hold (so player can pick up remaining items)
-    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
-    // Allow drop collection during hold
-    for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
-      if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
-      if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
-        if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};}
-        s.drops.splice(i,1);}}
-    return;}
+    if(s.triforceHold&&!s.triforceHold.fading){
+      for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+      for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
+        if(d2.type==="triforce"||d2.type==="heartcontainer"||d2.type==="key_drop"){d2.vy=Math.min(d2.vy+0.02*(dt/16),0.8);d2.y+=d2.vy*(dt/16);if(d2.y>d2.ground){d2.y=d2.ground;d2.vy=0;}}
+        if(Math.abs(s.p.x+PS/2-d2.x)<16&&Math.abs(s.p.y+PS/2-d2.y)<16){
+          if(d2.type==="heartcontainer"){s.p.mhp+=2;s.p.hp=s.p.mhp;sfx("itemget");s.msg={text:"Heart Container!",t:1500};
+            if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);}
+          s.drops.splice(i,1);}}
+      return;}}
   // Pit fall animation -- freeze gameplay, shrink player
   if(s.pitFall&&s.pitFall.a){s.pitFall.t+=dt;
     if(s.pitFall.t>=600){s.pitFall.a=false;
@@ -1185,7 +1194,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
       else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
-        if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);}
+        if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);
+        // Auto-warp to entrance if boss defeated + triforce already collected + HC just collected
+        if(s.bossVictory&&p.tri[s.bossVictory.di]){
+          s.bossVictory.fadeDelay=800;s.shake.t=300;}}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;}
@@ -1194,34 +1206,20 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
     if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
-  // Boss warp portal — appears after boss death, warps player to overworld
-  if(s.bossWarp){s.bossWarp.t+=dt;
-    if(!s.bossWarp.ready&&s.bossWarp.t>3000){
-      // Portal appears after 3 seconds (time for drops to land)
-      s.bossWarp.ready=true;sfx("secret");s.msg={text:"A warp portal appeared!",t:2500};
-      const wx=s.bossWarp.x,wy=s.bossWarp.y;
-      s.pt.push(...Array.from({length:20},()=>({x:wx*TL+16,y:wy*TL+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));
-    }
-    if(s.bossWarp.ready){
-      const wx=s.bossWarp.x*TL,wy=s.bossWarp.y*TL;
-      // Check if player stepped on the portal
-      if(p.x+PS/2>wx&&p.x+PS/2<wx+TL&&p.y+PS/2>wy&&p.y+PS/2<wy+TL){
-        const di=s.bossWarp.di;const bx=s.bossWarp.x,by=s.bossWarp.y;
-        const bossScr=s.loc.scr;
-        // Find the dungeon entry room (the one with STAIRS_UP)
-        const dg2=s.dg[di];let entryScr="0,0";
-        for(const rk of Object.keys(dg2.rooms)){if(dg2.rooms[rk].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk;break;}}
-        // Make this warp permanent
-        if(!s.bossWarps.find(w=>w.di===di)){
-          s.bossWarps.push({di,bossScr,bossX:bx,bossY:by,entryScr});
-        }
-        s.bossWarp=null;
-        // Warp to dungeon entrance room
-        s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
-          s.loc.scr=entryScr;p.x=7*TL;p.y=9*TL;
-          s.triMu=false;s.ec=500;le(s);s.msg={text:"Warped to dungeon entrance!",t:1500};
-        }};
-      }
+  // Boss victory auto-warp — delayed fade to dungeon entrance after collecting all items
+  if(s.bossVictory&&s.bossVictory.fadeDelay!=null){
+    s.bossVictory.fadeDelay-=dt;
+    if(s.bossVictory.fadeDelay<=0){
+      const di2=s.bossVictory.di;const bossScr=s.loc.scr;
+      s.bossWarp=null;
+      s.fade={a:true,alpha:0,dir:1,t:0,spd:1000,cb:()=>{
+        const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
+          for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
+          if(!s.bossWarps.find(w=>w.di===di2)){const bx2=Math.floor((p.x+PS/2)/TL),by2=Math.floor((p.y+PS/2)/TL);
+            s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
+          s.loc.scr=entryScr;p.x=7*TL;p.y=9*TL;s.ec=500;le(s);
+          s.heroLand={t:0,dur:2000};}
+        s.bossVictory=null;s.triMu=false;}};
     }
   }
   // Persistent warp portals — check if player steps on one
@@ -1595,9 +1593,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           s.drops.push({x:ecx,y:-20,vy:0.35,ground:ecy-8,type:"triforce",t:0,spin:0});
           s.triMu=true;}
         if(s.loc.di===3){s.triMu=true;s.finalDeath={t:0,dur:7000,bx:ecx,by:ecy,flash:0,fallY:0,fadeAlpha:0,heroRaise:0};s.msg={text:"",t:0};}
-        // Spawn warp portal after boss death (delayed so drops land first)
-        if(s.loc.di<3){const wTx=Math.floor(ecx/TL),wTy=Math.floor(ecy/TL);
-          s.bossWarp={x:wTx,y:wTy,t:0,ready:false,di:s.loc.di};}
+        // Track boss victory — auto-warp after triforce + heart container collected
+        if(s.loc.di<3){s.bossVictory={di:s.loc.di};}
       }else if(e.type==="miniboss"){sfx("bossdeath");s.shake.t=400;s.freeze=300;s.bossFight=false;
         s.drops.push({x:ecx,y:ecy-8,vy:-4,ground:ecy,type:"heart",t:0},{x:ecx-10,y:ecy-8,vy:-3.5,ground:ecy,type:"heart",t:0});
         s.msg={text:`${e.name||"Mini-Boss"} defeated!`,t:2000};
@@ -2854,22 +2851,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     for(let i=0;i<8;i++){const sa=t/400+i*Math.PI/4,sr=14+Math.sin(t/250+i)*4;
       const sx=tx3+Math.cos(sa)*sr,sy=ty3+Math.sin(sa)*sr;
       c.fillStyle=`rgba(255,255,200,${0.3+Math.sin(t/200+i)*0.2})`;c.beginPath();c.arc(sx,sy,1.5,0,Math.PI*2);c.fill();}
-    // Warp portal
+    // Golden glow intensifies when warp is ready
     if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
-      const wcx=W2/2,wcy=H2/2;const wr=wp2*20;
-      c.strokeStyle=`rgba(100,180,255,${wp2*0.6})`;c.lineWidth=3;
-      c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.stroke();
-      c.fillStyle=`rgba(80,150,255,${wp2*0.2})`;c.beginPath();c.arc(wcx,wcy,wr,0,Math.PI*2);c.fill();
-      for(let i=0;i<6;i++){const a=t/300+i*Math.PI/3;
-        c.fillStyle=`rgba(150,200,255,${wp2*0.5})`;c.beginPath();c.arc(wcx+Math.cos(a)*wr,wcy+Math.sin(a)*wr,2,0,Math.PI*2);c.fill();}}
-  }else if(s.heroLand){// Hero descending from above
+      c.fillStyle=`rgba(253,211,51,${wp2*0.08})`;c.fillRect(0,0,W2,H2);}
+  }else if(s.heroLand){// Hero slowly descending from ceiling
     const hl=s.heroLand,lp=Math.min(1,hl.t/hl.dur);
-    const landY=p.y-60*(1-lp);// descend from 60px above
-    const bounce=lp>=0.9?Math.sin((lp-0.9)/0.1*Math.PI)*4:0;// small bounce at end
-    c.fillStyle="rgba(0,0,0,0.18)";c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,4+lp*6,1+lp*2,0,0,Math.PI*2);c.fill();
-    // Light beam from above
-    if(lp<0.8){const beamA=0.15*(1-lp/0.8);
-      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-8,landY-10);c.lineTo(p.x+PS/2+8,landY-10);c.lineTo(p.x+PS/2+4,-10);c.lineTo(p.x+PS/2-4,-10);c.fill();}
+    const ease=1-Math.pow(1-lp,3);// cubic ease-out — fast start, soft landing
+    const landY=-20+(p.y+20)*ease;// from above screen to ground position
+    const bounce=lp>=0.93?Math.sin((lp-0.93)/0.07*Math.PI)*3:0;// gentle bounce at touchdown
+    // Growing shadow as hero approaches ground
+    c.fillStyle=`rgba(0,0,0,${0.04+ease*0.16})`;c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,3+ease*7,1+ease*2,0,0,Math.PI*2);c.fill();
+    // Light beam from above — wider, fades as hero lands
+    if(lp<0.85){const beamA=0.18*(1-lp/0.85);
+      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-14,landY-10);c.lineTo(p.x+PS/2+14,landY-10);c.lineTo(p.x+PS/2+5,-10);c.lineTo(p.x+PS/2-5,-10);c.fill();}
     dP(c,p.x,landY-bounce,p.dir,t,p.redArmor);
   }else if(s.finalDeath){// Hero drawn by finalDeath overlay — skip normal draw
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
