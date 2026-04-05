@@ -457,6 +457,9 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(s.ec<=0){
       for(const ent of DE){if(ent.s!==loc.scr)continue;
         if(ent.d===3&&!s.finalOpen)continue;
+        // Gate dungeons: must beat previous dungeon's boss first
+        if(ent.d===1&&!p.tri[0]){for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){s.msg={text:"A dark force blocks the way... Defeat the Forest Temple boss first!",t:2500};s.ec=300;}}continue;}
+        if(ent.d===2&&!p.tri[1]){for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){s.msg={text:"Intense heat blocks the way... Defeat the Fire Cavern boss first!",t:2500};s.ec=300;}}continue;}
         for(const[tx,ty]of ent.t){if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="dg";loc.di=ent.d;const dg2=s.dg[ent.d];let er="0,0";for(const rk of Object.keys(dg2.rooms))if(dg2.rooms[rk].tiles.some(r=>r.includes(T.STAIRS_UP))){er=rk;break;}
