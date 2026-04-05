@@ -318,7 +318,7 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
@@ -916,19 +916,31 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   {const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);const m2=gm(s);
     if(m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TSWITCH){
       const tk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:tswitch`;
+      const sk=`${tk}:${ptx},${pty}`;// per-tile switch key
       if(!s.timedDoors.find(td=>td.key===tk)){
-        sfx("pickup");s.shake.t=200;
-        // Open all DOOR tiles and deactivate SPIKE tiles temporarily
-        let hasDoors=false,hasSpikes=false;const spikePos=[];
-        for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){
-          if(m2[yy][xx]===T.DOOR){hasDoors=true;
-            const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
-            s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
-          if(m2[yy][xx]===T.SPIKE){hasSpikes=true;spikePos.push([xx,yy]);
-            m2[yy][xx]=T.FLOOR;
-            s.pt.push({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:300,c:"#aaa"});}}
-        if(hasDoors||hasSpikes)s.msg={text:hasDoors?"Timed switch! Hurry!":"Spikes retracted! Hurry!",t:1500};
-        s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,spikes:spikePos});}}}
+        // Count total switches in room and track which have been triggered
+        if(!s._tswitchHit)s._tswitchHit={};
+        if(!s._tswitchHit[tk])s._tswitchHit[tk]=new Set();
+        if(!s._tswitchHit[tk].has(sk)){
+          s._tswitchHit[tk].add(sk);sfx("pickup");s.shake.t=200;
+          let totalSwitches=0;
+          for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){if(m2[yy][xx]===T.TSWITCH)totalSwitches++;}
+          s.pt.push(...Array.from({length:6},()=>({x:ptx*TL+16,y:pty*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));
+          if(s._tswitchHit[tk].size<totalSwitches){
+            s.msg={text:`Switch ${s._tswitchHit[tk].size}/${totalSwitches} activated!`,t:1500};
+          }else{
+            // All switches triggered — open doors and retract spikes
+            s._tswitchHit[tk]=null;
+            let hasDoors=false,hasSpikes=false;const spikePos=[];
+            for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){
+              if(m2[yy][xx]===T.DOOR){hasDoors=true;
+                const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
+                s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
+              if(m2[yy][xx]===T.SPIKE){hasSpikes=true;spikePos.push([xx,yy]);
+                m2[yy][xx]=T.FLOOR;
+                s.pt.push({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:300,c:"#aaa"});}}
+            if(hasDoors||hasSpikes)s.msg={text:hasDoors?"All switches hit! Hurry!":"Spikes retracted! Hurry!",t:1500};
+            s.timedDoors.push({key:tk,t:5000,scr:s.loc.scr,di:s.loc.di,ty:s.loc.ty,spikes:spikePos});}}}}}
   for(let i=s.timedDoors.length-1;i>=0;i--){const td=s.timedDoors[i];td.t-=dt;
     if(td.t<=0){
       const m2=td.ty==="dg"?s.dg[td.di]?.rooms[td.scr]?.tiles:null;
