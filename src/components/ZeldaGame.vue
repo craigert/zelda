@@ -2361,20 +2361,105 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       if(e.shadowForm)c.globalAlpha=1;
     }
     else if(e.type==="miniboss"){
-      // Draw miniboss -- armored skeleton, larger, with HP bar and aura
+      // Draw miniboss -- unique appearance per dungeon
       const mbPh=Math.floor(e.mt/2500)%3;const charging=mbPh===2;
-      const auraA=charging?0.25:0.1+Math.sin(t/300)*0.05;
-      c.fillStyle=`rgba(200,50,50,${auraA})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
-      dSk(c,ex,ey,sz,fl,t);
-      // Armor overlay
-      c.fillStyle=fl?"#fff":"#8a4a2a";c.fillRect(ex+sz*0.15,ey+sz*0.3,sz*0.7,sz*0.25);
-      c.fillStyle=fl?"#fff":"#666";c.fillRect(ex+sz*0.35,ey+sz*0.05,sz*0.3,sz*0.15);
-      // Glowing eyes
-      if(!fl){c.fillStyle=charging?"#f33":"#fa3";c.beginPath();c.arc(ex+sz*0.35,ey+sz*0.18,2,0,Math.PI*2);c.fill();
-        c.beginPath();c.arc(ex+sz*0.65,ey+sz*0.18,2,0,Math.PI*2);c.fill();}
-      // HP bar
+      const mn=e.name||"";
+      if(mn==="Vine Guardian"){
+        // Forest miniboss — tangled vine creature with glowing core
+        const pulse=Math.sin(t/250)*0.08;const sway=Math.sin(t/400)*3;
+        c.fillStyle=`rgba(40,180,40,${charging?0.3:0.12+pulse})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
+        // Vine tendrils
+        c.strokeStyle=fl?"#fff":"#2a6a18";c.lineWidth=3;
+        for(let i=0;i<6;i++){const a=i*Math.PI/3+t/800,r1=sz*0.25,r2=sz*0.65+Math.sin(t/300+i)*4;
+          c.beginPath();c.moveTo(ex+sz/2+Math.cos(a)*r1,ey+sz/2+Math.sin(a)*r1);
+          c.quadraticCurveTo(ex+sz/2+Math.cos(a+0.3)*(r1+r2)/2+sway,ey+sz/2+Math.sin(a+0.3)*(r1+r2)/2,ex+sz/2+Math.cos(a)*r2,ey+sz/2+Math.sin(a)*r2);c.stroke();}
+        // Woody body
+        const vg=c.createRadialGradient(ex+sz*.45,ey+sz*.3,2,ex+sz/2,ey+sz*.4,sz*.25);
+        vg.addColorStop(0,fl?"#fff":"#5a8a30");vg.addColorStop(1,fl?"#ddd":"#3a5a18");
+        c.fillStyle=vg;c.beginPath();c.ellipse(ex+sz/2,ey+sz*.42,sz*.22,sz*.28,0,0,Math.PI*2);c.fill();
+        // Bark texture lines
+        if(!fl){c.strokeStyle="rgba(30,50,10,0.4)";c.lineWidth=1;
+          c.beginPath();c.moveTo(ex+sz*.38,ey+sz*.25);c.lineTo(ex+sz*.42,ey+sz*.55);c.stroke();
+          c.beginPath();c.moveTo(ex+sz*.58,ey+sz*.28);c.lineTo(ex+sz*.55,ey+sz*.52);c.stroke();}
+        // Glowing eye knots
+        if(!fl){c.fillStyle=charging?"#ff4":"#8f2";c.beginPath();c.arc(ex+sz*.38,ey+sz*.32,2.5,0,Math.PI*2);c.fill();
+          c.beginPath();c.arc(ex+sz*.62,ey+sz*.32,2.5,0,Math.PI*2);c.fill();
+          c.fillStyle=`rgba(${charging?'255,255,100':'140,255,40'},0.4)`;c.beginPath();c.arc(ex+sz*.38,ey+sz*.32,4,0,Math.PI*2);c.fill();
+          c.beginPath();c.arc(ex+sz*.62,ey+sz*.32,4,0,Math.PI*2);c.fill();}
+        // Leaf crown
+        if(!fl){c.fillStyle="#3a8a20";
+          for(let i=0;i<5;i++){const la=Math.PI+i*Math.PI/6+Math.sin(t/500+i)*0.15;
+            c.beginPath();c.ellipse(ex+sz/2+Math.cos(la)*sz*.2,ey+sz*.18+Math.sin(la)*sz*.1,5,3,la+Math.PI/2,0,Math.PI*2);c.fill();}}
+      }else if(mn==="Flame Sentinel"){
+        // Fire miniboss — living flame with molten armor
+        const flicker=Math.sin(t/100)*0.1;const blaze=Math.sin(t/150)*4;
+        c.fillStyle=`rgba(255,100,20,${charging?0.35:0.15+flicker})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.75,0,Math.PI*2);c.fill();
+        // Flame body — layered fire shape
+        const fg1=c.createRadialGradient(ex+sz*.45,ey+sz*.35,2,ex+sz/2,ey+sz*.45,sz*.3);
+        fg1.addColorStop(0,fl?"#fff":"#ffe060");fg1.addColorStop(0.5,fl?"#fdd":"#f08020");fg1.addColorStop(1,fl?"#faa":"#c02000");
+        c.fillStyle=fg1;
+        c.beginPath();c.moveTo(ex+sz*.2,ey+sz*.65);c.quadraticCurveTo(ex+sz*.15,ey+sz*.3,ex+sz*.35+blaze*0.5,ey+sz*.05);
+        c.quadraticCurveTo(ex+sz*.45,ey+sz*.2,ex+sz/2,ey-sz*.05+blaze);
+        c.quadraticCurveTo(ex+sz*.55,ey+sz*.2,ex+sz*.65-blaze*0.5,ey+sz*.05);
+        c.quadraticCurveTo(ex+sz*.85,ey+sz*.3,ex+sz*.8,ey+sz*.65);c.closePath();c.fill();
+        // Inner white-hot core
+        c.fillStyle=fl?"#fff":"rgba(255,255,200,0.6)";
+        c.beginPath();c.ellipse(ex+sz/2,ey+sz*.4,sz*.12,sz*.15,0,0,Math.PI*2);c.fill();
+        // Molten armor plates
+        if(!fl){c.fillStyle="#8a2a08";c.fillRect(ex+sz*.2,ey+sz*.45,sz*.6,sz*.12);
+          c.fillStyle="#6a1a04";c.fillRect(ex+sz*.25,ey+sz*.43,sz*.15,sz*.16);c.fillRect(ex+sz*.6,ey+sz*.43,sz*.15,sz*.16);
+          // Glowing cracks in armor
+          c.strokeStyle="rgba(255,160,40,0.7)";c.lineWidth=1;
+          c.beginPath();c.moveTo(ex+sz*.35,ey+sz*.45);c.lineTo(ex+sz*.4,ey+sz*.55);c.stroke();
+          c.beginPath();c.moveTo(ex+sz*.6,ey+sz*.46);c.lineTo(ex+sz*.55,ey+sz*.56);c.stroke();}
+        // Ember eyes
+        if(!fl){c.fillStyle=charging?"#fff":"#ff2";c.beginPath();c.arc(ex+sz*.38,ey+sz*.28,2.5,0,Math.PI*2);c.fill();
+          c.beginPath();c.arc(ex+sz*.62,ey+sz*.28,2.5,0,Math.PI*2);c.fill();}
+        // Floating embers
+        if(!fl){for(let i=0;i<4;i++){const ea=t/200+i*1.5,er=sz*0.4+Math.sin(t/300+i)*8;
+          const epx=ex+sz/2+Math.cos(ea)*er*0.5,epy=ey+sz*.2-Math.abs(Math.sin(ea))*er;
+          c.fillStyle=`rgba(255,${150+Math.floor(Math.random()*80)},30,${0.4+Math.sin(t/200+i)*0.2})`;
+          c.beginPath();c.arc(epx,epy,1.5,0,Math.PI*2);c.fill();}}
+      }else{
+        // Shadow Knight — dark spectral warrior with purple aura
+        const pulse=Math.sin(t/300)*0.08;const drift=Math.sin(t/500)*2;
+        c.fillStyle=`rgba(100,40,180,${charging?0.3:0.12+pulse})`;c.beginPath();c.arc(ex+sz/2,ey+sz/2,sz*0.7,0,Math.PI*2);c.fill();
+        // Dark body with gradient
+        const sg=c.createRadialGradient(ex+sz*.45,ey+sz*.3,2,ex+sz/2,ey+sz*.4,sz*.28);
+        sg.addColorStop(0,fl?"#fff":"#4a3a6a");sg.addColorStop(1,fl?"#ddd":"#1a0a2a");
+        c.fillStyle=sg;c.beginPath();c.ellipse(ex+sz/2,ey+sz*.42,sz*.22,sz*.3,0,0,Math.PI*2);c.fill();
+        // Horned helm
+        const hg=c.createLinearGradient(ex+sz*.3,ey,ex+sz*.7,ey+sz*.25);
+        hg.addColorStop(0,fl?"#fff":"#3a2a4a");hg.addColorStop(1,fl?"#ddd":"#2a1a3a");
+        c.fillStyle=hg;c.beginPath();c.arc(ex+sz/2,ey+sz*.2,sz*.22,0,Math.PI*2);c.fill();
+        // Horns
+        if(!fl){c.fillStyle="#2a1a3a";
+          c.beginPath();c.moveTo(ex+sz*.25,ey+sz*.2);c.lineTo(ex+sz*.15,ey-sz*.05+drift);c.lineTo(ex+sz*.32,ey+sz*.12);c.fill();
+          c.beginPath();c.moveTo(ex+sz*.75,ey+sz*.2);c.lineTo(ex+sz*.85,ey-sz*.05-drift);c.lineTo(ex+sz*.68,ey+sz*.12);c.fill();}
+        // Dark armor with purple trim
+        if(!fl){c.fillStyle="#2a1838";c.fillRect(ex+sz*.18,ey+sz*.32,sz*.64,sz*.22);
+          c.strokeStyle="rgba(150,80,255,0.5)";c.lineWidth=1;
+          c.strokeRect(ex+sz*.18,ey+sz*.32,sz*.64,sz*.22);
+          // Shoulder plates
+          c.fillStyle="#1a0828";c.beginPath();c.ellipse(ex+sz*.18,ey+sz*.35,sz*.1,sz*.07,0,0,Math.PI*2);c.fill();
+          c.beginPath();c.ellipse(ex+sz*.82,ey+sz*.35,sz*.1,sz*.07,0,0,Math.PI*2);c.fill();}
+        // Spectral eyes — slitted purple
+        if(!fl){c.fillStyle=charging?"#f4f":"#a060ff";
+          c.beginPath();c.ellipse(ex+sz*.37,ey+sz*.18,3,1.5,0,0,Math.PI*2);c.fill();
+          c.beginPath();c.ellipse(ex+sz*.63,ey+sz*.18,3,1.5,0,0,Math.PI*2);c.fill();
+          c.fillStyle=`rgba(${charging?'255,100,255':'160,100,255'},0.3)`;
+          c.beginPath();c.arc(ex+sz*.37,ey+sz*.18,5,0,Math.PI*2);c.fill();
+          c.beginPath();c.arc(ex+sz*.63,ey+sz*.18,5,0,Math.PI*2);c.fill();}
+        // Shadow wisps
+        if(!fl){c.strokeStyle="rgba(80,40,140,0.3)";c.lineWidth=2;
+          for(let i=0;i<3;i++){const wa=t/600+i*2,wr=sz*0.35;
+            c.beginPath();c.moveTo(ex+sz/2+Math.cos(wa)*wr*0.3,ey+sz*.6);
+            c.quadraticCurveTo(ex+sz/2+Math.cos(wa)*wr,ey+sz*.7+Math.sin(wa)*5,ex+sz/2+Math.cos(wa+0.5)*wr*0.6,ey+sz*.85);c.stroke();}}
+      }
+      // HP bar (all minibosses)
       const hbw=sz+6,hbx=ex-3,hby=ey-8;c.fillStyle="#000";c.fillRect(hbx,hby,hbw,4);
-      c.fillStyle=e.hp>e.mhp*0.3?"#f80":"#f22";c.fillRect(hbx+1,hby+1,Math.max(0,(hbw-2)*e.hp/e.mhp),2);
+      const hpCol=mn==="Vine Guardian"?"#4c4":mn==="Flame Sentinel"?"#f80":"#a060ff";
+      c.fillStyle=e.hp>e.mhp*0.3?hpCol:"#f22";c.fillRect(hbx+1,hby+1,Math.max(0,(hbw-2)*e.hp/e.mhp),2);
     }
     else if(e.type==="bat"||e.type==="fire_bat")dBt(c,ex,ey,sz,fl,t,e.type==="fire_bat");
     else if(e.type==="archer")dAr(c,ex,ey,sz,fl,t);
