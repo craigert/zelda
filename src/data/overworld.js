@@ -333,14 +333,27 @@ export const OW={
 // Eastern ruins
 "3,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  // Scattered boulder field
   m[3][4]=T.ROCK;m[3][5]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
   m[8][4]=T.ROCK;m[8][5]=T.ROCK;m[8][10]=T.ROCK;m[8][11]=T.ROCK;
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[7][4]=T.ROCK;m[7][11]=T.ROCK;
-  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.CRACK;// bomb center rock to reveal cave
+  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
   m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
   m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
+  // Extra boulders — denser field extending east
+  m[2][10]=T.ROCK;m[2][11]=T.ROCK;m[2][12]=T.ROCK;
+  m[3][12]=T.ROCK;m[3][13]=T.ROCK;
+  m[4][12]=T.ROCK;m[4][13]=T.ROCK;
+  m[5][10]=T.ROCK;m[5][11]=T.ROCK;m[5][12]=T.ROCK;
+  m[6][10]=T.ROCK;m[6][11]=T.ROCK;m[6][12]=T.ROCK;
+  m[7][12]=T.ROCK;m[7][13]=T.ROCK;
+  m[8][12]=T.ROCK;m[8][13]=T.ROCK;
+  m[9][10]=T.ROCK;m[9][11]=T.ROCK;m[9][12]=T.ROCK;
+  m[5][3]=T.ROCK;m[6][3]=T.ROCK;m[9][5]=T.ROCK;m[2][5]=T.ROCK;
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");
+  // Cracked tile near east side — nestled in the boulder field
+  m[5][12]=T.CRACK;
   return m;})(),
 
 // D1 Fire Cavern — desert dungeon

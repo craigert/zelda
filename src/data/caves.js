@@ -14,7 +14,7 @@ export const CAVES=[
   {s:"-1,1",t:[[12,8]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][7]=T.HEART_PIECE;m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[7][6]=T.TORCH;m[7][9]=T.TORCH;m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[6][6]=T.RUPEE;m[6][9]=T.RUPEE;}),enemies:[]}},
   {s:"2,1",t:[[3,9]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[4][7]=T.BOMB;m[4][8]=T.BOMB;m[5][7]=T.HEART;m[5][8]=T.HEART;m[6][7]=T.RUPEE;m[6][8]=T.RUPEE;m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;}),enemies:[]}},
   // Shadow Grotto — dark winding corridors with pits, heart piece at the end
-  {s:"3,1",t:[[8,6]],style:{color:"#0a0a12",wc:"#2a2a3a",fc:"#151520",name:"Shadow Grotto",th:"shadow"},rooms:{
+  {s:"3,1",t:[[12,5]],style:{color:"#0a0a12",wc:"#2a2a3a",fc:"#151520",name:"Shadow Grotto",th:"shadow"},rooms:{
     // Room 1 — dark entry corridor, winding path over pits
     "0,0":{dark:true,tiles:mr(m=>{ae(m,["N"]);
       m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;
