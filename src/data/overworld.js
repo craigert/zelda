@@ -341,10 +341,10 @@ export const OW={
   m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");
-  // Cracked rock hiding heart piece — placed after exits so oe("E") doesn't overwrite
+  // Cracked rock hiding cave entrance — bomb to reveal Shadow Grotto
   m[4][12]=T.ROCK;m[4][13]=T.ROCK;m[4][14]=T.ROCK;
-  m[5][12]=T.CRACK;// bomb this
-  m[5][14]=T.HEART_PIECE;
+  m[5][12]=T.CRACK;// bomb this to reveal cave entrance
+  m[5][13]=T.ROCK;m[5][14]=T.ROCK;
   m[6][12]=T.ROCK;m[6][13]=T.ROCK;m[6][14]=T.ROCK;
   return m;})(),
 

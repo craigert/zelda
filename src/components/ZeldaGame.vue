@@ -359,7 +359,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   const sp=(e,i)=>({...e,mhp:e.hp,fl:0,mt:Math.random()*2000,st:"patrol",stT:0,hx:e.x,hy:e.y,spawnT:400+i*120});
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
-  else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];s.en=cv?.room?.enemies?cv.room.enemies.map(sp):[];}
+  else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];const cvRm=cv?.rooms?cv.rooms[s.loc.scr]:cv?.room;s.en=cvRm?.enemies?cvRm.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
   // Boss intro -- cinematic sequence if room has a boss
   // Combat lock -- only for reward/boss/miniboss rooms, blocks transitions only (not collision)
@@ -377,7 +377,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   }
 }
 
-function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave")return CAVES[s.loc.di]?.room?.tiles||null;if(s.loc.ty==="passage")return null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
+function gm(s){if(s.loc.ty==="ow")return OW[s.loc.scr]||null;if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];return cv?.rooms?cv.rooms[s.loc.scr]?.tiles||null:cv?.room?.tiles||null;}if(s.loc.ty==="passage")return null;return s.dg[s.loc.di].rooms[s.loc.scr]?.tiles||null;}
 
 function gts(s,ns,tx,ty){let m;if(s.loc.ty==="ow")m=OW[ns];else m=s.dg[s.loc.di].rooms[ns]?.tiles;
   if(!m||ty<0||ty>=RO||tx<0||tx>=CO)return T.WALL;return m[ty][tx];}
@@ -477,7 +477,7 @@ function cTr(s){const p=s.p,loc=s.loc;
         const owm=OW[loc.scr];
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
-            loc.ty="cave";loc.di=ci;loc.scr="0";p.x=7*TL;p.y=(RO-3)*TL;s.ec=500;le(s);
+            loc.ty="cave";loc.di=ci;loc.scr=cv.rooms?"0,0":"0";p.x=7*TL;p.y=(RO-3)*TL;s.ec=500;le(s);
             if(cv.shop){s.shopVisited=true;
               s.shopGround=[
                 {tx:3,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
@@ -497,14 +497,20 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(p.x>W2-PS+4){const ns=`${sx+1},${sy}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.x=8;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}
     if(p.y<-4){const ns=`${sx},${sy-1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-PS-8;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
     if(p.y>H2-PS+4){const ns=`${sx},${sy+1}`;if(OW[ns]){const ps=loc.scr;loc.scr=ns;p.y=8;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
-  }else if(loc.ty==="cave"){const m=gm(s);
+  }else if(loc.ty==="cave"){const m=gm(s);const cv2=CAVES[loc.di];
     // Safety: if cave has no valid tiles, warp back to overworld
-    if(!m){const cv2=CAVES[loc.di];if(cv2){loc.ty="ow";loc.scr=cv2.s;loc.di=-1;p.x=7*TL;p.y=9*TL;le(s);}return;}
+    if(!m){if(cv2){loc.ty="ow";loc.scr=cv2.s;loc.di=-1;p.x=7*TL;p.y=9*TL;le(s);}return;}
     const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const ci2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const cv=CAVES[ci2];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
         p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
+    // Multi-room cave — screen transitions like dungeons
+    if(cv2?.rooms){const[rx,ry]=loc.scr.split(",").map(Number);
+      if(p.y<-4){const ns=`${rx},${ry-1}`;if(cv2.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
+      if(p.y>H2-PS+4){const ns=`${rx},${ry+1}`;if(cv2.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=TL+4;le(s);s.slide={a:true,dx:0,dy:1,t:0,dur:200,prevScr:ps};}else p.y=H2-PS+4;}
+      if(p.x<-4){const ns=`${rx-1},${ry}`;if(cv2.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=W2-TL-PS-4;le(s);s.slide={a:true,dx:-1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=-4;}
+      if(p.x>W2-PS+4){const ns=`${rx+1},${ry}`;if(cv2.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.x=TL+4;le(s);s.slide={a:true,dx:1,dy:0,t:0,dur:200,prevScr:ps};}else p.x=W2-PS+4;}}
   }else{const[rx,ry]=loc.scr.split(",").map(Number),m=gm(s);
     const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
@@ -1146,7 +1152,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         }sfx("pickup");}}
     if(!npcHit){s.sw.a=true;s.sw.t=SD;sfx("sword");
       // Light torches with sword -- only in dark rooms
-      const isDkRoom=s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark;
+      const isDkRoom=(s.loc.ty==="dg"&&s.dg[s.loc.di]?.rooms[s.loc.scr]?.dark)||(s.loc.ty==="cave"&&CAVES[s.loc.di]?.rooms?.[s.loc.scr]?.dark);
       if(isDkRoom){const m2=gm(s);
         const ftx3=Math.floor((p.x+PS/2)/TL)+(p.dir===1?1:p.dir===3?-1:0);
         const fty3=Math.floor((p.y+PS/2)/TL)+(p.dir===0?-1:p.dir===2?1:0);
@@ -2081,7 +2087,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   // ===== GAME AREA =====
   c.save();c.translate(0,HH);
   if(s.shake.t>0)c.translate(s.shake.x,s.shake.y);
-  const m=gm(s),loc=s.loc,iD=loc.ty==="dg"||loc.ty==="cave",dg=loc.ty==="dg"?s.dg[loc.di]:(loc.ty==="cave"?{color:"#1a2a18",wc:"#3a5a3a",fc:"#2a3a28",name:"Hidden Cave"}:null);
+  const m=gm(s),loc=s.loc,iD=loc.ty==="dg"||loc.ty==="cave",dg=loc.ty==="dg"?s.dg[loc.di]:(loc.ty==="cave"?(CAVES[loc.di]?.style||{color:"#1a2a18",wc:"#3a5a3a",fc:"#2a3a28",name:"Hidden Cave"}):null);
   // Clip game area for slide transitions
   c.save();c.beginPath();c.rect(0,0,W2,H2);c.clip();
   // Slide: render old screen sliding out
@@ -3133,7 +3139,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
   // Dungeon darkness -- dark until torches are lit
   // Only dark rooms flagged with dark:true in room data
-  const isDarkRoom=loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark;
+  const isDarkRoom=(loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark)||(loc.ty==="cave"&&CAVES[loc.di]?.rooms?.[loc.scr]?.dark);
   if(iD&&m&&isDarkRoom){let totalT2=0,litT2=0;
     for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalT2++;if(s.litTorches.has(`${x},${y}`))litT2++;}
     if(totalT2>0){const darkPct=1-litT2/totalT2;const darkness=darkPct*0.55;
@@ -3835,7 +3841,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? (s.shopGround?"shop":"forest") : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? "overworld" : (s.loc.ty === "cave" ? (s.shopGround?"shop":(CAVES[s.loc.di]?.style?.th||"forest")) : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       stopMu();
       if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
