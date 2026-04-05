@@ -189,21 +189,27 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[9][12]=T.KEY;
   }),enemies:[{x:10*TL,y:3*TL,hp:3,type:"fire_bat"},{x:5*TL,y:6*TL,hp:4,type:"magma_slug"},{x:10*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
-  // Upper east — timed switch room
+  // Upper east — timed switch room (switches open hidden door on east wall)
   "1,0":{tiles:mr(m=>{ae(m,["S","W"]);
     for(let y=2;y<=9;y++){m[y][5]=T.WALL;m[y][10]=T.WALL;}
     m[5][5]=T.FLOOR;m[6][5]=T.FLOOR;m[5][10]=T.FLOOR;m[6][10]=T.FLOOR;
     m[3][3]=T.SPIKE;m[3][12]=T.SPIKE;m[8][3]=T.SPIKE;m[8][12]=T.SPIKE;
     m[3][7]=T.HEART;m[8][8]=T.HEART;
-    m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
+    // Two timed switches — both sides of the room
+    m[9][3]=T.TSWITCH;m[9][12]=T.TSWITCH;
+    // Hidden door on east wall — opened by timed switches
+    m[5][CO-1]=T.DOOR;m[6][CO-1]=T.DOOR;
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
   }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"mage"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
-  // Secret room (crack east wall of 1,0) — treasure cache
+  // Secret treasure room (east of 1,0) — rupees and bombs
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
-    m[4][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;
+    // Rupee stash
+    m[4][6]=T.RUPEE;m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[4][9]=T.RUPEE;
+    m[5][6]=T.RUPEE;m[5][9]=T.RUPEE;
+    // Bomb stash
+    m[7][6]=T.BOMB;m[7][7]=T.BOMB;m[7][8]=T.BOMB;m[7][9]=T.BOMB;
     m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;
   }),enemies:[]},
 
