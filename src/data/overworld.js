@@ -336,16 +336,11 @@ export const OW={
   m[3][4]=T.ROCK;m[3][5]=T.ROCK;m[3][10]=T.ROCK;m[3][11]=T.ROCK;
   m[8][4]=T.ROCK;m[8][5]=T.ROCK;m[8][10]=T.ROCK;m[8][11]=T.ROCK;
   m[4][4]=T.ROCK;m[4][11]=T.ROCK;m[7][4]=T.ROCK;m[7][11]=T.ROCK;
-  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
+  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.CRACK;// bomb center rock to reveal cave
   m[4][6]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;m[4][9]=T.PATH;
   m[7][6]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;m[7][9]=T.PATH;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;m[9][7]=T.TORCH;m[9][8]=T.TORCH;
   oe(m,"W");oe(m,"E");oe(m,"N");oe(m,"S");
-  // Cracked rock hiding cave entrance — bomb to reveal Shadow Grotto
-  // Alcove in lower-right, away from the east exit path
-  m[9][10]=T.ROCK;m[9][11]=T.ROCK;m[9][12]=T.ROCK;
-  m[10][10]=T.CRACK;// bomb this to reveal cave entrance
-  m[10][12]=T.ROCK;
   return m;})(),
 
 // D1 Fire Cavern — desert dungeon
