@@ -571,12 +571,17 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.bossIntro){s.bossIntro.t+=dt;
     if(s.bossIntro.t>=s.bossIntro.dur||s.bossIntro.t>5000){s.bossIntro=null;}
     return;}
-  // Hero landing animation after boss victory warp
+  // Hero landing animation after boss victory — descends like key drop
   if(s.heroLand){s.heroLand.t+=dt;
-    // Sparkle particles during descent
-    if(s.heroLand.t<s.heroLand.dur*0.9&&Math.random()<0.25){
-      s.pt.push({x:s.p.x+PS/2+(Math.random()-.5)*20,y:-10+Math.random()*20,dx:(Math.random()-.5)*1.5,dy:Math.random()*0.5+0.3,l:400,c:Math.random()>.5?"#cdf":"#fff"});}
-    if(s.heroLand.t>=s.heroLand.dur){s.heroLand=null;}
+    // Gravity-based descent (like key_drop): starts slow, accelerates, caps speed
+    if(!s.heroLand.vy)s.heroLand.vy=0;
+    if(!s.heroLand.landed){
+      s.heroLand.vy=Math.min(s.heroLand.vy+0.015*(dt/16),0.7);
+      if(!s.heroLand.y&&s.heroLand.y!==0)s.heroLand.y=-30;
+      s.heroLand.y+=s.heroLand.vy*(dt/16);
+      if(s.heroLand.y>=s.p.y){s.heroLand.y=s.p.y;s.heroLand.landed=true;s.heroLand.landT=0;sfx("door");s.shake.t=100;}}
+    else{s.heroLand.landT+=dt;
+      if(s.heroLand.landT>=800){s.heroLand=null;}}
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
   // Triforce/item hold-up animation
@@ -595,10 +600,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.fade={a:true,alpha:0,dir:1,t:0,spd:1000,cb:()=>{
           const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
             for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
-            if(!s.bossWarps.find(w=>w.di===di2)){const bx2=Math.floor((s.p.x+PS/2)/TL),by2=Math.floor((s.p.y+PS/2)/TL);
-              s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
             s.loc.scr=entryScr;s.p.x=7*TL;s.p.y=9*TL;s.ec=500;le(s);
-            s.heroLand={t:0,dur:2000};}
+            s.heroLand={t:0,dur:2500};}
           s.triforceHold=null;s.triMu=false;s.bossVictory=null;}};
       }else{
         // Heart container not yet collected — end hold-up, let player collect it
@@ -1232,29 +1235,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       s.fade={a:true,alpha:0,dir:1,t:0,spd:1000,cb:()=>{
         const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
           for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
-          if(!s.bossWarps.find(w=>w.di===di2)){const bx2=Math.floor((p.x+PS/2)/TL),by2=Math.floor((p.y+PS/2)/TL);
-            s.bossWarps.push({di:di2,bossScr,bossX:bx2,bossY:by2,entryScr});}
           s.loc.scr=entryScr;p.x=7*TL;p.y=9*TL;s.ec=500;le(s);
-          s.heroLand={t:0,dur:2000};}
+          s.heroLand={t:0,dur:2500};}
         s.bossVictory=null;s.triMu=false;}};
-    }
-  }
-  // Persistent warp portals — check if player steps on one
-  if(s.loc.ty==="dg"&&s.bossWarps.length>0&&!s.bossWarp){
-    const di=s.loc.di;const scr=s.loc.scr;
-    for(const w of s.bossWarps){if(w.di!==di)continue;
-      let wx=-1,wy=-1,destScr=null;
-      if(scr===w.bossScr){wx=w.bossX;wy=w.bossY;destScr=w.entryScr;}
-      else if(scr===w.entryScr){wx=7;wy=9;destScr=w.bossScr;} // portal near stairs in entry room
-      if(wx>=0&&destScr&&p.x+PS/2>wx*TL&&p.x+PS/2<(wx+1)*TL&&p.y+PS/2>wy*TL&&p.y+PS/2<(wy+1)*TL){
-        s.fade={a:true,alpha:0,dir:1,t:0,cb:()=>{
-          s.loc.scr=destScr;
-          if(destScr===w.entryScr){p.x=7*TL;p.y=9*TL;}
-          else{p.x=w.bossX*TL;p.y=(w.bossY+1)*TL;}
-          s.ec=500;le(s);sfx("door");
-          s.msg={text:destScr===w.entryScr?"Warped to entrance!":"Warped to boss room!",t:1500};
-        }};break;
-      }
     }
   }
   // Chest update -- requires action button to open
@@ -2949,26 +2932,6 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     for(let i=0;i<4;i++){const a=spin*2+i*Math.PI/2,r=12+Math.sin(s.gt/200+i)*4;
       c.fillStyle=`rgba(200,230,255,${0.5*pulse})`;c.beginPath();c.arc(wx+Math.cos(a)*r,wy+Math.sin(a)*r,1.5,0,Math.PI*2);c.fill();}
   }
-  // Persistent warp portals
-  if(s.loc.ty==="dg"&&s.bossWarps.length>0&&!s.bossWarp){
-    for(const w of s.bossWarps){if(w.di!==s.loc.di)continue;
-      let pwx=-1,pwy=-1;
-      if(s.loc.scr===w.bossScr){pwx=w.bossX;pwy=w.bossY;}
-      else if(s.loc.scr===w.entryScr){pwx=7;pwy=9;}
-      if(pwx>=0){const wx2=pwx*TL+16,wy2=pwy*TL+16;
-        const pulse2=Math.sin(s.gt/200)*0.2+0.8;const spin2=s.gt/500;
-        const wg2=c.createRadialGradient(wx2,wy2,4,wx2,wy2,18);
-        wg2.addColorStop(0,`rgba(100,180,255,${0.4*pulse2})`);wg2.addColorStop(0.5,`rgba(60,120,255,${0.25*pulse2})`);wg2.addColorStop(1,"rgba(40,60,200,0)");
-        c.fillStyle=wg2;c.beginPath();c.arc(wx2,wy2,18,0,Math.PI*2);c.fill();
-        c.strokeStyle=`rgba(150,200,255,${0.6*pulse2})`;c.lineWidth=1.5;
-        c.beginPath();c.arc(wx2,wy2,8+Math.sin(s.gt/300)*2,spin2,spin2+Math.PI*1.5);c.stroke();
-        c.fillStyle=`rgba(220,240,255,${0.5*pulse2})`;c.beginPath();c.arc(wx2,wy2,3,0,Math.PI*2);c.fill();
-        c.fillStyle=`rgba(255,255,255,${0.7*pulse2})`;c.beginPath();c.arc(wx2,wy2,1.5,0,Math.PI*2);c.fill();
-        for(let i=0;i<3;i++){const a=spin2*2+i*Math.PI*2/3,r=10+Math.sin(s.gt/200+i)*3;
-          c.fillStyle=`rgba(200,230,255,${0.4*pulse2})`;c.beginPath();c.arc(wx2+Math.cos(a)*r,wy2+Math.sin(a)*r,1.2,0,Math.PI*2);c.fill();}
-      }
-    }
-  }
   for(const d2 of s.drops){const bob2=Math.sin(t/200)*2;
     if(d2.type==="heart"){c.fillStyle="#ee3333";dH(c,d2.x-6,d2.y-6+bob2,12);c.fillStyle="#ff8888";dH(c,d2.x-3,d2.y-4+bob2,6);}
     else if(d2.type==="heartcontainer"){
@@ -3087,17 +3050,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Golden glow intensifies when warp is ready
     if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
       c.fillStyle=`rgba(253,211,51,${wp2*0.08})`;c.fillRect(0,0,W2,H2);}
-  }else if(s.heroLand){// Hero slowly descending from ceiling
-    const hl=s.heroLand,lp=Math.min(1,hl.t/hl.dur);
-    const ease=1-Math.pow(1-lp,3);// cubic ease-out — fast start, soft landing
-    const landY=-20+(p.y+20)*ease;// from above screen to ground position
-    const bounce=lp>=0.93?Math.sin((lp-0.93)/0.07*Math.PI)*3:0;// gentle bounce at touchdown
-    // Growing shadow as hero approaches ground
-    c.fillStyle=`rgba(0,0,0,${0.04+ease*0.16})`;c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,3+ease*7,1+ease*2,0,0,Math.PI*2);c.fill();
-    // Light beam from above — wider, fades as hero lands
-    if(lp<0.85){const beamA=0.18*(1-lp/0.85);
-      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-14,landY-10);c.lineTo(p.x+PS/2+14,landY-10);c.lineTo(p.x+PS/2+5,-10);c.lineTo(p.x+PS/2-5,-10);c.fill();}
-    dP(c,p.x,landY-bounce,p.dir,t,p.redArmor);
+  }else if(s.heroLand){// Hero descending from sky like key drop
+    const hl=s.heroLand;
+    const heroY=hl.landed?p.y:(hl.y!=null?hl.y:-30);
+    // Shadow on ground — grows as hero gets closer
+    const distToGround=Math.max(0,p.y-heroY);const maxDist=p.y+30;
+    const closeness=1-Math.min(1,distToGround/maxDist);
+    const shadowW=3+closeness*8,shadowH=1+closeness*2.5;
+    c.fillStyle=`rgba(0,0,0,${0.03+closeness*0.18})`;
+    c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,shadowW,shadowH,0,0,Math.PI*2);c.fill();
+    // Light beam from above while falling
+    if(!hl.landed){const beamA=0.15*(1-closeness*0.8);
+      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-12,heroY-10);c.lineTo(p.x+PS/2+12,heroY-10);c.lineTo(p.x+PS/2+4,-10);c.lineTo(p.x+PS/2-4,-10);c.fill();}
+    // Small bounce on landing
+    let drawY=heroY;
+    if(hl.landed&&hl.landT<200){const bprog=hl.landT/200;drawY=p.y-Math.sin(bprog*Math.PI)*4;}
+    dP(c,p.x,drawY,p.dir,t,p.redArmor);
   }else if(s.finalDeath){// Hero drawn by finalDeath overlay — skip normal draw
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
     const fp=Math.min(1,s.pitFall.t/600);const sc=1-fp*0.9;const spin=fp*Math.PI*3;
