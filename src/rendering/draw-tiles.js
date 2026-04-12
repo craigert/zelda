@@ -872,7 +872,13 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.beginPath();c.arc(px+13,py+5+sp2,1,0,Math.PI*2);c.fill();break;}
     case T.HEART:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const hg=Math.sin(t/400)*.15+.2;c.fillStyle=`rgba(255,50,50,${hg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();c.fillStyle="#ee3333";dH(c,px+6,py+6,20);c.fillStyle="#ff6666";dH(c,px+9,py+8,12);break;}
     case T.TRIFORCE:{c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);const tg=Math.sin(t/250)*.2+.3;c.fillStyle=`rgba(253,211,51,${tg})`;c.beginPath();c.arc(px+16,py+16,14,0,Math.PI*2);c.fill();c.fillStyle="#ffd633";c.beginPath();c.moveTo(px+16,py+4);c.lineTo(px+27,py+26);c.lineTo(px+5,py+26);c.fill();c.fillStyle="#ffe866";c.beginPath();c.moveTo(px+16,py+8);c.lineTo(px+23,py+22);c.lineTo(px+9,py+22);c.fill();break;}
-    case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);for(let i=0;i<4;i++){c.fillStyle=`rgb(${80+i*20},${80+i*20},${80+i*20})`;c.fillRect(px+3,py+3+i*7,TL-6,5);}c.fillStyle="#6c6";c.font="bold 9px monospace";c.fillText("EXIT",px+5,py+20);break;}
+    case T.STAIRS_UP:{c.fillStyle="#444";c.fillRect(px,py,TL,TL);
+      for(let i=0;i<4;i++){const sh=70+i*22;c.fillStyle=`rgb(${sh},${sh},${sh})`;c.fillRect(px+2+i,py+3+i*7,TL-4-i*2,5);
+        c.fillStyle=`rgba(255,255,255,${0.08+i*0.03})`;c.fillRect(px+2+i,py+3+i*7,TL-4-i*2,2);}
+      const sg=c.createRadialGradient(px+TL/2,py+4,2,px+TL/2,py+TL/2,TL/2);
+      sg.addColorStop(0,"rgba(200,220,180,0.25)");sg.addColorStop(1,"rgba(200,220,180,0)");
+      c.fillStyle=sg;c.fillRect(px,py,TL,TL);
+      c.fillStyle="rgba(180,200,150,0.5)";c.beginPath();c.moveTo(px+TL/2,py+2);c.lineTo(px+TL/2+5,py+8);c.lineTo(px+TL/2-5,py+8);c.fill();break;}
     case T.SAND:{
       // Warm multi-band sand with dune appearance
       const sg=c.createRadialGradient(px+16+hs(px,py,0)*10-5,py+16+hs(px,py,1)*10-5,4,px+16,py+16,26);
