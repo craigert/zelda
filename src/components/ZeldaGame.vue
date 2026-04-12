@@ -3395,13 +3395,36 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       fg.addColorStop(0,"rgba(0,0,0,1)");fg.addColorStop(0.5,"rgba(0,0,0,0.6)");fg.addColorStop(1,"rgba(0,0,0,0)");
       c.fillStyle=fg;c.fillRect(p.x+PS/2-fogR,p.y+PS/2-fogR,fogR*2,fogR*2);
       c.restore();
-      // Drifting fog wisps — more and darker in shadow forest
-      const wispCount=isShadowBiome?7:4;
-      for(let i=0;i<wispCount;i++){const fx=(t/3+i*140+Math.sin(t/2000+i)*30)%(W2+100)-50;
-        const fy=H2*0.15+Math.sin(t/1500+i*2)*40+i*(H2*0.8/wispCount);
-        const wc=isShadowBiome?`rgba(60,40,90,${fogA*0.4+Math.sin(t/800+i)*fogA*0.15})`:`rgba(180,190,200,${fogA*0.3+Math.sin(t/800+i)*fogA*0.1})`;
-        c.fillStyle=wc;
-        c.beginPath();c.ellipse(fx,fy,50+Math.sin(t/1200+i)*10,18+Math.sin(t/900+i*3)*5,0,0,Math.PI*2);c.fill();}
+      // Drifting nebulous fog blobs — slow, layered, shimmering
+      const wispCount=isShadowBiome?10:5;
+      for(let i=0;i<wispCount;i++){
+        // Each blob drifts slowly with its own speed and wobble
+        const spd=0.4+hs(i,50,600)*0.6;// varied drift speeds
+        const fx=(t*spd/10+i*87+Math.sin(t/3000+i*1.7)*50)%(W2+200)-100;
+        const fy=hs(i,51,601)*H2*0.9+Math.sin(t/2500+i*2.3)*30+H2*0.05;
+        // Pulsing size — breathes in and out
+        const breathe=Math.sin(t/1800+i*1.1)*0.3+1;
+        const rx=(40+hs(i,52,602)*40)*breathe;
+        const ry=(15+hs(i,53,603)*15)*breathe;
+        // Shimmer: alpha oscillates slowly
+        const shimmer=Math.sin(t/1200+i*2.7)*0.08;
+        const baseA=isShadowBiome?fogA*0.35:fogA*0.2;
+        const a=baseA+shimmer;
+        // Layered rendering: soft outer halo + denser core
+        const col=isShadowBiome?"50,30,80":"170,180,195";
+        c.fillStyle=`rgba(${col},${a*0.4})`;
+        c.beginPath();c.ellipse(fx,fy,rx*1.6,ry*1.6,Math.sin(t/4000+i)*0.3,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(${col},${a*0.7})`;
+        c.beginPath();c.ellipse(fx+Math.sin(t/2200+i)*8,fy+Math.cos(t/2600+i)*5,rx,ry,Math.sin(t/3500+i*0.7)*0.2,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(${col},${a})`;
+        c.beginPath();c.ellipse(fx+Math.sin(t/1900+i*1.3)*5,fy+Math.cos(t/2100+i*0.9)*3,rx*0.5,ry*0.5,0,0,Math.PI*2);c.fill();
+        // Wispy tendrils trailing off the blob
+        if(i%2===0){c.strokeStyle=`rgba(${col},${a*0.3})`;c.lineWidth=1.5;
+          for(let j=0;j<3;j++){const ta=t/2000+i+j*2.1;
+            c.beginPath();c.moveTo(fx+Math.cos(ta)*rx*0.4,fy+Math.sin(ta)*ry*0.4);
+            c.quadraticCurveTo(fx+Math.cos(ta+0.5)*rx*1.2,fy+Math.sin(ta+0.5)*ry*1.8,
+              fx+Math.cos(ta+1)*rx*0.8,fy+Math.sin(ta+1)*ry*2.2);c.stroke();}}
+      }
     }
   }
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
