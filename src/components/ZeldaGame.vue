@@ -688,6 +688,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     else{s.heroLand.landT+=dt;
       if(s.heroLand.landT>=1000){s.heroLand=null;saveGame(s);}}
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    // Advance fade-in during heroLand so screen doesn't stay black
+    if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;
+      if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}
+      else{s.fade.alpha=Math.min(1,s.fade.t/fs);}}
     return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
@@ -715,8 +719,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           // Hero descends from sky in pillar of light
           s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};
           s.triforceHold=null;s.triMu=false;s.bossVictory=null;
-          // Fade back in
-          s.fade={a:true,alpha:1,dir:-1,t:0,spd:1500,cb:null};}};
+          // Fade system auto-reverses (dir=-1) after cb — no need to set new fade
+        }};
       }else{
         // Heart container not yet collected — end hold-up, let player collect it
         s.triforceHold=null;
