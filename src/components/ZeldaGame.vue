@@ -1817,7 +1817,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         // Mini-boss non-chase: gentle idle movement
         const mn=e.name||"";
         if(mn==="Vine Guardian"){moveX=Math.sin(e.mt/600)*0.15;moveY=Math.cos(e.mt/800)*0.1;}
-        else if(mn==="Flame Sentinel"){const ca=e.mt/500;moveX=Math.cos(ca)*es*0.65;moveY=Math.sin(ca)*es*0.65;}
+        else if(mn==="Flame Sentinel"){const ca=e.mt/700;moveX=Math.cos(ca)*es*0.4;moveY=Math.sin(ca)*es*0.4;}
         else{const ca=e.mt/600;moveX=Math.cos(ca)*es*0.5;moveY=Math.sin(ca)*es*0.5;}
       }else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
     }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
