@@ -43,16 +43,16 @@ export const OW_EN={
   // Inner ring (hub area)
   "1,1":[],
   "0,0":[{x:3*TL,y:3*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"bat"}],
-  "1,0":[{x:4*TL,y:6*TL,hp:1,type:"bat"},{x:11*TL,y:4*TL,hp:1,type:"bat"}],
+  "1,0":[],// peaceful meadow
   "2,0":[{x:5*TL,y:4*TL,hp:2,type:"skeleton"},{x:10*TL,y:8*TL,hp:2,type:"skeleton"}],
   "0,1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:7*TL,hp:2,type:"skeleton"}],
   "2,1":[{x:3*TL,y:5*TL,hp:1,type:"bat"},{x:12*TL,y:7*TL,hp:1,type:"bat"}],
-  "1,2":[{x:6*TL,y:4*TL,hp:1,type:"bat"},{x:9*TL,y:8*TL,hp:1,type:"bat"}],
+  "1,2":[],// calm southern meadow
   // Middle ring
   "3,0":[{x:6*TL,y:5*TL,hp:3,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
   "3,1":[{x:5*TL,y:4*TL,hp:3,type:"ghost"},{x:10*TL,y:7*TL,hp:3,type:"ghost"},{x:8*TL,y:5*TL,hp:4,type:"knight"}],
   "0,2":[{x:4*TL,y:5*TL,hp:2,type:"skeleton"},{x:11*TL,y:6*TL,hp:3,type:"skeleton"}],
-  "2,2":[{x:5*TL,y:5*TL,hp:2,type:"bat"},{x:10*TL,y:7*TL,hp:2,type:"skeleton"}],
+  "2,2":[],// hot spring — peaceful rest area
   "0,-1":[{x:5*TL,y:5*TL,hp:2,type:"skeleton"},{x:10*TL,y:7*TL,hp:2,type:"bat"}],
   "1,-1":[{x:4*TL,y:4*TL,hp:2,type:"bat"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"}],
   // Outer ring

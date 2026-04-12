@@ -57,7 +57,7 @@ export const CAVES=[
     "0,-2":{tiles:mr(m=>{ae(m,["S"]);
       m[5][7]=T.BANANA;m[4][7]=T.RUPEE;m[6][7]=T.RUPEE;m[4][8]=T.RUPEE;m[6][8]=T.RUPEE;
       m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;
-    }),enemies:[]},
+    }),enemies:[{x:7*TL,y:6*TL,hp:14,type:"yeti"},{x:4*TL,y:4*TL,hp:8,type:"yeti"},{x:10*TL,y:8*TL,hp:8,type:"yeti"}]},
   }},
   {s:"2,0",t:[[12,8]],shop:true,room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;for(let x=5;x<=10;x++)m[4][x]=T.WALL;}),enemies:[]}},
   {s:"4,0",t:[[5,8]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][7]=T.JAR;m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;m[4][7]=T.RUPEE;m[6][7]=T.RUPEE;m[4][8]=T.RUPEE;m[6][8]=T.RUPEE;}),enemies:[]}},
