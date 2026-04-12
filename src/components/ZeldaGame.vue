@@ -404,7 +404,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];
   // Trigger Dark Sanctum reveal when entering screen 3,2 with all 3 triforce pieces
   if(s.loc.ty==="ow"&&s.loc.scr==="3,2"&&s.finalOpen&&!s.sanctumRevealed){
-    s.sanctumRevealed=true;s.sanctumReveal={t:0,phase:"wait",dur:8000};}
+    s.sanctumRevealed=true;s.sanctumReveal={t:0,phase:"wait",dur:8000};s.freeze=9000;}
   // Always load blade traps for dungeons (even if room is cleared)
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
@@ -1861,10 +1861,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#aaf"})));
             s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:"BLOCK",c:"#88f"});
             continue;}}
-        // Yetis are immune to sword — only arrows damage them
-        if(e.type==="yeti"){e.fl=200;sfx("door");
+        // Yetis take reduced sword damage (half)
+        if(e.type==="yeti"){const ydmg=p.hasMasterSword?1:1;e.hp-=ydmg;e.fl=300;sfx("hit");
+          const kb2=12,kba2=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba2)*kb2;e.y+=Math.sin(kba2)*kb2;
+          s.dmgNums.push({x:ecx,y:ecy-8,t:600,val:ydmg,c:"#8cf"});
           s.pt.push(...Array.from({length:3},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:200,c:"#8cf"})));
-          s.dmgNums.push({x:ecx,y:ecy-8,t:800,val:"USE BOW",c:"#8af"});
           continue;}
         const sdmg=p.hasMasterSword?2:1;e.hp-=sdmg;e.fl=300;const kb=isBossLike?10:18,kba=Math.atan2(ecy-pcy,ecx-pcx);e.x+=Math.cos(kba)*kb;e.y+=Math.sin(kba)*kb;
         if(e.type==="boss"&&e.pattern==="all"&&e.hitCount!==undefined)e.hitCount++;
