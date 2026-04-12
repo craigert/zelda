@@ -176,6 +176,20 @@ function getWeatherForBiome(biome){
   return "rain";
 }
 
+// --- Night check helper ---
+function isNightTime(s){
+  const phase=(s.weather.timer%300000)/300000;
+  return Math.max(0,Math.sin(phase*Math.PI*2-Math.PI/2)*0.5+0.5)>0.3;
+}
+
+// --- Night enemy spawns per biome ---
+const NIGHT_ENEMIES={
+  "meadow":[{type:"ghost",hp:4},{type:"skeleton",hp:4}],
+  "forest":[{type:"ghost",hp:5},{type:"ghost",hp:4}],
+  "snow":[{type:"ghost",hp:4},{type:"yeti",hp:6}],
+  "desert":[{type:"fire_bat",hp:5},{type:"mage",hp:5}],
+};
+
 // --- Canvas click handler ---
 function onCanvasClick() {
   const s = stR.value;
@@ -344,7 +358,7 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
@@ -385,7 +399,15 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   if(s.loc.ty==="passage"){const pi2=s.ss?.pi??-1;const pg=PASSAGES[pi2];s.en=pg?.enemies?pg.enemies.map(sp):[];s.combatLock=false;return;}
   if(s.loc.ty==="dg"){const rm=s.dg[s.loc.di].rooms[s.loc.scr];s.en=rm?.enemies?rm.enemies.map(sp):[];}
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];const cvRm=cv?.rooms?cv.rooms[s.loc.scr]:cv?.room;s.en=cvRm?.enemies?cvRm.enemies.map(sp):[];}
-  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];}
+  else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];
+    // Night enemies — extra dangerous foes appear on the overworld at night
+    if(isNightTime(s)&&s.loc.scr!=="1,1"){// hub stays safe
+      const biome=getBiome(s.loc.scr);const ne=NIGHT_ENEMIES[biome]||NIGHT_ENEMIES.meadow;
+      const baseIdx=s.en.length;
+      for(let ni=0;ni<ne.length;ni++){const proto=ne[ni];
+        // Random position avoiding edges
+        const nx=(2+Math.floor(Math.random()*12))*TL,ny=(2+Math.floor(Math.random()*8))*TL;
+        s.en.push(sp({x:nx,y:ny,hp:proto.hp,type:proto.type,night:true},baseIdx+ni));}}}
   // Boss intro -- cinematic sequence if room has a boss
   // Combat lock -- only for reward/boss/miniboss rooms, blocks transitions only (not collision)
   const isDg=s.loc.ty==="dg"||s.loc.ty==="cave";
@@ -503,7 +525,12 @@ function cTr(s){const p=s.p,loc=s.loc;
         for(const[tx,ty]of cv.t){if(owm&&owm[ty][tx]!==T.ENTRANCE)continue;if(p.x<tx*TL+TL&&p.x+PS>tx*TL&&p.y<ty*TL+TL&&p.y+PS>ty*TL){
           s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
             loc.ty="cave";loc.di=ci;loc.scr=cv.rooms?"0,0":"0";p.x=7*TL;p.y=(RO-3)*TL;s.ec=500;le(s);
-            if(cv.shop){s.shopVisited=true;
+            if(cv.shop&&isNightTime(s)){
+              // Shop is closed at night — shopkeeper is sleeping
+              s.shopGround=null;s.shop=null;s._shopClosed=true;
+              s.msg={text:"The shop is closed... The keeper sleeps at night.",t:2500};
+            }
+            else if(cv.shop){s.shopVisited=true;
               s.shopGround=[
                 {tx:3,ty:7,name:"Key",cost:20,action:s2=>{s2.p.keys++;},collected:false},
                 {tx:6,ty:7,name:"Bombs x5",cost:15,req:"hasBombs",action:s2=>{s2.p.bombs+=5;},collected:false},
@@ -2138,6 +2165,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(p.poison>0){c.fillStyle="#4a4";c.fillText("POISON",stx,26);stx+=45;}
     if(p.snare>0){c.fillStyle="#6a4";c.fillText("SNARED",stx,26);}}
   c.textAlign="left";
+  // Day/Night indicator — small sun or moon on HUD
+  if(!iD2){const dnP=((s.weather.timer%300000)/300000);const nA=Math.max(0,Math.sin(dnP*Math.PI*2-Math.PI/2)*0.5+0.5);
+    const dix=W2/2+52,diy=iD2?20:16;
+    if(nA>0.3){// Moon
+      c.fillStyle=`rgba(180,200,240,${0.5+nA*0.3})`;c.beginPath();c.arc(dix,diy,5,0,Math.PI*2);c.fill();
+      c.fillStyle="#111";c.beginPath();c.arc(dix+2,diy-1,4,0,Math.PI*2);c.fill();// crescent cut
+      // Stars around moon
+      for(let si2=0;si2<3;si2++){const sx2=dix+8+si2*4,sy2=diy-3+si2*2;
+        c.fillStyle=`rgba(200,220,255,${0.4+Math.sin(t/300+si2)*0.2})`;c.fillRect(sx2,sy2,1.5,1.5);}
+    }else{// Sun
+      c.fillStyle="rgba(253,211,51,0.7)";c.beginPath();c.arc(dix,diy,4,0,Math.PI*2);c.fill();
+      c.fillStyle="rgba(253,211,51,0.2)";c.beginPath();c.arc(dix,diy,7,0,Math.PI*2);c.fill();
+      // Rays
+      for(let ri=0;ri<6;ri++){const ra=ri*Math.PI/3+t/2000;
+        c.strokeStyle="rgba(253,211,51,0.4)";c.lineWidth=0.8;c.beginPath();
+        c.moveTo(dix+Math.cos(ra)*5,diy+Math.sin(ra)*5);c.lineTo(dix+Math.cos(ra)*8,diy+Math.sin(ra)*8);c.stroke();}
+    }}
   // RIGHT: Items — evenly spaced, vertically centered
   {const hudItems=[];const midY=HH/2;
   // Build items list right-to-left
@@ -3502,6 +3546,29 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=s.p.rupees>=si.cost?"#4f4":"#f66";
       c.fillText(`${si.cost}r`,cx2,iy+TL+8);
     }
+    c.textAlign="left";
+  }
+  // Sleeping shopkeeper at night (shop cave but closed)
+  if(s._shopClosed&&!s.shopGround&&s.loc.ty==="cave"){
+    const skx=7*TL+16,sky=3*TL;
+    // Shadow
+    c.fillStyle="rgba(0,0,0,0.15)";c.beginPath();c.ellipse(skx,sky+29,10,3,0,0,Math.PI*2);c.fill();
+    // Body slumped on counter
+    c.fillStyle="#8a5a2a";c.beginPath();c.moveTo(skx-8,sky+13);c.lineTo(skx+8,sky+13);c.lineTo(skx+10,sky+30);c.lineTo(skx-10,sky+30);c.fill();
+    // Head — tilted/resting on counter
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(skx+4,sky+14,7,0,Math.PI*2);c.fill();
+    // Hair
+    c.fillStyle="#ccc";c.beginPath();c.arc(skx+4,sky+12,8,Math.PI,0);c.fill();
+    // Closed eyes (lines)
+    c.strokeStyle="#222";c.lineWidth=1.5;
+    c.beginPath();c.moveTo(skx,sky+15);c.lineTo(skx+4,sky+15);c.stroke();
+    c.beginPath();c.moveTo(skx+5,sky+15);c.lineTo(skx+9,sky+15);c.stroke();
+    // ZZZ floating
+    const zb=Math.sin(t/400)*3;
+    c.fillStyle="rgba(150,180,255,0.6)";c.font="bold 8px monospace";c.textAlign="center";
+    c.fillText("z",skx+12,sky+4+zb);c.font="bold 10px monospace";c.fillText("Z",skx+18,sky-2+zb*0.7);c.font="bold 12px monospace";c.fillText("Z",skx+25,sky-8+zb*0.5);
+    // "CLOSED" sign
+    c.fillStyle="#a33";c.font="bold 7px monospace";c.fillText("CLOSED",skx,sky-2);
     c.textAlign="left";
   }
   // Sanctum reveal overlay
