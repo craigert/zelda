@@ -7,22 +7,29 @@ function srand(seed){return()=>{seed=(seed*16807+0)%2147483647;return(seed-1)/21
 // Scatter extra trees/rocks near existing clusters for organic look
 function scatter(m,seed){
   const rng=srand(seed);
-  // Add stray trees near existing trees (not on paths/water/entrances/special tiles)
+  // Tiles safe to overwrite (basic terrain only)
   const safe=new Set([T.GRASS,T.TALLGRASS,T.FLOWER]);
+  // Tiles that must be protected — never place anything adjacent to these
+  const protect=new Set([T.ENTRANCE,T.CRACK,T.PUSH,T.HEART_PIECE,T.STAIRS_UP,T.STAIRS_DOWN,T.HOT_SPRING,T.BANANA,T.BOW,T.BOMB_BAG,T.MASTER_SWORD,T.JAR,T.NPC]);
+  // Build set of protected tiles and their neighbors
+  const blocked=new Set();
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    if(protect.has(m[y][x])){
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){blocked.add((y+dy)*CO+(x+dx));}}}
+  // Add stray trees near existing trees
   for(let y=2;y<RO-2;y++)for(let x=2;x<CO-2;x++){
     if(m[y][x]!==T.TREE&&m[y][x]!==T.ROCK)continue;
-    // Chance to grow a neighbor tree/rock
     for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]]){
       const nx=x+dx,ny=y+dy;
       if(nx<1||nx>=CO-1||ny<1||ny>=RO-1)continue;
-      if(!safe.has(m[ny][nx]))continue;
-      if(rng()<0.15)m[ny][nx]=m[y][x];// same type as neighbor
+      if(!safe.has(m[ny][nx])||blocked.has(ny*CO+nx))continue;
+      if(rng()<0.15)m[ny][nx]=m[y][x];
     }
   }
-  // Randomly place a few standalone bushes/stumps for variation
+  // Randomly place a few standalone bushes/stumps
   for(let i=0;i<4;i++){
     const bx=2+Math.floor(rng()*(CO-4)),by=2+Math.floor(rng()*(RO-4));
-    if(safe.has(m[by][bx]))m[by][bx]=rng()<0.5?T.BUSH:T.STUMP;
+    if(safe.has(m[by][bx])&&!blocked.has(by*CO+bx))m[by][bx]=rng()<0.5?T.BUSH:T.STUMP;
   }
 }
 
