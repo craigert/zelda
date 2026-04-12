@@ -3382,19 +3382,28 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Snow ground accumulation tint
       c.fillStyle="rgba(200,210,230,0.04)";c.fillRect(0,0,W2,H2);
     }
-    // Fog — reduces visibility like dark rooms
+    // Fog — reduces visibility like dark rooms (drawn as radial gradient overlay)
     if(w.fog>0.02){
       const isShadowBiome=loc.ty==="ow"&&getBiome(loc.scr)==="shadow_forest";
-      const fogA=w.fog*(1+nightAmount*0.5);// denser fog at night
-      // Base fog layer — shadow forest uses dark purple fog
-      c.fillStyle=isShadowBiome?`rgba(30,20,50,${fogA})`:`rgba(160,170,180,${fogA})`;c.fillRect(0,0,W2,H2);
-      // Cut visibility around player (like dark rooms)
-      c.save();c.globalCompositeOperation="destination-out";
-      const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);// shadow forest: nearly blind without lantern
-      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
-      fg.addColorStop(0,"rgba(0,0,0,1)");fg.addColorStop(0.5,"rgba(0,0,0,0.6)");fg.addColorStop(1,"rgba(0,0,0,0)");
-      c.fillStyle=fg;c.fillRect(p.x+PS/2-fogR,p.y+PS/2-fogR,fogR*2,fogR*2);
-      c.restore();
+      const fogA=Math.min(0.92,w.fog*(1+nightAmount*0.5));// denser fog at night
+      const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);
+      const fogCol=isShadowBiome?"30,20,50":"100,110,120";
+      // Single radial gradient: transparent at player center, fog color at edges
+      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,fogR*0.3,p.x+PS/2,p.y+PS/2,fogR);
+      fg.addColorStop(0,"rgba("+fogCol+",0)");// clear at center
+      fg.addColorStop(0.6,"rgba("+fogCol+","+fogA*0.4+")");// partial fog
+      fg.addColorStop(1,"rgba("+fogCol+","+fogA+")");// full fog at edge of radius
+      c.fillStyle=fg;c.fillRect(0,0,W2,H2);
+      // Fill corners beyond the gradient with solid fog
+      c.fillStyle="rgba("+fogCol+","+fogA+")";
+      // Top strip
+      c.fillRect(0,0,W2,Math.max(0,p.y+PS/2-fogR));
+      // Bottom strip
+      c.fillRect(0,Math.min(H2,p.y+PS/2+fogR),W2,H2);
+      // Left strip
+      c.fillRect(0,0,Math.max(0,p.x+PS/2-fogR),H2);
+      // Right strip
+      c.fillRect(Math.min(W2,p.x+PS/2+fogR),0,W2,H2);
       // Drifting nebulous fog blobs — slow, layered, shimmering
       const wispCount=isShadowBiome?10:5;
       for(let i=0;i<wispCount;i++){
@@ -4133,7 +4142,7 @@ watch([muOn, customMu], () => {
       const targetVol=(stR.value?.volume??80)/100;
       const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
       if (tryMp3) {
-        const a = new Audio(tryMp3); a.loop = true; a.volume = 0;
+        const a = new Audio(tryMp3); a.loop = true; a.volume = 0.01;
         a.play().then(() => { if(_muGen!==gen){a.pause();return;} customAuRef.value = a;
           // Fade in over 1.5s
           const fadeIn=setInterval(()=>{if(a.volume<targetVol-0.02){a.volume=Math.min(targetVol,a.volume+0.02);}else{a.volume=targetVol;clearInterval(fadeIn);}},30);
