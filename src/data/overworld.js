@@ -10,7 +10,7 @@ function scatter(m,seed){
   // Tiles safe to overwrite (basic terrain only)
   const safe=new Set([T.GRASS,T.TALLGRASS,T.FLOWER]);
   // Tiles that must be protected — never place anything adjacent to these
-  const protect=new Set([T.ENTRANCE,T.CRACK,T.PUSH,T.HEART_PIECE,T.STAIRS_UP,T.STAIRS_DOWN,T.HOT_SPRING,T.BANANA,T.BOW,T.BOMB_BAG,T.MASTER_SWORD,T.JAR,T.NPC]);
+  const protect=new Set([T.ENTRANCE,T.CRACK,T.PUSH,T.HEART_PIECE,T.STAIRS_UP,T.STAIRS_DOWN,T.HOT_SPRING,T.BANANA,T.BOW,T.BOMB_BAG,T.MASTER_SWORD,T.JAR,T.NPC,T.PATH,T.BRIDGE,T.TORCH]);
   // Build set of protected tiles and their neighbors
   const blocked=new Set();
   for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
