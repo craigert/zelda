@@ -675,15 +675,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     return;}
   // Hero landing animation after boss victory — descends like key drop
   if(s.heroLand){s.heroLand.t+=dt;
-    // Gravity-based descent (like key_drop): starts slow, accelerates, caps speed
+    // Slow majestic descent in pillar of light
     if(!s.heroLand.vy)s.heroLand.vy=0;
     if(!s.heroLand.landed){
-      s.heroLand.vy=Math.min(s.heroLand.vy+0.015*(dt/16),0.7);
-      if(!s.heroLand.y&&s.heroLand.y!==0)s.heroLand.y=-30;
+      s.heroLand.vy=Math.min(s.heroLand.vy+0.008*(dt/16),0.45);// slower gravity, lower cap
+      if(!s.heroLand.y&&s.heroLand.y!==0)s.heroLand.y=-40;
       s.heroLand.y+=s.heroLand.vy*(dt/16);
-      if(s.heroLand.y>=s.p.y){s.heroLand.y=s.p.y;s.heroLand.landed=true;s.heroLand.landT=0;sfx("door");s.shake.t=100;}}
+      if(s.heroLand.y>=s.p.y){s.heroLand.y=s.p.y;s.heroLand.landed=true;s.heroLand.landT=0;sfx("triforce");s.shake.t=200;
+        // Landing burst particles
+        for(let i=0;i<12;i++){const a=Math.PI*2*i/12;
+          s.pt.push({x:s.p.x+PS/2,y:s.p.y+PS/2,dx:Math.cos(a)*2,dy:Math.sin(a)*1.5-1,l:600,c:Math.random()>.5?"#fd3":"#fff"});}}}
     else{s.heroLand.landT+=dt;
-      if(s.heroLand.landT>=800){s.heroLand=null;}}
+      if(s.heroLand.landT>=1000){s.heroLand=null;saveGame(s);}}
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
   // Triforce/item hold-up animation
@@ -697,14 +700,23 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(!hcRemain&&s.bossVictory){
         // All 3 conditions met — fade to dungeon entrance
         s.triforceHold.fading=true;
-        const di2=s.bossVictory.di;const bossScr=s.loc.scr;
+        const di2=s.bossVictory.di;
         s.bossWarp=null;
-        s.fade={a:true,alpha:0,dir:1,t:0,spd:1000,cb:()=>{
-          const dg3=s.dg[di2];if(dg3){let entryScr="0,0";
-            for(const rk3 of Object.keys(dg3.rooms)){if(dg3.rooms[rk3].tiles?.some(r=>r.includes(T.STAIRS_UP))){entryScr=rk3;break;}}
-            s.loc.scr=entryScr;s.p.x=7*TL;s.p.y=9*TL;s.ec=500;le(s);
-            s.heroLand={t:0,dur:2500};}
-          s.triforceHold=null;s.triMu=false;s.bossVictory=null;}};
+        // Fade to black, then warp to overworld dungeon entrance
+        s.fade={a:true,alpha:0,dir:1,t:0,spd:1500,cb:()=>{
+          // Find the overworld entrance for this dungeon
+          const de2=DE.find(d=>d.d===di2);
+          if(de2){
+            s.loc.ty="ow";s.loc.scr=de2.s;s.loc.di=-1;
+            s.p.x=de2.t[0][0]*TL;s.p.y=de2.t[0][1]*TL;
+            s.respawn={ty:"ow",scr:de2.s,di:-1,x:s.p.x,y:s.p.y};
+            s.ec=500;le(s);
+          }
+          // Hero descends from sky in pillar of light
+          s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};
+          s.triforceHold=null;s.triMu=false;s.bossVictory=null;
+          // Fade back in
+          s.fade={a:true,alpha:1,dir:-1,t:0,spd:1500,cb:null};}};
       }else{
         // Heart container not yet collected — end hold-up, let player collect it
         s.triforceHold=null;
@@ -3256,21 +3268,48 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Golden glow intensifies when warp is ready
     if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
       c.fillStyle=`rgba(253,211,51,${wp2*0.08})`;c.fillRect(0,0,W2,H2);}
-  }else if(s.heroLand){// Hero descending from sky like key drop
+  }else if(s.heroLand){// Hero descending from sky in pillar of light
     const hl=s.heroLand;
-    const heroY=hl.landed?p.y:(hl.y!=null?hl.y:-30);
-    // Shadow on ground — grows as hero gets closer
-    const distToGround=Math.max(0,p.y-heroY);const maxDist=p.y+30;
+    const heroY=hl.landed?p.y:(hl.y!=null?hl.y:-40);
+    const cx2=p.x+PS/2;
+    // Distance and closeness to ground
+    const distToGround=Math.max(0,p.y-heroY);const maxDist=p.y+40;
     const closeness=1-Math.min(1,distToGround/maxDist);
-    const shadowW=3+closeness*8,shadowH=1+closeness*2.5;
-    c.fillStyle=`rgba(0,0,0,${0.03+closeness*0.18})`;
-    c.beginPath();c.ellipse(p.x+PS/2+2,p.y+PS-1,shadowW,shadowH,0,0,Math.PI*2);c.fill();
-    // Light beam from above while falling
-    if(!hl.landed){const beamA=0.15*(1-closeness*0.8);
-      c.fillStyle=`rgba(200,220,255,${beamA})`;c.beginPath();c.moveTo(p.x+PS/2-12,heroY-10);c.lineTo(p.x+PS/2+12,heroY-10);c.lineTo(p.x+PS/2+4,-10);c.lineTo(p.x+PS/2-4,-10);c.fill();}
+    // Shadow on ground — grows as hero descends
+    const shadowW=3+closeness*10,shadowH=1+closeness*3;
+    c.fillStyle=`rgba(0,0,0,${0.03+closeness*0.2})`;
+    c.beginPath();c.ellipse(cx2+2,p.y+PS-1,shadowW,shadowH,0,0,Math.PI*2);c.fill();
+    if(!hl.landed){
+      // Pillar of light — wide beam from sky to hero
+      const beamW=20+closeness*8;const beamA=0.25-closeness*0.15;
+      const bg2=c.createLinearGradient(cx2,0,cx2,heroY+PS);
+      bg2.addColorStop(0,`rgba(220,240,255,${beamA*0.3})`);
+      bg2.addColorStop(0.5,`rgba(200,230,255,${beamA})`);
+      bg2.addColorStop(1,`rgba(255,255,220,${beamA*0.6})`);
+      c.fillStyle=bg2;c.beginPath();c.moveTo(cx2-beamW/2,0);c.lineTo(cx2+beamW/2,0);
+      c.lineTo(cx2+10,heroY+PS);c.lineTo(cx2-10,heroY+PS);c.fill();
+      // Inner bright core
+      c.fillStyle=`rgba(255,255,240,${beamA*0.4})`;
+      c.beginPath();c.moveTo(cx2-4,0);c.lineTo(cx2+4,0);c.lineTo(cx2+3,heroY+PS);c.lineTo(cx2-3,heroY+PS);c.fill();
+      // Sparkle particles drifting down the beam
+      for(let i=0;i<12;i++){const sy2=(t/3+i*35)%(heroY+PS+20)-10;
+        const sx2=cx2+Math.sin(t/300+i*2.3)*(beamW*0.3);
+        const sa2=0.3+Math.sin(t/200+i)*0.2;
+        c.fillStyle=`rgba(255,255,200,${sa2})`;c.beginPath();c.arc(sx2,sy2,1+Math.sin(t/150+i)*0.5,0,Math.PI*2);c.fill();}
+      // Ground glow where the beam meets the floor
+      const gg=c.createRadialGradient(cx2,p.y+PS,0,cx2,p.y+PS,25+closeness*15);
+      gg.addColorStop(0,`rgba(255,255,200,${0.15+closeness*0.1})`);gg.addColorStop(1,"rgba(255,255,200,0)");
+      c.fillStyle=gg;c.fillRect(cx2-40,p.y+PS-20,80,40);
+    }else{
+      // Landing burst — flash and particles on touchdown
+      if(hl.landT<300){const ba=1-hl.landT/300;
+        const lg=c.createRadialGradient(cx2,p.y+PS/2,0,cx2,p.y+PS/2,40);
+        lg.addColorStop(0,`rgba(255,255,200,${ba*0.3})`);lg.addColorStop(1,"rgba(255,255,200,0)");
+        c.fillStyle=lg;c.fillRect(cx2-40,p.y+PS/2-40,80,80);}
+    }
     // Small bounce on landing
     let drawY=heroY;
-    if(hl.landed&&hl.landT<200){const bprog=hl.landT/200;drawY=p.y-Math.sin(bprog*Math.PI)*4;}
+    if(hl.landed&&hl.landT<200){const bprog=hl.landT/200;drawY=p.y-Math.sin(bprog*Math.PI)*6;}
     dP(c,p.x,drawY,p.dir,t,p.redArmor);
   }else if(s.finalDeath){// Hero drawn by finalDeath overlay — skip normal draw
   }else if(s.pitFall&&s.pitFall.a){// Falling into pit -- shrink + spin
