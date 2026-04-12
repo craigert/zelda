@@ -4143,7 +4143,7 @@ watch([muOn, customMu], () => {
         a.play().then(() => { if(_muGen!==gen){a.pause();return;} customAuRef.value = a;
           // Fade in over 1.5s
           const fadeIn=setInterval(()=>{if(a.volume<targetVol-0.02){a.volume=Math.min(targetVol,a.volume+0.02);}else{a.volume=targetVol;clearInterval(fadeIn);}},30);
-        }).catch(() => { if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
+        }).catch((err) => { console.warn("MP3 play failed for",th,err); if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
       } else {
         playSynth();
       }
