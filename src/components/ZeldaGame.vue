@@ -1486,7 +1486,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       let nx2=ns2.x,ny2=ns2.y;
       if(ns2.dir===0)ny2-=nsp;if(ns2.dir===2)ny2+=nsp;if(ns2.dir===1)nx2+=nsp;if(ns2.dir===3)nx2-=nsp;
       const wander=isDog?TL*3:TL*2;
-      if(Math.abs(nx2-ns2.hx)<wander&&Math.abs(ny2-ns2.hy)<wander&&nx2>TL&&nx2<W2-TL*2&&ny2>TL&&ny2<H2-TL*2){ns2.x=nx2;ns2.y=ny2;}
+      // Check tile collision + wander bounds + screen bounds
+      const ntx1=Math.floor((nx2+4)/TL),nty1=Math.floor((ny2+4)/TL),ntx2=Math.floor((nx2+28)/TL),nty2=Math.floor((ny2+28)/TL);
+      const mm=gm(s);const blocked=!mm||ntx1<0||nty1<0||ntx2>=CO||nty2>=RO||SOLID.has(mm[nty1]?.[ntx1])||SOLID.has(mm[nty1]?.[ntx2])||SOLID.has(mm[nty2]?.[ntx1])||SOLID.has(mm[nty2]?.[ntx2]);
+      if(!blocked&&Math.abs(nx2-ns2.hx)<wander&&Math.abs(ny2-ns2.hy)<wander&&nx2>TL&&nx2<W2-TL*2&&ny2>TL&&ny2<H2-TL*2){ns2.x=nx2;ns2.y=ny2;}
+      else{ns2.st="idle";ns2.wait=500+Math.random()*1000;ns2.dir=[0,1,2,3][Math.random()*4|0];}// turn around if blocked
       ns2.wait-=dt;if(ns2.wait<=0){ns2.st="idle";ns2.wait=isDog?300+Math.random()*800:1500+Math.random()*3000;}}}}
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];

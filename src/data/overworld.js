@@ -1,6 +1,31 @@
 import { T, TL, CO, RO } from '../constants.js';
 import { oe } from '../utils/map-helpers.js';
 
+// Seeded random for deterministic but natural-looking variation
+function srand(seed){return()=>{seed=(seed*16807+0)%2147483647;return(seed-1)/2147483646;};}
+
+// Scatter extra trees/rocks near existing clusters for organic look
+function scatter(m,seed){
+  const rng=srand(seed);
+  // Add stray trees near existing trees (not on paths/water/entrances/special tiles)
+  const safe=new Set([T.GRASS,T.TALLGRASS,T.FLOWER]);
+  for(let y=2;y<RO-2;y++)for(let x=2;x<CO-2;x++){
+    if(m[y][x]!==T.TREE&&m[y][x]!==T.ROCK)continue;
+    // Chance to grow a neighbor tree/rock
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1]]){
+      const nx=x+dx,ny=y+dy;
+      if(nx<1||nx>=CO-1||ny<1||ny>=RO-1)continue;
+      if(!safe.has(m[ny][nx]))continue;
+      if(rng()<0.15)m[ny][nx]=m[y][x];// same type as neighbor
+    }
+  }
+  // Randomly place a few standalone bushes/stumps for variation
+  for(let i=0;i<4;i++){
+    const bx=2+Math.floor(rng()*(CO-4)),by=2+Math.floor(rng()*(RO-4));
+    if(safe.has(m[by][bx]))m[by][bx]=rng()<0.5?T.BUSH:T.STUMP;
+  }
+}
+
 // Overworld enemy definitions per screen
 export const OW_EN={
   // Inner ring (hub area)
@@ -697,3 +722,6 @@ export const OW={
   oe(m,"N");return m;})(),
 
 };
+
+// Post-process: scatter organic tree/rock/bush variation on all screens
+{let seed=42;for(const k of Object.keys(OW)){scatter(OW[k],seed);seed+=137;}}
