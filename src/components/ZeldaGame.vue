@@ -972,8 +972,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2+w.wind*20,y:-8-Math.random()*40,vy:5+Math.random()*2,vx:w.wind*2+0.5,l:1,sp:0.3+Math.random()*0.2});}
       w.fog=Math.min(0.08,w.fog+dt*0.00002);
     }else if(w.type==="snow"){
-      const spawnRate=2;
-      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2,y:-4-Math.random()*20,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2,wobble:Math.random()*Math.PI*2});}
+      const spawnRate=6;
+      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*(W2+40)-20,y:-4-Math.random()*30,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2.5,wobble:Math.random()*Math.PI*2});}
       w.fog=Math.min(0.12,w.fog+dt*0.00003);
     }else if(w.type==="fog"){
       w.fog=Math.min(0.25,w.fog+dt*0.00005);
@@ -986,7 +986,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       d.x+=d.vx*(dt/16);d.y+=d.vy*(dt/16);
       if(d.wobble!==undefined)d.x+=Math.sin(d.wobble+w.timer/300)*0.3;
       if(d.y>H2||d.x<-20||d.x>W2+20)w.drops.splice(i,1);}
-    if(w.drops.length>250)w.drops.splice(0,w.drops.length-250);
+    if(w.drops.length>400)w.drops.splice(0,w.drops.length-400);
   }else{
     // Indoors: no weather, fade fog out
     w.fog=Math.max(0,w.fog-dt*0.0003);
