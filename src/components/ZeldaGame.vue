@@ -3392,7 +3392,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.save();c.globalCompositeOperation="destination-out";
       const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);// shadow forest: nearly blind without lantern
       const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
-      fg.addColorStop(0,`rgba(0,0,0,${fogA*0.85})`);fg.addColorStop(0.5,`rgba(0,0,0,${fogA*0.4})`);fg.addColorStop(1,"rgba(0,0,0,0)");
+      fg.addColorStop(0,"rgba(0,0,0,1)");fg.addColorStop(0.5,"rgba(0,0,0,0.6)");fg.addColorStop(1,"rgba(0,0,0,0)");
       c.fillStyle=fg;c.fillRect(p.x+PS/2-fogR,p.y+PS/2-fogR,fogR*2,fogR*2);
       c.restore();
       // Drifting fog wisps — more and darker in shadow forest
