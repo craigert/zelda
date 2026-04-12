@@ -340,6 +340,11 @@ function applySave(s, save) {
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
   if(save.weatherTimer)s.weather.timer=save.weatherTimer;
+  // Instantly apply fog for shadow forest on load — no bright flash
+  if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){
+    s.weather.fog=0.50;s.weather.type="fog";s.weather.active="fog";
+    if(!s.weather.biomeWeather.shadow_forest)s.weather.biomeWeather.shadow_forest={active:"fog",timer:99999};
+  }
   if (s.finalOpen && s.sanctumRevealed) {
     const fm = OW["3,2"];
     if (fm) { fm[5][7] = T.ENTRANCE; fm[5][8] = T.ENTRANCE; fm[6][7] = T.ENTRANCE; fm[6][8] = T.ENTRANCE; }
@@ -388,6 +393,8 @@ function applyVolume(vol){
 
 // --- Game logic functions ---
 function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
+  // Instant fog when entering shadow forest
+  if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){s.weather.fog=0.50;s.weather.type="fog";}
   // Restore lit torches for this room (persists between visits)
   if(!s.litTorchesAll)s.litTorchesAll={};
   const trk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
