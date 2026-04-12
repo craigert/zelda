@@ -5,7 +5,7 @@ import { oe } from '../utils/map-helpers.js';
 function srand(seed){return()=>{seed=(seed*16807+0)%2147483647;return(seed-1)/2147483646;};}
 
 // Scatter extra trees/rocks near existing clusters for organic look
-function scatter(m,seed){
+function scatter(m,seed,scrKey){
   const rng=srand(seed);
   // Tiles safe to overwrite (basic terrain only)
   const safe=new Set([T.GRASS,T.TALLGRASS,T.FLOWER]);
@@ -16,6 +16,11 @@ function scatter(m,seed){
   for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
     if(protect.has(m[y][x])){
       for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){blocked.add((y+dy)*CO+(x+dx));}}}
+  // Also protect enemy spawn positions
+  const enemies=OW_EN[scrKey];
+  if(enemies){for(const e of enemies){
+    const ex=Math.floor(e.x/TL),ey=Math.floor(e.y/TL);
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){blocked.add((ey+dy)*CO+(ex+dx));}}}
   // Add stray trees near existing trees
   for(let y=2;y<RO-2;y++)for(let x=2;x<CO-2;x++){
     if(m[y][x]!==T.TREE&&m[y][x]!==T.ROCK)continue;
@@ -731,4 +736,4 @@ export const OW={
 };
 
 // Post-process: scatter organic tree/rock/bush variation on all screens
-{let seed=42;for(const k of Object.keys(OW)){scatter(OW[k],seed);seed+=137;}}
+{let seed=42;for(const k of Object.keys(OW)){scatter(OW[k],seed,k);seed+=137;}}
