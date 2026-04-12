@@ -466,7 +466,15 @@ function gts(s,ns,tx,ty){let m;if(s.loc.ty==="ow")m=OW[ns];else m=s.dg[s.loc.di]
   if(!m||ty<0||ty>=RO||tx<0||tx>=CO)return T.WALL;return m[ty][tx];}
 
 function iS(s,tx,ty){const m=gm(s);if(!m)return true;
-  if(s.loc.ty==="cave"){if(tx<0||tx>=CO||ty<0||ty>=RO)return true;
+  if(s.loc.ty==="cave"){
+    const cv=CAVES[s.loc.di];
+    if(cv?.rooms){// Multi-room cave — allow cross-room transitions like dungeons
+      const[sx,sy]=s.loc.scr.split(",").map(Number);
+      if(tx<0){const ns=`${sx-1},${sy}`;return cv.rooms[ns]?SOLID.has((cv.rooms[ns].tiles[RO+ty]||[])[CO+tx]||T.WALL):true;}
+      if(tx>=CO){const ns=`${sx+1},${sy}`;return cv.rooms[ns]?SOLID.has((cv.rooms[ns].tiles[ty]||[])[tx-CO]||T.WALL):true;}
+      if(ty<0){const ns=`${sx},${sy-1}`;return cv.rooms[ns]?SOLID.has((cv.rooms[ns].tiles[RO+ty]||[])[tx]||T.WALL):true;}
+      if(ty>=RO){const ns=`${sx},${sy+1}`;return cv.rooms[ns]?SOLID.has((cv.rooms[ns].tiles[ty-RO]||[])[tx]||T.WALL):true;}
+    }else{if(tx<0||tx>=CO||ty<0||ty>=RO)return true;}
     const tl=m[ty][tx];return SOLID.has(tl);}
   const[sx,sy]=s.loc.scr.split(",").map(Number);
   if(tx<0){return SOLID.has(gts(s,`${sx-1},${sy}`,CO+tx,ty));}
