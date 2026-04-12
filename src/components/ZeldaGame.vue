@@ -3385,22 +3385,28 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       // Snow ground accumulation tint
       c.fillStyle="rgba(200,210,230,0.04)";c.fillRect(0,0,W2,H2);
     }
-    // Fog — reduces visibility like dark rooms (drawn as radial gradient overlay)
+    // Fog — reduces visibility (built on offscreen canvas to avoid destination-out artifacts)
     if(w.fog>0.02){
       const isShadowBiome=loc.ty==="ow"&&getBiome(loc.scr)==="shadow_forest";
-      const fogA=Math.min(0.92,w.fog*(1+nightAmount*0.5));// denser fog at night
+      const fogA=Math.min(0.92,w.fog*(1+nightAmount*0.5));
       const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);
       const fogCol=isShadowBiome?"30,20,50":"100,110,120";
-      // Solid fog everywhere, then circular clear area around player
-      c.fillStyle="rgba("+fogCol+","+fogA+")";c.fillRect(0,0,W2,H2);
-      // Cut circular visibility hole centered on player
-      c.save();c.globalCompositeOperation="destination-out";
-      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
+      // Build fog with hole on offscreen canvas
+      if(!s._fogCv){s._fogCv=document.createElement("canvas");s._fogCv.width=W2;s._fogCv.height=H2;}
+      const fc=s._fogCv.getContext("2d");
+      fc.clearRect(0,0,W2,H2);
+      // Solid fog
+      fc.fillStyle="rgba("+fogCol+","+fogA+")";fc.fillRect(0,0,W2,H2);
+      // Cut circular hole
+      fc.globalCompositeOperation="destination-out";
+      const fg=fc.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
       fg.addColorStop(0,"rgba(0,0,0,1)");
       fg.addColorStop(0.6,"rgba(0,0,0,0.5)");
       fg.addColorStop(1,"rgba(0,0,0,0)");
-      c.fillStyle=fg;c.beginPath();c.arc(p.x+PS/2,p.y+PS/2,fogR,0,Math.PI*2);c.fill();
-      c.restore();
+      fc.fillStyle=fg;fc.beginPath();fc.arc(p.x+PS/2,p.y+PS/2,fogR,0,Math.PI*2);fc.fill();
+      fc.globalCompositeOperation="source-over";
+      // Composite fog layer onto main canvas
+      c.drawImage(s._fogCv,0,0);
       // Drifting nebulous fog blobs — slow, layered, shimmering
       const wispCount=isShadowBiome?10:5;
       for(let i=0;i<wispCount;i++){
