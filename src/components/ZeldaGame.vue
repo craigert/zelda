@@ -4158,13 +4158,15 @@ watch([muOn, customMu], () => {
         const fade=setInterval(()=>{vol-=0.03;if(vol<=0){clearInterval(fade);try{oldAu.pause();}catch(e){}}else{try{oldAu.volume=Math.max(0,vol);}catch(e){clearInterval(fade);}}},25);
         customAuRef.value=null;
       }
-      // Fade out synth volume too
+      // Fade out synth volume too (ramp down, will restore after stopMu)
       try{if(au.p)Tone.getDestination().volume.rampTo(-Infinity,1);}catch(e){}
       // Delay new track start to let old one fade
       const startDelay=hadOldAu||au.p?1000:0;
       const startNew=()=>{
         if(_muGen!==gen)return;
         stopMu();
+        // Restore Tone destination volume so SFX still work
+        applyVolume(stR.value?.volume??80);
         const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); applyVolume(stR.value?.volume??80); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
         if (tryMp3) {
           const a = new Audio(tryMp3); a.loop = true; a.volume = 0.01;
