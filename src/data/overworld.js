@@ -650,9 +650,12 @@ export const OW={
   m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][3]=T.TREE;m[3][12]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
   m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
   m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
-  // Swamp water in far corners only
-  m[4][3]=T.WATER;m[4][4]=T.WATER;m[3][4]=T.WATER;
-  m[8][11]=T.WATER;m[8][12]=T.WATER;m[7][12]=T.WATER;
+  // Swamp water on the left side
+  m[4][1]=T.WATER;m[4][2]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;
+  m[5][1]=T.WATER;m[5][2]=T.WATER;m[5][3]=T.WATER;m[5][4]=T.WATER;m[5][5]=T.WATER;
+  m[6][1]=T.WATER;m[6][2]=T.WATER;m[6][3]=T.WATER;m[6][4]=T.WATER;m[6][5]=T.WATER;
+  m[7][1]=T.WATER;m[7][2]=T.WATER;m[7][3]=T.WATER;m[7][4]=T.WATER;
+  m[8][2]=T.WATER;m[8][3]=T.WATER;
   // D3 Shadow Keep entrance (center)
   m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
   // 4 boulders — one at each corner of the entrance
