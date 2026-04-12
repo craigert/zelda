@@ -983,9 +983,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       w.fog=Math.min(0.12,w.fog+dt*0.00003);
     }else if(w.type==="fog"){
       const isShadow=getBiome(s.loc.scr)==="shadow_forest";
-      const fogMax=isShadow?0.50:0.25;// shadow forest: extremely dense fog
-      const fogRate=isShadow?0.00015:0.00005;
-      w.fog=Math.min(fogMax,w.fog+dt*fogRate);
+      const fogMax=isShadow?0.50:0.25;
+      if(isShadow){w.fog=fogMax;}// shadow forest: always full fog instantly
+      else{w.fog=Math.min(fogMax,w.fog+dt*0.00005);}
       if(Math.random()<(isShadow?0.25:0.15)){w.drops.push({x:Math.random()*W2,y:-4,vy:3+Math.random(),vx:w.wind*0.5,l:1,sp:0.2});}
     }else{// clear — fog and drops fade out naturally
       w.fog=Math.max(0,w.fog-dt*0.0002);
@@ -3391,22 +3391,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const fogA=Math.min(0.92,w.fog*(1+nightAmount*0.5));// denser fog at night
       const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);
       const fogCol=isShadowBiome?"30,20,50":"100,110,120";
-      // Single radial gradient: transparent at player center, fog color at edges
-      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,fogR*0.3,p.x+PS/2,p.y+PS/2,fogR);
-      fg.addColorStop(0,"rgba("+fogCol+",0)");// clear at center
-      fg.addColorStop(0.6,"rgba("+fogCol+","+fogA*0.4+")");// partial fog
-      fg.addColorStop(1,"rgba("+fogCol+","+fogA+")");// full fog at edge of radius
-      c.fillStyle=fg;c.fillRect(0,0,W2,H2);
-      // Fill corners beyond the gradient with solid fog
-      c.fillStyle="rgba("+fogCol+","+fogA+")";
-      // Top strip
-      c.fillRect(0,0,W2,Math.max(0,p.y+PS/2-fogR));
-      // Bottom strip
-      c.fillRect(0,Math.min(H2,p.y+PS/2+fogR),W2,H2);
-      // Left strip
-      c.fillRect(0,0,Math.max(0,p.x+PS/2-fogR),H2);
-      // Right strip
-      c.fillRect(Math.min(W2,p.x+PS/2+fogR),0,W2,H2);
+      // Solid fog everywhere, then circular clear area around player
+      c.fillStyle="rgba("+fogCol+","+fogA+")";c.fillRect(0,0,W2,H2);
+      // Cut circular visibility hole centered on player
+      c.save();c.globalCompositeOperation="destination-out";
+      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
+      fg.addColorStop(0,"rgba(0,0,0,1)");
+      fg.addColorStop(0.6,"rgba(0,0,0,0.5)");
+      fg.addColorStop(1,"rgba(0,0,0,0)");
+      c.fillStyle=fg;c.beginPath();c.arc(p.x+PS/2,p.y+PS/2,fogR,0,Math.PI*2);c.fill();
+      c.restore();
       // Drifting nebulous fog blobs — slow, layered, shimmering
       const wispCount=isShadowBiome?10:5;
       for(let i=0;i<wispCount;i++){
