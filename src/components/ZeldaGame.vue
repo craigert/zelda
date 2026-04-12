@@ -182,11 +182,18 @@ function rollWeather(biome){
   return "clear";
 }
 
-// --- Night check helper ---
-function isNightTime(s){
-  const phase=(s.weather.timer%300000)/300000;
-  return Math.max(0,Math.sin(phase*Math.PI*2-Math.PI/2)*0.5+0.5)>0.3;
+// --- Day/Night cycle: 10 min full cycle, smooth transitions ---
+// Returns 0 (full day) to 1 (full night) with slow ease in/out
+const DAY_CYCLE_MS=600000;// 10 minutes per full day/night cycle
+function getNightAmount(timer){
+  const phase=(timer%DAY_CYCLE_MS)/DAY_CYCLE_MS;// 0-1
+  // Raw sine: peaks at 0.25 (midnight), troughs at 0.75 (noon)
+  const raw=Math.sin(phase*Math.PI*2-Math.PI/2)*0.5+0.5;// 0-1
+  // Smoothstep for gradual transitions (flattens the peaks/valleys)
+  const clamped=Math.max(0,Math.min(1,raw));
+  return clamped*clamped*(3-2*clamped);// smoothstep
 }
+function isNightTime(s){return getNightAmount(s.weather.timer)>0.3;}
 
 // --- Night enemy spawns per biome ---
 const NIGHT_ENEMIES={
@@ -2173,7 +2180,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     if(p.snare>0){c.fillStyle="#6a4";c.fillText("SNARED",stx,26);}}
   c.textAlign="left";
   // Day/Night indicator — small sun or moon on HUD
-  if(!iD2){const dnP=((s.weather.timer%300000)/300000);const nA=Math.max(0,Math.sin(dnP*Math.PI*2-Math.PI/2)*0.5+0.5);
+  if(!iD2){const nA=getNightAmount(s.weather.timer);
     const dix=W2/2+52,diy=iD2?20:16;
     if(nA>0.3){// Moon
       c.fillStyle=`rgba(180,200,240,${0.5+nA*0.3})`;c.beginPath();c.arc(dix,diy,5,0,Math.PI*2);c.fill();
@@ -2486,8 +2493,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   // Overworld ambient effects
   if(!iD){
     // Day/Night cycle — compute night intensity for ambient effects
-    const dnPhase=((s.weather.timer%300000)/300000);
-    const nightAmt=Math.max(0,Math.sin(dnPhase*Math.PI*2-Math.PI/2)*0.5+0.5);
+    const nightAmt=getNightAmount(s.weather.timer);
     // Night sky stars (only visible at night on overworld)
     if(nightAmt>0.2){const starA=Math.min(1,(nightAmt-0.2)/0.3);
       for(let i=0;i<20;i++){const sx2=hs(i,30,400)*W2,sy2=hs(i,31,401)*H2*0.6;
@@ -3318,8 +3324,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.restore();}
   // --- Day/Night cycle tint ---
   // Full cycle: ~5 minutes real time. Phase: 0=noon, 0.5=midnight
-  const dayPhase=((s.weather.timer%300000)/300000);// 0-1 over 5 minutes
-  const nightAmount=Math.max(0,Math.sin(dayPhase*Math.PI*2-Math.PI/2)*0.5+0.5);// 0 at noon, 1 at midnight
+  const nightAmount=getNightAmount(s.weather.timer);
   const isNight=nightAmount>0.3;
   if(!iD){
     // Ambient day/night tint
