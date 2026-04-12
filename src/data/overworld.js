@@ -655,11 +655,11 @@ export const OW={
   m[8][11]=T.WATER;m[8][12]=T.WATER;m[7][12]=T.WATER;
   // D3 Shadow Keep entrance (center)
   m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
-  // 4 boulders — one on each side of the entrance
-  m[4][7]=T.ROCK;m[4][8]=T.ROCK;// north side
-  m[7][7]=T.ROCK;m[7][8]=T.ROCK;// south side
-  m[5][6]=T.ROCK;m[6][6]=T.ROCK;// west side
-  m[5][9]=T.ROCK;m[6][9]=T.ROCK;// east side
+  // 4 boulders — one at each corner of the entrance
+  m[4][6]=T.ROCK;// northwest
+  m[4][9]=T.ROCK;// northeast
+  m[7][6]=T.ROCK;// southwest
+  m[7][9]=T.ROCK;// southeast
   // Wide clear path from entrance to north exit
   m[3][6]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[3][9]=T.PATH;
   m[4][5]=T.PATH;m[4][6]=T.PATH;m[4][9]=T.PATH;m[4][10]=T.PATH;
