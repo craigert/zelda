@@ -4134,27 +4134,36 @@ watch([muOn, customMu], () => {
     const s = stR.value; if (!s) return;
     let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? (isNightTime(s)?"nighttime":"overworld") : (s.loc.ty === "cave" ? (s.shopGround?"shop":(CAVES[s.loc.di]?.style?.th||"forest")) : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
-      // Smooth crossfade: fade out current audio over 1.5s before switching
-      const oldAu=customAuRef.value;
-      if(oldAu){
-        const fadeOut=()=>{let vol=oldAu.volume;const fade=setInterval(()=>{vol-=0.02;if(vol<=0){clearInterval(fade);try{oldAu.pause();}catch(e){}}else{try{oldAu.volume=vol;}catch(e){clearInterval(fade);}}},30);};
-        fadeOut();customAuRef.value=null;
-      }
-      stopMu();
       ltRef.value = th;
-      const gen = ++_muGen; // capture generation for async check
+      const gen = ++_muGen;
       const tryMp3 = customMu.value[th];
       const targetVol=(stR.value?.volume??80)/100;
-      const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
-      if (tryMp3) {
-        const a = new Audio(tryMp3); a.loop = true; a.volume = 0.01;
-        a.play().then(() => { if(_muGen!==gen){a.pause();return;} customAuRef.value = a;
-          // Fade in over 1.5s
-          const fadeIn=setInterval(()=>{if(a.volume<targetVol-0.02){a.volume=Math.min(targetVol,a.volume+0.02);}else{a.volume=targetVol;clearInterval(fadeIn);}},30);
-        }).catch((err) => { console.warn("MP3 play failed for",th,err); if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
+      // Fade out current audio over ~1s, then start new track
+      const oldAu=customAuRef.value;
+      const hadOldAu=!!oldAu;
+      if(oldAu){
+        let vol=oldAu.volume;
+        const fade=setInterval(()=>{vol-=0.03;if(vol<=0){clearInterval(fade);try{oldAu.pause();}catch(e){}}else{try{oldAu.volume=Math.max(0,vol);}catch(e){clearInterval(fade);}}},25);
+        customAuRef.value=null;
+      }
+      // Fade out synth volume too
+      try{if(au.p)Tone.getDestination().volume.rampTo(-Infinity,1);}catch(e){}
+      // Delay new track start to let old one fade
+      const startDelay=hadOldAu||au.p?1000:0;
+      const startNew=()=>{
+        if(_muGen!==gen)return;
+        stopMu();
+        const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); applyVolume(stR.value?.volume??80); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
+        if (tryMp3) {
+          const a = new Audio(tryMp3); a.loop = true; a.volume = 0.01;
+          a.play().then(() => { if(_muGen!==gen){a.pause();return;} customAuRef.value = a;
+            const fadeIn=setInterval(()=>{if(a.volume<targetVol-0.02){a.volume=Math.min(targetVol,a.volume+0.02);}else{a.volume=targetVol;clearInterval(fadeIn);}},25);
+          }).catch((err) => { console.warn("MP3 play failed for",th,err); if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
       } else {
         playSynth();
       }
+      };
+      if(startDelay>0)setTimeout(startNew,startDelay);else startNew();
     }
   };
   ck();
