@@ -175,11 +175,11 @@ function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
 
 // --- Weather probabilities per biome: [clear, rain, fog, snow] ---
 const WEATHER_ODDS={
-  meadow:[0.55, 0.30, 0.15, 0],        // mostly clear, sometimes rain, rare fog
-  forest:[0.40, 0.25, 0.35, 0],         // fog-prone, decent rain chance
-  snow:  [0.35, 0.05, 0.15, 0.45],      // snowy often, rarely rain
-  desert:[0.85, 0.05, 0.10, 0],         // almost always clear
-  shadow_forest:[0.0, 0.0, 1.0, 0],      // always foggy — lantern essential
+  meadow:[0.65, 0.35, 0, 0],            // clear or rain, no fog
+  forest:[0.55, 0.45, 0, 0],            // clear or rain, no fog
+  snow:  [0.30, 0.0, 0.15, 0.55],       // snow or fog on mountains
+  desert:[0.90, 0.10, 0, 0],            // almost always clear
+  shadow_forest:[0.0, 0.0, 1.0, 0],     // always foggy — lantern essential
 };
 function rollWeather(biome){
   const odds=WEATHER_ODDS[biome]||WEATHER_ODDS.meadow;
