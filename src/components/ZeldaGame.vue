@@ -148,7 +148,7 @@ function init() {
     sanctumRevealed:false, // true after the reveal has played
     sanctumDark:false, // true after sanctum rises — overworld 3,2 shrouded in darkness
     heroLand:null, // {t,dur} — hero landing animation after triforce warp
-    weather:{drops:[],fog:0,type:"clear",wind:0,timer:0,nextChange:15000+Math.random()*30000,active:"clear"}, // weather system state
+    weather:{drops:[],fog:0,type:"clear",wind:0,timer:0,nextChange:15000+Math.random()*30000,active:"clear",biomeWeather:{}}, // weather system state — biomeWeather tracks per-biome
   };
 }
 
@@ -156,6 +156,7 @@ function init() {
 const BIOME_MAP={
   // Icy/snowy screens (northern highlands, mountain)
   "3,-1":"snow","4,-1":"snow","2,-1":"snow",
+  "5,-1":"snow","5,0":"snow","5,1":"snow",
   // Forest screens
   "-1,-1":"forest","0,-1":"forest","1,-1":"forest",
   "0,0":"forest","0,1":"forest","-1,0":"forest","-1,1":"forest",
@@ -163,6 +164,7 @@ const BIOME_MAP={
   "-1,2":"forest",
   // Fire/desert — clear & hot
   "4,0":"desert","4,1":"desert","4,2":"desert","3,2":"desert",
+  "5,2":"desert",
   // Default (hub, meadows) gets rain
 };
 function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
@@ -945,15 +947,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   {const w=s.weather;w.timer+=dt;
   if(s.loc.ty==="ow"){
     const biome=getBiome(s.loc.scr);
-    // Re-roll weather when entering a new biome or when timer expires
-    w.nextChange-=dt;
-    const biomeChanged=w._lastBiome!==biome;
-    if(biomeChanged)w._lastBiome=biome;
-    if(w.nextChange<=0||biomeChanged){
-      w.active=rollWeather(biome);
-      w.nextChange=20000+Math.random()*40000;// 20-60s until next change
+    // Per-biome weather: each biome has its own weather state + timer
+    if(!w.biomeWeather[biome])w.biomeWeather[biome]={active:"clear",timer:20000+Math.random()*30000};
+    const bw=w.biomeWeather[biome];
+    bw.timer-=dt;
+    if(bw.timer<=0){
+      bw.active=rollWeather(biome);
+      bw.timer=20000+Math.random()*40000;// 20-60s until next change
     }
-    w.type=w.active;
+    w.type=bw.active;
     // Wind oscillates slowly
     w.wind=Math.sin(w.timer/4000)*1.5;
     // Manage weather drop particles

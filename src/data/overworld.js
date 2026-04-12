@@ -30,6 +30,11 @@ export const OW_EN={
   "-1,2":[{x:5*TL,y:4*TL,hp:4,type:"knight"},{x:10*TL,y:7*TL,hp:4,type:"mage"},{x:7*TL,y:9*TL,hp:3,type:"fire_bat"}],
   "3,2":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}],
   "4,2":[{x:4*TL,y:4*TL,hp:4,type:"fire_bat"},{x:11*TL,y:7*TL,hp:5,type:"knight"},{x:7*TL,y:9*TL,hp:4,type:"fire_bat"}],
+  // Eastern frontier (x=5)
+  "5,-1":[{x:5*TL,y:5*TL,hp:5,type:"yeti"},{x:10*TL,y:7*TL,hp:4,type:"ghost"},{x:8*TL,y:3*TL,hp:4,type:"skeleton"}],
+  "5,0":[{x:6*TL,y:5*TL,hp:5,type:"yeti"},{x:9*TL,y:6*TL,hp:5,type:"yeti"},{x:4*TL,y:8*TL,hp:4,type:"ghost"}],
+  "5,1":[{x:5*TL,y:3*TL,hp:5,type:"ghost"},{x:10*TL,y:8*TL,hp:6,type:"knight"},{x:7*TL,y:6*TL,hp:5,type:"yeti"}],
+  "5,2":[{x:5*TL,y:5*TL,hp:5,type:"fire_bat"},{x:10*TL,y:7*TL,hp:5,type:"mage"},{x:7*TL,y:4*TL,hp:6,type:"knight"},{x:12*TL,y:9*TL,hp:4,type:"fire_bat"}],
 };
 
 export const OW={
@@ -157,7 +162,7 @@ export const OW={
   // Banana cave — push boulder to reveal, guarded by yetis inside
   m[8][3]=T.ROCK;m[9][3]=T.ROCK;m[9][5]=T.ROCK;
   m[8][4]=T.PUSH;// beside rocks, push south to reveal cave
-  oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
+  oe(m,"W",T.ICE);oe(m,"S",T.ICE);oe(m,"E",T.ICE);return m;})(),
 
 // ===== ROW y=0 (Main upper row) =====
 
@@ -470,6 +475,102 @@ export const OW={
   m[7][7]=T.PATH;m[7][8]=T.PATH;
   m[3][8]=T.TORCH;m[3][9]=T.TORCH;m[9][5]=T.TORCH;m[9][6]=T.TORCH;
   m[3][4]=T.ROCK;m[8][4]=T.ROCK;m[3][11]=T.ROCK;
+  oe(m,"W",T.SAND);oe(m,"N",T.SAND);oe(m,"E",T.SAND);return m;})(),
+
+// ===== COLUMN x=5 (Eastern frontier — ice mountains + desert) =====
+
+// Frozen Peak — treacherous ice mountain summit with heart piece
+"5,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][CO-1]=T.ROCK;}
+  // Heavy mountain rock formations
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][10]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][11]=T.ROCK;m[2][12]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[3][12]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][11]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][12]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  // Frozen crevasses (water = bottomless ice gaps)
+  m[4][3]=T.WATER;m[4][4]=T.WATER;m[5][3]=T.WATER;m[5][4]=T.WATER;
+  m[7][8]=T.WATER;m[7][9]=T.WATER;m[8][8]=T.WATER;m[8][9]=T.WATER;m[8][10]=T.WATER;
+  // Winding ice path through the peaks
+  m[3][4]=T.PATH;m[3][5]=T.PATH;m[3][6]=T.PATH;m[4][6]=T.PATH;m[5][6]=T.PATH;m[5][7]=T.PATH;
+  m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;m[6][11]=T.PATH;
+  m[7][11]=T.PATH;m[8][11]=T.PATH;
+  // Heart piece at the end of the treacherous path
+  m[7][11]=T.HEART_PIECE;
+  // Rock clusters for atmosphere
+  m[5][10]=T.ROCK;m[5][11]=T.ROCK;m[4][9]=T.ROCK;m[4][10]=T.ROCK;
+  m[7][3]=T.ROCK;m[7][4]=T.ROCK;m[8][3]=T.ROCK;
+  m[3][8]=T.STUMP;m[9][6]=T.STUMP;
+  oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
+
+// Ice Mountain Pass — connects ice and desert, steep rocky terrain
+"5,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Mountain walls on both sides with narrow pass
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][4]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][3]=T.ROCK;m[2][12]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[3][1]=T.ROCK;m[3][2]=T.ROCK;m[3][13]=T.ROCK;m[3][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  // Central rock ridge dividing the pass
+  m[5][5]=T.ROCK;m[5][6]=T.ROCK;m[6][5]=T.ROCK;m[6][6]=T.ROCK;
+  m[5][9]=T.ROCK;m[5][10]=T.ROCK;m[6][9]=T.ROCK;m[6][10]=T.ROCK;
+  // Ice bridge over frozen chasm
+  m[4][7]=T.BRIDGE;m[4][8]=T.BRIDGE;m[5][7]=T.BRIDGE;m[5][8]=T.BRIDGE;
+  m[6][7]=T.BRIDGE;m[6][8]=T.BRIDGE;m[7][7]=T.BRIDGE;m[7][8]=T.BRIDGE;
+  // Frozen water below the bridge
+  m[4][5]=T.WATER;m[4][6]=T.WATER;m[7][5]=T.WATER;m[7][6]=T.WATER;
+  m[4][9]=T.WATER;m[4][10]=T.WATER;m[7][9]=T.WATER;m[7][10]=T.WATER;
+  // Cracked wall hides a cave
+  m[8][4]=T.CRACK;
+  m[3][7]=T.STUMP;m[8][11]=T.STUMP;
+  oe(m,"N",T.ICE);oe(m,"S",T.ICE);return m;})(),
+
+// Frozen Cliffs — ice mountain with ledges and dangerous terrain
+"5,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Mountain walls
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][12]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][4]=T.ROCK;m[10][11]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][3]=T.ROCK;m[9][12]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  // Large frozen lake in the center
+  m[4][4]=T.WATER;m[4][5]=T.WATER;m[4][6]=T.WATER;m[4][7]=T.WATER;m[4][8]=T.WATER;
+  m[5][4]=T.WATER;m[5][5]=T.ICE;m[5][6]=T.ICE;m[5][7]=T.ICE;m[5][8]=T.WATER;
+  m[6][4]=T.WATER;m[6][5]=T.ICE;m[6][6]=T.ICE;m[6][7]=T.ICE;m[6][8]=T.WATER;
+  m[7][4]=T.WATER;m[7][5]=T.WATER;m[7][6]=T.WATER;m[7][7]=T.WATER;m[7][8]=T.WATER;
+  // Ledges on the eastern cliff face
+  m[3][10]=T.LEDGE_S;m[3][11]=T.LEDGE_S;
+  m[5][10]=T.ROCK;m[5][11]=T.ROCK;m[6][10]=T.ROCK;m[6][11]=T.ROCK;
+  m[8][10]=T.LEDGE_S;m[8][11]=T.LEDGE_S;
+  // Paths around the lake
+  m[3][4]=T.PATH;m[3][5]=T.PATH;m[3][6]=T.PATH;m[8][5]=T.PATH;m[8][6]=T.PATH;m[8][7]=T.PATH;
+  m[4][9]=T.PATH;m[5][9]=T.PATH;m[6][9]=T.PATH;m[7][9]=T.PATH;
+  // Pushable boulder hiding a cave
+  m[9][7]=T.ROCK;m[9][8]=T.ROCK;m[9][9]=T.ROCK;
+  m[9][6]=T.PUSH;
+  oe(m,"N",T.ICE);oe(m,"S",T.ICE);return m;})(),
+
+// Scorched Barrens — desert frontier, hostile and barren
+"5,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][CO-1]=T.ROCK;}
+  // Rocky desert outcrops
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  // Dried lava channels (water = lava visually)
+  m[3][5]=T.WATER;m[3][6]=T.WATER;m[4][6]=T.WATER;m[5][6]=T.WATER;m[5][7]=T.WATER;
+  m[7][8]=T.WATER;m[7][9]=T.WATER;m[8][9]=T.WATER;m[8][10]=T.WATER;m[9][10]=T.WATER;
+  // Ruined columns
+  m[4][3]=T.ROCK;m[4][4]=T.ROCK;m[4][10]=T.ROCK;m[4][11]=T.ROCK;
+  m[7][3]=T.ROCK;m[7][4]=T.ROCK;m[7][11]=T.ROCK;
+  // Sandy paths between the ruins
+  m[5][8]=T.PATH;m[5][9]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  m[5][3]=T.PATH;m[5][4]=T.PATH;m[6][3]=T.PATH;m[6][4]=T.PATH;
+  // Torches marking an ancient site
+  m[3][8]=T.TORCH;m[3][9]=T.TORCH;m[8][5]=T.TORCH;m[8][6]=T.TORCH;
+  m[5][11]=T.BUSH;m[6][11]=T.BUSH;m[9][5]=T.BUSH;
   oe(m,"W",T.SAND);oe(m,"N",T.SAND);return m;})(),
 
 };
