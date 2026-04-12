@@ -3496,6 +3496,22 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       }
     }
   }
+  // Shadow forest — ALWAYS dark, independent of weather system
+  if(!iD&&loc.ty==="ow"&&getBiome(loc.scr)==="shadow_forest"){
+    const sfFogA=0.95;const sfR=s.hasLantern?90:24;
+    if(!s._fogCv){s._fogCv=document.createElement("canvas");s._fogCv.width=W2;s._fogCv.height=H2;}
+    const fc=s._fogCv.getContext("2d");
+    fc.clearRect(0,0,W2,H2);
+    fc.fillStyle="rgba(15,8,30,"+sfFogA+")";fc.fillRect(0,0,W2,H2);
+    fc.globalCompositeOperation="destination-out";
+    const px2=p.x+PS/2,py2=p.y+PS/2;
+    const fg=fc.createRadialGradient(px2,py2,0,px2,py2,sfR);
+    fg.addColorStop(0,"rgba(0,0,0,1)");fg.addColorStop(0.5,"rgba(0,0,0,0.8)");
+    fg.addColorStop(0.8,"rgba(0,0,0,0.3)");fg.addColorStop(1,"rgba(0,0,0,0)");
+    fc.fillStyle=fg;fc.fillRect(px2-sfR,py2-sfR,sfR*2,sfR*2);
+    fc.globalCompositeOperation="source-over";
+    c.drawImage(s._fogCv,0,0);
+  }
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
   vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
