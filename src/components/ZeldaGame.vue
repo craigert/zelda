@@ -148,7 +148,7 @@ function init() {
     sanctumRevealed:false, // true after the reveal has played
     sanctumDark:false, // true after sanctum rises — overworld 3,2 shrouded in darkness
     heroLand:null, // {t,dur} — hero landing animation after triforce warp
-    weather:{drops:[],fog:0,type:"clear",wind:0,timer:0}, // weather system state
+    weather:{drops:[],fog:0,type:"clear",wind:0,timer:0,nextChange:15000+Math.random()*30000,active:"clear"}, // weather system state
   };
 }
 
@@ -167,13 +167,19 @@ const BIOME_MAP={
 };
 function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
 
-// --- Weather type per biome ---
-function getWeatherForBiome(biome){
-  if(biome==="snow")return "snow";
-  if(biome==="forest")return "fog";
-  if(biome==="desert")return "clear";
-  // Meadow screens get rain
-  return "rain";
+// --- Weather probabilities per biome: [clear, rain, fog, snow] ---
+const WEATHER_ODDS={
+  meadow:[0.55, 0.30, 0.15, 0],     // mostly clear, sometimes rain, rare fog
+  forest:[0.40, 0.25, 0.35, 0],      // fog-prone, decent rain chance
+  snow:  [0.35, 0.05, 0.15, 0.45],   // snowy often, rarely rain
+  desert:[0.85, 0.05, 0.10, 0],      // almost always clear
+};
+function rollWeather(biome){
+  const odds=WEATHER_ODDS[biome]||WEATHER_ODDS.meadow;
+  const r=Math.random();let cum=0;
+  const types=["clear","rain","fog","snow"];
+  for(let i=0;i<4;i++){cum+=odds[i];if(r<cum)return types[i];}
+  return "clear";
 }
 
 // --- Night check helper ---
@@ -929,45 +935,46 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.p.hp<=2)s.lowHp+=dt;else s.lowHp=0;
 
   // --- Weather system update ---
+  {const w=s.weather;w.timer+=dt;
   if(s.loc.ty==="ow"){
-    const biome=getBiome(s.loc.scr);const wType=getWeatherForBiome(biome);
-    const w=s.weather;w.type=wType;w.timer+=dt;
+    const biome=getBiome(s.loc.scr);
+    // Re-roll weather when entering a new biome or when timer expires
+    w.nextChange-=dt;
+    const biomeChanged=w._lastBiome!==biome;
+    if(biomeChanged)w._lastBiome=biome;
+    if(w.nextChange<=0||biomeChanged){
+      w.active=rollWeather(biome);
+      w.nextChange=20000+Math.random()*40000;// 20-60s until next change
+    }
+    w.type=w.active;
     // Wind oscillates slowly
     w.wind=Math.sin(w.timer/4000)*1.5;
     // Manage weather drop particles
-    if(wType==="rain"){
-      // Spawn rain drops
-      const spawnRate=3;// drops per frame
+    if(w.type==="rain"){
+      const spawnRate=3;
       for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2+w.wind*20,y:-8-Math.random()*40,vy:5+Math.random()*2,vx:w.wind*2+0.5,l:1,sp:0.3+Math.random()*0.2});}
-      // Fog builds up slightly in rain
       w.fog=Math.min(0.08,w.fog+dt*0.00002);
-    }else if(wType==="snow"){
+    }else if(w.type==="snow"){
       const spawnRate=2;
       for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2,y:-4-Math.random()*20,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2,wobble:Math.random()*Math.PI*2});}
       w.fog=Math.min(0.12,w.fog+dt*0.00003);
-    }else if(wType==="fog"){
+    }else if(w.type==="fog"){
       w.fog=Math.min(0.25,w.fog+dt*0.00005);
-      // Occasional light drizzle in foggy forest
       if(Math.random()<0.15){w.drops.push({x:Math.random()*W2,y:-4,vy:3+Math.random(),vx:w.wind*0.5,l:1,sp:0.2});}
-    }else{// clear
-      w.fog=Math.max(0,w.fog-dt*0.0001);
+    }else{// clear — fog and drops fade out naturally
+      w.fog=Math.max(0,w.fog-dt*0.0002);
     }
     // Update drops
     for(let i=w.drops.length-1;i>=0;i--){const d=w.drops[i];
       d.x+=d.vx*(dt/16);d.y+=d.vy*(dt/16);
-      if(d.wobble!==undefined)d.x+=Math.sin(d.wobble+w.timer/300)*0.3;// snow wobble
+      if(d.wobble!==undefined)d.x+=Math.sin(d.wobble+w.timer/300)*0.3;
       if(d.y>H2||d.x<-20||d.x>W2+20)w.drops.splice(i,1);}
-    // Cap drops to prevent lag
     if(w.drops.length>250)w.drops.splice(0,w.drops.length-250);
   }else{
     // Indoors: no weather, fade fog out
-    s.weather.fog=Math.max(0,s.weather.fog-dt*0.0003);
-    s.weather.drops.length=0;s.weather.type="clear";
-  }
-
-  // --- Day/Night cycle ---
-  // Game time drives the cycle: ~5 real minutes per full day
-  s.weather.timer+=0;// timer already advanced above
+    w.fog=Math.max(0,w.fog-dt*0.0003);
+    w.drops.length=0;w.type="clear";
+  }}
 
   const ky=kyR.value,p=s.p,tc=tcR.value;let dx=0,dy=0;
   if(ky.has("arrowup")||ky.has("w")){dy=-1;p.dir=0;}if(ky.has("arrowdown")||ky.has("s")){dy=1;p.dir=2;}
@@ -3319,7 +3326,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const dayAmb=Math.sin(t/15000)*0.03;
     if(nightAmount>0.05){
       // Night: blue-dark overlay
-      c.fillStyle=`rgba(10,10,40,${nightAmount*0.35})`;c.fillRect(0,0,W2,H2);
+      c.fillStyle=`rgba(8,8,35,${nightAmount*0.55})`;c.fillRect(0,0,W2,H2);
     }else{
       c.fillStyle=dayAmb>0?`rgba(255,200,100,${dayAmb})`:`rgba(100,150,255,${-dayAmb})`;c.fillRect(0,0,W2,H2);
     }
