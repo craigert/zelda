@@ -2259,6 +2259,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD||tl2===T.JAR)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
         if((tl2===T.DOOR||tl2===T.BOSS_DOOR)&&s.dr.has(opk))tl2=T.FLOOR;
         dT(c,tl2,x2*TL,y2*TL,iD,dg,t,null);}
+      // Apply day/night tint to old screen during slide
+      if(!iD){const slNight=getNightAmount(s.weather.timer);
+        if(slNight>0.05){c.fillStyle=`rgba(8,8,35,${slNight*0.55})`;c.fillRect(0,0,W2,H2);}}
       c.restore();}
     // Offset new screen
     c.translate((1-ease)*W2*sl.dx,(1-ease)*H2*sl.dy);}
