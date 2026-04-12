@@ -176,7 +176,7 @@ function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
 // --- Weather probabilities per biome: [clear, rain, fog, snow] ---
 const WEATHER_ODDS={
   meadow:[0.65, 0.35, 0, 0],            // clear or rain, no fog
-  forest:[0.55, 0.45, 0, 0],            // clear or rain, no fog
+  forest:[0.45, 0.35, 0.20, 0],          // occasional fog in forests
   snow:  [0.30, 0.0, 0.15, 0.55],       // snow or fog on mountains
   desert:[0.90, 0.10, 0, 0],            // almost always clear
   shadow_forest:[0.0, 0.0, 1.0, 0],     // always foggy — lantern essential
