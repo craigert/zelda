@@ -179,7 +179,7 @@ const WEATHER_ODDS={
   forest:[0.40, 0.25, 0.35, 0],         // fog-prone, decent rain chance
   snow:  [0.35, 0.05, 0.15, 0.45],      // snowy often, rarely rain
   desert:[0.85, 0.05, 0.10, 0],         // almost always clear
-  shadow_forest:[0.10, 0.15, 0.75, 0],  // almost always foggy — lantern essential
+  shadow_forest:[0.0, 0.0, 1.0, 0],      // always foggy — lantern essential
 };
 function rollWeather(biome){
   const odds=WEATHER_ODDS[biome]||WEATHER_ODDS.meadow;
@@ -200,7 +200,13 @@ function getNightAmount(timer){
   const clamped=Math.max(0,Math.min(1,raw));
   return clamped*clamped*(3-2*clamped);// smoothstep
 }
-function isNightTime(s){return getNightAmount(s.weather.timer)>0.3;}
+// Hysteresis: once night starts (>0.35), stays night until it drops below 0.2
+let _wasNight=false;
+function isNightTime(s){
+  const n=getNightAmount(s.weather.timer);
+  if(_wasNight){_wasNight=n>0.2;}else{_wasNight=n>0.35;}
+  return _wasNight;
+}
 
 // --- Night enemy spawns per biome ---
 const NIGHT_ENEMIES={
@@ -326,7 +332,7 @@ function applySave(s, save) {
     s.loc.ty=save.respawn.ty;s.loc.scr=save.respawn.scr;s.loc.di=save.respawn.di;
     s.p.x=save.respawn.x;s.p.y=save.respawn.y;
   }else{s.loc.ty = save.loc.ty; s.loc.scr = save.loc.scr; s.loc.di = save.loc.di;}
-  s.pk = new Set(save.pk); s.dr = new Set(save.dr); s.cl = new Set(save.cl);
+  s.pk = new Set(save.pk||[]); s.dr = new Set(save.dr||[]); s.cl = new Set(save.cl||[]);
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mbV2?save.mb:[]);s.co = new Set(save.co||[]);// mbV2: clear stale boulder data from old saves
   s.heartContainers = [...save.heartContainers];
@@ -976,8 +982,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*(W2+40)-20,y:-4-Math.random()*30,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2.5,wobble:Math.random()*Math.PI*2});}
       w.fog=Math.min(0.12,w.fog+dt*0.00003);
     }else if(w.type==="fog"){
-      w.fog=Math.min(0.25,w.fog+dt*0.00005);
-      if(Math.random()<0.15){w.drops.push({x:Math.random()*W2,y:-4,vy:3+Math.random(),vx:w.wind*0.5,l:1,sp:0.2});}
+      const isShadow=getBiome(s.loc.scr)==="shadow_forest";
+      const fogMax=isShadow?0.50:0.25;// shadow forest: extremely dense fog
+      const fogRate=isShadow?0.00015:0.00005;
+      w.fog=Math.min(fogMax,w.fog+dt*fogRate);
+      if(Math.random()<(isShadow?0.25:0.15)){w.drops.push({x:Math.random()*W2,y:-4,vy:3+Math.random(),vx:w.wind*0.5,l:1,sp:0.2});}
     }else{// clear — fog and drops fade out naturally
       w.fog=Math.max(0,w.fog-dt*0.0002);
     }
@@ -3375,20 +3384,23 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     }
     // Fog — reduces visibility like dark rooms
     if(w.fog>0.02){
+      const isShadowBiome=loc.ty==="ow"&&getBiome(loc.scr)==="shadow_forest";
       const fogA=w.fog*(1+nightAmount*0.5);// denser fog at night
-      // Base fog layer
-      c.fillStyle=`rgba(160,170,180,${fogA})`;c.fillRect(0,0,W2,H2);
+      // Base fog layer — shadow forest uses dark purple fog
+      c.fillStyle=isShadowBiome?`rgba(30,20,50,${fogA})`:`rgba(160,170,180,${fogA})`;c.fillRect(0,0,W2,H2);
       // Cut visibility around player (like dark rooms)
       c.save();c.globalCompositeOperation="destination-out";
-      const fogR=s.hasLantern?140:90;// lantern pierces fog further
+      const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);// shadow forest: nearly blind without lantern
       const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
       fg.addColorStop(0,`rgba(0,0,0,${fogA*0.85})`);fg.addColorStop(0.5,`rgba(0,0,0,${fogA*0.4})`);fg.addColorStop(1,"rgba(0,0,0,0)");
       c.fillStyle=fg;c.fillRect(p.x+PS/2-fogR,p.y+PS/2-fogR,fogR*2,fogR*2);
       c.restore();
-      // Drifting fog wisps
-      for(let i=0;i<4;i++){const fx=(t/3+i*140+Math.sin(t/2000+i)*30)%(W2+100)-50;
-        const fy=H2*0.3+Math.sin(t/1500+i*2)*40+i*60;
-        c.fillStyle=`rgba(180,190,200,${fogA*0.3+Math.sin(t/800+i)*fogA*0.1})`;
+      // Drifting fog wisps — more and darker in shadow forest
+      const wispCount=isShadowBiome?7:4;
+      for(let i=0;i<wispCount;i++){const fx=(t/3+i*140+Math.sin(t/2000+i)*30)%(W2+100)-50;
+        const fy=H2*0.15+Math.sin(t/1500+i*2)*40+i*(H2*0.8/wispCount);
+        const wc=isShadowBiome?`rgba(60,40,90,${fogA*0.4+Math.sin(t/800+i)*fogA*0.15})`:`rgba(180,190,200,${fogA*0.3+Math.sin(t/800+i)*fogA*0.1})`;
+        c.fillStyle=wc;
         c.beginPath();c.ellipse(fx,fy,50+Math.sin(t/1200+i)*10,18+Math.sin(t/900+i*3)*5,0,0,Math.PI*2);c.fill();}
     }
   }
@@ -4085,15 +4097,24 @@ watch([muOn, customMu], () => {
     const s = stR.value; if (!s) return;
     let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? (isNightTime(s)?"nighttime":"overworld") : (s.loc.ty === "cave" ? (s.shopGround?"shop":(CAVES[s.loc.di]?.style?.th||"forest")) : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
+      // Smooth crossfade: fade out current audio over 1.5s before switching
+      const oldAu=customAuRef.value;
+      if(oldAu){
+        const fadeOut=()=>{let vol=oldAu.volume;const fade=setInterval(()=>{vol-=0.02;if(vol<=0){clearInterval(fade);try{oldAu.pause();}catch(e){}}else{try{oldAu.volume=vol;}catch(e){clearInterval(fade);}}},30);};
+        fadeOut();customAuRef.value=null;
+      }
       stopMu();
-      if (customAuRef.value) { customAuRef.value.pause(); customAuRef.value = null; }
       ltRef.value = th;
       const gen = ++_muGen; // capture generation for async check
       const tryMp3 = customMu.value[th];
+      const targetVol=(stR.value?.volume??80)/100;
       const playSynth = () => { Tone.start().then(() => { if(_muGen!==gen)return; if (!au.i) initAu(); playTh(th); }).catch(() => { if(_muGen===gen)ltRef.value = null; }); };
       if (tryMp3) {
-        const a = new Audio(tryMp3); a.loop = true; a.volume = (stR.value?.volume??80)/100;
-        a.play().then(() => { if(_muGen===gen)customAuRef.value = a; else a.pause(); }).catch(() => { if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
+        const a = new Audio(tryMp3); a.loop = true; a.volume = 0;
+        a.play().then(() => { if(_muGen!==gen){a.pause();return;} customAuRef.value = a;
+          // Fade in over 1.5s
+          const fadeIn=setInterval(()=>{if(a.volume<targetVol-0.02){a.volume=Math.min(targetVol,a.volume+0.02);}else{a.volume=targetVol;clearInterval(fadeIn);}},30);
+        }).catch(() => { if(_muGen!==gen)return; if(MUSIC[th])playSynth(); else ltRef.value=null; });
       } else {
         playSynth();
       }
