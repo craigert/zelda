@@ -644,25 +644,29 @@ export const OW={
 // Shadow Keep Depths — D3 Shadow Keep entrance, deepest shadow forest
 "6,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-  // Heavy shadow forest borders
-  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  // Shadow forest borders — leave columns 5-10 open for north exit
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
   m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
-  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
+  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][3]=T.TREE;m[3][12]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
   m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
-  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
-  // Swamp water around the entrance (away from north path)
-  m[4][3]=T.WATER;m[4][4]=T.WATER;m[3][3]=T.WATER;m[3][4]=T.WATER;
-  m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;m[7][11]=T.WATER;m[7][12]=T.WATER;
-  m[3][11]=T.WATER;m[3][12]=T.WATER;
-  // D3 Shadow Keep entrance
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Swamp water in far corners only
+  m[4][3]=T.WATER;m[4][4]=T.WATER;m[3][4]=T.WATER;
+  m[8][11]=T.WATER;m[8][12]=T.WATER;m[7][12]=T.WATER;
+  // D3 Shadow Keep entrance (center)
   m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
-  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
-  // Paths to entrance and north exit
-  m[4][7]=T.PATH;m[4][8]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;
-  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;
-  // Torches marking the dungeon (not blocking north path)
-  m[4][5]=T.TORCH;m[4][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
-  m[5][4]=T.TALLGRASS;m[5][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;m[6][11]=T.TALLGRASS;
+  // 4 boulders — one on each side of the entrance
+  m[4][7]=T.ROCK;m[4][8]=T.ROCK;// north side
+  m[7][7]=T.ROCK;m[7][8]=T.ROCK;// south side
+  m[5][6]=T.ROCK;m[6][6]=T.ROCK;// west side
+  m[5][9]=T.ROCK;m[6][9]=T.ROCK;// east side
+  // Wide clear path from entrance to north exit
+  m[3][6]=T.PATH;m[3][7]=T.PATH;m[3][8]=T.PATH;m[3][9]=T.PATH;
+  m[4][5]=T.PATH;m[4][6]=T.PATH;m[4][9]=T.PATH;m[4][10]=T.PATH;
+  m[7][5]=T.PATH;m[7][6]=T.PATH;m[7][9]=T.PATH;m[7][10]=T.PATH;
+  m[8][6]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;
+  // Torches flanking the approach
+  m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
   oe(m,"N");return m;})(),
 
 };
