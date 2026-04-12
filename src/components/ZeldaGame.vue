@@ -3397,13 +3397,15 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       fc.clearRect(0,0,W2,H2);
       // Solid fog
       fc.fillStyle="rgba("+fogCol+","+fogA+")";fc.fillRect(0,0,W2,H2);
-      // Cut circular hole
+      // Feathered circular cutout — clear center, soft fade to dark
       fc.globalCompositeOperation="destination-out";
-      const fg=fc.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
+      const px2=p.x+PS/2,py2=p.y+PS/2;
+      const fg=fc.createRadialGradient(px2,py2,0,px2,py2,fogR);
       fg.addColorStop(0,"rgba(0,0,0,1)");
-      fg.addColorStop(0.6,"rgba(0,0,0,0.5)");
+      fg.addColorStop(0.5,"rgba(0,0,0,0.8)");
+      fg.addColorStop(0.8,"rgba(0,0,0,0.3)");
       fg.addColorStop(1,"rgba(0,0,0,0)");
-      fc.fillStyle=fg;fc.beginPath();fc.arc(p.x+PS/2,p.y+PS/2,fogR,0,Math.PI*2);fc.fill();
+      fc.fillStyle=fg;fc.fillRect(px2-fogR,py2-fogR,fogR*2,fogR*2);
       fc.globalCompositeOperation="source-over";
       // Composite fog layer onto main canvas
       c.drawImage(s._fogCv,0,0);
