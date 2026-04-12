@@ -617,9 +617,16 @@ export const OW={
   m[8][6]=T.PATH;m[8][7]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;m[9][9]=T.PATH;
   // Torches to light the way
   m[4][3]=T.TORCH;m[7][3]=T.TORCH;m[5][8]=T.TORCH;m[8][10]=T.TORCH;
+  // Swamp pools scattered through the thicket
+  m[4][11]=T.WATER;m[4][12]=T.WATER;m[4][13]=T.WATER;
+  m[5][11]=T.WATER;m[5][12]=T.WATER;m[5][13]=T.WATER;
+  m[6][12]=T.WATER;m[6][13]=T.WATER;
+  m[3][3]=T.WATER;m[2][4]=T.WATER;
+  m[8][4]=T.WATER;m[8][5]=T.WATER;m[9][4]=T.WATER;m[9][5]=T.WATER;m[9][6]=T.WATER;
+  m[7][10]=T.WATER;m[7][11]=T.WATER;m[7][12]=T.WATER;
   oe(m,"N");oe(m,"S");return m;})(),
 
-// Shadow Crossing — entry point from 5,1, dark forest hub
+// Shadow Crossing — entry point, dark forest hub
 "6,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
   // Dense tree borders with clearing in center
@@ -639,6 +646,15 @@ export const OW={
   m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
   m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
   m[5][9]=T.PATH;m[5][10]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  // Swamp pools around the edges
+  m[3][2]=T.WATER;m[3][3]=T.WATER;m[3][4]=T.WATER;
+  m[4][2]=T.WATER;m[4][3]=T.WATER;
+  m[8][2]=T.WATER;m[8][3]=T.WATER;m[8][4]=T.WATER;
+  m[9][3]=T.WATER;m[9][4]=T.WATER;
+  m[3][11]=T.WATER;m[3][12]=T.WATER;
+  m[4][12]=T.WATER;m[4][13]=T.WATER;
+  m[8][11]=T.WATER;m[8][12]=T.WATER;m[8][13]=T.WATER;
+  m[9][11]=T.WATER;
   oe(m,"N");oe(m,"S");return m;})(),
 
 // Shadow Keep Depths — D3 Shadow Keep entrance, deepest shadow forest
@@ -650,18 +666,20 @@ export const OW={
   m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][3]=T.TREE;m[3][12]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
   m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
   m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
-  // Swamp water — left side and wrapping around south
-  m[3][4]=T.WATER;m[3][5]=T.WATER;
+  // Swamp water — surrounds the keep on all sides
+  m[3][4]=T.WATER;m[3][5]=T.WATER;m[3][10]=T.WATER;m[3][11]=T.WATER;
   m[4][1]=T.WATER;m[4][2]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;m[4][5]=T.WATER;
+  m[4][10]=T.WATER;m[4][11]=T.WATER;m[4][12]=T.WATER;
   m[5][1]=T.WATER;m[5][2]=T.WATER;m[5][3]=T.WATER;m[5][4]=T.WATER;m[5][5]=T.WATER;
+  m[5][10]=T.WATER;m[5][11]=T.WATER;m[5][12]=T.WATER;
   m[6][1]=T.WATER;m[6][2]=T.WATER;m[6][3]=T.WATER;m[6][4]=T.WATER;m[6][5]=T.WATER;
+  m[6][10]=T.WATER;m[6][11]=T.WATER;m[6][12]=T.WATER;
   m[7][1]=T.WATER;m[7][2]=T.WATER;m[7][3]=T.WATER;m[7][4]=T.WATER;m[7][5]=T.WATER;
-  m[8][1]=T.WATER;m[8][2]=T.WATER;m[8][3]=T.WATER;m[8][4]=T.WATER;
-  m[9][4]=T.WATER;m[9][5]=T.WATER;
-  // Right side swamp pools
-  m[7][10]=T.WATER;m[7][11]=T.WATER;
+  m[7][10]=T.WATER;m[7][11]=T.WATER;m[7][12]=T.WATER;
+  m[8][1]=T.WATER;m[8][2]=T.WATER;m[8][3]=T.WATER;m[8][4]=T.WATER;m[8][5]=T.WATER;
   m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;
-  m[9][10]=T.WATER;m[9][11]=T.WATER;
+  m[9][4]=T.WATER;m[9][5]=T.WATER;m[9][6]=T.WATER;
+  m[9][9]=T.WATER;m[9][10]=T.WATER;m[9][11]=T.WATER;
   // D3 Shadow Keep entrance (center)
   m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
   // 4 boulders — one at each corner of the entrance
