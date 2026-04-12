@@ -1495,7 +1495,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
     e.stT+=dt;const isBossLike=e.type==="boss"||e.type==="miniboss";
     const alwaysChase=e.type==="wallmaster"||e.type==="magma_slug"||e.type==="vine_creeper"||e.type==="stalfos";
-    const detectRange=isBossLike?250:alwaysChase?300:160;const loseRange=250;
+    const detectRange=isBossLike?250:alwaysChase?300:80;const loseRange=150;
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
     if(e.st==="chase"&&dist>loseRange&&!isBossLike&&!alwaysChase)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
