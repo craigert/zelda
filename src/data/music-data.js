@@ -12,6 +12,7 @@ export const DEFAULT_MUSIC = {
   sanctum: "music/sanctum.mp3",
   finalbattle: "music/finalbattle.mp3",
   "temple-rising": "music/temple-rising.mp3",
+  nighttime: "music/nighttime.mp3",
 };
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
@@ -166,6 +167,25 @@ export const MUSIC = {
       "K","K","S","K","K","S","K","K","K",null,null,null,null,null,null,null],
   },
   // SHOP — Cheerful bouncy jingle, C major. Warm cozy feel, light percussion.
+  // NIGHTTIME — Mysterious ambient, E minor. Slow, sparse, dreamlike.
+  nighttime: { tempo: 72,
+    lead: ["E4",null,null,null,"B4",null,null,null,"G4",null,null,null,"F#4",null,"E4",null,
+      null,null,null,null,"A4",null,null,null,"G4",null,"F#4",null,"E4",null,null,null,
+      "B4",null,null,null,"D5",null,"C5",null,"B4",null,null,null,"A4",null,"G4",null,
+      null,null,null,null,"E4",null,null,null,null,null,null,null,null,null,null,null],
+    pad: ["E3","E3","E3","E3","E3","E3","E3","E3","C3","C3","C3","C3","C3","C3","C3","C3",
+      "A2","A2","A2","A2","A2","A2","A2","A2","B2","B2","B2","B2","B2","B2","B2","B2",
+      "E3","E3","E3","E3","E3","E3","E3","E3","C3","C3","C3","C3","C3","C3","C3","C3",
+      "A2","A2","A2","A2","B2","B2","B2","B2","E3","E3",null,null,null,null,null,null],
+    bass: ["E1",null,null,null,null,null,null,null,"C2",null,null,null,null,null,null,null,
+      "A1",null,null,null,null,null,null,null,"B1",null,null,null,null,null,null,null,
+      "E1",null,null,null,null,null,null,null,"C2",null,null,null,null,null,null,null,
+      "A1",null,null,null,"B1",null,null,null,"E1",null,null,null,null,null,null,null],
+    drums: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,"S",null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,"S",null,null,null,null,null,null,null,null,null],
+  },
   shop: { tempo: 120,
     lead: ["C5",null,"E5","G5","A5",null,"G5",null,"E5",null,"D5","C5","D5",null,null,null,
       "F5",null,"A5","G5","F5",null,"E5",null,"D5",null,"E5","F5","G5",null,null,null,
