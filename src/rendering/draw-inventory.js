@@ -102,10 +102,14 @@ function drawMapPage(c,s,t){
 }
 
 function drawOverworldMap(c,s,t){
-  const onX=-1,oxX=4,onY=-1,oxY=2;
-  const cW=48,cH=34,op=6;
-  const gW=(oxX-onX+1)*cW,gH=(oxY-onY+1)*cH;
-  const omX=W2/2-gW/2,omY=66;
+  const owCoords=Object.keys(OW).map(k=>k.split(",").map(Number));
+  const onX=Math.min(...owCoords.map(c2=>c2[0])),oxX=Math.max(...owCoords.map(c2=>c2[0]));
+  const onY=Math.min(...owCoords.map(c2=>c2[1])),oxY=Math.max(...owCoords.map(c2=>c2[1]));
+  const cols=oxX-onX+1,rows=oxY-onY+1;
+  // Scale cells to fit within 440px wide, 140px tall
+  const cW=Math.min(48,Math.floor(440/cols)),cH=Math.min(34,Math.floor(140/rows));
+  const gW=cols*cW,gH=rows*cH;
+  const omX=Math.floor(W2/2-gW/2),omY=66;
 
   // Map background with subtle border
   c.fillStyle="rgba(0,0,0,0.5)";c.fillRect(omX-4,omY-4,gW+8,gH+8);
