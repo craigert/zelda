@@ -3388,9 +3388,9 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Fog — reduces visibility (built on offscreen canvas to avoid destination-out artifacts)
     if(w.fog>0.02){
       const isShadowBiome=loc.ty==="ow"&&getBiome(loc.scr)==="shadow_forest";
-      const fogA=Math.min(0.92,w.fog*(1+nightAmount*0.5));
-      const fogR=isShadowBiome?(s.hasLantern?100:30):(s.hasLantern?140:90);
-      const fogCol=isShadowBiome?"30,20,50":"100,110,120";
+      const fogA=isShadowBiome?0.95:Math.min(0.92,w.fog*(1+nightAmount*0.5));
+      const fogR=isShadowBiome?(s.hasLantern?90:24):(s.hasLantern?140:90);
+      const fogCol=isShadowBiome?"15,8,30":"100,110,120";
       // Build fog with hole on offscreen canvas
       if(!s._fogCv){s._fogCv=document.createElement("canvas");s._fogCv.width=W2;s._fogCv.height=H2;}
       const fc=s._fogCv.getContext("2d");
