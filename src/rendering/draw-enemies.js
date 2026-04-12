@@ -364,3 +364,64 @@ export function dYt(c,x,y,sz,fl,t){
   c.beginPath();c.arc(x+sz*0.2,y+sz*0.3,2,0,Math.PI*2);c.fill();
   c.beginPath();c.arc(x+sz*0.8,y+sz*0.35,1.5,0,Math.PI*2);c.fill();
 }
+
+// BLOB — amorphous dark ooze creature, pulsing and stretching
+export function dBl(c,x,y,sz,fl,t){
+  c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(x+sz/2,y+sz-2,sz/2,4,0,0,Math.PI*2);c.fill();
+  const pulse=Math.sin(t/300)*0.08;const squish=Math.sin(t/200)*0.04;
+  // Body — dark oozy mass
+  const bg=c.createRadialGradient(x+sz*.4,y+sz*.35,2,x+sz/2,y+sz*.5,sz*.4);
+  bg.addColorStop(0,fl?"#fff":"#3a2a4a");bg.addColorStop(0.6,fl?"#ddd":"#2a1a3a");bg.addColorStop(1,fl?"#bbb":"#1a0a2a");
+  c.fillStyle=bg;
+  c.beginPath();c.ellipse(x+sz/2,y+sz*.5+pulse*sz,sz*(.38+squish),sz*(.35-squish),0,0,Math.PI*2);c.fill();
+  // Glistening highlights
+  if(!fl){c.fillStyle="rgba(120,80,180,0.35)";
+    c.beginPath();c.ellipse(x+sz*.35,y+sz*.38,sz*.08,sz*.05,-.3,0,Math.PI*2);c.fill();
+    c.fillStyle="rgba(150,100,200,0.2)";
+    c.beginPath();c.ellipse(x+sz*.6,y+sz*.42,sz*.06,sz*.04,.2,0,Math.PI*2);c.fill();}
+  // Ooze tendrils reaching out
+  if(!fl){c.strokeStyle="rgba(50,30,70,0.5)";c.lineWidth=2;
+    for(let i=0;i<4;i++){const a=i*Math.PI/2+t/600,r1=sz*.25,r2=sz*.45+Math.sin(t/250+i)*4;
+      c.beginPath();c.moveTo(x+sz/2+Math.cos(a)*r1,y+sz*.5+Math.sin(a)*r1*.6);
+      c.quadraticCurveTo(x+sz/2+Math.cos(a+.4)*r2,y+sz*.5+Math.sin(a+.4)*r2*.5,x+sz/2+Math.cos(a)*r2,y+sz*.5+Math.sin(a)*r2*.5);c.stroke();}}
+  // Eyes — two glowing orbs inside the mass
+  const eb=Math.sin(t/400)*1.5;
+  c.fillStyle=fl?"#fff":"#cc44ff";c.beginPath();c.arc(x+sz*.38,y+sz*.4+eb,2.5,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*.58,y+sz*.4+eb,2.5,0,Math.PI*2);c.fill();
+  c.fillStyle=fl?"#fff":"#ff88ff";c.beginPath();c.arc(x+sz*.38,y+sz*.39+eb,1,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*.58,y+sz*.39+eb,1,0,Math.PI*2);c.fill();
+  // Toxic drips
+  if(!fl){const dp=Math.sin(t/150)*0.5+0.5;
+    c.fillStyle=`rgba(80,40,120,${dp*0.4})`;c.beginPath();c.arc(x+sz*.3,y+sz*.7+dp*3,1.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(x+sz*.7,y+sz*.75+dp*2,1.2,0,Math.PI*2);c.fill();}
+}
+
+// SHIMMER GHOUL — ethereal glowing specter with trailing wisps
+export function dSg(c,x,y,sz,fl,t){
+  const hover=Math.sin(t/350)*3;const yy=y+hover;
+  // No shadow (it floats)
+  c.fillStyle=`rgba(80,40,120,${0.08+Math.sin(t/500)*0.04})`;c.beginPath();c.ellipse(x+sz/2,y+sz-1,sz/3,2,0,0,Math.PI*2);c.fill();
+  // Ghostly body — semi-transparent with shimmer
+  const shimmer=Math.sin(t/180)*0.15;
+  c.globalAlpha=fl?1:0.6+shimmer;
+  const bg=c.createRadialGradient(x+sz*.45,yy+sz*.3,1,x+sz/2,yy+sz*.45,sz*.4);
+  bg.addColorStop(0,fl?"#fff":"#e0c0ff");bg.addColorStop(0.5,fl?"#eee":"#a060d0");bg.addColorStop(1,fl?"#ddd":"rgba(60,20,100,0)");
+  c.fillStyle=bg;c.beginPath();c.ellipse(x+sz/2,yy+sz*.4,sz*.3,sz*.35,0,0,Math.PI*2);c.fill();
+  // Tattered trailing wisps
+  if(!fl){c.strokeStyle="rgba(160,100,220,0.4)";c.lineWidth=1.5;
+    for(let i=0;i<5;i++){const wa=t/500+i*1.2,wx=x+sz*.25+i*sz*.12;
+      c.beginPath();c.moveTo(wx,yy+sz*.55);c.quadraticCurveTo(wx+Math.sin(wa)*6,yy+sz*.7+Math.sin(wa+1)*4,wx+Math.sin(wa)*8,yy+sz*.9+Math.cos(wa)*3);c.stroke();}}
+  // Head
+  c.fillStyle=fl?"#fff":"#d8b0f0";c.beginPath();c.arc(x+sz/2,yy+sz*.22,sz*.18,0,Math.PI*2);c.fill();
+  // Eyes — bright shimmering points
+  const eyeGlow=Math.sin(t/120)*0.3+0.7;
+  c.fillStyle=`rgba(255,200,255,${eyeGlow})`;c.beginPath();c.arc(x+sz*.4,yy+sz*.2,2.5,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*.6,yy+sz*.2,2.5,0,Math.PI*2);c.fill();
+  c.fillStyle="#fff";c.beginPath();c.arc(x+sz*.4,yy+sz*.19,1,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(x+sz*.6,yy+sz*.19,1,0,Math.PI*2);c.fill();
+  // Shimmer particles around body
+  if(!fl){for(let i=0;i<4;i++){const sa=t/300+i*Math.PI/2,sr=sz*.35+Math.sin(t/200+i)*4;
+    const pa=0.3+Math.sin(t/150+i*2)*0.2;
+    c.fillStyle=`rgba(200,160,255,${pa})`;c.beginPath();c.arc(x+sz/2+Math.cos(sa)*sr,yy+sz*.4+Math.sin(sa)*sr*.6,1.5,0,Math.PI*2);c.fill();}}
+  c.globalAlpha=1;
+}

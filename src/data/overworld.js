@@ -35,6 +35,11 @@ export const OW_EN={
   "5,0":[{x:6*TL,y:5*TL,hp:5,type:"yeti"},{x:9*TL,y:6*TL,hp:5,type:"yeti"},{x:4*TL,y:8*TL,hp:4,type:"ghost"}],
   "5,1":[{x:5*TL,y:3*TL,hp:5,type:"ghost"},{x:10*TL,y:8*TL,hp:6,type:"knight"},{x:7*TL,y:6*TL,hp:5,type:"yeti"}],
   "5,2":[{x:5*TL,y:5*TL,hp:5,type:"fire_bat"},{x:10*TL,y:7*TL,hp:5,type:"mage"},{x:7*TL,y:4*TL,hp:6,type:"knight"},{x:12*TL,y:9*TL,hp:4,type:"fire_bat"}],
+  // Shadow Forest frontier (x=6)
+  "6,-1":[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:10*TL,y:7*TL,hp:4,type:"knight"},{x:8*TL,y:3*TL,hp:3,type:"bat"}],
+  "6,0":[{x:5*TL,y:4*TL,hp:5,type:"blob"},{x:9*TL,y:7*TL,hp:5,type:"shimmer_ghoul"},{x:7*TL,y:5*TL,hp:5,type:"blob"},{x:11*TL,y:4*TL,hp:4,type:"ghost"}],
+  "6,1":[{x:5*TL,y:5*TL,hp:6,type:"shimmer_ghoul"},{x:10*TL,y:7*TL,hp:5,type:"blob"},{x:7*TL,y:3*TL,hp:5,type:"shimmer_ghoul"}],
+  "6,2":[{x:4*TL,y:4*TL,hp:6,type:"blob"},{x:11*TL,y:8*TL,hp:6,type:"shimmer_ghoul"},{x:7*TL,y:9*TL,hp:5,type:"blob"},{x:9*TL,y:4*TL,hp:6,type:"shimmer_ghoul"}],
 };
 
 export const OW={
@@ -379,29 +384,23 @@ export const OW={
 
 // ===== ROW y=2 (Southern row) =====
 
-// D2 Shadow Keep — dark swamp dungeon
+// Dark swamp clearing (Shadow Keep moved to 6,2)
 "-1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
   m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
   m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
   m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
   m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
-  // Swamp water everywhere
+  // Swamp water
   m[3][3]=T.WATER;m[3][4]=T.WATER;m[3][5]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;
   m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;
   m[3][10]=T.WATER;m[3][11]=T.WATER;m[4][11]=T.WATER;
-  // D2 Shadow Keep entrance
-  m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
+  // Abandoned ruins where entrance used to be
+  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
   m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
-  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
-  m[4][7]=T.PATH;m[4][8]=T.PATH;
   m[6][4]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[5][11]=T.TALLGRASS;
   m[2][7]=T.TORCH;m[2][8]=T.TORCH;
-  // Clear path from entrance south to east exit
-  m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;m[8][10]=T.PATH;m[8][11]=T.PATH;
-  m[9][11]=T.PATH;m[9][12]=T.PATH;
-  // Remove blocking trees/water on the escape path
-  m[8][12]=T.PATH;m[9][3]=T.GRASS;
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
   oe(m,"N");oe(m,"E");return m;})(),
 
 // Southern forest — crack cave
@@ -549,7 +548,7 @@ export const OW={
   // Pushable boulder hiding a cave
   m[9][7]=T.ROCK;m[9][8]=T.ROCK;m[9][9]=T.ROCK;
   m[9][6]=T.PUSH;
-  oe(m,"N",T.ICE);oe(m,"S",T.ICE);return m;})(),
+  oe(m,"N",T.ICE);oe(m,"S",T.ICE);oe(m,"E",T.ICE);return m;})(),
 
 // Scorched Barrens — desert frontier, hostile and barren
 "5,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
@@ -572,5 +571,99 @@ export const OW={
   m[3][8]=T.TORCH;m[3][9]=T.TORCH;m[8][5]=T.TORCH;m[8][6]=T.TORCH;
   m[5][11]=T.BUSH;m[6][11]=T.BUSH;m[9][5]=T.BUSH;
   oe(m,"W",T.SAND);oe(m,"N",T.SAND);return m;})(),
+
+// ===== COLUMN x=6 (Shadow Forest frontier — accessible from 5,1 east) =====
+
+// Stormcrag Summit — rocky mountain passage, not icy
+"6,-1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.ROCK;m[RO-1][i]=T.ROCK;}for(let i=0;i<RO;i++){m[i][0]=T.ROCK;m[i][CO-1]=T.ROCK;}
+  // Mountain terrain — rocky peaks and narrow paths
+  m[1][1]=T.ROCK;m[1][2]=T.ROCK;m[1][3]=T.ROCK;m[1][11]=T.ROCK;m[1][12]=T.ROCK;m[1][13]=T.ROCK;m[1][14]=T.ROCK;
+  m[2][1]=T.ROCK;m[2][2]=T.ROCK;m[2][12]=T.ROCK;m[2][13]=T.ROCK;m[2][14]=T.ROCK;
+  m[10][1]=T.ROCK;m[10][2]=T.ROCK;m[10][3]=T.ROCK;m[10][12]=T.ROCK;m[10][13]=T.ROCK;m[10][14]=T.ROCK;
+  m[9][1]=T.ROCK;m[9][2]=T.ROCK;m[9][13]=T.ROCK;m[9][14]=T.ROCK;
+  // Rocky outcrops in center
+  m[4][4]=T.ROCK;m[4][5]=T.ROCK;m[5][4]=T.ROCK;
+  m[4][10]=T.ROCK;m[4][11]=T.ROCK;m[5][11]=T.ROCK;
+  m[7][3]=T.ROCK;m[7][4]=T.ROCK;m[8][4]=T.ROCK;
+  m[7][11]=T.ROCK;m[7][12]=T.ROCK;m[8][11]=T.ROCK;
+  // Mountain paths
+  m[3][7]=T.PATH;m[3][8]=T.PATH;m[4][7]=T.PATH;m[4][8]=T.PATH;
+  m[5][6]=T.PATH;m[5][7]=T.PATH;m[5][8]=T.PATH;m[5][9]=T.PATH;
+  m[6][5]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
+  m[3][6]=T.STUMP;m[8][10]=T.STUMP;m[2][8]=T.FLOWER;m[9][7]=T.FLOWER;
+  oe(m,"S");return m;})(),
+
+// Twilight Thicket — shadow forest, dense and dark
+"6,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  // Dense shadow trees forming a maze
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][6]=T.TREE;m[3][7]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
+  m[4][1]=T.TREE;m[4][6]=T.TREE;m[4][10]=T.TREE;m[4][14]=T.TREE;
+  m[5][1]=T.TREE;m[5][5]=T.TREE;m[5][10]=T.TREE;m[5][14]=T.TREE;
+  m[6][1]=T.TREE;m[6][5]=T.TREE;m[6][6]=T.TREE;m[6][10]=T.TREE;m[6][11]=T.TREE;m[6][14]=T.TREE;
+  m[7][1]=T.TREE;m[7][2]=T.TREE;m[7][8]=T.TREE;m[7][13]=T.TREE;m[7][14]=T.TREE;
+  m[8][1]=T.TREE;m[8][2]=T.TREE;m[8][3]=T.TREE;m[8][8]=T.TREE;m[8][9]=T.TREE;m[8][12]=T.TREE;m[8][13]=T.TREE;m[8][14]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Winding path through the dark forest
+  m[3][4]=T.PATH;m[3][5]=T.PATH;m[4][4]=T.PATH;m[4][5]=T.PATH;m[5][4]=T.PATH;
+  m[5][3]=T.PATH;m[6][3]=T.PATH;m[6][4]=T.PATH;m[7][4]=T.PATH;m[7][5]=T.PATH;m[7][6]=T.PATH;m[7][7]=T.PATH;
+  m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[5][9]=T.PATH;m[4][9]=T.PATH;
+  m[4][8]=T.PATH;m[4][7]=T.PATH;m[3][9]=T.PATH;m[3][10]=T.PATH;m[3][11]=T.PATH;
+  m[8][6]=T.PATH;m[8][7]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;m[9][9]=T.PATH;
+  // Torches to light the way
+  m[4][3]=T.TORCH;m[7][3]=T.TORCH;m[5][8]=T.TORCH;m[8][10]=T.TORCH;
+  oe(m,"N");oe(m,"S");return m;})(),
+
+// Shadow Crossing — entry point from 5,1, dark forest hub
+"6,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][CO-1]=T.TREE;}
+  // Dense tree borders with clearing in center
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  // Shadow trees scattered
+  m[4][4]=T.TREE;m[4][5]=T.TREE;m[4][10]=T.TREE;m[4][11]=T.TREE;
+  m[7][4]=T.TREE;m[7][5]=T.TREE;m[7][10]=T.TREE;m[7][11]=T.TREE;
+  m[5][3]=T.TREE;m[6][3]=T.TREE;m[5][12]=T.TREE;m[6][12]=T.TREE;
+  // Central clearing with torches
+  m[5][7]=T.PATH;m[5][8]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;
+  m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;
+  // Paths to all exits
+  m[3][7]=T.PATH;m[3][8]=T.PATH;m[2][7]=T.PATH;m[2][8]=T.PATH;
+  m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
+  m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
+  m[5][9]=T.PATH;m[5][10]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
+  oe(m,"W",T.TALLGRASS);oe(m,"N");oe(m,"S");return m;})(),
+
+// Shadow Keep Depths — D3 Shadow Keep entrance, deepest shadow forest
+"6,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
+  // Heavy shadow forest borders
+  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][4]=T.TREE;m[1][10]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
+  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][3]=T.TREE;m[2][12]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
+  m[3][1]=T.TREE;m[3][2]=T.TREE;m[3][13]=T.TREE;m[3][14]=T.TREE;
+  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
+  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
+  // Swamp water around the entrance
+  m[3][4]=T.WATER;m[3][5]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;
+  m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;m[7][11]=T.WATER;m[7][12]=T.WATER;
+  m[3][10]=T.WATER;m[3][11]=T.WATER;
+  // D3 Shadow Keep entrance
+  m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
+  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
+  // Paths to entrance
+  m[4][7]=T.PATH;m[4][8]=T.PATH;m[7][7]=T.PATH;m[7][8]=T.PATH;
+  m[8][7]=T.PATH;m[8][8]=T.PATH;m[8][9]=T.PATH;
+  // Torches marking the dungeon
+  m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
+  m[2][7]=T.TORCH;m[2][8]=T.TORCH;
+  m[5][4]=T.TALLGRASS;m[5][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;m[6][11]=T.TALLGRASS;
+  oe(m,"N");return m;})(),
 
 };

@@ -68,7 +68,7 @@ import { initSfx, sfx } from '../audio/sfx.js';
 import { dc, hs } from '../utils/helpers.js';
 import { dP } from '../rendering/draw-player.js';
 import { dSw } from '../rendering/draw-sword.js';
-import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf, dYt } from '../rendering/draw-enemies.js';
+import { dSk, dBt, dGh, dBo, dAr, dMg, dKn, dMs, dWm, dVc, dSf, dYt, dBl, dSg } from '../rendering/draw-enemies.js';
 import { dH } from '../rendering/draw-hud.js';
 import { dT } from '../rendering/draw-tiles.js';
 import { drawTerrainOverlay } from '../rendering/draw-terrain.js';
@@ -162,6 +162,10 @@ const BIOME_MAP={
   "0,0":"forest","0,1":"forest","-1,0":"forest","-1,1":"forest",
   // Swamp / Shadow area — heavy fog
   "-1,2":"forest",
+  // Shadow forest — perpetual fog, dark and dangerous
+  "6,0":"shadow_forest","6,1":"shadow_forest","6,2":"shadow_forest",
+  // Mountain (non-ice)
+  "6,-1":"meadow",
   // Fire/desert — clear & hot
   "4,0":"desert","4,1":"desert","4,2":"desert","3,2":"desert",
   "5,2":"desert",
@@ -171,10 +175,11 @@ function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
 
 // --- Weather probabilities per biome: [clear, rain, fog, snow] ---
 const WEATHER_ODDS={
-  meadow:[0.55, 0.30, 0.15, 0],     // mostly clear, sometimes rain, rare fog
-  forest:[0.40, 0.25, 0.35, 0],      // fog-prone, decent rain chance
-  snow:  [0.35, 0.05, 0.15, 0.45],   // snowy often, rarely rain
-  desert:[0.85, 0.05, 0.10, 0],      // almost always clear
+  meadow:[0.55, 0.30, 0.15, 0],        // mostly clear, sometimes rain, rare fog
+  forest:[0.40, 0.25, 0.35, 0],         // fog-prone, decent rain chance
+  snow:  [0.35, 0.05, 0.15, 0.45],      // snowy often, rarely rain
+  desert:[0.85, 0.05, 0.10, 0],         // almost always clear
+  shadow_forest:[0.10, 0.15, 0.75, 0],  // almost always foggy — lantern essential
 };
 function rollWeather(biome){
   const odds=WEATHER_ODDS[biome]||WEATHER_ODDS.meadow;
@@ -203,6 +208,7 @@ const NIGHT_ENEMIES={
   "forest":[{type:"ghost",hp:5},{type:"ghost",hp:4}],
   "snow":[{type:"ghost",hp:4},{type:"yeti",hp:6}],
   "desert":[{type:"fire_bat",hp:5},{type:"mage",hp:5}],
+  "shadow_forest":[{type:"shimmer_ghoul",hp:6},{type:"blob",hp:5},{type:"shimmer_ghoul",hp:5}],
 };
 
 // --- Canvas click handler ---
@@ -1475,10 +1481,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(e.st==="patrol"&&dist<detectRange)e.st="chase";
     if(e.st==="chase"&&dist>loseRange&&!isBossLike&&!alwaysChase)e.st="retreat";
     if(e.st==="retreat"&&e.stT>2000){e.st="patrol";e.stT=0;}
-    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.5:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:1.0;
+    let es=e.type==="boss"?1.0:e.type==="miniboss"?1.5:e.type==="ghost"?1.3:(e.type==="bat"||e.type==="fire_bat")?1.2:e.type==="archer"?0.8:e.type==="mage"?0.6:e.type==="knight"?1.1:e.type==="magma_slug"?0.4:e.type==="vine_creeper"?0.5:e.type==="stalfos"?1.0:e.type==="blob"?0.7:e.type==="shimmer_ghoul"?1.4:1.0;
     let moveX=0,moveY=0;
     if(e.st==="chase"||e.type==="boss"){const ang=Math.atan2(pcy-ecy,pcx-ecx);
-      if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
+      if(e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"||e.type==="shimmer_ghoul"){const w=Math.sin(e.mt/250)*.6;moveX=Math.cos(ang+w)*es;moveY=Math.sin(ang+w)*es;}
       else if(e.type==="miniboss"){
         const mn=e.name||"";
         if(mn==="Vine Guardian"){
@@ -1784,7 +1790,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     else if(e.st==="retreat"){const ang=Math.atan2(e.hy-ecy,e.hx-ecx);moveX=Math.cos(ang)*es*.6;moveY=Math.sin(ang)*es*.6;}
     const nx=e.x+moveX*(dt/16),ny=e.y+moveY*(dt/16);
     const em=4;
-    const flies=e.type==="ghost"||e.type==="bat"||e.type==="fire_bat";
+    const flies=e.type==="ghost"||e.type==="bat"||e.type==="fire_bat"||e.type==="shimmer_ghoul";
     if(flies){e.x=nx;e.y=ny;}else{
     const eCanX=!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+em)/TL))&&!eSolid(s,Math.floor((nx+em)/TL),Math.floor((e.y+ES-em)/TL))&&!eSolid(s,Math.floor((nx+ES-em)/TL),Math.floor((e.y+ES-em)/TL));
     const eCanY=!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+em)/TL))&&!eSolid(s,Math.floor((e.x+em)/TL),Math.floor((ny+ES-em)/TL))&&!eSolid(s,Math.floor((e.x+ES-em)/TL),Math.floor((ny+ES-em)/TL));
@@ -1863,8 +1869,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(p.ifr<=0&&dist<(PS+ES)*0.38){if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;
       const hkb=8,hka=Math.atan2(pcy-ecy,pcx-ecx);if(tm(p.x+Math.cos(hka)*hkb,p.y+Math.sin(hka)*hkb)){p.x+=Math.cos(hka)*hkb;p.y+=Math.sin(hka)*hkb;}
       if(e.type==="fire_bat"){p.burn=3000;p.burnTick=0;s.msg={text:"Burning!",t:1000};}
-      if(e.type==="ghost"){p.freeze=2500;s.msg={text:"Frozen!",t:1000};}
-      s.pt.push(...Array.from({length:4},()=>({x:pcx,y:pcy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:300,c:e.type==="fire_bat"?"#f80":e.type==="ghost"?"#8af":"#f44"})));
+      if(e.type==="ghost"||e.type==="shimmer_ghoul"){p.freeze=e.type==="shimmer_ghoul"?3000:2500;s.msg={text:"Frozen!",t:1000};}
+      if(e.type==="blob"){p.poison=3000;p.poisonTick=0;s.msg={text:"Poisoned!",t:1000};}
+      s.pt.push(...Array.from({length:4},()=>({x:pcx,y:pcy,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:300,c:e.type==="fire_bat"?"#f80":e.type==="ghost"||e.type==="shimmer_ghoul"?"#c8f":e.type==="blob"?"#6a4":"#f44"})));
       if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}
   for(let i=s.bProj.length-1;i>=0;i--){const bp=s.bProj[i];bp.x+=bp.dx*(dt/16);bp.y+=bp.dy*(dt/16);bp.l-=dt;
     if(bp.l<=0||bp.x<0||bp.x>W2||bp.y<0||bp.y>H2){
@@ -2625,6 +2632,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       else if(e.type==="magma_slug")dMs(c,ex,ey,sz,false,t);
       else if(e.type==="wallmaster")dWm(c,ex,ey,sz,false,t);
       else if(e.type==="yeti")dYt(c,ex,ey,sz,false,t);
+      else if(e.type==="blob")dBl(c,ex,ey,sz,false,t);
+      else if(e.type==="shimmer_ghoul")dSg(c,ex,ey,sz,false,t);
       else dSk(c,ex,ey,sz,false,t);
       c.globalAlpha=1;c.restore();continue;}
     const ex=e.x+(ES-sz)/2,ey=e.y+(ES-sz)/2;
@@ -2763,6 +2772,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     else if(e.type==="vine_creeper")dVc(c,ex,ey,sz,fl,t);
     else if(e.type==="stalfos")dSf(c,ex,ey,sz,fl,t);
     else if(e.type==="yeti")dYt(c,ex,ey,sz,fl,t);
+    else if(e.type==="blob")dBl(c,ex,ey,sz,fl,t);
+    else if(e.type==="shimmer_ghoul")dSg(c,ex,ey,sz,fl,t);
     else dSk(c,ex,ey,sz,fl,t);}
   // Draw push block slide animation
   if(s.pushAnim){const pa=s.pushAnim,pr=Math.min(1,pa.t/pa.dur);
@@ -3403,11 +3414,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD){const owKeys=Object.keys(OW);const owC=owKeys.map(k=>k.split(",").map(Number));
     const onX=Math.min(...owC.map(c2=>c2[0])),oxX=Math.max(...owC.map(c2=>c2[0])),onY=Math.min(...owC.map(c2=>c2[1])),oxY=Math.max(...owC.map(c2=>c2[1]));
     const os=14,op=4,oW=(oxX-onX+1)*os+op*2,oH=(oxY-onY+1)*os+op*2,omX=W2-oW-8,omY=H2-oH-8;
+    c.globalAlpha=0.55;
     c.fillStyle="rgba(0,0,0,0.65)";c.fillRect(omX-1,omY-1,oW+2,oH+2);c.strokeStyle="rgba(255,255,255,0.1)";c.strokeRect(omX-1,omY-1,oW+2,oH+2);
     for(const ok of owKeys){const[cx2,cy2]=ok.split(",").map(Number);
       let col="#3a5a2a";if(ok===loc.scr)col="#fd3";
       c.fillStyle=col;c.fillRect(omX+op+(cx2-onX)*os+1,omY+op+(cy2-onY)*os+1,os-2,os-2);
       for(const de2 of DE){if(de2.s===ok){c.fillStyle=ok===loc.scr?"#000":"#222";c.fillRect(omX+op+(cx2-onX)*os+os/2-2,omY+op+(cy2-onY)*os+os/2-2,4,4);}}}
+    c.globalAlpha=1;
   }
   if(s.timedDoors.length>0){const td=s.timedDoors[0];const pct=td.t/5000;
     c.fillStyle="rgba(0,0,0,0.7)";c.fillRect(W2/2-60,4,120,10);
