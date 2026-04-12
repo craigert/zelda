@@ -300,7 +300,8 @@ function saveGame(s) {
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
       hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, treeGift: s.treeGift||false, sanctumRevealed: s.sanctumRevealed||false, sanctumDark: s.sanctumDark||false,
-      bossWarps: s.bossWarps||[]
+      bossWarps: s.bossWarps||[],
+      weatherTimer: s.weather.timer||0
     };
     localStorage.setItem('zelda_save_'+saveSlot.value, JSON.stringify(data));
   } catch (e) {}
@@ -332,6 +333,7 @@ function applySave(s, save) {
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false; s.sanctumDark = save.sanctumDark || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
+  if(save.weatherTimer)s.weather.timer=save.weatherTimer;
   if (s.finalOpen && s.sanctumRevealed) {
     const fm = OW["3,2"];
     if (fm) { fm[5][7] = T.ENTRANCE; fm[5][8] = T.ENTRANCE; fm[6][7] = T.ENTRANCE; fm[6][8] = T.ENTRANCE; }

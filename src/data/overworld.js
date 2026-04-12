@@ -500,7 +500,7 @@ export const OW={
   m[5][10]=T.ROCK;m[5][11]=T.ROCK;m[4][9]=T.ROCK;m[4][10]=T.ROCK;
   m[7][3]=T.ROCK;m[7][4]=T.ROCK;m[8][3]=T.ROCK;
   m[3][8]=T.STUMP;m[9][6]=T.STUMP;
-  oe(m,"W",T.ICE);oe(m,"S",T.ICE);return m;})(),
+  oe(m,"W",T.ICE);oe(m,"S",T.ICE);oe(m,"E",T.ICE);return m;})(),
 
 // Ice Mountain Pass — connects ice and desert, steep rocky terrain
 "5,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.ICE));
@@ -548,7 +548,7 @@ export const OW={
   // Pushable boulder hiding a cave
   m[9][7]=T.ROCK;m[9][8]=T.ROCK;m[9][9]=T.ROCK;
   m[9][6]=T.PUSH;
-  oe(m,"N",T.ICE);oe(m,"S",T.ICE);oe(m,"E",T.ICE);return m;})(),
+  oe(m,"N",T.ICE);oe(m,"S",T.ICE);return m;})(),
 
 // Scorched Barrens — desert frontier, hostile and barren
 "5,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.SAND));
@@ -593,7 +593,7 @@ export const OW={
   m[6][5]=T.PATH;m[6][6]=T.PATH;m[6][7]=T.PATH;m[6][8]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
   m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
   m[3][6]=T.STUMP;m[8][10]=T.STUMP;m[2][8]=T.FLOWER;m[9][7]=T.FLOWER;
-  oe(m,"S");return m;})(),
+  oe(m,"W",T.GRASS);oe(m,"S");return m;})(),
 
 // Twilight Thicket — shadow forest, dense and dark
 "6,0":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
@@ -621,7 +621,7 @@ export const OW={
 
 // Shadow Crossing — entry point from 5,1, dark forest hub
 "6,1":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
-  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][CO-1]=T.TREE;}
+  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
   // Dense tree borders with clearing in center
   m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][11]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
   m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
@@ -639,7 +639,7 @@ export const OW={
   m[8][7]=T.PATH;m[8][8]=T.PATH;m[9][7]=T.PATH;m[9][8]=T.PATH;
   m[5][5]=T.PATH;m[5][6]=T.PATH;m[6][5]=T.PATH;m[6][6]=T.PATH;
   m[5][9]=T.PATH;m[5][10]=T.PATH;m[6][9]=T.PATH;m[6][10]=T.PATH;
-  oe(m,"W",T.TALLGRASS);oe(m,"N");oe(m,"S");return m;})(),
+  oe(m,"N");oe(m,"S");return m;})(),
 
 // Shadow Keep Depths — D3 Shadow Keep entrance, deepest shadow forest
 "6,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TALLGRASS));
