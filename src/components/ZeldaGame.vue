@@ -148,7 +148,32 @@ function init() {
     sanctumRevealed:false, // true after the reveal has played
     sanctumDark:false, // true after sanctum rises — overworld 3,2 shrouded in darkness
     heroLand:null, // {t,dur} — hero landing animation after triforce warp
+    weather:{drops:[],fog:0,type:"clear",wind:0,timer:0}, // weather system state
   };
+}
+
+// --- Biome map: screen key → biome type ---
+const BIOME_MAP={
+  // Icy/snowy screens (northern highlands, mountain)
+  "3,-1":"snow","4,-1":"snow","2,-1":"snow",
+  // Forest screens
+  "-1,-1":"forest","0,-1":"forest","1,-1":"forest",
+  "0,0":"forest","0,1":"forest","-1,0":"forest","-1,1":"forest",
+  // Swamp / Shadow area — heavy fog
+  "-1,2":"forest",
+  // Fire/desert — clear & hot
+  "4,0":"desert","4,1":"desert","4,2":"desert","3,2":"desert",
+  // Default (hub, meadows) gets rain
+};
+function getBiome(scr){return BIOME_MAP[scr]||"meadow";}
+
+// --- Weather type per biome ---
+function getWeatherForBiome(biome){
+  if(biome==="snow")return "snow";
+  if(biome==="forest")return "fog";
+  if(biome==="desert")return "clear";
+  // Meadow screens get rain
+  return "rain";
 }
 
 // --- Canvas click handler ---
@@ -858,6 +883,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         else if(d2.type==="rupee_green"){p.rupees+=1;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+1",c:"#4f4"});}
         else if(d2.type==="rupee_blue"){p.rupees+=5;sfx("pickup");s.dmgNums.push({x:pcx,y:pcy,t:800,val:"+5",c:"#44f"});}
         else if(d2.type==="bomb"){if(p.hasBombs){p.bombs++;sfx("pickup");}}
+        // Sparkle burst on pickup
+        const spkC=d2.type==="heart"?"#f88":d2.type.includes("rupee")?"#8f8":"#88f";
+        for(let si=0;si<8;si++){const ang=Math.PI*2*si/8;
+          s.pt.push({x:d2.x,y:d2.y,dx:Math.cos(ang)*2.5,dy:Math.sin(ang)*2.5-1,l:500,c:spkC});
+          s.pt.push({x:d2.x,y:d2.y,dx:Math.cos(ang+0.4)*1.2,dy:Math.sin(ang+0.4)*1.2-0.5,l:350,c:"#fff"});}
         s.drops.splice(i,1);continue;}
       if(d2.t>6000)s.drops.splice(i,1);}
     // Particles & damage numbers
@@ -870,6 +900,47 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.shake.t>0){s.shake.t-=dt;const intensity=s.shake.t/300*4;s.shake.x=(Math.random()-.5)*intensity;s.shake.y=(Math.random()-.5)*intensity;}
   else{s.shake.x=0;s.shake.y=0;}
   if(s.p.hp<=2)s.lowHp+=dt;else s.lowHp=0;
+
+  // --- Weather system update ---
+  if(s.loc.ty==="ow"){
+    const biome=getBiome(s.loc.scr);const wType=getWeatherForBiome(biome);
+    const w=s.weather;w.type=wType;w.timer+=dt;
+    // Wind oscillates slowly
+    w.wind=Math.sin(w.timer/4000)*1.5;
+    // Manage weather drop particles
+    if(wType==="rain"){
+      // Spawn rain drops
+      const spawnRate=3;// drops per frame
+      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2+w.wind*20,y:-8-Math.random()*40,vy:5+Math.random()*2,vx:w.wind*2+0.5,l:1,sp:0.3+Math.random()*0.2});}
+      // Fog builds up slightly in rain
+      w.fog=Math.min(0.08,w.fog+dt*0.00002);
+    }else if(wType==="snow"){
+      const spawnRate=2;
+      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2,y:-4-Math.random()*20,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2,wobble:Math.random()*Math.PI*2});}
+      w.fog=Math.min(0.12,w.fog+dt*0.00003);
+    }else if(wType==="fog"){
+      w.fog=Math.min(0.25,w.fog+dt*0.00005);
+      // Occasional light drizzle in foggy forest
+      if(Math.random()<0.15){w.drops.push({x:Math.random()*W2,y:-4,vy:3+Math.random(),vx:w.wind*0.5,l:1,sp:0.2});}
+    }else{// clear
+      w.fog=Math.max(0,w.fog-dt*0.0001);
+    }
+    // Update drops
+    for(let i=w.drops.length-1;i>=0;i--){const d=w.drops[i];
+      d.x+=d.vx*(dt/16);d.y+=d.vy*(dt/16);
+      if(d.wobble!==undefined)d.x+=Math.sin(d.wobble+w.timer/300)*0.3;// snow wobble
+      if(d.y>H2||d.x<-20||d.x>W2+20)w.drops.splice(i,1);}
+    // Cap drops to prevent lag
+    if(w.drops.length>250)w.drops.splice(0,w.drops.length-250);
+  }else{
+    // Indoors: no weather, fade fog out
+    s.weather.fog=Math.max(0,s.weather.fog-dt*0.0003);
+    s.weather.drops.length=0;s.weather.type="clear";
+  }
+
+  // --- Day/Night cycle ---
+  // Game time drives the cycle: ~5 real minutes per full day
+  s.weather.timer+=0;// timer already advanced above
 
   const ky=kyR.value,p=s.p,tc=tcR.value;let dx=0,dy=0;
   if(ky.has("arrowup")||ky.has("w")){dy=-1;p.dir=0;}if(ky.has("arrowdown")||ky.has("s")){dy=1;p.dir=2;}
@@ -904,7 +975,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(ft2===T.LEDGE_S||ft2===T.LEDGE_N||ft2===T.LEDGE_E||ft2===T.LEDGE_W){
         if(s.ledgeHop<=0){s.ledgeHop=250;sfx("door");
           s.pt.push(...Array.from({length:4},()=>({x:p.x+PS/2,y:p.y+PS,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:300,c:"#aaa"})));}}}}
-  // Footstep particles by terrain
+  // Footstep particles by terrain + running dust
   if(moved&&s.gt%6<2){const ftx2=Math.floor((p.x+PS/2)/TL),fty2=Math.floor((p.y+PS-2)/TL),mp3=gm(s);
     if(mp3&&fty2>=0&&fty2<RO&&ftx2>=0&&ftx2<CO){const ft=mp3[fty2][ftx2],fx=p.x+PS/2+(Math.random()-.5)*6,fy=p.y+PS-2;
       if(ft===T.GRASS||ft===T.TALLGRASS||ft===T.FLOWER)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1.5,dy:-Math.random()*1.2,l:250,c:Math.random()>.5?"#5a5":"#7b7"});
@@ -912,7 +983,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       else if(ft===T.WATER||ft===T.BRIDGE)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:200,c:Math.random()>.5?"#6af":"#8cf"});
       else if(ft===T.ICE)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*2.5,dy:-Math.random()*1,l:300,c:Math.random()>.5?"#cef":"#fff"});
       else if(ft===T.PATH)s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:200,c:"#8a7050"});
-      else if(ft===T.FLOOR&&s.loc.ty!=="ow")s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:200,c:"rgba(150,150,150,0.5)"});}}
+      else if(ft===T.FLOOR&&s.loc.ty!=="ow")s.pt.push({x:fx,y:fy,dx:(Math.random()-.5)*1,dy:-Math.random()*0.5,l:200,c:"rgba(150,150,150,0.5)"});
+      // Running dust puffs — small cloud behind player
+      if(!shieldUp&&fzMult>=1){const ddx=p.dir===1?-1:p.dir===3?1:0,ddy=p.dir===0?1:p.dir===2?-1:0;
+        s.pt.push({x:fx+ddx*4,y:fy+ddy*2,dx:ddx*0.8+(Math.random()-.5)*0.5,dy:-0.5-Math.random()*0.5,l:200,c:"rgba(180,170,150,0.4)"});
+        if(Math.random()<0.3)s.pt.push({x:fx+ddx*6,y:fy+ddy*3,dx:ddx*1.2+(Math.random()-.5)*0.3,dy:-0.8-Math.random()*0.3,l:180,c:"rgba(160,150,130,0.3)"});}
+      // Forest biome — kick up leaf particles
+      if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="forest"&&(ft===T.GRASS||ft===T.TALLGRASS)&&Math.random()<0.25){
+        const lc=Math.random()>.5?"rgba(120,170,50,0.6)":"rgba(90,140,30,0.5)";
+        s.pt.push({x:fx+(Math.random()-.5)*4,y:fy-2,dx:(Math.random()-.5)*2,dy:-1-Math.random()*1.5,l:600,c:lc});}}}
   if(p.burn>0){p.burn-=dt;p.burnTick+=dt;if(p.burnTick>=500){p.burnTick=0;if(p.ifr<=0){p.hp--;sfx("hurt");
     s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:-Math.random()*2,l:400,c:"#f80"})));
     if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}}}
@@ -2355,6 +2434,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   if(!iD)drawTerrainOverlay(c,m,t);
   // Overworld ambient effects
   if(!iD){
+    // Day/Night cycle — compute night intensity for ambient effects
+    const dnPhase=((s.weather.timer%300000)/300000);
+    const nightAmt=Math.max(0,Math.sin(dnPhase*Math.PI*2-Math.PI/2)*0.5+0.5);
+    // Night sky stars (only visible at night on overworld)
+    if(nightAmt>0.2){const starA=Math.min(1,(nightAmt-0.2)/0.3);
+      for(let i=0;i<20;i++){const sx2=hs(i,30,400)*W2,sy2=hs(i,31,401)*H2*0.6;
+        const twinkle=Math.sin(t/300+i*2.7)*0.3+0.7;
+        c.fillStyle=`rgba(255,255,220,${starA*twinkle*0.5})`;c.beginPath();c.arc(sx2,sy2,0.8+twinkle*0.4,0,Math.PI*2);c.fill();}
+      // Fireflies at night (replace some pollen with glowing dots)
+      for(let i=0;i<6;i++){const ffx=(hs(i,40,500)*W2+Math.sin(t/800+i*3)*20),ffy=hs(i,41,501)*H2+Math.sin(t/600+i*2)*15;
+        const glow=Math.sin(t/400+i*4)*0.5+0.5;// pulse
+        if(glow>0.3){c.fillStyle=`rgba(200,255,100,${starA*glow*0.5})`;c.beginPath();c.arc(ffx,ffy,1.5,0,Math.PI*2);c.fill();
+          c.fillStyle=`rgba(180,255,80,${starA*glow*0.15})`;c.beginPath();c.arc(ffx,ffy,5,0,Math.PI*2);c.fill();}}}
     // Wind wisps -- mystical wisps with particle trails
     for(let i=0;i<5;i++){
       const wPhase=t/5000+i*1.3;const wActive=Math.sin(wPhase)>0.3;// visible ~40% of the time
@@ -3173,8 +3265,62 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     eg.addColorStop(0,`rgba(0,0,0,${sdAlpha*0.5})`);eg.addColorStop(0.7,`rgba(0,0,0,${sdAlpha*0.15})`);eg.addColorStop(1,"rgba(0,0,0,0)");
     c.fillStyle=eg;c.fillRect(ecx2-eGlow,ecy2-eGlow,eGlow*2,eGlow*2);
     c.restore();}
-  if(!iD){const amb=Math.sin(t/15000)*0.03;
-    c.fillStyle=amb>0?`rgba(255,200,100,${amb})`:`rgba(100,150,255,${-amb})`;c.fillRect(0,0,W2,H2);}
+  // --- Day/Night cycle tint ---
+  // Full cycle: ~5 minutes real time. Phase: 0=noon, 0.5=midnight
+  const dayPhase=((s.weather.timer%300000)/300000);// 0-1 over 5 minutes
+  const nightAmount=Math.max(0,Math.sin(dayPhase*Math.PI*2-Math.PI/2)*0.5+0.5);// 0 at noon, 1 at midnight
+  const isNight=nightAmount>0.3;
+  if(!iD){
+    // Ambient day/night tint
+    const dayAmb=Math.sin(t/15000)*0.03;
+    if(nightAmount>0.05){
+      // Night: blue-dark overlay
+      c.fillStyle=`rgba(10,10,40,${nightAmount*0.35})`;c.fillRect(0,0,W2,H2);
+    }else{
+      c.fillStyle=dayAmb>0?`rgba(255,200,100,${dayAmb})`:`rgba(100,150,255,${-dayAmb})`;c.fillRect(0,0,W2,H2);
+    }
+  }
+  // --- Weather rendering (overworld only) ---
+  if(!iD&&s.weather.type!=="clear"){const w=s.weather;
+    // Rain drops
+    if(w.type==="rain"){
+      c.strokeStyle="rgba(150,180,220,0.5)";c.lineWidth=1;
+      for(const d of w.drops){c.beginPath();c.moveTo(d.x,d.y);c.lineTo(d.x+d.vx*2,d.y+d.vy*3);c.stroke();}
+      // Splash particles when drops hit ground
+      for(const d of w.drops){if(d.y>H2-8&&d.y<H2){
+        c.fillStyle="rgba(150,190,230,0.3)";c.beginPath();c.arc(d.x,H2-2,1.5,0,Math.PI*2);c.fill();}}
+      // Subtle rain ambient darkening
+      c.fillStyle=`rgba(20,30,50,${0.06+nightAmount*0.04})`;c.fillRect(0,0,W2,H2);
+    }
+    // Snow flakes
+    if(w.type==="snow"){
+      for(const d of w.drops){const sz=d.sp||1.5;
+        const sa=Math.min(1,Math.max(0.3,(H2-d.y)/H2+0.3));
+        c.fillStyle=`rgba(230,240,255,${sa*0.7})`;c.beginPath();c.arc(d.x,d.y,sz,0,Math.PI*2);c.fill();
+        // Subtle glow
+        c.fillStyle=`rgba(200,220,255,${sa*0.15})`;c.beginPath();c.arc(d.x,d.y,sz*2.5,0,Math.PI*2);c.fill();}
+      // Snow ground accumulation tint
+      c.fillStyle="rgba(200,210,230,0.04)";c.fillRect(0,0,W2,H2);
+    }
+    // Fog — reduces visibility like dark rooms
+    if(w.fog>0.02){
+      const fogA=w.fog*(1+nightAmount*0.5);// denser fog at night
+      // Base fog layer
+      c.fillStyle=`rgba(160,170,180,${fogA})`;c.fillRect(0,0,W2,H2);
+      // Cut visibility around player (like dark rooms)
+      c.save();c.globalCompositeOperation="destination-out";
+      const fogR=s.hasLantern?140:90;// lantern pierces fog further
+      const fg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,fogR);
+      fg.addColorStop(0,`rgba(0,0,0,${fogA*0.85})`);fg.addColorStop(0.5,`rgba(0,0,0,${fogA*0.4})`);fg.addColorStop(1,"rgba(0,0,0,0)");
+      c.fillStyle=fg;c.fillRect(p.x+PS/2-fogR,p.y+PS/2-fogR,fogR*2,fogR*2);
+      c.restore();
+      // Drifting fog wisps
+      for(let i=0;i<4;i++){const fx=(t/3+i*140+Math.sin(t/2000+i)*30)%(W2+100)-50;
+        const fy=H2*0.3+Math.sin(t/1500+i*2)*40+i*60;
+        c.fillStyle=`rgba(180,190,200,${fogA*0.3+Math.sin(t/800+i)*fogA*0.1})`;
+        c.beginPath();c.ellipse(fx,fy,50+Math.sin(t/1200+i)*10,18+Math.sin(t/900+i*3)*5,0,0,Math.PI*2);c.fill();}
+    }
+  }
   const vig=c.createRadialGradient(W2/2,H2/2,W2*0.3,W2/2,H2/2,W2*0.75);
   vig.addColorStop(0,"rgba(0,0,0,0)");vig.addColorStop(0.7,iD?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)");vig.addColorStop(1,iD?"rgba(0,0,0,0.4)":"rgba(0,0,10,0.12)");
   c.fillStyle=vig;c.fillRect(0,0,W2,H2);
