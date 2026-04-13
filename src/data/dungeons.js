@@ -331,6 +331,9 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     // Sand platforms at corners
     m[3][4]=T.SAND;m[3][5]=T.SAND;m[3][10]=T.SAND;m[3][11]=T.SAND;
     m[8][4]=T.SAND;m[8][5]=T.SAND;m[8][10]=T.SAND;m[8][11]=T.SAND;
+    // Lava drip spots — spikes where molten lava falls from ceiling
+    m[4][7]=T.SPIKE;m[4][8]=T.SPIKE;m[7][7]=T.SPIKE;m[7][8]=T.SPIKE;
+    m[5][5]=T.SPIKE;m[6][10]=T.SPIKE;
     // Torches at corners — blazing fire
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
     m[4][4]=T.TORCH;m[4][11]=T.TORCH;m[7][4]=T.TORCH;m[7][11]=T.TORCH;
