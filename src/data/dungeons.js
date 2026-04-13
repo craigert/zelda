@@ -318,21 +318,24 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"mage"},{x:3*TL,y:4*TL,hp:4,type:"fire_bat"},{x:12*TL,y:7*TL,hp:4,type:"fire_bat"}]},
 
-  // BOSS ROOM — Flame Wyrm (lava moat with ice bridges)
+  // BOSS ROOM — Flame Wyrm (lava moat with sand bridges)
   "-1,-2":{tiles:mr(m=>{
+    // Sand floor base — volcanic arena
+    for(let y=1;y<=10;y++)for(let x=1;x<=14;x++)m[y][x]=T.SAND;
     m[5][CO-1]=T.BOSS_DOOR;m[6][CO-1]=T.BOSS_DOOR;
-    // Lava moat
+    // Lava moat (pits = lava visually in fire dungeon)
     for(let y=2;y<=9;y++)for(let x=2;x<=13;x++)m[y][x]=T.PIT;
-    // Cross bridges with ice
-    for(let y=2;y<=9;y++){m[y][7]=T.ICE;m[y][8]=T.ICE;}
-    for(let x=2;x<=13;x++){m[5][x]=T.ICE;m[6][x]=T.ICE;}
-    // Floor platforms at corners
-    m[3][4]=T.FLOOR;m[3][5]=T.FLOOR;m[3][10]=T.FLOOR;m[3][11]=T.FLOOR;
-    m[8][4]=T.FLOOR;m[8][5]=T.FLOOR;m[8][10]=T.FLOOR;m[8][11]=T.FLOOR;
-    // Torches at corners
+    // Sand bridges over lava
+    for(let y=2;y<=9;y++){m[y][7]=T.SAND;m[y][8]=T.SAND;}
+    for(let x=2;x<=13;x++){m[5][x]=T.SAND;m[6][x]=T.SAND;}
+    // Sand platforms at corners
+    m[3][4]=T.SAND;m[3][5]=T.SAND;m[3][10]=T.SAND;m[3][11]=T.SAND;
+    m[8][4]=T.SAND;m[8][5]=T.SAND;m[8][10]=T.SAND;m[8][11]=T.SAND;
+    // Torches at corners — blazing fire
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
+    m[4][4]=T.TORCH;m[4][11]=T.TORCH;m[7][4]=T.TORCH;m[7][11]=T.TORCH;
     // Triforce reward
-    m[2][7]=T.FLOOR;
+    m[2][7]=T.SAND;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:14,type:"boss",name:"Flame Wyrm",pattern:"spawn"}]},
 
   // South treasure (crack south wall of entry room)
@@ -502,19 +505,18 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:7*TL,y:4*TL,hp:5,type:"ghost"},{x:4*TL,y:7*TL,hp:5,type:"knight"},{x:11*TL,y:7*TL,hp:5,type:"ghost"}]},
 
-  // BOSS ROOM — Shadow Lord (pit border with open center arena)
-  "-1,-4":{tiles:mr(m=>{
+  // BOSS ROOM — Shadow Lord (dark stone arena)
+  "-1,-4":{dark:true,tiles:mr(m=>{
     m[RO-1][7]=T.BOSS_DOOR;m[RO-1][8]=T.BOSS_DOOR;
-    // Pit border ring — dangerous edges but open center for combat
+    // Pit border ring — dangerous edges
     for(let x=2;x<=13;x++){m[2][x]=T.PIT;m[9][x]=T.PIT;}
     for(let y=3;y<=8;y++){m[y][2]=T.PIT;m[y][13]=T.PIT;}
-    // Corner pits for extra danger
+    // Corner pits
     m[3][3]=T.PIT;m[3][12]=T.PIT;m[8][3]=T.PIT;m[8][12]=T.PIT;
-    // Open arena floor in center (plenty of room to fight and collect drops)
-    for(let y=4;y<=7;y++)for(let x=5;x<=10;x++)m[y][x]=T.FLOOR;
+    // Open arena center — stone floor (default from mr)
     for(let y=3;y<=8;y++){m[y][7]=T.FLOOR;m[y][8]=T.FLOOR;}
     m[3][6]=T.FLOOR;m[3][9]=T.FLOOR;m[8][6]=T.FLOOR;m[8][9]=T.FLOOR;
-    // Spike accents in corners of arena
+    // Spike accents
     m[3][4]=T.SPIKE;m[3][11]=T.SPIKE;m[8][4]=T.SPIKE;m[8][11]=T.SPIKE;
     // Torches — eerie purple light
     m[4][4]=T.TORCH;m[4][11]=T.TORCH;m[7][4]=T.TORCH;m[7][11]=T.TORCH;
@@ -673,15 +675,15 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;m[2][3]=T.TORCH;m[2][12]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:7,type:"ghost"},{x:10*TL,y:6*TL,hp:7,type:"ghost"}]},
 
-  // BOSS ROOM — Dark King (everything: ice, spikes, pits, tswitch)
-  "0,-4":{tiles:mr(m=>{
+  // BOSS ROOM — Dark King (cursed sanctum: ice, spikes, pits, darkness)
+  "0,-4":{dark:true,tiles:mr(m=>{
     m[RO-1][7]=T.BOSS_DOOR;m[RO-1][8]=T.BOSS_DOOR;
-    // ICE floor sections
-    for(let y=4;y<=7;y++)for(let x=5;x<=10;x++)m[y][x]=T.ICE;
+    // ICE floor — frozen cursed ground
+    for(let y=3;y<=8;y++)for(let x=4;x<=11;x++)m[y][x]=T.ICE;
     // Spike borders
     for(let x=3;x<=12;x++){m[2][x]=T.SPIKE;m[9][x]=T.SPIKE;}
     for(let y=3;y<=8;y++){m[y][3]=T.SPIKE;m[y][12]=T.SPIKE;}
-    // PIT corners
+    // PIT corners — bottomless void
     m[2][2]=T.PIT;m[2][3]=T.PIT;m[2][12]=T.PIT;m[2][13]=T.PIT;
     m[9][2]=T.PIT;m[9][3]=T.PIT;m[9][12]=T.PIT;m[9][13]=T.PIT;
     m[3][2]=T.PIT;m[3][13]=T.PIT;m[8][2]=T.PIT;m[8][13]=T.PIT;
@@ -689,7 +691,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;
     // Timed switch to temporarily convert spikes to floor
     m[3][4]=T.TSWITCH;m[3][11]=T.TSWITCH;m[8][4]=T.TSWITCH;m[8][11]=T.TSWITCH;
-    // Torches for atmosphere
+    // Torches — must be lit to see in the darkness
     m[3][7]=T.TORCH;m[3][8]=T.TORCH;m[8][7]=T.TORCH;m[8][8]=T.TORCH;
     m[5][4]=T.TORCH;m[5][11]=T.TORCH;m[6][4]=T.TORCH;m[6][11]=T.TORCH;
     // Triforce reward
