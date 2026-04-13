@@ -1932,11 +1932,25 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       const ba=Math.atan2(bp.y-(p.y+PS/2),bp.x-(p.x+PS/2));
       const pf=p.dir===0?-Math.PI/2:p.dir===2?Math.PI/2:p.dir===3?Math.PI:0;
       const diff=Math.abs(((ba-pf+Math.PI*3)%(Math.PI*2))-Math.PI);
-      if(diff<Math.PI*(s.hasShieldUp?0.85:0.6)){sfx("door");s.bProj.splice(i,1);
-        s.pt.push(...Array.from({length:6},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#88f"})));
-        s.dmgNums.push({x:p.x+PS/2,y:p.y,t:500,val:"BLOCK",c:"#8af"});
+      if(diff<Math.PI*(s.hasShieldUp?0.85:0.6)){
+        if(s.hasShieldUp){// Mirror Shield — reflect projectile back
+          bp.dx=-bp.dx;bp.dy=-bp.dy;bp.reflected=true;bp.l=Math.min(bp.l,1200);
+          sfx("secret");
+          s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:400,c:Math.random()>.5?"#8af":"#fff"})));
+          s.dmgNums.push({x:p.x+PS/2,y:p.y,t:500,val:"REFLECT",c:"#8cf"});
+        }else{sfx("door");s.bProj.splice(i,1);
+          s.pt.push(...Array.from({length:6},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:300,c:"#88f"})));
+          s.dmgNums.push({x:p.x+PS/2,y:p.y,t:500,val:"BLOCK",c:"#8af"});}
         continue;}}
-    if(p.ifr<=0&&Math.hypot(p.x+PS/2-bp.x,p.y+PS/2-bp.y)<14){
+    // Reflected projectiles damage enemies
+    if(bp.reflected){let hitEnemy=false;
+      for(const e of s.en){const ed=Math.hypot(e.x+ES/2-bp.x,e.y+ES/2-bp.y);
+        if(ed<ES*0.5){e.hp-=2;e.fl=300;sfx("hit");
+          s.dmgNums.push({x:e.x+ES/2,y:e.y,t:600,val:2,c:"#8cf"});
+          s.pt.push(...Array.from({length:4},()=>({x:bp.x,y:bp.y,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:300,c:"#8af"})));
+          hitEnemy=true;break;}}
+      if(hitEnemy){s.bProj.splice(i,1);continue;}}
+    if(p.ifr<=0&&!bp.reflected&&Math.hypot(p.x+PS/2-bp.x,p.y+PS/2-bp.y)<14){
       if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;sfx("hurt");s.shake.t=300;s.bProj.splice(i,1);
       const hka=Math.atan2(p.y+PS/2-bp.y,p.x+PS/2-bp.x);if(tm(p.x+Math.cos(hka)*6,p.y+Math.sin(hka)*6)){p.x+=Math.cos(hka)*6;p.y+=Math.sin(hka)*6;}
       if(bp.type==="fire"){p.burn=3000;p.burnTick=0;
@@ -3566,8 +3580,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.strokeStyle="rgba(253,211,51,0.5)";c.stroke();c.fillStyle="#fff";c.textAlign="center";c.fillText(s.msg.text,W2/2,my+20);c.textAlign="left";}
   // NPC Dialogue box
   if(s.npcTalk){const dlg=s.npcTalk;
-    const bx2=16,by2=H2-80,bw2=W2-32,bh2=70;
-    c.fillStyle="rgba(0,0,20,0.92)";const r3=6;
+    const bx2=16,by2=H2-92,bw2=W2-32,bh2=84;const r3=6;
+    c.fillStyle="rgba(0,0,20,0.92)";
     c.beginPath();c.moveTo(bx2+r3,by2);c.lineTo(bx2+bw2-r3,by2);c.quadraticCurveTo(bx2+bw2,by2,bx2+bw2,by2+r3);
     c.lineTo(bx2+bw2,by2+bh2-r3);c.quadraticCurveTo(bx2+bw2,by2+bh2,bx2+bw2-r3,by2+bh2);
     c.lineTo(bx2+r3,by2+bh2);c.quadraticCurveTo(bx2,by2+bh2,bx2,by2+bh2-r3);
@@ -3580,13 +3594,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.lineWidth=1;
     c.fillStyle="#fd3";c.font="bold 11px monospace";c.textAlign="left";
     c.fillText(dlg.name,bx2+10,by2+16);
+    // Show current line + next line (2 lines visible at once)
     c.fillStyle="#fff";c.font="12px monospace";
-    const line=dlg.lines[dlg.idx];const shown=line.substring(0,dlg.charIdx);
-    c.fillText(shown,bx2+10,by2+36);
+    const line1=dlg.lines[dlg.idx];const shown1=line1.substring(0,dlg.charIdx);
+    c.fillText(shown1,bx2+10,by2+34);
+    const line2=dlg.lines[dlg.idx+1];
+    if(line2&&dlg.charIdx>=line1.length){c.fillStyle="#ccc";c.fillText(line2,bx2+10,by2+50);}
     c.fillStyle="#888";c.font="9px monospace";c.textAlign="right";
     c.fillText(`${dlg.idx+1}/${dlg.lines.length}`,bx2+bw2-10,by2+16);
-    if(dlg.charIdx>=line.length){const blink2=Math.sin(t/300)>0;
-      if(blink2){c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("\u25bc",bx2+bw2/2,by2+bh2-8);}}
+    if(dlg.charIdx>=line1.length){const blink2=Math.sin(t/300)>0;
+      if(blink2){c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("\u25bc",bx2+bw2/2,by2+bh2-6);}}
     c.textAlign="left";}
   c.restore(); // end clip
   c.restore(); // end game area offset
