@@ -198,7 +198,7 @@ export const OW={
   // Path leads to heart piece in corner alcove
   m[7][10]=T.PATH;m[7][11]=T.PATH;m[7][12]=T.PATH;
   m[8][12]=T.PATH;m[9][12]=T.PATH;
-  m[9][11]=T.HEART_PIECE;// visible in the alcove
+  m[9][11]=T.RUPEE;m[9][10]=T.RUPEE;// rupees in the alcove
   m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
   m[9][7]=T.STUMP;m[3][7]=T.STUMP;
   // Banana cave — push boulder to reveal, guarded by yetis inside
