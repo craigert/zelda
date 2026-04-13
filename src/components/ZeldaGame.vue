@@ -716,12 +716,15 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           const de2=DE.find(d=>d.d===di2);
           if(de2){
             s.loc.ty="ow";s.loc.scr=de2.s;s.loc.di=-1;
-            s.p.x=de2.t[0][0]*TL;s.p.y=de2.t[0][1]*TL;
+            // Land below the dungeon entrance
+            const landY=Math.max(...de2.t.map(t2=>t2[1]))+2;
+            s.p.x=de2.t[0][0]*TL;s.p.y=landY*TL;
             s.respawn={ty:"ow",scr:de2.s,di:-1,x:s.p.x,y:s.p.y};
             s.ec=500;le(s);
           }
           // Queue hero descent — starts after fade-in completes
-          s._heroLandPending=true;
+          // Hide player until descent begins
+          s._heroLandPending=true;s._heroHidden=true;
           s.triforceHold=null;s.triMu=false;s.bossVictory=null;
           // Fade system auto-reverses (dir=-1) after cb
         }};
@@ -753,7 +756,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.fade.alpha>=1&&s.fade.cb){try{s.fade.cb();}catch(e){console.error("Fade callback error:",e);}s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
     if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0){s.fade.a=false;
       // Start hero descent after fade-in completes
-      if(s._heroLandPending){s._heroLandPending=false;s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};}}}return;}
+      if(s._heroLandPending){s._heroLandPending=false;s._heroHidden=false;s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};}}}return;}
   // Shop ground items — player walks over to buy
   if(s.shopGround){const p=s.p;
     for(const si of s.shopGround){
@@ -3335,6 +3338,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     const fx=s.pitFall.x+PS/2,fy=s.pitFall.y+PS/2;
     c.save();c.translate(fx,fy);c.rotate(spin);c.scale(sc,sc);c.globalAlpha=1-fp;
     dP(c,-PS/2,-PS/2,p.dir,t,p.redArmor);c.restore();
+  }else if(s._heroHidden){// Hidden until descent begins
   }else{const vis=p.ifr<=0||Math.floor(p.ifr/80)%2;
     if(vis){
       const hopY=s.ledgeHop>0?-Math.sin(s.ledgeHop/250*Math.PI)*8:0;
