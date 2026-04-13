@@ -696,10 +696,6 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     else{s.heroLand.landT+=dt;
       if(s.heroLand.landT>=1000){s.heroLand=null;saveGame(s);}}
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
-    // Advance fade-in during heroLand so screen doesn't stay black
-    if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;
-      if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}
-      else{s.fade.alpha=Math.min(1,s.fade.t/fs);}}
     return;}
   // Triforce/item hold-up animation
   if(s.triforceHold){s.triforceHold.t+=dt;
@@ -724,10 +720,10 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.respawn={ty:"ow",scr:de2.s,di:-1,x:s.p.x,y:s.p.y};
             s.ec=500;le(s);
           }
-          // Hero descends from sky in pillar of light
-          s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};
+          // Queue hero descent — starts after fade-in completes
+          s._heroLandPending=true;
           s.triforceHold=null;s.triMu=false;s.bossVictory=null;
-          // Fade system auto-reverses (dir=-1) after cb — no need to set new fade
+          // Fade system auto-reverses (dir=-1) after cb
         }};
       }else{
         // Heart container not yet collected — end hold-up, let player collect it
@@ -755,7 +751,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   // Fade transition — must run before shop/NPC/freeze checks
   if(s.fade.a){const fs=s.fade.spd||250;s.fade.t+=dt;s.fade.alpha=Math.min(1,s.fade.t/fs);
     if(s.fade.alpha>=1&&s.fade.cb){try{s.fade.cb();}catch(e){console.error("Fade callback error:",e);}s.fade.cb=null;s.fade.dir=-1;s.fade.t=0;}
-    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0)s.fade.a=false;}return;}
+    if(s.fade.dir===-1){s.fade.alpha=Math.max(0,1-s.fade.t/fs);if(s.fade.alpha<=0){s.fade.a=false;
+      // Start hero descent after fade-in completes
+      if(s._heroLandPending){s._heroLandPending=false;s.heroLand={t:0,dur:3000,y:-40,vy:0,landed:false};}}}return;}
   // Shop ground items — player walks over to buy
   if(s.shopGround){const p=s.p;
     for(const si of s.shopGround){
