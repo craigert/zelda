@@ -86,7 +86,8 @@ export const NPC_DATA = {
       "~ HEALING SPRING ~",
       "Wade into the warm waters",
       "to restore your health.",
-      "Cures burns, poison & frost."
+      "Cures burns, poison & frost.",
+      "...Hearts love hot water."
     ]},
   ],
 };
