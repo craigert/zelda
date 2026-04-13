@@ -1234,15 +1234,43 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#777";c.fillRect(px+8,py+8,TL-16,TL-16);
       const pp=Math.sin(t/500)*0.2+0.3;c.fillStyle=`rgba(255,200,50,${pp})`;c.fillRect(px+10,py+10,TL-20,TL-20);
       break;}
-    case T.PIT:{// Bottomless pit
-      c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
-      // Dark gradient edges to show depth
-      const pg2=c.createRadialGradient(px+16,py+16,2,px+16,py+16,18);
-      pg2.addColorStop(0,"#000004");pg2.addColorStop(0.7,"#080810");pg2.addColorStop(1,iD?(dg.fc||"#1a1a2a"):"#2a3a28");
-      c.fillStyle=pg2;c.fillRect(px,py,TL,TL);
-      // Inner shadow ring
-      c.strokeStyle="rgba(0,0,0,0.5)";c.lineWidth=2;c.strokeRect(px+3,py+3,TL-6,TL-6);
-      break;}
+    case T.PIT:{
+      const isLava=iD&&dg&&dg.th==="fire";
+      if(isLava){
+        // Molten lava — glowing, flowing, alive
+        const lx=px*0.37+py*0.53;// per-tile seed
+        const flow1=Math.sin(t/800+lx)*0.5+0.5;
+        const flow2=Math.sin(t/600+lx*1.3+1)*0.5+0.5;
+        // Base deep red-orange
+        c.fillStyle="#4a1000";c.fillRect(px,py,TL,TL);
+        // Flowing bright lava streaks
+        const lg=c.createRadialGradient(px+10+flow1*12,py+10+flow2*12,2,px+16,py+16,18);
+        lg.addColorStop(0,"#ff6010");lg.addColorStop(0.4,"#d03008");lg.addColorStop(1,"#601000");
+        c.fillStyle=lg;c.fillRect(px,py,TL,TL);
+        // Hot spots — bright yellow-white patches that drift
+        const hx1=px+8+Math.sin(t/500+lx)*8,hy1=py+8+Math.cos(t/700+lx)*8;
+        const hx2=px+20+Math.sin(t/600+lx*2)*6,hy2=py+20+Math.cos(t/450+lx*2)*6;
+        c.fillStyle=`rgba(255,200,50,${0.3+flow1*0.2})`;c.beginPath();c.ellipse(hx1,hy1,5+flow2*2,3+flow1,t/2000+lx,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(255,160,30,${0.25+flow2*0.15})`;c.beginPath();c.ellipse(hx2,hy2,4+flow1*2,2+flow2,t/1500+lx,0,Math.PI*2);c.fill();
+        // Surface crust — dark veins
+        c.strokeStyle=`rgba(40,8,0,${0.3+Math.sin(t/1000+lx)*0.1})`;c.lineWidth=1;
+        c.beginPath();c.moveTo(px+flow1*TL,py+4);c.quadraticCurveTo(px+16,py+16+flow2*4,px+TL-flow2*TL,py+TL-4);c.stroke();
+        c.beginPath();c.moveTo(px+4,py+flow2*TL);c.quadraticCurveTo(px+16+flow1*4,py+16,px+TL-4,py+TL-flow1*TL);c.stroke();
+        // Bubbles
+        const bub=Math.sin(t/300+lx*3);
+        if(bub>0.6){const bx=px+6+((lx*7)%20),by=py+6+((lx*11)%20),br=1+bub;
+          c.fillStyle=`rgba(255,220,80,${(bub-0.6)*2})`;c.beginPath();c.arc(bx,by,br,0,Math.PI*2);c.fill();}
+        // Edge darkening
+        c.fillStyle="rgba(30,5,0,0.3)";c.fillRect(px,py,TL,2);c.fillRect(px,py+TL-2,TL,2);
+        c.fillRect(px,py,2,TL);c.fillRect(px+TL-2,py,2,TL);
+      }else{
+        // Bottomless pit
+        c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
+        const pg2=c.createRadialGradient(px+16,py+16,2,px+16,py+16,18);
+        pg2.addColorStop(0,"#000004");pg2.addColorStop(0.7,"#080810");pg2.addColorStop(1,iD?(dg.fc||"#1a1a2a"):"#2a3a28");
+        c.fillStyle=pg2;c.fillRect(px,py,TL,TL);
+        c.strokeStyle="rgba(0,0,0,0.5)";c.lineWidth=2;c.strokeRect(px+3,py+3,TL-6,TL-6);
+      }break;}
     case T.SPIKE:{// Spike trap — toggles on/off
       c.fillStyle=iD?(dg.fc||dg.color):"#38982e";c.fillRect(px,py,TL,TL);
       if(iD){c.strokeStyle="rgba(255,255,255,0.03)";c.strokeRect(px+1,py+1,TL-2,TL-2);}
