@@ -1651,13 +1651,22 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       }
       else if(e.type==="boss"){
         const ang2=Math.atan2(pcy-ecy,pcx-ecx);
-        if(e.pattern==="charge"){const phase=Math.floor(e.mt/2000)%3;
-          if(phase===2){const bsp=es*3;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
-          else if(phase===1){moveX=0;moveY=0;
-            if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
-              for(let a=0;a<4;a++){const ra=a*Math.PI/2;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"root",l:800});}
+        if(e.pattern==="charge"){const phase=Math.floor(e.mt/2500)%4;
+          if(phase===3){// Fast charge at player
+            const bsp=es*3.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            // Leave root trail while charging
+            if(Math.random()<0.3){s.bProj.push({x:ecx,y:ecy,dx:(Math.random()-.5)*1.5,dy:(Math.random()-.5)*1.5,type:"root",l:600,snare:true});}}
+          else if(phase===2){// Stop and unleash root burst
+            moveX=0;moveY=0;
+            if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)){
+              for(let a=0;a<6;a++){const ra=a*Math.PI/3;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"root",l:1000,snare:true});}
               sfx("bomb");}}
-          else{const bsp=es*0.6;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
+          else if(phase===1){// Aimed root snare at player
+            const bsp=es*0.8;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;
+            if(Math.floor(e.mt/1200)!==Math.floor((e.mt-dt)/1200)){
+              const pa2=Math.atan2(pcy-ecy,pcx-ecx);
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*3,dy:Math.sin(pa2)*3,type:"root",l:1200,snare:true});sfx("bomb");}}
+          else{const bsp=es*0.5;moveX=Math.cos(ang2)*bsp;moveY=Math.sin(ang2)*bsp;}
         }else if(e.pattern==="spawn"){const ca=e.mt/800;moveX=Math.cos(ca)*es*1.2;moveY=Math.sin(ca)*es*1.2;
           if(Math.floor(e.mt/3000)!==Math.floor((e.mt-dt)/3000)&&s.en.length<8){
             s.en.push({x:e.x,y:e.y,hp:2,mhp:2,type:"fire_bat",fl:0,mt:0,st:"chase",stT:0,hx:e.x,hy:e.y});}

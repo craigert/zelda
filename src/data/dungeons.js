@@ -164,7 +164,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     // Triforce reward
     m[2][8]=T.FLOOR;
-  }),enemies:[{x:7.5*TL,y:5*TL,hp:12,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
+  }),enemies:[{x:7.5*TL,y:5*TL,hp:18,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
 
 // ═══════════════════════════════════════════════════════════════
