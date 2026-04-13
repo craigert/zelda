@@ -144,26 +144,33 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[4][7]=T.HEART;
   }),enemies:[{x:7*TL,y:5*TL,hp:4,type:"skeleton"},{x:8*TL,y:6*TL,hp:4,type:"skeleton"},{x:5*TL,y:5*TL,hp:3,type:"bat"},{x:10*TL,y:6*TL,hp:3,type:"bat"}]},
 
-  // BOSS ROOM — Forest Guardian
+  // BOSS ROOM — Forest Guardian (mossy forest floor)
   "0,-4":{tiles:mr(m=>{
+    // Cover floor with grass for mossy forest look
+    for(let y=1;y<=10;y++)for(let x=1;x<=14;x++)m[y][x]=T.GRASS;
     m[RO-1][7]=T.BOSS_DOOR;m[RO-1][8]=T.BOSS_DOOR;
     // Spike cross columns
     for(let y=2;y<=9;y++){m[y][4]=T.SPIKE;m[y][11]=T.SPIKE;}
     for(let x=2;x<=13;x++){m[5][x]=T.SPIKE;m[6][x]=T.SPIKE;}
-    // Floor islands
-    m[5][4]=T.FLOOR;m[6][4]=T.FLOOR;m[5][11]=T.FLOOR;m[6][11]=T.FLOOR;
-    m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;
-    for(let y=3;y<=4;y++)for(let x=6;x<=9;x++)m[y][x]=T.FLOOR;
-    for(let y=7;y<=8;y++)for(let x=6;x<=9;x++)m[y][x]=T.FLOOR;
-    m[3][7]=T.FLOOR;m[3][8]=T.FLOOR;m[8][7]=T.FLOOR;m[8][8]=T.FLOOR;
+    // Grass islands over spikes
+    m[5][4]=T.GRASS;m[6][4]=T.GRASS;m[5][11]=T.GRASS;m[6][11]=T.GRASS;
+    m[5][7]=T.GRASS;m[5][8]=T.GRASS;m[6][7]=T.GRASS;m[6][8]=T.GRASS;
+    for(let y=3;y<=4;y++)for(let x=6;x<=9;x++)m[y][x]=T.GRASS;
+    for(let y=7;y<=8;y++)for(let x=6;x<=9;x++)m[y][x]=T.GRASS;
+    m[3][7]=T.GRASS;m[3][8]=T.GRASS;m[8][7]=T.GRASS;m[8][8]=T.GRASS;
+    // Tallgrass patches for extra forest feel
+    m[3][6]=T.TALLGRASS;m[3][9]=T.TALLGRASS;m[8][6]=T.TALLGRASS;m[8][9]=T.TALLGRASS;
+    m[4][5]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[4][10]=T.TALLGRASS;m[7][10]=T.TALLGRASS;
     // Pit borders
     m[2][2]=T.PIT;m[2][3]=T.PIT;m[2][12]=T.PIT;m[2][13]=T.PIT;
     m[9][2]=T.PIT;m[9][3]=T.PIT;m[9][12]=T.PIT;m[9][13]=T.PIT;
+    // Tree stumps in corners for atmosphere
+    m[2][5]=T.STUMP;m[2][10]=T.STUMP;m[9][5]=T.STUMP;m[9][10]=T.STUMP;
     // Torches — light islands
     m[3][3]=T.TORCH;m[3][12]=T.TORCH;m[8][3]=T.TORCH;m[8][12]=T.TORCH;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     // Triforce reward
-    m[2][8]=T.FLOOR;
+    m[2][8]=T.GRASS;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:18,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
 
