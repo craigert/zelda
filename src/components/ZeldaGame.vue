@@ -1569,47 +1569,40 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             moveX=0;moveY=0;
             if(e.vineT>500){e.vinePhase="rooted";e.vineT=0;}}
         }else if(mn==="Flame Sentinel"){
-          // Flame Sentinel: erratic figure-8 spirals leaving fire everywhere, sudden dashes
-          if(!e.flamePhase){e.flamePhase="spiral";e.flameT=0;e.dashAng=0;}
+          // Flame Sentinel: slow melting lava monster, oozes toward player leaving lava trails
+          if(!e.flamePhase){e.flamePhase="ooze";e.flameT=0;}
           e.flameT+=dt;
-          if(e.flamePhase==="spiral"){
-            // Figure-8 orbit around player — tightening spiral
-            const orbitT=e.mt/350;const lobeX=Math.sin(orbitT)*2;const lobeY=Math.sin(orbitT*2)*1.2;
-            const orbitR=TL*2.5+Math.sin(e.mt/1200)*TL;
-            const targetX=pcx+lobeX*orbitR-ES/2,targetY=pcy+lobeY*orbitR-ES/2;
-            const tdx=targetX-e.x,tdy=targetY-e.y,td=Math.max(1,Math.hypot(tdx,tdy));
-            const spd=es*2.2;moveX=tdx/td*spd;moveY=tdy/td*spd;
-            // Fire trail
+          if(e.flamePhase==="ooze"){
+            // Slow creep toward player
+            moveX=Math.cos(ang)*es*0.25;moveY=Math.sin(ang)*es*0.25;
+            // Constant lava trail
             if(!e.trailT)e.trailT=0;e.trailT+=dt;
-            if(e.trailT>200){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
-              s.fireTrails.push({x:ecx,y:ecy,t:2500});}
-            s.pt.push({x:ecx+(Math.random()-.5)*8,y:ecy+(Math.random()-.5)*8,dx:(Math.random()-.5)*2,dy:-Math.random()*1.5,l:200,c:Math.random()>.5?"#f80":"#fa0"});
-            // Lob exploding fireball every 2s
-            if(Math.floor(e.mt/2000)!==Math.floor((e.mt-dt)/2000)){
+            if(e.trailT>300){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
+              s.fireTrails.push({x:ecx,y:ecy,t:3500});}
+            // Dripping lava particles
+            if(Math.random()<0.4)s.pt.push({x:ecx+(Math.random()-.5)*12,y:ecy+(Math.random()-.5)*8,dx:(Math.random()-.5)*1,dy:-Math.random()*1,l:300,c:Math.random()>.5?"#f80":"#fa0"});
+            // Lob exploding fireball every 2.5s
+            if(Math.floor(e.mt/2500)!==Math.floor((e.mt-dt)/2500)){
               const pa2=Math.atan2(pcy-ecy,pcx-ecx);
-              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*3.5,dy:Math.sin(pa2)*3.5,type:"fire",l:1000,explode:true});sfx("bomb");}
-            if(e.flameT>4000){e.flamePhase="windup";e.flameT=0;e.dashAng=ang;}
-          }else if(e.flamePhase==="windup"){
-            // Stop, spin in place gathering fire, then dash
+              s.bProj.push({x:ecx,y:ecy,dx:Math.cos(pa2)*2.5,dy:Math.sin(pa2)*2.5,type:"fire",l:1200,explode:true});sfx("bomb");}
+            // After 5s, pause to gather energy
+            if(e.flameT>5000){e.flamePhase="gather";e.flameT=0;}
+          }else if(e.flamePhase==="gather"){
+            // Stop and pulse, gathering lava energy
             moveX=0;moveY=0;
-            const spinR=8+e.flameT/50;
-            for(let i=0;i<2;i++){const sa=e.mt/60+i*Math.PI;
-              s.pt.push({x:ecx+Math.cos(sa)*spinR,y:ecy+Math.sin(sa)*spinR,dx:0,dy:0,l:200,c:Math.random()>.3?"#f80":"#ff0"});}
-            if(e.flameT>800){e.flamePhase="dash";e.flameT=0;e.dashAng=Math.atan2(pcy-ecy,pcx-ecx);sfx("bomb");s.shake.t=200;}
-          }else if(e.flamePhase==="dash"){
-            // Blazing straight-line dash leaving heavy fire trail
-            const bsp=es*4;moveX=Math.cos(e.dashAng)*bsp;moveY=Math.sin(e.dashAng)*bsp;
-            if(!e.trailT)e.trailT=0;e.trailT+=dt;
-            if(e.trailT>80){e.trailT=0;if(!s.fireTrails)s.fireTrails=[];
-              s.fireTrails.push({x:ecx,y:ecy,t:3000});}
-            s.pt.push({x:ecx+(Math.random()-.5)*10,y:ecy+(Math.random()-.5)*10,dx:-moveX*0.4,dy:-moveY*0.4,l:200,c:"#f44"});
-            if(e.flameT>700){e.flamePhase="explode";e.flameT=0;
-              // Ring explosion at end of dash
-              for(let a=0;a<8;a++){const ra=a*Math.PI/4;s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2.5,dy:Math.sin(ra)*2.5,type:"fire",l:900});}
-              sfx("bomb");s.shake.t=300;s.pt.push(...Array.from({length:15},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:400,c:Math.random()>.3?"#f80":"#ff0"})));}
-          }else{// explode pause, then back to spiral
+            const spinR=6+e.flameT/60;
+            for(let i=0;i<3;i++){const sa=e.mt/80+i*Math.PI*2/3;
+              s.pt.push({x:ecx+Math.cos(sa)*spinR,y:ecy+Math.sin(sa)*spinR,dx:0,dy:0,l:250,c:Math.random()>.3?"#f80":"#ff0"});}
+            // Eruption: ring of exploding fireballs
+            if(e.flameT>1500){e.flamePhase="erupt";e.flameT=0;sfx("bomb");s.shake.t=300;
+              for(let a=0;a<6;a++){const ra=a*Math.PI/3;
+                s.bProj.push({x:ecx,y:ecy,dx:Math.cos(ra)*2,dy:Math.sin(ra)*2,type:"fire",l:1000,explode:true});}
+              s.pt.push(...Array.from({length:12},()=>({x:ecx,y:ecy,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:500,c:Math.random()>.3?"#f80":"#ff0"})));}
+          }else{// erupt pause, heavy lava trail, then back to ooze
             moveX=0;moveY=0;
-            if(e.flameT>600){e.flamePhase="spiral";e.flameT=0;}}
+            if(!s.fireTrails)s.fireTrails=[];
+            if(Math.random()<0.5)s.fireTrails.push({x:ecx+(Math.random()-.5)*TL,y:ecy+(Math.random()-.5)*TL,t:4000});
+            if(e.flameT>1200){e.flamePhase="ooze";e.flameT=0;}}
         }else{
           // Shadow Knight: eerie drifting with sudden blink-teleports and afterimages
           if(!e.shadowPhase){e.shadowPhase="drift";e.shadowT=0;e.afterimages=[];}
@@ -1829,7 +1822,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         // Mini-boss non-chase: gentle idle movement
         const mn=e.name||"";
         if(mn==="Vine Guardian"){moveX=Math.sin(e.mt/600)*0.15;moveY=Math.cos(e.mt/800)*0.1;}
-        else if(mn==="Flame Sentinel"){const ca=e.mt/700;moveX=Math.cos(ca)*es*0.4;moveY=Math.sin(ca)*es*0.4;}
+        else if(mn==="Flame Sentinel"){moveX=Math.cos(ang)*es*0.2;moveY=Math.sin(ang)*es*0.2;}
         else{const ca=e.mt/600;moveX=Math.cos(ca)*es*0.5;moveY=Math.sin(ca)*es*0.5;}
       }else{moveX=Math.cos(ang)*es;moveY=Math.sin(ang)*es;}
     }else if(e.st==="patrol"){const ang=Math.sin(e.mt/1200)*Math.PI*2;moveX=Math.cos(ang)*es*.4;moveY=Math.sin(ang)*es*.4;}
