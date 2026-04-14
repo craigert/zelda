@@ -3544,8 +3544,8 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   // Full cycle: ~5 minutes real time. Phase: 0=noon, 0.5=midnight
   const nightAmount=getNightAmount(s.weather.timer);
   const isNight=nightAmount>0.3;
-  if(!iD){
-    // Ambient day/night tint
+  if(!iD&&loc.scr!=="-1,2"){
+    // Ambient day/night tint (skip Sacred Lake — always serene)
     const dayAmb=Math.sin(t/15000)*0.03;
     if(nightAmount>0.05){
       // Night: blue-dark overlay
@@ -3555,7 +3555,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     }
   }
   // --- Weather rendering (overworld only) ---
-  if(!iD&&s.weather.type!=="clear"){const w=s.weather;
+  if(!iD&&s.weather.type!=="clear"&&loc.scr!=="-1,2"){const w=s.weather;
     // Rain drops
     if(w.type==="rain"){
       c.strokeStyle="rgba(150,180,220,0.5)";c.lineWidth=1;
