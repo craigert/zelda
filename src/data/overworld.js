@@ -67,7 +67,7 @@ export const OW_EN={
   "4,-1":[{x:5*TL,y:4*TL,hp:4,type:"fire_bat"},{x:10*TL,y:8*TL,hp:4,type:"ghost"}],
   "4,0":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:7*TL,hp:3,type:"mage"},{x:7*TL,y:9*TL,hp:3,type:"bat"}],
   "4,1":[{x:4*TL,y:4*TL,hp:3,type:"fire_bat"},{x:11*TL,y:8*TL,hp:4,type:"fire_bat"}],
-  "-1,2":[{x:5*TL,y:4*TL,hp:4,type:"knight"},{x:10*TL,y:7*TL,hp:4,type:"mage"},{x:7*TL,y:9*TL,hp:3,type:"fire_bat"}],
+  "-1,2":[],// Sacred Lake — peaceful
   "3,2":[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:6*TL,hp:3,type:"fire_bat"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}],
   "4,2":[{x:4*TL,y:4*TL,hp:4,type:"fire_bat"},{x:11*TL,y:7*TL,hp:5,type:"knight"},{x:7*TL,y:9*TL,hp:4,type:"fire_bat"}],
   // Eastern frontier (x=5)
@@ -428,39 +428,33 @@ export const OW={
 // Dark swamp clearing (Shadow Keep moved to 6,2)
 // Sacred Lake — dense forest surrounding a lake with island, Master Sword only via hookshot
 "-1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TREE));
-  // Dense trees everywhere as base — thick forest
-  // Clear the entry paths
+  // Clear walkable border around the screen (2 tiles wide)
+  for(let y=1;y<=10;y++){m[y][1]=T.GRASS;m[y][2]=T.GRASS;m[y][13]=T.GRASS;m[y][14]=T.GRASS;}
+  for(let x=1;x<=14;x++){m[1][x]=T.GRASS;m[2][x]=T.GRASS;m[9][x]=T.GRASS;m[10][x]=T.GRASS;}
+  // Exits
   oe(m,"N");oe(m,"E");
-  // Forest clearing around the lake (rows 2-9, cols 2-13)
-  // Large lake filling most of the clearing
-  for(let y=2;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WATER;
-  // Shore paths — walkable ground around the lake edges
-  for(let x=3;x<=12;x++){m[2][x]=T.GRASS;m[9][x]=T.GRASS;}
-  for(let y=3;y<=8;y++){m[y][3]=T.GRASS;m[y][12]=T.GRASS;}
-  m[2][2]=T.GRASS;m[9][2]=T.GRASS;m[2][13]=T.GRASS;m[9][13]=T.GRASS;
-  // Extra shore space for walking
-  m[3][4]=T.GRASS;m[8][4]=T.GRASS;m[3][11]=T.GRASS;m[8][11]=T.GRASS;
-  // Island in the center of the lake (cols 7-8, rows 5-6)
-  m[5][7]=T.GRASS;m[5][8]=T.GRASS;
+  // Large lake in the center
+  for(let y=3;y<=8;y++)for(let x=4;x<=11;x++)m[y][x]=T.WATER;
+  // Shore path around the lake
+  for(let x=3;x<=12;x++){m[3][x]=T.GRASS;m[8][x]=T.GRASS;}
+  for(let y=4;y<=7;y++){m[y][3]=T.GRASS;m[y][12]=T.GRASS;}
+  // Thicken shore corners
+  m[3][3]=T.GRASS;m[3][12]=T.GRASS;m[8][3]=T.GRASS;m[8][12]=T.GRASS;
+  // Island in the center (cols 7-8, rows 5-6)
+  m[5][7]=T.MASTER_SWORD;m[5][8]=T.HOOKPOST;
   m[6][7]=T.GRASS;m[6][8]=T.GRASS;
-  // Master Sword on the island
-  m[5][7]=T.MASTER_SWORD;
-  // Trees on island corners for grove feel
+  // Trees on island corners
   m[4][7]=T.TREE;m[4][8]=T.TREE;m[7][7]=T.TREE;m[7][8]=T.TREE;
-  // Hookpost on the island — hookshot TO the island
-  m[5][8]=T.HOOKPOST;
-  // Hookpost on the shore — hookshot BACK from the island
+  // Hookpost on west shore — return trip
   m[5][3]=T.HOOKPOST;
-  // Torches on shore hinting at the sacred place
-  m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
-  // Path from north exit to shore
-  m[1][7]=T.GRASS;m[1][8]=T.GRASS;m[1][6]=T.GRASS;m[1][9]=T.GRASS;
-  // Path from east exit to shore
-  for(let y=3;y<=8;y++){m[y][13]=T.GRASS;m[y][14]=T.GRASS;}
-  m[3][14]=T.GRASS;m[8][14]=T.GRASS;
-  // Flowers and details on shore
-  m[2][6]=T.FLOWER;m[2][9]=T.FLOWER;m[9][6]=T.FLOWER;m[9][9]=T.FLOWER;
-  m[3][3]=T.TALLGRASS;m[8][3]=T.TALLGRASS;m[3][12]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
+  // Torches on shore
+  m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
+  // Forest details on walkable border
+  m[2][3]=T.FLOWER;m[2][12]=T.FLOWER;m[9][3]=T.FLOWER;m[9][12]=T.FLOWER;
+  m[1][4]=T.TALLGRASS;m[1][11]=T.TALLGRASS;m[10][4]=T.TALLGRASS;m[10][11]=T.TALLGRASS;
+  // Add some trees back inside the border for forest feel
+  m[1][1]=T.TREE;m[1][14]=T.TREE;m[10][1]=T.TREE;m[10][14]=T.TREE;
+  m[2][2]=T.TREE;m[2][13]=T.TREE;m[9][2]=T.TREE;m[9][13]=T.TREE;
   return m;})(),
 
 // Southern forest — crack cave

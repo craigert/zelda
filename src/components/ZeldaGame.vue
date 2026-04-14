@@ -35,7 +35,7 @@
     </div>
     <div v-if="showMuPicker" :style="{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:1000,background:'rgba(6,6,8,0.95)',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'8px',padding:'12px',maxWidth:'480px',width:'90%',maxHeight:'80vh',overflowY:'auto'}">
       <div :style="{color:'#aaa',fontSize:'11px',fontFamily:'monospace',marginBottom:'8px',textAlign:'center'}">CUSTOM MUSIC -- Pick files or paste URLs</div>
-      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['nighttime','🌙 Nighttime'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['shop','🛒 Shop'],['sanctum','🏰 Dark Sanctum'],['finalbattle','💀 Final Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
+      <div v-for="[key,label] in [['title','🎬 Title Screen'],['overworld','🌍 Overworld'],['nighttime','🌙 Nighttime'],['sword','🗡️ Sacred Lake'],['forest','🌲 Forest Temple'],['fire','🔥 Fire Cavern'],['shadow','👻 Shadow Keep'],['guardian','⚔️ Boss Battle'],['shop','🛒 Shop'],['sanctum','🏰 Dark Sanctum'],['finalbattle','💀 Final Battle'],['triforce','✨ Triforce Moment'],['end','🏆 End Credits']]" :key="key"
         :style="{marginBottom:'8px',padding:'6px',background:'rgba(255,255,255,0.02)',borderRadius:'4px'}">
         <div :style="{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px'}">
           <span :style="{color:'#888',fontSize:'10px',fontFamily:'monospace',width:'100px',flexShrink:0}">{{ label }}</span>
@@ -4299,7 +4299,7 @@ watch([muOn, customMu], () => {
   let _muGen = 0; // generation counter to invalidate stale async callbacks
   const ck = () => {
     const s = stR.value; if (!s) return;
-    let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? (isNightTime(s)?"nighttime":"overworld") : (s.loc.ty === "cave" ? (s.shopGround?"shop":(CAVES[s.loc.di]?.style?.th||"forest")) : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
+    let th = s.sanctumRising ? "temple-rising" : (s.title||s.saveSelect) ? "title" : s.endScreen ? "end" : s.triMu ? "triforce" : s.bossFight ? (s.loc.di===3?"finalbattle":"guardian") : (s.loc.ty === "ow" ? (s.loc.scr==="-1,2"?"sword":isNightTime(s)?"nighttime":"overworld") : (s.loc.ty === "cave" ? (s.shopGround?"shop":(CAVES[s.loc.di]?.style?.th||"forest")) : (s.loc.ty === "passage" ? (s.dg[PASSAGES[s.ss?.pi]?.di]?.th||"forest") : s.dg[s.loc.di].th)));
     if (th !== ltRef.value) {
       ltRef.value = th;
       const gen = ++_muGen;

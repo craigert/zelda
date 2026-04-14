@@ -13,6 +13,7 @@ export const DEFAULT_MUSIC = {
   finalbattle: "music/finalbattle.mp3",
   "temple-rising": "music/temple-rising.mp3",
   nighttime: "music/nighttime.mp3",
+  sword: "music/sword.mp3",
 };
 
 // ============ MUSIC — 4 RICH THEMES, 3 VOICES EACH ============
