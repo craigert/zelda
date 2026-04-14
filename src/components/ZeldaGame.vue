@@ -2634,6 +2634,49 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         const glow=Math.sin(t/400+i*4)*0.5+0.5;// pulse
         if(glow>0.3){c.fillStyle=`rgba(200,255,100,${starA*glow*0.5})`;c.beginPath();c.arc(ffx,ffy,1.5,0,Math.PI*2);c.fill();
           c.fillStyle=`rgba(180,255,80,${starA*glow*0.15})`;c.beginPath();c.arc(ffx,ffy,5,0,Math.PI*2);c.fill();}}}
+    // Sacred Lake (-1,2) — magical wisps and sprites floating over the water
+    if(loc.scr==="-1,2"){
+      // Glowing wisps — slow orbiting lights with color shifts
+      for(let i=0;i<8;i++){
+        const seed=i*137.5;const orbitR=30+Math.sin(t/3000+seed)*20;
+        const cx2=W2*0.15+hs(i,60,700)*W2*0.7;const cy2=H2*0.2+hs(i,61,701)*H2*0.6;
+        const wx=cx2+Math.cos(t/2000+seed)*orbitR;const wy=cy2+Math.sin(t/2500+seed)*orbitR*0.6;
+        const pulse=Math.sin(t/800+seed)*0.3+0.7;
+        // Outer glow
+        const hue=i%3===0?"180,230,255":i%3===1?"220,200,255":"200,255,220";
+        c.fillStyle=`rgba(${hue},${pulse*0.12})`;c.beginPath();c.arc(wx,wy,8+Math.sin(t/600+i)*2,0,Math.PI*2);c.fill();
+        // Core light
+        c.fillStyle=`rgba(${hue},${pulse*0.5})`;c.beginPath();c.arc(wx,wy,2.5+Math.sin(t/400+i)*0.5,0,Math.PI*2);c.fill();
+        // Bright center
+        c.fillStyle=`rgba(255,255,255,${pulse*0.4})`;c.beginPath();c.arc(wx,wy,1,0,Math.PI*2);c.fill();
+        // Trailing sparkle particles
+        for(let j=0;j<3;j++){const age=j*0.3;const tx2=wx-Math.cos(t/2000+seed)*orbitR*age*0.4;
+          const ty2=wy-Math.sin(t/2500+seed)*orbitR*0.6*age*0.4;
+          c.fillStyle=`rgba(${hue},${pulse*(1-age)*0.2})`;c.beginPath();c.arc(tx2,ty2,1.5-age,0,Math.PI*2);c.fill();}
+      }
+      // Floating fairy sprites — tiny winged lights that drift and bob
+      for(let i=0;i<4;i++){
+        const fx2=(hs(i,70,800)*W2+Math.sin(t/4000+i*2.7)*40);
+        const fy2=H2*0.3+hs(i,71,801)*H2*0.4+Math.sin(t/1500+i*3.1)*20;
+        const wingFlap=Math.sin(t/60+i*4)*0.5;
+        const glow2=Math.sin(t/500+i*2)*0.2+0.6;
+        // Wings
+        c.fillStyle=`rgba(200,240,255,${glow2*0.35})`;
+        c.beginPath();c.ellipse(fx2-3,fy2,3,1.5+wingFlap,-.3,0,Math.PI*2);c.fill();
+        c.beginPath();c.ellipse(fx2+3,fy2,3,1.5-wingFlap,.3,0,Math.PI*2);c.fill();
+        // Body glow
+        c.fillStyle=`rgba(220,250,255,${glow2*0.6})`;c.beginPath();c.arc(fx2,fy2,2,0,Math.PI*2);c.fill();
+        c.fillStyle=`rgba(255,255,255,${glow2*0.4})`;c.beginPath();c.arc(fx2,fy2,1,0,Math.PI*2);c.fill();
+        // Sparkle trail
+        const trail=Math.sin(t/300+i)*3;
+        c.fillStyle=`rgba(200,230,255,${glow2*0.15})`;c.beginPath();c.arc(fx2-trail,fy2+trail*0.5,1,0,Math.PI*2);c.fill();
+      }
+      // Shimmer on the water surface
+      for(let i=0;i<12;i++){
+        const sx2=3*TL+hs(i,80,900)*(9*TL);const sy2=3*TL+hs(i,81,901)*(5*TL);
+        const shimmer=Math.sin(t/400+i*1.7)*0.15+0.15;
+        c.fillStyle=`rgba(200,230,255,${shimmer})`;c.beginPath();c.arc(sx2,sy2,1+Math.sin(t/300+i)*0.5,0,Math.PI*2);c.fill();}
+    }
     // Wind wisps -- mystical wisps with particle trails
     for(let i=0;i<5;i++){
       const wPhase=t/5000+i*1.3;const wActive=Math.sin(wPhase)>0.3;// visible ~40% of the time
