@@ -21,6 +21,9 @@ function scatter(m,seed,scrKey){
   if(enemies){for(const e of enemies){
     const ex=Math.floor(e.x/TL),ey=Math.floor(e.y/TL);
     for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){blocked.add((ey+dy)*CO+(ex+dx));}}}
+  // Protect screen edge walkways (2 tiles deep on each edge) so players never get stuck entering
+  for(let y=0;y<RO;y++){for(let x=0;x<3;x++)blocked.add(y*CO+x);for(let x=CO-3;x<CO;x++)blocked.add(y*CO+x);}
+  for(let x=0;x<CO;x++){for(let y=0;y<3;y++)blocked.add(y*CO+x);for(let y=RO-3;y<RO;y++)blocked.add(y*CO+x);}
   // Add stray trees near existing trees
   for(let y=2;y<RO-2;y++)for(let x=2;x<CO-2;x++){
     if(m[y][x]!==T.TREE&&m[y][x]!==T.ROCK)continue;
