@@ -469,7 +469,7 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[4][5]=T.PIT;m[4][10]=T.PIT;m[7][5]=T.PIT;m[7][10]=T.PIT;
     m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;
-  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:16,type:"miniboss",name:"Shadow Knight"}],reward:"master_sword"},
+  }),enemies:[{x:6*TL,y:3*TL,hp:5,type:"ghost"},{x:9*TL,y:8*TL,hp:5,type:"ghost"},{x:7*TL,y:5*TL,hp:16,type:"miniboss",name:"Shadow Knight"}],reward:"hookshot"},
 
   // West of depth — spike+ghost gauntlet leading to master key
   "-1,-2":{tiles:mr(m=>{ae(m,["E","W"]);
@@ -594,7 +594,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[4][4]=T.SPIKE;m[4][11]=T.SPIKE;m[7][4]=T.SPIKE;m[7][11]=T.SPIKE;
     m[2][7]=T.HEART;m[9][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-  }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}],reward:"hookshot"},
+  }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}]},
 
   // Shadow vault — inaccessible room, no doors, reached only via passage stairs
   "-2,-1":{dark:true,tiles:mr(m=>{

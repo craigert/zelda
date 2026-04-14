@@ -460,14 +460,23 @@ export const OW={
 // Southern path — crack cave
 "1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-  for(let c=3;c<=12;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
-  m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
-  m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
+  for(let c=3;c<=8;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[8][4]=T.BUSH;m[8][5]=T.BUSH;
   m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
   // Boulders with hidden cave — pushable one beside cluster
-  m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[8][4]=T.ROCK;
-  m[9][2]=T.ROCK;m[9][4]=T.ROCK;
-  m[9][5]=T.PUSH;// beside cluster, push south
+  m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[9][2]=T.ROCK;m[9][5]=T.PUSH;
+  // Sacred Island Grove — surrounded by water, only reachable by hookshot
+  m[2][10]=T.WATER;m[2][11]=T.WATER;m[2][12]=T.WATER;m[2][13]=T.WATER;
+  m[3][9]=T.WATER;m[3][13]=T.WATER;
+  m[4][9]=T.WATER;m[4][13]=T.WATER;
+  m[5][9]=T.WATER;m[5][13]=T.WATER;
+  m[6][10]=T.WATER;m[6][11]=T.WATER;m[6][12]=T.WATER;m[6][13]=T.WATER;
+  // Island interior — grove with trees and master sword
+  m[3][10]=T.GRASS;m[3][11]=T.TORCH;m[3][12]=T.GRASS;
+  m[4][10]=T.GRASS;m[4][11]=T.MASTER_SWORD;m[4][12]=T.GRASS;
+  m[5][10]=T.TREE;m[5][11]=T.GRASS;m[5][12]=T.TREE;
+  // Hookpost on the island edge — hookshot target to reach it
+  m[4][9]=T.HOOKPOST;
   oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
 
 // Beach — sand and water coast
