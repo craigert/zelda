@@ -441,7 +441,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   else if(s.loc.ty==="cave"){const cv=CAVES[s.loc.di];const cvRm=cv?.rooms?cv.rooms[s.loc.scr]:cv?.room;s.en=cvRm?.enemies?cvRm.enemies.map(sp):[];}
   else{const oe2=OW_EN[s.loc.scr];s.en=oe2?oe2.map(sp):[];
     // Night enemies — extra dangerous foes appear on the overworld at night
-    if(isNightTime(s)&&s.loc.scr!=="1,1"){// hub stays safe
+    if(isNightTime(s)&&s.loc.scr!=="1,1"&&s.loc.scr!=="-1,2"){// hub + sacred lake stay safe
       const biome=getBiome(s.loc.scr);const ne=NIGHT_ENEMIES[biome]||NIGHT_ENEMIES.meadow;
       const baseIdx=s.en.length;
       for(let ni=0;ni<ne.length;ni++){const proto=ne[ni];
