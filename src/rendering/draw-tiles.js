@@ -1444,21 +1444,33 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Sparkle
       const js=Math.sin(t/180)*2;c.fillStyle="#fff";c.beginPath();c.arc(px+12+js,py+12,1.2,0,Math.PI*2);c.fill();
       break;}
-    case T.HOOKPOST:{// Hookshot target post — metal peg
+    case T.HOOKPOST:{// Hookshot target — wooden post with iron ring
       c.fillStyle=iD?(dg.fc||dg.color):"#2a3a28";c.fillRect(px,py,TL,TL);
-      // Post shadow
-      c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(px+17,py+20,7,3,0,0,Math.PI*2);c.fill();
-      // Metal base
-      c.fillStyle="#5a5a6a";c.beginPath();c.arc(px+16,py+16,8,0,Math.PI*2);c.fill();
-      // Highlight ring
-      c.strokeStyle="#9a9aaa";c.lineWidth=2;c.beginPath();c.arc(px+16,py+16,6,0,Math.PI*2);c.stroke();
-      // Center rivet
-      c.fillStyle="#3a3a4a";c.beginPath();c.arc(px+16,py+16,3,0,Math.PI*2);c.fill();
-      // Metallic sheen
-      c.fillStyle="rgba(200,220,255,0.2)";c.beginPath();c.arc(px+14,py+14,4,0,Math.PI*2);c.fill();
-      // Subtle pulse glow (hint it's interactive)
-      const hpg=Math.sin(t/600)*0.06+0.06;
-      c.fillStyle=`rgba(0,200,200,${hpg})`;c.beginPath();c.arc(px+16,py+16,10,0,Math.PI*2);c.fill();
+      // Post shadow on ground
+      c.fillStyle="rgba(0,0,0,0.25)";c.beginPath();c.ellipse(px+18,py+26,8,3,0.15,0,Math.PI*2);c.fill();
+      // Wooden post body — tapered cylinder
+      const wg=c.createLinearGradient(px+10,py,px+22,py);
+      wg.addColorStop(0,"#5a3a18");wg.addColorStop(0.3,"#8a6a30");wg.addColorStop(0.6,"#7a5a28");wg.addColorStop(1,"#4a2a10");
+      c.fillStyle=wg;c.fillRect(px+11,py+4,10,22);
+      // Rounded top
+      c.fillStyle="#7a5a28";c.beginPath();c.ellipse(px+16,py+5,5,2.5,0,0,Math.PI*2);c.fill();
+      c.fillStyle="#8a6a30";c.beginPath();c.ellipse(px+16,py+5,4,2,0,0,Math.PI);c.fill();
+      // Wood grain lines
+      c.strokeStyle="rgba(60,35,10,0.3)";c.lineWidth=0.7;
+      c.beginPath();c.moveTo(px+13,py+7);c.lineTo(px+13,py+24);c.stroke();
+      c.beginPath();c.moveTo(px+16,py+6);c.lineTo(px+16,py+25);c.stroke();
+      c.beginPath();c.moveTo(px+19,py+7);c.lineTo(px+19,py+24);c.stroke();
+      // Iron ring/band around middle — the hookshot target
+      c.fillStyle="#6a6a78";c.fillRect(px+10,py+13,12,4);
+      c.fillStyle="#8a8a98";c.fillRect(px+10,py+13,12,1.5);
+      // Ring highlight
+      c.fillStyle="rgba(200,210,230,0.25)";c.fillRect(px+11,py+13,4,1.5);
+      // Iron nails in band
+      c.fillStyle="#555";c.beginPath();c.arc(px+12,py+15,1,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(px+20,py+15,1,0,Math.PI*2);c.fill();
+      // Base — slightly wider, weathered
+      c.fillStyle="#4a2a10";c.fillRect(px+10,py+24,12,3);
+      c.fillStyle="#3a1a08";c.fillRect(px+9,py+25,14,2);
       break;}
     case T.LADDER:{// Ladder — climbable tile to get back up ledges
       // Sunken floor underneath

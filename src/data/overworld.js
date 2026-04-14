@@ -426,23 +426,40 @@ export const OW={
 // ===== ROW y=2 (Southern row) =====
 
 // Dark swamp clearing (Shadow Keep moved to 6,2)
-"-1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
-  for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-  m[1][1]=T.TREE;m[1][2]=T.TREE;m[1][3]=T.TREE;m[1][12]=T.TREE;m[1][13]=T.TREE;m[1][14]=T.TREE;
-  m[2][1]=T.TREE;m[2][2]=T.TREE;m[2][13]=T.TREE;m[2][14]=T.TREE;
-  m[9][1]=T.TREE;m[9][2]=T.TREE;m[9][3]=T.TREE;m[9][12]=T.TREE;m[9][13]=T.TREE;m[9][14]=T.TREE;
-  m[10][1]=T.TREE;m[10][2]=T.TREE;m[10][3]=T.TREE;m[10][4]=T.TREE;m[10][10]=T.TREE;m[10][11]=T.TREE;m[10][12]=T.TREE;m[10][13]=T.TREE;m[10][14]=T.TREE;
-  // Swamp water
-  m[3][3]=T.WATER;m[3][4]=T.WATER;m[3][5]=T.WATER;m[4][3]=T.WATER;m[4][4]=T.WATER;
-  m[7][10]=T.WATER;m[7][11]=T.WATER;m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;
-  m[3][10]=T.WATER;m[3][11]=T.WATER;m[4][11]=T.WATER;
-  // Abandoned ruins where entrance used to be
-  m[5][7]=T.ROCK;m[5][8]=T.ROCK;m[6][7]=T.ROCK;m[6][8]=T.ROCK;
-  m[4][6]=T.ROCK;m[4][9]=T.ROCK;m[7][6]=T.ROCK;m[7][9]=T.ROCK;
-  m[6][4]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[5][11]=T.TALLGRASS;
-  m[2][7]=T.TORCH;m[2][8]=T.TORCH;
-  m[7][7]=T.PATH;m[7][8]=T.PATH;m[8][7]=T.PATH;m[8][8]=T.PATH;
-  oe(m,"N");oe(m,"E");return m;})(),
+// Sacred Lake — dense forest surrounding a lake with island, Master Sword only via hookshot
+"-1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.TREE));
+  // Dense trees everywhere as base — thick forest
+  // Clear the entry paths
+  oe(m,"N");oe(m,"E");
+  // Forest clearing around the lake (rows 2-9, cols 2-13)
+  // Large lake filling most of the clearing
+  for(let y=2;y<=9;y++)for(let x=3;x<=12;x++)m[y][x]=T.WATER;
+  // Shore paths — walkable ground around the lake edges
+  for(let x=3;x<=12;x++){m[2][x]=T.GRASS;m[9][x]=T.GRASS;}
+  for(let y=3;y<=8;y++){m[y][3]=T.GRASS;m[y][12]=T.GRASS;}
+  m[2][2]=T.GRASS;m[9][2]=T.GRASS;m[2][13]=T.GRASS;m[9][13]=T.GRASS;
+  // Extra shore space for walking
+  m[3][4]=T.GRASS;m[8][4]=T.GRASS;m[3][11]=T.GRASS;m[8][11]=T.GRASS;
+  // Island in the center of the lake (cols 7-8, rows 5-6)
+  m[5][7]=T.GRASS;m[5][8]=T.GRASS;
+  m[6][7]=T.GRASS;m[6][8]=T.GRASS;
+  // Master Sword on the island
+  m[5][7]=T.MASTER_SWORD;
+  // Trees on island corners for grove feel
+  m[4][7]=T.TREE;m[4][8]=T.TREE;m[7][7]=T.TREE;m[7][8]=T.TREE;
+  // Hookpost on the island — the ONLY way to reach it
+  m[5][8]=T.HOOKPOST;
+  // Torches on shore hinting at the sacred place
+  m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
+  // Path from north exit to shore
+  m[1][7]=T.GRASS;m[1][8]=T.GRASS;m[1][6]=T.GRASS;m[1][9]=T.GRASS;
+  // Path from east exit to shore
+  for(let y=3;y<=8;y++){m[y][13]=T.GRASS;m[y][14]=T.GRASS;}
+  m[3][14]=T.GRASS;m[8][14]=T.GRASS;
+  // Flowers and details on shore
+  m[2][6]=T.FLOWER;m[2][9]=T.FLOWER;m[9][6]=T.FLOWER;m[9][9]=T.FLOWER;
+  m[3][3]=T.TALLGRASS;m[8][3]=T.TALLGRASS;m[3][12]=T.TALLGRASS;m[8][12]=T.TALLGRASS;
+  return m;})(),
 
 // Southern forest — crack cave
 "0,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
@@ -460,23 +477,11 @@ export const OW={
 // Southern path — crack cave
 "1,2":(()=>{const m=Array.from({length:RO},()=>Array(CO).fill(T.GRASS));
   for(let i=0;i<CO;i++){m[0][i]=T.TREE;m[RO-1][i]=T.TREE;}for(let i=0;i<RO;i++){m[i][0]=T.TREE;m[i][CO-1]=T.TREE;}
-  for(let c=3;c<=8;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
-  m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[8][4]=T.BUSH;m[8][5]=T.BUSH;
+  for(let c=3;c<=12;c++){m[5][c]=T.PATH;m[6][c]=T.PATH;}
+  m[3][4]=T.FLOWER;m[3][5]=T.FLOWER;m[3][10]=T.FLOWER;m[3][11]=T.FLOWER;
+  m[8][4]=T.BUSH;m[8][5]=T.BUSH;m[8][10]=T.BUSH;m[8][11]=T.BUSH;
   m[2][7]=T.TALLGRASS;m[2][8]=T.TALLGRASS;m[9][7]=T.TALLGRASS;m[9][8]=T.TALLGRASS;
-  // Boulders with hidden cave — pushable one beside cluster
   m[8][2]=T.ROCK;m[8][3]=T.ROCK;m[9][2]=T.ROCK;m[9][5]=T.PUSH;
-  // Sacred Island Grove — fully enclosed water moat, only reachable by hookshot
-  // Water moat — complete ring around island
-  for(let x=9;x<=14;x++){m[1][x]=T.WATER;m[6][x]=T.WATER;}
-  for(let y=2;y<=5;y++){m[y][9]=T.WATER;m[y][14]=T.WATER;}
-  m[2][13]=T.WATER;m[5][13]=T.WATER;// extra width on right
-  // Island interior (columns 10-12, rows 2-5)
-  m[2][10]=T.TREE;m[2][11]=T.GRASS;m[2][12]=T.TREE;
-  m[3][10]=T.GRASS;m[3][11]=T.TORCH;m[3][12]=T.GRASS;
-  m[4][10]=T.GRASS;m[4][11]=T.MASTER_SWORD;m[4][12]=T.GRASS;
-  m[5][10]=T.TREE;m[5][11]=T.GRASS;m[5][12]=T.TREE;
-  // Hookpost on the island — hookshot from shore across water
-  m[3][10]=T.HOOKPOST;
   oe(m,"N");oe(m,"W");oe(m,"E");return m;})(),
 
 // Beach — sand and water coast
