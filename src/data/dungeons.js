@@ -594,7 +594,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[4][4]=T.SPIKE;m[4][11]=T.SPIKE;m[7][4]=T.SPIKE;m[7][11]=T.SPIKE;
     m[2][7]=T.HEART;m[9][8]=T.HEART;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-  }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}]},
+  }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}],reward:"hookshot"},
 
   // Shadow vault — inaccessible room, no doors, reached only via passage stairs
   "-2,-1":{dark:true,tiles:mr(m=>{
@@ -616,6 +616,8 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[8][4]=T.TORCH;m[7][6]=T.TORCH;m[4][8]=T.TORCH;m[4][11]=T.TORCH;
     // Master key at the end
     m[4][13]=T.MASTER_KEY;
+    // Hookshot posts — shortcuts across the void
+    m[5][4]=T.HOOKPOST;m[3][7]=T.HOOKPOST;m[5][10]=T.HOOKPOST;
     // Hearts along the path
     m[7][5]=T.HEART;m[3][10]=T.HEART;
   }),enemies:[{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:8*TL,y:3*TL,hp:6,type:"ghost"},{x:11*TL,y:5*TL,hp:6,type:"ghost"},{x:4*TL,y:8*TL,hp:5,type:"bat"},{x:5*TL,y:5*TL,hp:5,type:"bat"}]},

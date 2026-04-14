@@ -1444,6 +1444,22 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       // Sparkle
       const js=Math.sin(t/180)*2;c.fillStyle="#fff";c.beginPath();c.arc(px+12+js,py+12,1.2,0,Math.PI*2);c.fill();
       break;}
+    case T.HOOKPOST:{// Hookshot target post — metal peg
+      c.fillStyle=iD?(dg.fc||dg.color):"#2a3a28";c.fillRect(px,py,TL,TL);
+      // Post shadow
+      c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(px+17,py+20,7,3,0,0,Math.PI*2);c.fill();
+      // Metal base
+      c.fillStyle="#5a5a6a";c.beginPath();c.arc(px+16,py+16,8,0,Math.PI*2);c.fill();
+      // Highlight ring
+      c.strokeStyle="#9a9aaa";c.lineWidth=2;c.beginPath();c.arc(px+16,py+16,6,0,Math.PI*2);c.stroke();
+      // Center rivet
+      c.fillStyle="#3a3a4a";c.beginPath();c.arc(px+16,py+16,3,0,Math.PI*2);c.fill();
+      // Metallic sheen
+      c.fillStyle="rgba(200,220,255,0.2)";c.beginPath();c.arc(px+14,py+14,4,0,Math.PI*2);c.fill();
+      // Subtle pulse glow (hint it's interactive)
+      const hpg=Math.sin(t/600)*0.06+0.06;
+      c.fillStyle=`rgba(0,200,200,${hpg})`;c.beginPath();c.arc(px+16,py+16,10,0,Math.PI*2);c.fill();
+      break;}
     case T.LADDER:{// Ladder — climbable tile to get back up ledges
       // Sunken floor underneath
       const ldc=iD?(dg.fc||dg.color):"#1a2a16";

@@ -10,7 +10,7 @@ function scatter(m,seed,scrKey){
   // Tiles safe to overwrite (basic terrain only)
   const safe=new Set([T.GRASS,T.TALLGRASS,T.FLOWER]);
   // Tiles that must be protected — never place anything adjacent to these
-  const protect=new Set([T.ENTRANCE,T.CRACK,T.PUSH,T.HEART_PIECE,T.STAIRS_UP,T.STAIRS_DOWN,T.HOT_SPRING,T.BANANA,T.BOW,T.BOMB_BAG,T.MASTER_SWORD,T.JAR,T.NPC,T.PATH,T.BRIDGE,T.TORCH]);
+  const protect=new Set([T.ENTRANCE,T.CRACK,T.PUSH,T.HEART_PIECE,T.STAIRS_UP,T.STAIRS_DOWN,T.HOT_SPRING,T.BANANA,T.BOW,T.BOMB_BAG,T.MASTER_SWORD,T.JAR,T.NPC,T.PATH,T.BRIDGE,T.TORCH,T.HOOKPOST]);
   // Build set of protected tiles and their neighbors
   const blocked=new Set();
   for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
@@ -199,6 +199,7 @@ export const OW={
   m[7][10]=T.PATH;m[7][11]=T.PATH;m[7][12]=T.PATH;
   m[8][12]=T.PATH;m[9][12]=T.PATH;
   m[9][11]=T.RUPEE;m[9][10]=T.RUPEE;// rupees in the alcove
+  m[5][7]=T.HOOKPOST;// hookpost in frozen lake — shortcut across
   m[7][4]=T.PATH;m[7][5]=T.PATH;m[8][4]=T.PATH;m[8][5]=T.PATH;
   m[9][7]=T.STUMP;m[3][7]=T.STUMP;
   // Banana cave — push boulder to reveal, guarded by yetis inside
@@ -717,6 +718,8 @@ export const OW={
   m[8][10]=T.WATER;m[8][11]=T.WATER;m[8][12]=T.WATER;
   m[9][4]=T.WATER;m[9][5]=T.WATER;m[9][6]=T.WATER;
   m[9][9]=T.WATER;m[9][10]=T.WATER;m[9][11]=T.WATER;
+  // Hookposts in the swamp — hookshot traversal
+  m[6][3]=T.HOOKPOST;m[7][11]=T.HOOKPOST;
   // D3 Shadow Keep entrance (center)
   m[5][7]=T.ENTRANCE;m[5][8]=T.ENTRANCE;m[6][7]=T.ENTRANCE;m[6][8]=T.ENTRANCE;
   // 4 boulders — one at each corner of the entrance

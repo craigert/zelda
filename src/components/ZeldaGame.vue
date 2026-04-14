@@ -19,6 +19,8 @@
           :style="{width:'36px',height:'36px',borderRadius:'6px',background:'rgba(100,100,255,0.15)',border:'1px solid rgba(100,100,255,0.3)',color:'#88f',fontSize:'10px',fontFamily:'monospace',cursor:'pointer',touchAction:'none'}">SHD</button>
         <button @touchstart.prevent="onBowBtn()" @mousedown="onBowBtn()"
           :style="{width:'36px',height:'36px',borderRadius:'6px',background:'rgba(255,200,50,0.1)',border:'1px solid rgba(255,200,50,0.2)',color:'#fd3',fontSize:'10px',fontFamily:'monospace',cursor:'pointer',touchAction:'none'}">BOW</button>
+        <button @touchstart.prevent="onHookshotBtn()" @mousedown="onHookshotBtn()"
+          :style="{width:'36px',height:'36px',borderRadius:'6px',background:'rgba(0,200,200,0.1)',border:'1px solid rgba(0,200,200,0.2)',color:'#0cc',fontSize:'10px',fontFamily:'monospace',cursor:'pointer',touchAction:'none'}">HSK</button>
         <button @touchstart.prevent="onMapBtn()" @mousedown="onMapBtn()"
           :style="{width:'36px',height:'36px',borderRadius:'6px',background:'rgba(100,255,100,0.1)',border:'1px solid rgba(100,255,100,0.2)',color:'#8f8',fontSize:'10px',fontFamily:'monospace',cursor:'pointer',touchAction:'none'}">MAP</button>
       </div>
@@ -96,8 +98,9 @@ const saveSlot = ref(0); // active save slot 0-2
 // --- Init ---
 function init() {
   return {
-    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,snare:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false,hasBone:false},
+    p:{x:7*TL,y:9*TL,dir:2,hp:8,mhp:8,keys:0,bombs:0,rupees:0,masterKey:[false,false,false,false],spd:2.8,ifr:0,tri:[false,false,false],burn:0,freeze:0,poison:0,poisonTick:0,burnTick:0,snare:0,shield:false,heartPieces:0,hasBow:false,hasBombs:false,hasMasterSword:false,redArmor:false,hasBanana:false,hasBone:false,hasHookshot:false},
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
+    hookshot:null,// {tipX,tipY,dx,dy,st:"extend"|"hit"|"pull"|"retract",spd,maxDist,target,t}
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),co:new Set(),// bc = bombed cracks, mb = moved boulders, co = chests opened
     msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
     title:true,saveSelect:false,saveSelIdx:0,
@@ -250,6 +253,7 @@ function onBombBtn() { kyR.value.add("b"); setTimeout(() => kyR.value.delete("b"
 function onShieldDown() { kyR.value.add("x"); }
 function onShieldUp() { kyR.value.delete("x"); }
 function onBowBtn() { kyR.value.add("c"); setTimeout(() => kyR.value.delete("c"), 100); }
+function onHookshotBtn() { kyR.value.add("v"); setTimeout(() => kyR.value.delete("v"), 100); }
 function onMapBtn() { const s2 = stR.value; if (s2) { s2.mapOpen = !s2.mapOpen; s2.paused = s2.mapOpen; } }
 
 function onMuToggle() {
@@ -296,7 +300,7 @@ function saveGame(s) {
   try {
     const data = {
       v: 1,
-      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor, hasBanana: s.p.hasBanana, hasBone: s.p.hasBone },
+      p: { x: s.p.x, y: s.p.y, dir: s.p.dir, hp: s.p.hp, mhp: s.p.mhp, keys: s.p.keys, bombs: s.p.bombs, rupees: s.p.rupees, masterKey: [...s.p.masterKey], tri: [...s.p.tri], heartPieces: s.p.heartPieces, hasBow: s.p.hasBow, hasBombs: s.p.hasBombs, hasMasterSword: s.p.hasMasterSword, redArmor: s.p.redArmor, hasBanana: s.p.hasBanana, hasBone: s.p.hasBone, hasHookshot: s.p.hasHookshot },
       loc: { ...s.loc },
       pk: [...s.pk],
       dr: [...s.dr],
@@ -326,7 +330,7 @@ function applySave(s, save) {
   s.p.x = save.p.x; s.p.y = save.p.y; s.p.dir = save.p.dir;
   s.p.hp = save.p.hp; s.p.mhp = save.p.mhp; s.p.keys = save.p.keys;
   s.p.bombs = save.p.bombs; s.p.rupees = save.p.rupees;
-  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false; s.p.hasBone = save.p.hasBone || false;
+  s.p.masterKey = [...save.p.masterKey]; s.p.tri = [...save.p.tri]; s.p.heartPieces = save.p.heartPieces || 0; s.p.hasBow = save.p.hasBow || false; s.p.hasBombs = save.p.hasBombs || false; s.p.hasMasterSword = save.p.hasMasterSword || false; s.p.redArmor = save.p.redArmor || false; s.p.hasBanana = save.p.hasBanana || false; s.p.hasBone = save.p.hasBone || false; s.p.hasHookshot = save.p.hasHookshot || false;
   // If saved in a passage or invalid state, fall back to respawn point
   if(save.loc.ty==="passage"){
     s.loc.ty=save.respawn.ty;s.loc.scr=save.respawn.scr;s.loc.di=save.respawn.di;
@@ -392,7 +396,7 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;
   // Instant fog when entering shadow forest
   if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){s.weather.fog=0.50;s.weather.type="fog";}
   // Restore lit torches for this room (persists between visits)
@@ -667,8 +671,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
       if(s.chest.reward){s.drops.push({x:s.chest.x+12,y:s.chest.y-(s.chest.itemY||0),vy:-1,ground:s.chest.y,type:s.chest.reward,t:0});}
-      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
-      const isSpecial=["bow","bomb_bag","master_sword","master_key"].includes(s.chest.reward);
+      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",hookshot:"Hookshot",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
+      const isSpecial=["bow","bomb_bag","master_sword","master_key","hookshot"].includes(s.chest.reward);
       sfx(isSpecial?"itemget":"pickup");
       s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
     // Still update particles during freeze
@@ -856,7 +860,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.go||s.won){if(kyR.value.has("r")||kyR.value.has(" ")||kyR.value.has("enter")||kyR.value.has("tab")||s.respawnClick){s.respawnClick=false;
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
-    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;ns.p.hasBone=old.p.hasBone;
+    const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;ns.p.hasBone=old.p.hasBone;ns.p.hasHookshot=old.p.hasHookshot;
     ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.co=old.co;ns.mb=old.mb;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;ns.treeGift=old.treeGift;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
@@ -1035,10 +1039,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   }}
 
   const ky=kyR.value,p=s.p,tc=tcR.value;let dx=0,dy=0;
+  if(!s.hookshot){// no movement input during hookshot
   if(ky.has("arrowup")||ky.has("w")){dy=-1;p.dir=0;}if(ky.has("arrowdown")||ky.has("s")){dy=1;p.dir=2;}
   if(ky.has("arrowleft")||ky.has("a")){dx=-1;p.dir=3;}if(ky.has("arrowright")||ky.has("d")){dx=1;p.dir=1;}
   if(tc.dir==="up"){dy=-1;p.dir=0;}if(tc.dir==="down"){dy=1;p.dir=2;}
-  if(tc.dir==="left"){dx=-1;p.dir=3;}if(tc.dir==="right"){dx=1;p.dir=1;}
+  if(tc.dir==="left"){dx=-1;p.dir=3;}if(tc.dir==="right"){dx=1;p.dir=1;}}
   if(dx&&dy){dx*=.707;dy*=.707;}
   const shieldUp=(ky.has("x")||ky.has("shift"))&&!s.sw.a;
   s.p.shield=shieldUp;
@@ -1351,11 +1356,55 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     p.bombs--;s.bombCd=true;setTimeout(()=>{if(stR.value)stR.value.bombCd=false;},800);
     s.activeBombs.push({x:ftx*TL+TL/2,y:fty*TL+TL/2,t:0,fuse:1500,exploded:false});sfx("pickup");
   }
-  if((ky.has("c"))&&p.hasBow&&!s.bowCd&&p.rupees>0&&s.pArrows.length<3){
+  if(!s.hookshot&&(ky.has("c"))&&p.hasBow&&!s.bowCd&&p.rupees>0&&s.pArrows.length<3){
     p.rupees--;s.bowCd=true;setTimeout(()=>{if(stR.value)stR.value.bowCd=false;},400);
     sfx("sword");
     const adx=p.dir===1?5:p.dir===3?-5:0,ady=p.dir===0?-5:p.dir===2?5:0;
     s.pArrows.push({x:p.x+PS/2,y:p.y+PS/2,dx:adx,dy:ady,l:800});
+  }
+  // Hookshot firing
+  if(ky.has("v")&&p.hasHookshot&&!s.hookshot&&!s.hookshotCd){
+    s.hookshotCd=true;setTimeout(()=>{if(stR.value)stR.value.hookshotCd=false;},600);
+    sfx("sword");
+    const hdx=p.dir===1?1:p.dir===3?-1:0,hdy=p.dir===0?-1:p.dir===2?1:0;
+    s.hookshot={tipX:p.x+PS/2,tipY:p.y+PS/2,dx:hdx,dy:hdy,st:"extend",spd:6,maxDist:192,target:null,t:0};
+  }
+  // Hookshot update
+  if(s.hookshot){const hs=s.hookshot;hs.t+=dt;
+    if(hs.st==="extend"){
+      const step=hs.spd*(dt/16);hs.tipX+=hs.dx*step;hs.tipY+=hs.dy*step;
+      const dist=Math.hypot(hs.tipX-(p.x+PS/2),hs.tipY-(p.y+PS/2));
+      if(dist>=hs.maxDist){hs.st="retract";}
+      // Tile collision
+      const htx=Math.floor(hs.tipX/TL),hty=Math.floor(hs.tipY/TL),hm=gm(s);
+      if(hm&&htx>=0&&htx<CO&&hty>=0&&hty<RO){const htl=hm[hty][htx];
+        if(htl===T.HOOKPOST){hs.target={type:"post",x:htx*TL+TL/2,y:hty*TL+TL/2};
+          hs.tipX=htx*TL+TL/2;hs.tipY=hty*TL+TL/2;hs.st="hit";hs.t=0;sfx("door");}
+        else if(SOLID.has(htl)||htl===T.DOOR||htl===T.BOSS_DOOR){hs.st="retract";sfx("door");}}
+      if(hs.tipX<0||hs.tipX>W2||hs.tipY<0||hs.tipY>H2)hs.st="retract";
+      // Enemy collision
+      if(hs.st==="extend"){for(let j=0;j<s.en.length;j++){const e=s.en[j];
+        if(e.hp<=0||e.shadowForm||e.burrowed||e.spawnT>0)continue;
+        if(Math.hypot(hs.tipX-(e.x+ES/2),hs.tipY-(e.y+ES/2))<ES*0.5){
+          e.hp-=1;e.fl=500;e.stun=e.type==="boss"?500:1500;sfx("hit");
+          s.dmgNums.push({x:e.x+ES/2,y:e.y-8,t:600,val:1,c:"#0dd"});
+          hs.st="retract";break;}}}
+    }
+    if(hs.st==="hit"){if(hs.t>100){hs.st="pull";hs.t=0;}}
+    if(hs.st==="pull"&&hs.target?.type==="post"){
+      const pullSpd=4.5*(dt/16);const dx2=hs.target.x-(p.x+PS/2),dy2=hs.target.y-(p.y+PS/2);
+      const pullDist=Math.hypot(dx2,dy2);
+      if(pullDist<pullSpd+4){// arrived
+        p.x=hs.target.x-PS/2-hs.dx*TL;p.y=hs.target.y-PS/2-hs.dy*TL;
+        const ftx2=Math.floor((p.x+PS/2)/TL),fty2=Math.floor((p.y+PS/2)/TL);
+        if(iS(s,ftx2,fty2)){p.x=hs.target.x-PS/2;p.y=hs.target.y-PS/2;}
+        s.hookshot=null;sfx("pickup");
+      }else{p.x+=dx2/pullDist*pullSpd;p.y+=dy2/pullDist*pullSpd;}
+    }
+    if(hs.st==="retract"){const step=hs.spd*1.5*(dt/16);
+      const toX=p.x+PS/2,toY=p.y+PS/2,retDist=Math.hypot(hs.tipX-toX,hs.tipY-toY);
+      if(retDist<step){s.hookshot=null;}
+      else{hs.tipX+=(toX-hs.tipX)/retDist*step;hs.tipY+=(toY-hs.tipY)/retDist*step;}}
   }
   if(s.sw.a){s.sw.t-=dt;if(s.sw.t<=0)s.sw.a=false;}if(p.ifr>0)p.ifr-=dt;
   for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
@@ -1396,6 +1445,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
       else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
+      else if(d2.type==="hookshot"){p.hasHookshot=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Hookshot! Press V to fire at metal posts!",t:3500};
+        s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#0cc":"#8cf"})));}
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
       else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
@@ -1520,6 +1571,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   const rk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}`;
   for(let i=s.en.length-1;i>=0;i--){const e=s.en[i];
     if(e.spawnT>0){e.spawnT-=dt;continue;}
+    if(e.stun>0){e.stun-=dt;e.fl=Math.max(e.fl,100);continue;}// stunned by hookshot
     e.mt+=dt;if(e.fl>0)e.fl-=dt;
     const pcx=p.x+PS/2,pcy=p.y+PS/2,ecx=e.x+ES/2,ecy=e.y+ES/2,dist=Math.hypot(pcx-ecx,pcy-ecy);
     e.stT+=dt;const isBossLike=e.type==="boss"||e.type==="miniboss";
@@ -3043,6 +3095,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#fff";c.beginPath();c.moveTo(8,0);c.lineTo(5,-3);c.lineTo(5,3);c.fill();
     c.fillStyle="rgba(253,211,51,0.3)";c.beginPath();c.moveTo(-10,0);c.lineTo(-18,3);c.lineTo(-18,-3);c.fill();
     c.restore();}
+  // Hookshot chain rendering
+  if(s.hookshot){const hs=s.hookshot,sx=p.x+PS/2,sy=p.y+PS/2;
+    // Chain line
+    c.strokeStyle="#8a8a9a";c.lineWidth=2;c.beginPath();c.moveTo(sx,sy);c.lineTo(hs.tipX,hs.tipY);c.stroke();
+    // Chain links
+    const cd=Math.hypot(hs.tipX-sx,hs.tipY-sy),links=Math.floor(cd/8);
+    for(let i=1;i<=links;i++){const t2=i/(links+1),lx=sx+(hs.tipX-sx)*t2,ly=sy+(hs.tipY-sy)*t2;
+      c.fillStyle=i%2===0?"#7a7a8a":"#9a9aaa";c.beginPath();c.arc(lx,ly,1.5,0,Math.PI*2);c.fill();}
+    // Hook tip
+    const ha=Math.atan2(hs.dy,hs.dx);c.save();c.translate(hs.tipX,hs.tipY);c.rotate(ha);
+    c.fillStyle="#ccc";c.beginPath();c.moveTo(6,0);c.lineTo(0,-4);c.lineTo(2,0);c.lineTo(0,4);c.closePath();c.fill();
+    c.fillStyle="rgba(255,255,255,0.3)";c.beginPath();c.arc(2,-1,2,0,Math.PI*2);c.fill();
+    c.restore();}
   // Draw active bombs
   for(const ab of s.activeBombs){const prog=ab.t/ab.fuse;
     if(!ab.exploded){
@@ -3806,7 +3871,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle="#666";c.font="10px monospace";
     c.fillText("CONTROLS",W2/2,cy2+16);
     c.fillStyle="#555";c.font="9px monospace";
-    const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","X / Shift \u2014 Shield","I / Tab \u2014 Map & Inventory","P / Esc \u2014 Pause","M \u2014 Toggle Music"];
+    const ctrls=["WASD / Arrows \u2014 Move","Space \u2014 Attack","B \u2014 Bomb","C \u2014 Bow (1 rupee)","V \u2014 Hookshot","X / Shift \u2014 Shield","I / Tab \u2014 Map & Inventory","P / Esc \u2014 Pause","M \u2014 Toggle Music"];
     for(let i=0;i<ctrls.length;i++)c.fillText(ctrls[i],W2/2,cy2+30+i*13);
     c.textAlign="left";}
   if(s.mapOpen){drawInventoryScreen(c,s,t);}
