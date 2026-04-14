@@ -447,8 +447,10 @@ export const OW={
   m[5][7]=T.MASTER_SWORD;
   // Trees on island corners for grove feel
   m[4][7]=T.TREE;m[4][8]=T.TREE;m[7][7]=T.TREE;m[7][8]=T.TREE;
-  // Hookpost on the island — the ONLY way to reach it
+  // Hookpost on the island — hookshot TO the island
   m[5][8]=T.HOOKPOST;
+  // Hookpost on the shore — hookshot BACK from the island
+  m[5][3]=T.HOOKPOST;
   // Torches on shore hinting at the sacred place
   m[2][5]=T.TORCH;m[2][10]=T.TORCH;m[9][5]=T.TORCH;m[9][10]=T.TORCH;
   // Path from north exit to shore
