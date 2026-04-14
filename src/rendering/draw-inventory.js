@@ -447,17 +447,18 @@ function drawPaperDoll(c,s,t){
   ];
 
   for(const slot of slots){
+    if(!slot.has)continue;// only show acquired equipment
     // Connecting line
     c.strokeStyle="rgba(184,150,42,0.2)";c.lineWidth=1;c.setLineDash([2,2]);
     c.beginPath();c.moveTo(pcx,pcy);c.lineTo(slot.x,slot.y);c.stroke();c.setLineDash([]);
     // Slot box
-    c.fillStyle=slot.has?"rgba(253,211,51,0.08)":"rgba(0,0,0,0.3)";
+    c.fillStyle="rgba(253,211,51,0.08)";
     c.fillRect(slot.x-14,slot.y-14,28,28);
-    c.strokeStyle=slot.has?"#7a621a":"#333";c.lineWidth=1;c.strokeRect(slot.x-14,slot.y-14,28,28);
+    c.strokeStyle="#7a621a";c.lineWidth=1;c.strokeRect(slot.x-14,slot.y-14,28,28);
     // Draw item
     slot.draw(slot.x,slot.y);
     // Label
-    c.fillStyle=slot.has?"#b8962a":"#444";c.font="bold 6px monospace";c.textAlign="center";
+    c.fillStyle="#b8962a";c.font="bold 6px monospace";c.textAlign="center";
     c.fillText(slot.label,slot.x,slot.y+20);c.textAlign="left";
   }
 }
@@ -485,9 +486,13 @@ function drawEquipGrid(c,s,t){
       if(s.hasJar&&s.springWater>0){c.fillStyle="rgba(100,220,255,0.5)";c.beginPath();c.arc(cx,cy+1,3,0,Math.PI*2);c.fill();
         c.fillStyle="#fff";c.font="bold 6px monospace";c.textAlign="center";c.fillText(s.springWater+"",cx,cy+6);c.textAlign="left";}
     }},
+    // Bone slot becomes Hookshot once bone is given to dog
+    s.dogDug?
+    {name:"Hookshot",has:s.p.hasHookshot,draw:(cx,cy)=>{
+      if(s.p.hasHookshot){c.strokeStyle="#8a8aaa";c.lineWidth=2;c.beginPath();c.moveTo(cx-4,cy+4);c.lineTo(cx+2,cy-4);c.stroke();
+        c.fillStyle="#ccc";c.beginPath();c.moveTo(cx+4,cy-6);c.lineTo(cx,cy-3);c.lineTo(cx+2,cy-1);c.closePath();c.fill();}}}:
     {name:"Bone",has:s.p.hasBone,draw:(cx,cy)=>{
-      if(s.p.hasBone){c.fillStyle="#e8dcc8";c.fillRect(cx-5,cy-1,10,3);c.beginPath();c.arc(cx-5,cy,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+5,cy,2.5,0,Math.PI*2);c.fill();}
-      else{c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx-5,cy);c.lineTo(cx+5,cy);c.stroke();c.beginPath();c.arc(cx-5,cy,2,0,Math.PI*2);c.stroke();c.beginPath();c.arc(cx+5,cy,2,0,Math.PI*2);c.stroke();}}},
+      if(s.p.hasBone){c.fillStyle="#e8dcc8";c.fillRect(cx-5,cy-1,10,3);c.beginPath();c.arc(cx-5,cy,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+5,cy,2.5,0,Math.PI*2);c.fill();}}},
   ];
 
   const cols=3,cellW=72,cellH=48;
@@ -497,26 +502,20 @@ function drawEquipGrid(c,s,t){
     const cx=startX+col*cellW+cellW/2,cy=startY+row*cellH+18;
     const bx=startX+col*cellW+2,by=startY+row*cellH+2;
 
-    // Cell background with bevel
-    if(items[i].has){
-      c.fillStyle="rgba(253,211,51,0.06)";c.fillRect(bx,by,cellW-4,cellH-4);
+    if(!items[i].has){
+      // Empty cell — subtle dark slot, no icon or label
+      c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(bx,by,cellW-4,cellH-4);
+      c.strokeStyle="rgba(40,40,40,0.3)";c.lineWidth=0.5;c.strokeRect(bx,by,cellW-4,cellH-4);
     }else{
-      c.fillStyle="rgba(0,0,0,0.2)";c.fillRect(bx,by,cellW-4,cellH-4);
-    }
-    // Bevel
-    c.strokeStyle=items[i].has?"rgba(184,150,42,0.4)":"rgba(60,60,60,0.4)";c.lineWidth=0.5;
-    c.strokeRect(bx,by,cellW-4,cellH-4);
-
-    // Icon
-    items[i].draw(cx,cy-4);
-    // Gold check if owned
-    if(items[i].has){
+      // Owned item cell
+      c.fillStyle="rgba(253,211,51,0.06)";c.fillRect(bx,by,cellW-4,cellH-4);
+      c.strokeStyle="rgba(184,150,42,0.4)";c.lineWidth=0.5;c.strokeRect(bx,by,cellW-4,cellH-4);
+      items[i].draw(cx,cy-4);
       c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="right";
       c.fillText("\u2713",bx+cellW-6,by+10);c.textAlign="left";
+      c.fillStyle="#b8962a";c.font="7px monospace";c.textAlign="center";
+      c.fillText(items[i].name,cx,cy+cellH/2-8);c.textAlign="left";
     }
-    // Label
-    c.fillStyle=items[i].has?"#b8962a":"#555";c.font="7px monospace";c.textAlign="center";
-    c.fillText(items[i].name,cx,cy+cellH/2-8);c.textAlign="left";
   }
 }
 
