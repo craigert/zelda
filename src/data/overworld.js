@@ -15,7 +15,9 @@ function scatter(m,seed,scrKey){
   const blocked=new Set();
   for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
     if(protect.has(m[y][x])){
-      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){blocked.add((y+dy)*CO+(x+dx));}}}
+      // ENTRANCE/CRACK get wider 3-tile radius (player spawns 2 tiles away)
+      const rad=(m[y][x]===T.ENTRANCE||m[y][x]===T.CRACK)?3:1;
+      for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){blocked.add((y+dy)*CO+(x+dx));}}}
   // Also protect enemy spawn positions
   const enemies=OW_EN[scrKey];
   if(enemies){for(const e of enemies){

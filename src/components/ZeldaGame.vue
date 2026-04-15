@@ -604,7 +604,14 @@ function cTr(s){const p=s.p,loc=s.loc;
     if(m&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m[pty][ptx]===T.STAIRS_UP){
       const ci2=loc.di;s.fade={a:true,alpha:0,dir:1,t:0,spd:500,cb:()=>{
         const cv=CAVES[ci2];loc.ty="ow";loc.scr=cv.s;loc.di=-1;
-        p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;s.ec=500;le(s);}};sfx("door");return;}
+        p.x=cv.t[0][0]*TL;p.y=(cv.t[0][1]+2)*TL;
+        // Clear any boulder blocking the exit landing spot
+        const owm=OW[cv.s];if(owm){const lx=cv.t[0][0],ly=cv.t[0][1]+2;
+          for(let dy2=-1;dy2<=1;dy2++)for(let dx2=-1;dx2<=1;dx2++){
+            const tx2=lx+dx2,ty2=ly+dy2;
+            if(tx2>=0&&tx2<CO&&ty2>=0&&ty2<RO&&(owm[ty2][tx2]===T.ROCK||owm[ty2][tx2]===T.PUSH)){
+              owm[ty2][tx2]=T.GRASS;}}}
+        s.ec=500;le(s);}};sfx("door");return;}
     // Multi-room cave — screen transitions like dungeons
     if(cv2?.rooms){const[rx,ry]=loc.scr.split(",").map(Number);
       if(p.y<-4){const ns=`${rx},${ry-1}`;if(cv2.rooms[ns]){const ps=loc.scr;loc.scr=ns;p.y=H2-TL-PS-4;le(s);s.slide={a:true,dx:0,dy:-1,t:0,dur:200,prevScr:ps};}else p.y=-4;}
@@ -1057,9 +1064,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   const HB={x:6,y:4,w:PS-12,h:PS-4};
   const tm=(px2,py2)=>{const l=Math.floor((px2+HB.x)/TL),r=Math.floor((px2+HB.x+HB.w-1)/TL),t2=Math.floor((py2+HB.y)/TL),b=Math.floor((py2+HB.y+HB.h-1)/TL);
     for(let ty=t2;ty<=b;ty++)for(let tx=l;tx<=r;tx++)if(iS(s,tx,ty))return false;return true;};
-  // Safety: if player is stuck inside a wall, push them out
+  // Safety: if player is stuck inside a wall, push them out (wider search)
   if(!tm(p.x,p.y)){const cx=Math.floor((p.x+PS/2)/TL)*TL+TL/2-PS/2,cy=Math.floor((p.y+PS/2)/TL)*TL+TL/2-PS/2;
-    for(let r=1;r<=3;r++){for(const[ox,oy]of[[0,-1],[0,1],[-1,0],[1,0]]){if(tm(cx+ox*TL*r,cy+oy*TL*r)){p.x=cx+ox*TL*r;p.y=cy+oy*TL*r;break;}}if(tm(p.x,p.y))break;}}
+    for(let r=1;r<=6;r++){for(const[ox,oy]of[[0,-1],[0,1],[-1,0],[1,0],[1,-1],[-1,-1],[1,1],[-1,1]]){if(tm(cx+ox*TL*r,cy+oy*TL*r)){p.x=cx+ox*TL*r;p.y=cy+oy*TL*r;break;}}if(tm(p.x,p.y))break;}}
   const moved=dx!==0||dy!==0;
   // Set move direction for ledge collision checks
   s._moveDir=dy<0?0:dy>0?2:dx>0?1:dx<0?3:p.dir;
