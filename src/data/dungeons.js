@@ -616,31 +616,28 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
   }),enemies:[{x:5*TL,y:5*TL,hp:5,type:"ghost"},{x:10*TL,y:6*TL,hp:5,type:"ghost"}]},
 
-  // Shadow vault — inaccessible room, no doors, reached only via passage stairs
+  // Shadow vault — floating platforms over void, hookshot between them to reach master key
   "-2,-1":{dark:true,tiles:mr(m=>{
-    // No exits (ae not called) — only reachable via passage
     // Fill everything with PIT (shadow void)
     for(let y=1;y<=10;y++)for(let x=1;x<=14;x++)m[y][x]=T.PIT;
-    // Narrow winding path through the shadow
-    m[9][3]=T.FLOOR;m[9][4]=T.FLOOR;m[8][4]=T.FLOOR;m[7][4]=T.FLOOR;
-    m[7][5]=T.FLOOR;m[7][6]=T.FLOOR;m[7][7]=T.FLOOR;
-    m[6][7]=T.FLOOR;m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;
-    m[4][8]=T.FLOOR;m[3][8]=T.FLOOR;m[3][9]=T.FLOOR;m[3][10]=T.FLOOR;
-    m[3][11]=T.FLOOR;m[4][11]=T.FLOOR;m[5][11]=T.FLOOR;
-    m[5][12]=T.FLOOR;m[5][13]=T.FLOOR;
-    // Wider area at the end for master key
+    // Platform 1: Entry (stairs arrive here) — bottom left
+    m[8][2]=T.FLOOR;m[8][3]=T.FLOOR;m[9][2]=T.FLOOR;m[9][3]=T.FLOOR;
+    m[9][2]=T.STAIRS_DOWN;m[8][3]=T.TORCH;
+    m[8][2]=T.HOOKPOST;
+    // Platform 2: middle-left — hookshot from P1
+    m[6][5]=T.FLOOR;m[6][6]=T.FLOOR;m[7][5]=T.FLOOR;
+    m[6][5]=T.HOOKPOST;m[7][5]=T.HEART;
+    // Platform 3: upper-center — hookshot from P2
+    m[3][7]=T.FLOOR;m[3][8]=T.FLOOR;m[4][7]=T.FLOOR;m[4][8]=T.FLOOR;
+    m[4][8]=T.HOOKPOST;m[3][7]=T.TORCH;
+    // Platform 4: middle-right — hookshot from P3
+    m[6][10]=T.FLOOR;m[6][11]=T.FLOOR;m[7][10]=T.FLOOR;
+    m[6][11]=T.HOOKPOST;m[7][10]=T.HEART;
+    // Platform 5: Master key island — hookshot from P4
     m[3][12]=T.FLOOR;m[3][13]=T.FLOOR;m[4][12]=T.FLOOR;m[4][13]=T.FLOOR;
-    // Stairs arrival point
-    m[9][3]=T.STAIRS_DOWN;
-    // Sparse torches (faint light in the void)
-    m[8][4]=T.TORCH;m[7][6]=T.TORCH;m[4][8]=T.TORCH;m[4][11]=T.TORCH;
-    // Master key at the end
-    m[4][13]=T.MASTER_KEY;
-    // Hookshot posts — shortcuts across the void
-    m[5][4]=T.HOOKPOST;m[3][7]=T.HOOKPOST;m[5][10]=T.HOOKPOST;
-    // Hearts along the path
-    m[7][5]=T.HEART;m[3][10]=T.HEART;
-  }),enemies:[{x:7*TL,y:7*TL,hp:6,type:"ghost"},{x:8*TL,y:3*TL,hp:6,type:"ghost"},{x:11*TL,y:5*TL,hp:6,type:"ghost"},{x:4*TL,y:8*TL,hp:5,type:"bat"},{x:5*TL,y:5*TL,hp:5,type:"bat"}]},
+    m[4][12]=T.HOOKPOST;m[3][13]=T.TORCH;
+    m[3][12]=T.MASTER_KEY;
+  }),enemies:[{x:6*TL,y:6*TL,hp:6,type:"ghost"},{x:4*TL,y:7*TL,hp:6,type:"ghost"},{x:10*TL,y:6*TL,hp:6,type:"ghost"}]},
 
   // North depth — locked door passage
   "0,-2":{tiles:mr(m=>{m[RO-1][7]=T.FLOOR;m[RO-1][8]=T.FLOOR;ae(m,["N","E","W"]);
