@@ -261,7 +261,7 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[5][4]=T.SPIKE;m[5][7]=T.SPIKE;m[5][10]=T.SPIKE;
     m[7][3]=T.SPIKE;m[7][6]=T.SPIKE;m[7][9]=T.SPIKE;m[7][12]=T.SPIKE;
     m[5][13]=T.HEART;m[2][2]=T.TORCH;m[2][13]=T.TORCH;
-    m[8][7]=T.KEY;
+    m[8][7]=T.HEART;// only one key (on the island)
     // Lava-surrounded treasure island (bottom-left) — only reachable via underground passage
     for(let x=1;x<=5;x++){m[8][x]=T.PIT;m[10][x]=T.PIT;}// lava moat top & bottom
     m[9][1]=T.PIT;m[9][5]=T.PIT;// lava moat sides
@@ -275,9 +275,9 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
   }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
   traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:2,dir:"v",range:7}]},
 
-  // MASTER_KEY room — behind second locked door, timed switch puzzle
+  // MASTER_KEY room — behind timed switch puzzle (boss door = key won't open)
   "-2,0":{tiles:mr(m=>{
-    m[5][CO-1]=T.DOOR;m[6][CO-1]=T.DOOR;
+    m[5][CO-1]=T.BOSS_DOOR;m[6][CO-1]=T.BOSS_DOOR;
     m[3][3]=T.TSWITCH;m[3][12]=T.TSWITCH;
     for(let x=4;x<=11;x++){m[5][x]=T.SPIKE;m[6][x]=T.SPIKE;}
     m[5][7]=T.FLOOR;m[5][8]=T.FLOOR;m[6][7]=T.FLOOR;m[6][8]=T.FLOOR;

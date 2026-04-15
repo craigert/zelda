@@ -1137,7 +1137,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s._tswitchHit[tk]=null;
             let hasDoors=false,hasSpikes=false;const spikePos=[];
             for(let yy=0;yy<RO;yy++)for(let xx=0;xx<CO;xx++){
-              if(m2[yy][xx]===T.DOOR){hasDoors=true;
+              if(m2[yy][xx]===T.DOOR||m2[yy][xx]===T.BOSS_DOOR){hasDoors=true;
                 const dk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${xx},${yy}`;s.dr.add(dk);
                 s.pt.push(...Array.from({length:4},()=>({x:xx*TL+16,y:yy*TL+16,dx:(Math.random()-.5)*3,dy:(Math.random()-.5)*3,l:400,c:"#fd3"})));}
               if(m2[yy][xx]===T.SPIKE){hasSpikes=true;spikePos.push([xx,yy]);
