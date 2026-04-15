@@ -7,15 +7,25 @@ function makePool(factory,n){const pool=[];for(let i=0;i<n;i++)pool.push(factory
 
 export function initSfx(){if(sfxReady)return;
   // Tonal synths — use PolySynth for overlapping notes
-  // Hit tonal — sharper triangle wave for cleaner tone
-  sfxSynths.hit=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"triangle"},envelope:{attack:0.001,decay:0.06,sustain:0,release:0.04},volume:-10}}).toDestination();
-  // Hit crunch — noise burst layered on top
-  sfxSynths.hitNoise=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.06,sustain:0,release:0.03},volume:-10}).toDestination(),3);
+  // Hit tonal — sharp metallic clang
+  sfxSynths.hit=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"sawtooth"},envelope:{attack:0.001,decay:0.05,sustain:0,release:0.03},volume:-12}}).toDestination();
+  // Hit crunch — punchy noise burst for impact
+  sfxSynths.hitNoise=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.04},volume:-8});
+    const filt=new Tone.Filter({frequency:2000,type:"lowpass",Q:2});n.connect(filt);filt.toDestination();return n;},3);
+  // Hit thud — low-end body for meaty impact
+  sfxSynths.hitThud=makePool(()=>new Tone.Synth({oscillator:{type:"sine"},envelope:{attack:0.001,decay:0.1,sustain:0,release:0.05},volume:-10}).toDestination(),3);
   sfxSynths.pickup=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.12,sustain:0.1,release:0.1},volume:-14}}).toDestination();
   sfxSynths.hurt=new Tone.PolySynth(Tone.Synth,{maxPolyphony:2,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.15,sustain:0,release:0.1},volume:-10}}).toDestination();
   sfxSynths.fanfare=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.01,decay:0.2,sustain:0.3,release:0.3},volume:-12}}).toDestination();
-  // Sword swing — crisp whoosh, not too loud
-  sfxSynths.sword=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.003,decay:0.09,sustain:0,release:0.04},volume:-16}).toDestination(),3);
+  // Sword swing — layered whoosh: filtered noise sweep + metallic ring
+  sfxSynths.sword=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"pink"},envelope:{attack:0.005,decay:0.15,sustain:0,release:0.08},volume:-14});
+    const filt=new Tone.Filter({frequency:3000,type:"bandpass",Q:1.5});
+    const lfo=new Tone.LFO({frequency:40,min:1500,max:5000}).start();
+    lfo.connect(filt.frequency);n.connect(filt);filt.toDestination();return n;},3);
+  // Metallic ring on sword swing
+  sfxSynths.swordRing=makePool(()=>new Tone.Synth({oscillator:{type:"sine"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.06},volume:-22}).toDestination(),3);
   sfxSynths.door=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1},volume:-14}).toDestination(),2);
   // Door unlock — bright ascending chime (accomplishment feel)
   sfxSynths.dooropenTone=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.005,decay:0.18,sustain:0.15,release:0.2},volume:-10}}).toDestination();
@@ -25,13 +35,14 @@ export function initSfx(){if(sfxReady)return;
 export function sfx(name,note){if(!sfxReady)return;
   const now=performance.now();if(lastPlay[name]&&now-lastPlay[name]<MIN_INTERVAL)return;lastPlay[name]=now;
   try{
-  if(name==="sword")sfxSynths.sword.trigger("8n");
+  if(name==="sword"){sfxSynths.sword.trigger("16n");
+    sfxSynths.swordRing.trigger("B5","32n");}// whoosh + metallic ring
   else if(name==="hit"){const t=Tone.now();
-    // Quick descending hit: high → low in 30ms for impact feel
-    sfxSynths.hit.triggerAttackRelease(note||"E4","32n",t);
-    sfxSynths.hit.triggerAttackRelease("A3","32n",t+0.015);
-    sfxSynths.hit.triggerAttackRelease("D3","32n",t+0.03);
-    sfxSynths.hitNoise.trigger("8n");}
+    // Metallic clang + crunch + low thud for meaty impact
+    sfxSynths.hit.triggerAttackRelease(note||"F4","32n",t);
+    sfxSynths.hit.triggerAttackRelease("C4","32n",t+0.01);
+    sfxSynths.hitNoise.trigger("16n");
+    sfxSynths.hitThud.trigger("E2","16n");}
   else if(name==="pickup"){const t=Tone.now();sfxSynths.pickup.triggerAttackRelease("E5","16n",t);sfxSynths.pickup.triggerAttackRelease("G5","16n",t+0.08);sfxSynths.pickup.triggerAttackRelease("C6","8n",t+0.16);}
   else if(name==="door")sfxSynths.door.trigger("8n");
   else if(name==="dooropen"){const t=Tone.now();sfxSynths.dooropenTone.triggerAttackRelease("G4","8n",t);sfxSynths.dooropenTone.triggerAttackRelease("B4","8n",t+0.08);sfxSynths.dooropenTone.triggerAttackRelease("D5","8n",t+0.16);sfxSynths.dooropenTone.triggerAttackRelease("G5","4n",t+0.24);}
