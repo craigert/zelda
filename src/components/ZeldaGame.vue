@@ -3526,14 +3526,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const isDarkRoom=(loc.ty==="dg"&&s.dg[loc.di]?.rooms[loc.scr]?.dark)||(loc.ty==="cave"&&CAVES[loc.di]?.rooms?.[loc.scr]?.dark);
   if(iD&&m&&isDarkRoom){let totalT2=0,litT2=0;
     for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m[y][x]===T.TORCH){totalT2++;if(s.litTorches.has(`${x},${y}`))litT2++;}
-    if(totalT2>0){const darkPct=1-litT2/totalT2;const darkness=darkPct*0.55;
+    if(totalT2>0){const darkPct=1-litT2/totalT2;
+      // Lantern reduces overall darkness in dark rooms
+      const darkness=darkPct*(s.hasLantern?0.35:0.55);
       if(darkness>0.01){
         // Draw darkness layer
         c.fillStyle=`rgba(0,0,0,${darkness})`;c.fillRect(0,0,W2,H2);
         // Cut light circles around player and lit torches
         c.save();c.globalCompositeOperation="destination-out";
-        // Player light (small personal glow)
-        const plr=(s.hasLantern?100:40)+litT2*8;const pg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plr);
+        // Player light — lantern gives a wide warm glow
+        const plr=(s.hasLantern?130:40)+litT2*8;const pg=c.createRadialGradient(p.x+PS/2,p.y+PS/2,0,p.x+PS/2,p.y+PS/2,plr);
         pg.addColorStop(0,`rgba(0,0,0,${darkness*0.9})`);pg.addColorStop(0.7,`rgba(0,0,0,${darkness*0.4})`);pg.addColorStop(1,"rgba(0,0,0,0)");
         c.fillStyle=pg;c.fillRect(p.x+PS/2-plr,p.y+PS/2-plr,plr*2,plr*2);
         // Lit torch lights
