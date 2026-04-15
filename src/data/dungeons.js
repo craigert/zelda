@@ -11,7 +11,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;
     for(let y=8;y<11;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
     m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;
-    m[5][5]=T.PIT;m[5][10]=T.PIT;m[6][5]=T.PIT;m[6][10]=T.PIT;
+    m[5][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
     m[5][3]=T.TORCH;m[5][12]=T.TORCH;
     m[5][7]=T.PUSH;
   }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"vine_creeper"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
@@ -83,7 +83,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=2;y<=9;y++){m[y][3]=T.WALL;m[y][12]=T.WALL;}
     m[5][3]=T.FLOOR;m[6][3]=T.FLOOR;m[5][12]=T.FLOOR;m[6][12]=T.FLOOR;
     m[4][5]=T.SPIKE;m[4][10]=T.SPIKE;m[7][5]=T.SPIKE;m[7][10]=T.SPIKE;
-    m[4][7]=T.PIT;m[4][8]=T.PIT;m[7][7]=T.PIT;m[7][8]=T.PIT;
+    m[4][7]=T.TALLGRASS;m[4][8]=T.TALLGRASS;m[7][7]=T.TALLGRASS;m[7][8]=T.TALLGRASS;
     // One-way ledge drop with ladder to climb back up
     m[6][6]=T.LEDGE_S;m[6][7]=T.LEDGE_S;m[6][8]=T.LEDGE_S;m[6][9]=T.LEDGE_S;
     m[6][9]=T.LADDER;m[7][9]=T.LADDER;// small ladder on right side of ledge
@@ -93,7 +93,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
 
   // West wing — dark room with torches (light them to reveal the path)
   "-1,-2":{dark:true,tiles:mr(m=>{ae(m,["E","N"]);
-    for(let y=3;y<=8;y++){m[y][3]=T.PIT;m[y][12]=T.PIT;}
+    for(let y=3;y<=8;y++){m[y][3]=T.TALLGRASS;m[y][12]=T.TALLGRASS;}
     m[3][6]=T.WALL;m[3][9]=T.WALL;m[8][6]=T.WALL;m[8][9]=T.WALL;
     m[5][5]=T.TORCH;m[5][10]=T.TORCH;m[6][5]=T.TORCH;m[6][10]=T.TORCH;
     m[5][7]=T.RUPEE;m[6][8]=T.RUPEE;
@@ -127,7 +127,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
   // North chamber — key guarded by enemies
   "0,-3":{tiles:mr(m=>{ae(m,["S","NB","E"]);
     m[3][4]=T.WALL;m[3][11]=T.WALL;m[8][4]=T.WALL;m[8][11]=T.WALL;
-    m[5][3]=T.PIT;m[6][3]=T.PIT;
+    m[5][3]=T.TALLGRASS;m[6][3]=T.TALLGRASS;
     m[4][7]=T.TORCH;m[4][8]=T.TORCH;m[7][7]=T.TORCH;m[7][8]=T.TORCH;
     m[5][7]=T.HEART;m[9][5]=T.HEART;
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"knight"},{x:9*TL,y:5*TL,hp:4,type:"archer"},{x:7*TL,y:8*TL,hp:3,type:"bat"}]},

@@ -1049,7 +1049,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   s.p.shield=shieldUp;
   if(shieldUp){dx*=0.4;dy*=0.4;}
   if(p.snare>0)p.snare-=dt;
-  const fzMult=p.snare>0?0:p.freeze>0?0.4:1.0;const sp=p.spd*fzMult*(dt/16);
+  const fzMult=p.snare>0?0:p.freeze>0?0.4:1.0;
+  // Thick vegetation slowdown (tallgrass in dungeons)
+  const ptm=gm(s);const ptx0=Math.floor((p.x+PS/2)/TL),pty0=Math.floor((p.y+PS/2)/TL);
+  const vegSlow=(s.loc.ty==="dg"&&ptm&&pty0>=0&&pty0<RO&&ptx0>=0&&ptx0<CO&&ptm[pty0][ptx0]===T.TALLGRASS)?0.5:1;
+  const sp=p.spd*fzMult*vegSlow*(dt/16);
   const HB={x:6,y:4,w:PS-12,h:PS-4};
   const tm=(px2,py2)=>{const l=Math.floor((px2+HB.x)/TL),r=Math.floor((px2+HB.x+HB.w-1)/TL),t2=Math.floor((py2+HB.y)/TL),b=Math.floor((py2+HB.y+HB.h-1)/TL);
     for(let ty=t2;ty<=b;ty++)for(let tx=l;tx<=r;tx++)if(iS(s,tx,ty))return false;return true;};
