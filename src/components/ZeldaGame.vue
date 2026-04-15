@@ -690,7 +690,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     // Slow majestic descent in pillar of light
     if(!s.heroLand.vy)s.heroLand.vy=0;
     if(!s.heroLand.landed){
-      s.heroLand.vy=Math.min(s.heroLand.vy+0.008*(dt/16),0.45);// slower gravity, lower cap
+      s.heroLand.vy=Math.min(s.heroLand.vy+0.018*(dt/16),0.8);// gentle but not too slow
       if(!s.heroLand.y&&s.heroLand.y!==0)s.heroLand.y=-40;
       s.heroLand.y+=s.heroLand.vy*(dt/16);
       if(s.heroLand.y>=s.p.y){s.heroLand.y=s.p.y;s.heroLand.landed=true;s.heroLand.landT=0;sfx("triforce");s.shake.t=200;
