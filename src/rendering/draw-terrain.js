@@ -264,5 +264,73 @@ export function drawTerrainOverlay(c,m,t){
       c.bezierCurveTo(px2+10,py2+20+wr*0.5,px2+22,py2+26+wr*0.5,px2+TL+2,py2+23+wr*0.5);c.stroke();
     }
   }
+  // PASS 4: Organic tile edge softening — break up square borders
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    const tl=m[y][x];const px2=x*TL,py2=y*TL;
+
+    // Grass/tallgrass — irregular tufts extending past tile edges
+    if(tl===T.GRASS||tl===T.TALLGRASS||tl===T.FLOWER){
+      for(let i=0;i<4;i++){const sd=x*17+y*31+i*53;
+        const side=i;// 0=top,1=right,2=bottom,3=left
+        const nx=x+(side===1?1:side===3?-1:0),ny=y+(side===0?-1:side===2?1:0);
+        if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+        const ntl=m[ny][nx];if(ntl===tl||ntl===T.GRASS||ntl===T.TALLGRASS||ntl===T.FLOWER)continue;
+        // Draw organic grass tufts spilling over the edge
+        const count=2+((hs(x,y,700+i)*3)|0);
+        for(let j=0;j<count;j++){
+          const along=hs(sd,j,710)*TL;const depth=2+hs(sd,j,711)*5;
+          const sway=Math.sin(t/600+sd+j)*1.5;
+          let bx,by;
+          if(side===0){bx=px2+along;by=py2-depth;}
+          else if(side===1){bx=px2+TL+depth;by=py2+along;}
+          else if(side===2){bx=px2+along;by=py2+TL+depth;}
+          else{bx=px2-depth;by=py2+along;}
+          c.fillStyle=`rgba(60,150,35,${0.2+hs(sd,j,712)*0.15})`;
+          c.beginPath();c.ellipse(bx+sway,by,2+hs(sd,j,713)*2,1+hs(sd,j,714),hs(sd,j,715)*Math.PI,0,Math.PI*2);c.fill();
+        }
+      }
+    }
+
+    // Rock tiles — rough irregular edges
+    if(tl===T.ROCK||tl===T.WALL){
+      for(const[dx2,dy2,si]of[[1,0,0],[0,1,1],[-1,0,2],[0,-1,3]]){
+        const nx=x+dx2,ny=y+dy2;
+        if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+        const ntl=m[ny][nx];if(ntl===T.ROCK||ntl===T.WALL||ntl===T.TREE)continue;
+        // Rough stone edges — irregular bumps
+        const sd=x*23+y*37+si*67;
+        for(let j=0;j<3;j++){
+          const along=4+hs(sd,j,720)*24;const depth=1+hs(sd,j,721)*3;
+          let bx,by;
+          if(si===0){bx=px2+TL+depth;by=py2+along;}
+          else if(si===1){bx=px2+along;by=py2+TL+depth;}
+          else if(si===2){bx=px2-depth;by=py2+along;}
+          else{bx=px2+along;by=py2-depth;}
+          c.fillStyle=`rgba(100,90,80,${0.25+hs(sd,j,722)*0.15})`;
+          c.beginPath();c.arc(bx,by,2+hs(sd,j,723)*2,0,Math.PI*2);c.fill();
+        }
+      }
+    }
+
+    // Ice tiles — crystalline edge frost
+    if(tl===T.ICE){
+      for(const[dx2,dy2,si]of[[1,0,0],[0,1,1],[-1,0,2],[0,-1,3]]){
+        const nx=x+dx2,ny=y+dy2;
+        if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+        if(m[ny][nx]===T.ICE)continue;
+        const sd=x*19+y*41+si*59;
+        for(let j=0;j<2;j++){
+          const along=6+hs(sd,j,730)*20;const depth=1+hs(sd,j,731)*4;
+          let bx,by;
+          if(si===0){bx=px2+TL+depth;by=py2+along;}
+          else if(si===1){bx=px2+along;by=py2+TL+depth;}
+          else if(si===2){bx=px2-depth;by=py2+along;}
+          else{bx=px2+along;by=py2-depth;}
+          c.fillStyle=`rgba(180,220,255,${0.15+hs(sd,j,732)*0.1})`;
+          c.beginPath();c.ellipse(bx,by,3+hs(sd,j,733)*2,1.5,hs(sd,j,734)*Math.PI,0,Math.PI*2);c.fill();
+        }
+      }
+    }
+  }
   c.lineCap="butt";
 }
