@@ -1271,7 +1271,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:3},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*2,dy:(Math.random()-.5)*2,l:300,c:"#888"})));
         if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}}
       if(m2[pty][ptx]===T.PIT&&p.ifr<=0&&!s.pitFall.a){
-        s.pitFall={a:true,t:0,x:p.x,y:p.y};sfx("hurt");}}}
+        const isLavaPit=s.loc.ty==="dg"&&s.dg[s.loc.di]?.th==="fire";
+        if(isLavaPit){// Walk through lava — burn damage, no pit fall
+          if(!p.redArmor||Math.random()>0.5)p.hp--;p.ifr=IFR;p.burn=2000;p.burnTick=0;
+          sfx("hurt");s.shake.t=200;s.msg={text:"Lava burns!",t:800};
+          s.pt.push(...Array.from({length:5},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:400,c:Math.random()>.5?"#f80":"#fa0"})));
+          if(p.hp<=0){s.death.a=true;s.death.t=0;s.death.spin=0;}
+        }else{s.pitFall={a:true,t:0,x:p.x,y:p.y};sfx("hurt");}}}}
   // Pit fall animation -- handled in update freeze section
   {const m2=gm(s);const ptx=Math.floor((p.x+PS/2)/TL),pty=Math.floor((p.y+PS/2)/TL);
     if(s.loc.ty==="ow"&&s.loc.scr==="0,1"&&m2&&pty>=0&&pty<RO&&ptx>=0&&ptx<CO&&m2[pty][ptx]===T.TALLGRASS&&p.poison<=0){

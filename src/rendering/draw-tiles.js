@@ -1273,6 +1273,19 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
             c.fillStyle=`rgba(255,255,180,${(1-ba)*0.3})`;c.beginPath();c.arc(bx3-0.5,by3-0.5,br3*0.4,0,Math.PI*2);c.fill();}}
         // Ambient glow — slight bloom
         c.fillStyle=`rgba(255,100,20,${0.04+Math.sin(t/2000+sd)*0.02})`;c.fillRect(px-2,py-2,TL+4,TL+4);
+        // Organic lava edges — bleed irregular blobs past tile boundaries
+        for(let ei2=0;ei2<4;ei2++){
+          const esd=sd+ei2*47;const along=4+((esd*7)%24);const depth=2+((esd*11)%5);
+          const wave=Math.sin(t/800+esd)*2;
+          let bx2,by2;
+          if(ei2===0){bx2=px+TL+depth+wave;by2=py+along;}
+          else if(ei2===1){bx2=px+along;by2=py+TL+depth+wave;}
+          else if(ei2===2){bx2=px-depth-wave;by2=py+along;}
+          else{bx2=px+along;by2=py-depth-wave;}
+          const pulse=0.2+Math.sin(t/600+esd)*0.08;
+          c.fillStyle=`rgba(200,60,10,${pulse})`;c.beginPath();c.ellipse(bx2,by2,4+((esd*3)%3),2+((esd*5)%2),esd%3,0,Math.PI*2);c.fill();
+          c.fillStyle=`rgba(255,140,30,${pulse*0.5})`;c.beginPath();c.ellipse(bx2,by2,2,1,esd%3,0,Math.PI*2);c.fill();
+        }
       }else{
         // Bottomless pit
         c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
