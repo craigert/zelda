@@ -1369,7 +1369,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   // Hookshot firing
   if(ky.has("v")&&p.hasHookshot&&!s.hookshot&&!s.hookshotCd){
     s.hookshotCd=true;setTimeout(()=>{if(stR.value)stR.value.hookshotCd=false;},600);
-    sfx("sword");
+    sfx("hookshot");
     const hdx=p.dir===1?1:p.dir===3?-1:0,hdy=p.dir===0?-1:p.dir===2?1:0;
     s.hookshot={tipX:p.x+PS/2,tipY:p.y+PS/2,dx:hdx,dy:hdy,st:"extend",spd:6,maxDist:192,target:null,t:0};
   }
@@ -1991,7 +1991,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(diff<Math.PI*(s.hasShieldUp?0.85:0.6)){
         if(s.hasShieldUp){// Mirror Shield — reflect projectile back
           bp.dx=-bp.dx;bp.dy=-bp.dy;bp.reflected=true;bp.l=Math.min(bp.l,1200);
-          sfx("secret");
+          sfx("reflect");
           s.pt.push(...Array.from({length:8},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:400,c:Math.random()>.5?"#8af":"#fff"})));
           s.dmgNums.push({x:p.x+PS/2,y:p.y,t:500,val:"REFLECT",c:"#8cf"});
         }else{sfx("door");s.bProj.splice(i,1);
@@ -2295,7 +2295,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const iD2=s.loc.ty==="dg"||s.loc.ty==="cave";
   c.textAlign="center";
   if(iD2){const dgn=s.loc.ty==="dg"?s.dg[s.loc.di].name:"Hidden Cave";c.fillStyle="#888";c.font="bold 9px monospace";c.fillText(dgn,W2/2,11);}
-  for(let i=0;i<3;i++){const tx=W2/2-22+i*22,ty=iD2?16:8;
+  for(let i=0;i<3;i++){const tx=W2/2-30+i*22,ty=iD2?16:8;
     c.fillStyle=p.tri[i]?"#ffd633":"#333";c.beginPath();c.moveTo(tx+8,ty);c.lineTo(tx+16,ty+14);c.lineTo(tx,ty+14);c.closePath();c.fill();
     if(p.tri[i]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(tx+8,ty+4);c.lineTo(tx+12,ty+11);c.lineTo(tx+4,ty+11);c.closePath();c.fill();}}
   // Status effects -- below triforce if in dungeon

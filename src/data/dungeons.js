@@ -14,6 +14,9 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[5][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
     m[5][3]=T.TORCH;m[5][12]=T.TORCH;
     m[5][7]=T.PUSH;
+    // Overgrown patches
+    m[4][4]=T.TALLGRASS;m[4][5]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[7][11]=T.TALLGRASS;
+    m[3][6]=T.TALLGRASS;m[8][9]=T.TALLGRASS;m[8][10]=T.TALLGRASS;
   }),enemies:[{x:6*TL,y:4*TL,hp:2,type:"vine_creeper"},{x:9*TL,y:7*TL,hp:2,type:"skeleton"}]},
 
   // East wing — spike corridor with key
@@ -22,6 +25,9 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     for(let y=2;y<=6;y++)m[y][8]=T.WALL;
     m[8][4]=T.SPIKE;m[8][5]=T.SPIKE;m[8][6]=T.SPIKE;m[8][9]=T.SPIKE;m[8][10]=T.SPIKE;m[8][11]=T.SPIKE;
     m[5][4]=T.KEY;m[9][12]=T.HEART;m[4][2]=T.TORCH;m[7][13]=T.TORCH;
+    // Overgrown corridor edges
+    m[4][3]=T.TALLGRASS;m[6][3]=T.TALLGRASS;m[7][3]=T.TALLGRASS;m[9][4]=T.TALLGRASS;
+    m[4][12]=T.TALLGRASS;m[6][12]=T.TALLGRASS;m[9][11]=T.TALLGRASS;
   }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"archer"},{x:11*TL,y:8*TL,hp:3,type:"skeleton"},{x:6*TL,y:7*TL,hp:2,type:"bat"},{x:12*TL,y:5*TL,hp:2,type:"bat"}]},
 
   // East wing upper — lever puzzle room
@@ -41,6 +47,9 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][7]=T.TORCH;m[8][7]=T.TORCH;m[3][5]=T.TORCH;m[3][10]=T.TORCH;
     m[8][5]=T.TORCH;m[8][10]=T.TORCH;
     m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[7][6]=T.RUPEE;m[7][9]=T.RUPEE;
+    // Thick overgrowth around walls
+    m[4][5]=T.TALLGRASS;m[4][10]=T.TALLGRASS;m[7][5]=T.TALLGRASS;m[7][10]=T.TALLGRASS;
+    m[6][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
   }),enemies:[{x:6*TL,y:5*TL,hp:4,type:"skeleton"},{x:9*TL,y:5*TL,hp:4,type:"skeleton"},{x:7*TL,y:7*TL,hp:4,type:"bat"}],reward:"master_key"},
 
   // East far room — sunken pit with ledges and ladder (east of 1,0)

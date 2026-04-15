@@ -31,6 +31,22 @@ export function initSfx(){if(sfxReady)return;
     const bp=new Tone.Filter({frequency:1200,type:"bandpass",Q:2});
     n.connect(bp);bp.toDestination();return n;},3);
 
+  // === HOOKSHOT — chain launch: metallic clank + rattling chain ===
+  sfxSynths.hookLaunch=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.03,sustain:0,release:0.01},volume:-10});
+    const bp=new Tone.Filter({frequency:3000,type:"bandpass",Q:3});
+    n.connect(bp);bp.toDestination();return n;},3);
+  sfxSynths.hookChain=makePool(()=>{
+    const s=new Tone.Synth({oscillator:{type:"triangle"},envelope:{attack:0.001,decay:0.06,sustain:0.02,release:0.04},volume:-14});
+    s.toDestination();return s;},3);
+
+  // === MIRROR SHIELD REFLECT — bright crystalline ping ===
+  sfxSynths.reflectPing=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"sine"},envelope:{attack:0.001,decay:0.15,sustain:0.05,release:0.1},volume:-12}}).toDestination();
+  sfxSynths.reflectShimmer=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.08,sustain:0,release:0.04},volume:-18});
+    const hp=new Tone.Filter({frequency:6000,type:"highpass"});
+    n.connect(hp);hp.toDestination();return n;},2);
+
   // Legacy aliases for compatibility
   sfxSynths.hit=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"sawtooth"},envelope:{attack:0.001,decay:0.05,sustain:0,release:0.03},volume:-12}}).toDestination();
   sfxSynths.pickup=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.12,sustain:0.1,release:0.1},volume:-14}}).toDestination();
@@ -60,6 +76,23 @@ export function sfx(name,note){if(!sfxReady)return;
     sfxSynths.hitKnock.trigger(note||"G4","32n",t);// sharp knock
     sfxSynths.hitKnock.trigger("C4","32n",t+0.02);// lower follow
     sfxSynths.hitCrunch.trigger("32n",t);// crunch
+  }
+  else if(name==="hookshot"){
+    // Chain launch: metallic clank + rapid rattling notes
+    const t=Tone.now();
+    sfxSynths.hookLaunch.trigger("32n",t);// initial clank
+    sfxSynths.hookChain.trigger("E5","32n",t+0.02);// chain rattle
+    sfxSynths.hookChain.trigger("G5","32n",t+0.05);
+    sfxSynths.hookChain.trigger("E5","32n",t+0.08);
+    sfxSynths.hookLaunch.trigger("32n",t+0.06);// second clank
+  }
+  else if(name==="reflect"){
+    // Crystalline ping: bright ascending shimmer
+    const t=Tone.now();
+    sfxSynths.reflectPing.triggerAttackRelease("E6","16n",t);
+    sfxSynths.reflectPing.triggerAttackRelease("G#6","16n",t+0.04);
+    sfxSynths.reflectPing.triggerAttackRelease("B6","8n",t+0.08);
+    sfxSynths.reflectShimmer.trigger("16n",t);
   }
   else if(name==="pickup"){const t=Tone.now();sfxSynths.pickup.triggerAttackRelease("E5","16n",t);sfxSynths.pickup.triggerAttackRelease("G5","16n",t+0.08);sfxSynths.pickup.triggerAttackRelease("C6","8n",t+0.16);}
   else if(name==="door")sfxSynths.door.trigger("8n");
