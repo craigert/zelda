@@ -1154,18 +1154,14 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       if(sparkPhase<400){const sy2=py+2-sparkPhase*0.015,sx2=px+16+Math.sin(sparkPhase/60+ts)*4;
         c.fillStyle=`rgba(255,200,60,${0.7-sparkPhase/600})`;c.beginPath();c.arc(sx2,sy2,0.8,0,Math.PI*2);c.fill();}
       break;}
-    case T.CRACK:{// Cracked wall — looks like wall but with visible cracks
+    case T.CRACK:{// Cracked wall — looks almost like a normal wall, very subtle cracks
       c.fillStyle=iD?dg.wc:"#4a3728";c.fillRect(px,py,TL,TL);
       c.fillStyle="rgba(0,0,0,0.15)";c.fillRect(px,py+8,TL,1);c.fillRect(px,py+16,TL,1);c.fillRect(px,py+24,TL,1);
       c.fillStyle="rgba(255,255,255,0.08)";c.fillRect(px,py,TL,2);c.fillStyle="rgba(0,0,0,0.25)";c.fillRect(px,py+TL-3,TL,3);
-      // Visible cracks
-      c.strokeStyle="rgba(0,0,0,0.5)";c.lineWidth=1;
-      c.beginPath();c.moveTo(px+8,py+4);c.lineTo(px+14,py+12);c.lineTo(px+10,py+20);c.lineTo(px+16,py+28);c.stroke();
-      c.beginPath();c.moveTo(px+22,py+2);c.lineTo(px+18,py+10);c.lineTo(px+24,py+18);c.stroke();
-      c.beginPath();c.moveTo(px+12,py+14);c.lineTo(px+20,py+16);c.stroke();
-      // Subtle highlight on cracks
-      c.strokeStyle="rgba(255,200,100,0.15)";c.lineWidth=1;
-      c.beginPath();c.moveTo(px+9,py+4);c.lineTo(px+15,py+12);c.stroke();
+      // Very faint hairline cracks — barely visible unless you look closely
+      c.strokeStyle="rgba(0,0,0,0.18)";c.lineWidth=0.5;
+      c.beginPath();c.moveTo(px+12,py+6);c.lineTo(px+15,py+14);c.lineTo(px+13,py+22);c.stroke();
+      c.beginPath();c.moveTo(px+20,py+10);c.lineTo(px+18,py+18);c.stroke();
       break;}
     case T.BOMB:{// Bomb pickup on floor
       c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
