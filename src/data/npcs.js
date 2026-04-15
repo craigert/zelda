@@ -1,5 +1,5 @@
 // NPC definitions per overworld screen location
-// Each NPC has: tx/ty (tile coords), name, lines (dialogue array)
+// Each NPC has: tx/ty (tile coords), name, lines (dialogue array), repeat (optional follow-up)
 export const NPC_DATA = {
   "1,1": [
     { tx: 3, ty: 4, name: "Old Sage", lines: [
@@ -7,11 +7,17 @@ export const NPC_DATA = {
       "Seek the three Triforce pieces...",
       "hidden in the Forest Temple, Fire Cavern,",
       "and Shadow Keep. Beware the Dark Sanctum!"
+    ], repeat: [
+      "The fate of Hyrule rests on your shoulders.",
+      "Have you found all the Triforce pieces yet?"
     ]},
     { tx: 10, ty: 7, name: "Dog", lines: [
       "Arf! Arf arf!",
       "*wags tail happily*",
       "Bark!!"
+    ], repeat: [
+      "*pant pant*",
+      "*wags tail*"
     ]},
   ],
   "0,0": [
@@ -19,6 +25,9 @@ export const NPC_DATA = {
       "The Forest Temple lies ahead...",
       "Bombs can break cracked walls!",
       "Search every room for secrets."
+    ], repeat: [
+      "The forest holds many secrets.",
+      "Keep your eyes open!"
     ]},
   ],
   "2,-1": [
@@ -26,6 +35,9 @@ export const NPC_DATA = {
       "The mountains hide many secrets.",
       "Heart Pieces increase your strength.",
       "Look carefully in every corner!"
+    ], repeat: [
+      "Still exploring the peaks?",
+      "The cold air keeps me sharp."
     ]},
   ],
   "3,0": [
@@ -33,6 +45,9 @@ export const NPC_DATA = {
       "The eastern desert is dangerous!",
       "Fire bats patrol these lands.",
       "A Fire Cavern lies to the south..."
+    ], repeat: [
+      "The sands shift endlessly...",
+      "Watch for fire from above."
     ]},
   ],
   "-1,1": [
@@ -41,6 +56,9 @@ export const NPC_DATA = {
       "The Shadow Keep to the south...",
       "holds an ancient, evil power.",
       "Only the brave may enter."
+    ], repeat: [
+      "Still lurking in my swamp?",
+      "Don't breathe the purple mist."
     ]},
   ],
   "1,2": [
@@ -48,6 +66,9 @@ export const NPC_DATA = {
       "I've seen lights in the caves...",
       "Bomb the cracked walls to find",
       "hidden treasures beneath the earth!"
+    ], repeat: [
+      "The fish aren't biting today.",
+      "Try the caves to the north!"
     ]},
   ],
   "3,2": [
@@ -55,6 +76,9 @@ export const NPC_DATA = {
       "The Dark Sanctum opens only",
       "when all three Triforce pieces",
       "have been gathered. Are you ready?"
+    ], repeat: [
+      "The Sanctum awaits its challenger.",
+      "Gather your strength, hero."
     ]},
   ],
   "4,1": [
@@ -62,6 +86,9 @@ export const NPC_DATA = {
       "The Fire Cavern burns eternal!",
       "Its Master Key is hidden deep...",
       "behind locked doors within."
+    ], repeat: [
+      "The flames never rest.",
+      "Nor should you, hero."
     ]},
   ],
   "0,1": [
@@ -74,6 +101,10 @@ export const NPC_DATA = {
       "in a room to earn its treasure.",
       "Light dim torches with your sword...",
       "and the darkness will reward you."
+    ], repeat: [
+      "...*creak*...",
+      "The wind carries old memories.",
+      "Be safe on your journey, young one."
     ]},
     { tx: 9, ty: 7, name: "Sign", fixed: true, lines: [
       "BEWARE OF SWAMP!",

@@ -1308,7 +1308,11 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.treeGift=true;sfx("itemget");s.shake.t=400;
             s.npcTalk={name:npc.name,lines:["...*creak*... You carry the Master Sword!","The blade of legend... I can feel its power.","You are truly the hero of Hyrule.","Take this gift I have guarded for ages..."],idx:0,charIdx:0,timer:0,treeGift:true};
             npcHit=true;ns2.st="idle";ns2.wait=9999;break;}
-          s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
+          if(!s._talkedNpcs)s._talkedNpcs=new Set();
+          const npcKey=loc.scr+":"+ni;const talked=s._talkedNpcs.has(npcKey);
+          s._talkedNpcs.add(npcKey);
+          const lines=talked&&npc.repeat?npc.repeat:npc.lines;
+          s.npcTalk={name:npc.name,lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
           ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
           // NPC faces player
           ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);
