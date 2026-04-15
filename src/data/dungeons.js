@@ -182,6 +182,13 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[2][8]=T.GRASS;
   }),enemies:[{x:7.5*TL,y:5*TL,hp:18,type:"boss",name:"Forest Guardian",pattern:"charge"}]},
 }};
+// Scatter random grass/tallgrass patches into Forest Temple floor tiles
+{let seed=77;for(const rk of Object.keys(d1.rooms)){const rm=d1.rooms[rk];if(!rm.tiles)continue;
+  const m=rm.tiles;for(let y=1;y<RO-1;y++)for(let x=1;x<CO-1;x++){
+    if(m[y][x]!==T.FLOOR)continue;
+    seed=(seed*16807+0)%2147483647;const r=(seed-1)/2147483646;
+    if(r<0.12)m[y][x]=T.TALLGRASS;
+    else if(r<0.2)m[y][x]=T.GRASS;}}}
 
 // ═══════════════════════════════════════════════════════════════
 // DUNGEON 2 — Fire Cavern (14 rooms)

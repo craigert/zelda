@@ -331,6 +331,47 @@ export function drawTerrainOverlay(c,m,t){
         }
       }
     }
+
+    // Water tiles — organic bleed edges into non-water neighbors
+    if(tl===T.WATER){
+      for(const[dx2,dy2,si]of[[1,0,0],[0,1,1],[-1,0,2],[0,-1,3]]){
+        const nx=x+dx2,ny=y+dy2;
+        if(nx<0||nx>=CO||ny<0||ny>=RO)continue;
+        if(m[ny][nx]===T.WATER)continue;
+        const sd=x*29+y*43+si*71;
+        // Wavy water edge — multiple overlapping ellipses
+        for(let j=0;j<4;j++){
+          const along=3+hs(sd,j,740)*26;const depth=1+hs(sd,j,741)*5;
+          const wave=Math.sin(t/600+sd+j*2)*1.5;
+          let bx,by;
+          if(si===0){bx=px2+TL+depth+wave;by=py2+along;}
+          else if(si===1){bx=px2+along;by=py2+TL+depth+wave;}
+          else if(si===2){bx=px2-depth-wave;by=py2+along;}
+          else{bx=px2+along;by=py2-depth-wave;}
+          c.fillStyle=`rgba(40,100,180,${0.15+hs(sd,j,742)*0.1})`;
+          c.beginPath();c.ellipse(bx,by,3+hs(sd,j,743)*2,1.5+hs(sd,j,744),hs(sd,j,745)*Math.PI,0,Math.PI*2);c.fill();
+        }
+      }
+    }
+  }
+
+  // PASS 5: Organic grass clumps — larger irregular shaped patches on grass tiles
+  for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){
+    const tl=m[y][x];
+    if(tl===T.GRASS||tl===T.TALLGRASS||tl===T.FLOWER){
+      const px2=x*TL,py2=y*TL;const sd=x*43+y*67;
+      // Irregular clump — blob of slightly different green
+      if(hs(x,y,800)>0.55){
+        const cx2=px2+6+hs(x,y,801)*20,cy2=py2+6+hs(x,y,802)*20;
+        const rx=4+hs(x,y,803)*6,ry=3+hs(x,y,804)*4;
+        const rot=hs(x,y,805)*Math.PI;
+        c.fillStyle=`rgba(50,140,35,${0.12+hs(x,y,806)*0.08})`;
+        c.beginPath();c.ellipse(cx2,cy2,rx,ry,rot,0,Math.PI*2);c.fill();
+        // Second smaller clump nearby
+        c.fillStyle=`rgba(70,160,45,${0.1+hs(x,y,807)*0.06})`;
+        c.beginPath();c.ellipse(cx2+hs(x,y,808)*8-4,cy2+hs(x,y,809)*6-3,rx*0.6,ry*0.6,rot+0.5,0,Math.PI*2);c.fill();
+      }
+    }
   }
   c.lineCap="butt";
 }
