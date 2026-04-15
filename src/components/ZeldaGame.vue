@@ -1397,7 +1397,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       if(hm&&htx>=0&&htx<CO&&hty>=0&&hty<RO){const htl=hm[hty][htx];
         if(htl===T.HOOKPOST){hs.target={type:"post",x:htx*TL+TL/2,y:hty*TL+TL/2};
           hs.tipX=htx*TL+TL/2;hs.tipY=hty*TL+TL/2;hs.st="hit";hs.t=0;sfx("door");}
-        else if(SOLID.has(htl)||htl===T.DOOR||htl===T.BOSS_DOOR){hs.st="retract";sfx("door");}}
+        else if(htl===T.WALL||htl===T.DOOR||htl===T.BOSS_DOOR){hs.st="retract";sfx("door");}}
       if(hs.tipX<0||hs.tipX>W2||hs.tipY<0||hs.tipY>H2)hs.st="retract";
       // Enemy collision
       if(hs.st==="extend"){for(let j=0;j<s.en.length;j++){const e=s.en[j];
