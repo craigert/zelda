@@ -6,16 +6,19 @@ const MIN_INTERVAL=50; // ms between same sfx
 function makePool(factory,n){const pool=[];for(let i=0;i<n;i++)pool.push(factory());let idx=0;return{trigger:(...args)=>{pool[idx].triggerAttackRelease(...args);idx=(idx+1)%pool.length;}};}
 
 export function initSfx(){if(sfxReady)return;
-  // === SWORD SLASH — classic Zelda "hyah" swish ===
-  // Layer 1: Fast high-pitched downward sweep (the signature slash sound)
-  sfxSynths.swordSweep=makePool(()=>{
-    const s=new Tone.Synth({oscillator:{type:"sawtooth"},envelope:{attack:0.001,decay:0.07,sustain:0,release:0.03},volume:-16});
-    s.toDestination();return s;},3);
-  // Layer 2: Short sharp noise burst (air whoosh)
-  sfxSynths.swordWhip=makePool(()=>{
-    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.05,sustain:0,release:0.02},volume:-18});
-    const hp=new Tone.Filter({frequency:4000,type:"highpass"});
-    n.connect(hp);hp.toDestination();return n;},3);
+  // === SWORD SLASH — fast filtered noise whoosh ===
+  // Pool with exposed filters for frequency sweep
+  sfxSynths.swordPool=[];
+  for(let i=0;i<3;i++){
+    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.13,sustain:0,release:0.07},volume:-10});
+    const filt=new Tone.Filter({frequency:6000,type:"bandpass",Q:0.7});
+    n.connect(filt);filt.toDestination();sfxSynths.swordPool.push({n,filt});}
+  sfxSynths.swordIdx=0;
+  // Lower body layer for weight
+  sfxSynths.swordBody=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"pink"},envelope:{attack:0.003,decay:0.1,sustain:0,release:0.05},volume:-14});
+    const filt=new Tone.Filter({frequency:900,type:"lowpass"});
+    n.connect(filt);filt.toDestination();return n;},3);
 
   // === ENEMY HIT — classic Zelda "thwack" ===
   // Layer 1: Sharp percussive knock (the initial impact)
@@ -42,12 +45,14 @@ export function sfx(name,note){if(!sfxReady)return;
   const now=performance.now();if(lastPlay[name]&&now-lastPlay[name]<MIN_INTERVAL)return;lastPlay[name]=now;
   try{
   if(name==="sword"){
-    // Classic Zelda slash: fast descending pitch sweep + air whoosh
+    // Sword whoosh: white noise with bandpass sweep 8000→1500Hz
+    const si=sfxSynths.swordPool[sfxSynths.swordIdx];
+    sfxSynths.swordIdx=(sfxSynths.swordIdx+1)%3;
     const t=Tone.now();
-    sfxSynths.swordSweep.trigger("C6","32n",t);// high start
-    sfxSynths.swordSweep.trigger("F5","32n",t+0.015);// quick drop
-    sfxSynths.swordSweep.trigger("C5","32n",t+0.03);// low end
-    sfxSynths.swordWhip.trigger("32n",t);// air whoosh
+    si.filt.frequency.setValueAtTime(8000,t);
+    si.filt.frequency.exponentialRampToValueAtTime(1500,t+0.1);
+    si.n.triggerAttackRelease("8n",t);
+    sfxSynths.swordBody.trigger("8n");
   }
   else if(name==="hit"){
     // Classic Zelda hit: short sharp knock + crunch
