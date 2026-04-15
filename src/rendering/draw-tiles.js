@@ -1233,59 +1233,88 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
     case T.PIT:{
       const isLava=iD&&dg&&dg.th==="fire";
       if(isLava){
-        // Smooth flowing lava — layered glowing liquid
-        const sd=px*0.37+py*0.53;// per-tile seed for variation
-        // Slow smooth flow offsets
-        const fx=Math.sin(t/1200+sd)*8;const fy=Math.cos(t/1400+sd*1.3)*6;
-        const fx2=Math.sin(t/900+sd*0.7)*10;const fy2=Math.cos(t/1100+sd*1.1)*8;
-        // Layer 1: Deep dark red base
-        c.fillStyle="#3a0800";c.fillRect(px,py,TL,TL);
-        // Layer 2: Flowing orange-red mid layer (large smooth blobs)
-        for(let i=0;i<3;i++){const bsd=sd+i*47;
-          const bx2=px+8+Math.sin(t/1500+bsd)*10+i*8;const by2=py+8+Math.cos(t/1800+bsd)*8+i*6;
-          const br2=10+Math.sin(t/2000+bsd)*3;
-          const bg2=c.createRadialGradient(bx2,by2,0,bx2,by2,br2);
-          bg2.addColorStop(0,"rgba(220,80,10,0.7)");bg2.addColorStop(0.6,"rgba(180,40,5,0.4)");bg2.addColorStop(1,"rgba(100,15,0,0)");
-          c.fillStyle=bg2;c.fillRect(px,py,TL,TL);}
-        // Layer 3: Bright yellow-orange hot streams flowing across
-        c.strokeStyle="rgba(255,160,20,0.5)";c.lineWidth=3;
-        c.beginPath();c.moveTo(px+fx,py+8+fy*0.5);
-        c.quadraticCurveTo(px+16+fx2*0.5,py+16+fy2*0.3,px+TL+fx*0.7,py+24+fy*0.3);c.stroke();
-        c.strokeStyle="rgba(255,120,10,0.35)";c.lineWidth=2;
-        c.beginPath();c.moveTo(px+8+fx2*0.6,py+fy2);
-        c.quadraticCurveTo(px+20+fx*0.4,py+20+fy*0.5,px+TL-4+fx2*0.3,py+TL+fy2*0.4);c.stroke();
-        // Layer 4: Bright yellow-white hot spots (slow drifting)
-        for(let i=0;i<2;i++){const hsd=sd+i*83;
-          const hx=px+10+Math.sin(t/2000+hsd)*12;const hy=py+10+Math.cos(t/2400+hsd)*10;
-          const hp=Math.sin(t/1000+hsd)*0.15+0.35;
-          const hg=c.createRadialGradient(hx,hy,0,hx,hy,6+Math.sin(t/1500+hsd)*2);
-          hg.addColorStop(0,`rgba(255,240,120,${hp})`);hg.addColorStop(0.4,`rgba(255,180,40,${hp*0.6})`);hg.addColorStop(1,"rgba(255,100,10,0)");
+        const sd=px*0.37+py*0.53;
+        // === BASE: deep molten underlayer ===
+        c.fillStyle="#2a0400";c.fillRect(px,py,TL,TL);
+
+        // === CONVECTION CELLS: large slowly churning blobs ===
+        for(let i=0;i<4;i++){const cs=sd+i*37;
+          // Each cell drifts in a slow elliptical path
+          const cx2=px+4+((cs*7)%24)+Math.sin(t/3000+cs)*6;
+          const cy2=py+4+((cs*11)%24)+Math.cos(t/3500+cs*1.3)*5;
+          const cr=8+Math.sin(t/2500+cs)*3;
+          // Hot center → cooling edges
+          const cg=c.createRadialGradient(cx2,cy2,0,cx2,cy2,cr);
+          cg.addColorStop(0,`rgba(255,${140+Math.sin(t/1000+cs)*40|0},20,0.8)`);
+          cg.addColorStop(0.4,`rgba(220,${60+Math.sin(t/1200+cs)*30|0},10,0.5)`);
+          cg.addColorStop(0.7,"rgba(140,25,5,0.25)");cg.addColorStop(1,"rgba(60,8,0,0)");
+          c.fillStyle=cg;c.fillRect(px,py,TL,TL);}
+
+        // === COOLING CRUST: dark patches that drift and break apart ===
+        for(let i=0;i<3;i++){const cs2=sd+i*59;
+          const crx=px+6+((cs2*13)%20)+Math.sin(t/4000+cs2)*4;
+          const cry=py+6+((cs2*17)%20)+Math.cos(t/4500+cs2)*3;
+          const rot=t/8000+cs2;const crw=5+((cs2*3)%4);const crh=3+((cs2*5)%3);
+          c.fillStyle=`rgba(30,5,0,${0.3+Math.sin(t/2000+cs2)*0.1})`;
+          c.beginPath();c.ellipse(crx,cry,crw,crh,rot,0,Math.PI*2);c.fill();}
+
+        // === GLOWING CRACKS between crust plates ===
+        const f1=Math.sin(t/1500+sd)*6;const f2=Math.cos(t/1800+sd*1.3)*5;
+        c.strokeStyle="rgba(255,180,40,0.6)";c.lineWidth=1.5;c.lineCap="round";
+        c.beginPath();c.moveTo(px+2+f1,py+6);
+        c.bezierCurveTo(px+10+f2,py+12+f1*0.3,px+22+f1*0.5,py+10+f2*0.4,px+TL-2+f2*0.3,py+16);c.stroke();
+        c.strokeStyle="rgba(255,220,80,0.4)";c.lineWidth=1;
+        c.beginPath();c.moveTo(px+6,py+20+f2);
+        c.bezierCurveTo(px+14+f1*0.4,py+24+f2*0.3,px+20+f2*0.5,py+18+f1*0.3,px+TL-4,py+26+f1*0.2);c.stroke();
+        // Thin secondary cracks
+        c.strokeStyle="rgba(255,140,20,0.3)";c.lineWidth=0.7;
+        c.beginPath();c.moveTo(px+10+f2*0.5,py+2);c.quadraticCurveTo(px+16+f1*0.3,py+8,px+14+f2*0.4,py+16);c.stroke();
+
+        // === WHITE-HOT SPOTS: brightest areas where crust has broken ===
+        for(let i=0;i<2;i++){const hs2=sd+i*83;
+          const hx=px+8+Math.sin(t/2500+hs2)*10;const hy=py+8+Math.cos(t/3000+hs2)*8;
+          const hp2=Math.sin(t/1200+hs2)*0.12+0.28;
+          const hg=c.createRadialGradient(hx,hy,0,hx,hy,5+Math.sin(t/1800+hs2)*2);
+          hg.addColorStop(0,`rgba(255,255,200,${hp2})`);hg.addColorStop(0.3,`rgba(255,200,60,${hp2*0.7})`);
+          hg.addColorStop(0.7,`rgba(255,120,20,${hp2*0.3})`);hg.addColorStop(1,"rgba(200,40,0,0)");
           c.fillStyle=hg;c.fillRect(px,py,TL,TL);}
-        // Layer 5: Surface shimmer — bright ripples
-        const shimmer=Math.sin(t/600+sd)*0.12+0.12;
-        c.fillStyle=`rgba(255,220,100,${shimmer})`;
-        c.beginPath();c.ellipse(px+16+fx*0.3,py+16+fy*0.3,12+Math.sin(t/1800+sd)*4,6+Math.cos(t/2200+sd)*2,t/5000+sd,0,Math.PI*2);c.fill();
-        // Layer 6: Bubbles — slow rising pops
-        for(let i=0;i<2;i++){const bsd2=sd+i*31;
-          const bubT=(t/800+bsd2*3)%3;// 0-3 cycle
-          if(bubT<1){const ba=bubT;const bx3=px+8+((bsd2*7)%18);const by3=py+20-ba*8;const br3=1.5+ba;
-            c.fillStyle=`rgba(255,200,60,${(1-ba)*0.6})`;c.beginPath();c.arc(bx3,by3,br3,0,Math.PI*2);c.fill();
-            c.fillStyle=`rgba(255,255,180,${(1-ba)*0.3})`;c.beginPath();c.arc(bx3-0.5,by3-0.5,br3*0.4,0,Math.PI*2);c.fill();}}
-        // Ambient glow — slight bloom
-        c.fillStyle=`rgba(255,100,20,${0.04+Math.sin(t/2000+sd)*0.02})`;c.fillRect(px-2,py-2,TL+4,TL+4);
-        // Organic lava edges — bleed irregular blobs past tile boundaries
-        for(let ei2=0;ei2<4;ei2++){
-          const esd=sd+ei2*47;const along=4+((esd*7)%24);const depth=2+((esd*11)%5);
-          const wave=Math.sin(t/800+esd)*2;
+
+        // === BUBBLES: multiple with staggered timing ===
+        for(let i=0;i<3;i++){const bs=sd+i*31;
+          const bubT=(t/1000+bs*3)%4;
+          if(bubT<1.5){const ba=bubT/1.5;
+            const bx3=px+5+((bs*7)%22);const by3=py+22-ba*12;const br3=1+ba*2;
+            // Bubble body
+            c.fillStyle=`rgba(255,180,40,${(1-ba)*0.5})`;c.beginPath();c.arc(bx3,by3,br3,0,Math.PI*2);c.fill();
+            // Bright highlight
+            c.fillStyle=`rgba(255,255,200,${(1-ba)*0.3})`;c.beginPath();c.arc(bx3-br3*0.3,by3-br3*0.3,br3*0.35,0,Math.PI*2);c.fill();
+            // Pop ring at end
+            if(ba>0.8){const pa=(ba-0.8)/0.2;
+              c.strokeStyle=`rgba(255,200,60,${(1-pa)*0.4})`;c.lineWidth=0.5;
+              c.beginPath();c.arc(bx3,by3,br3+pa*3,0,Math.PI*2);c.stroke();}}}
+
+        // === HEAT SHIMMER: subtle wavering glow ===
+        const shim=Math.sin(t/700+sd)*0.08+0.08;
+        c.fillStyle=`rgba(255,200,80,${shim})`;
+        c.beginPath();c.ellipse(px+16+f1*0.2,py+16+f2*0.2,14+Math.sin(t/2200+sd)*3,8+Math.cos(t/2800+sd)*2,t/6000+sd,0,Math.PI*2);c.fill();
+
+        // === AMBIENT BLOOM ===
+        c.fillStyle=`rgba(255,80,10,${0.05+Math.sin(t/2000+sd)*0.02})`;c.fillRect(px-3,py-3,TL+6,TL+6);
+
+        // === ORGANIC EDGES: bleed into neighbors ===
+        c.lineCap="round";
+        for(let ei2=0;ei2<6;ei2++){const esd=sd+ei2*41;
+          const side=ei2%4;const along=3+((esd*7)%26);const depth=2+((esd*11)%4);
+          const wave=Math.sin(t/900+esd)*2;
           let bx2,by2;
-          if(ei2===0){bx2=px+TL+depth+wave;by2=py+along;}
-          else if(ei2===1){bx2=px+along;by2=py+TL+depth+wave;}
-          else if(ei2===2){bx2=px-depth-wave;by2=py+along;}
+          if(side===0){bx2=px+TL+depth+wave;by2=py+along;}
+          else if(side===1){bx2=px+along;by2=py+TL+depth+wave;}
+          else if(side===2){bx2=px-depth-wave;by2=py+along;}
           else{bx2=px+along;by2=py-depth-wave;}
-          const pulse=0.2+Math.sin(t/600+esd)*0.08;
-          c.fillStyle=`rgba(200,60,10,${pulse})`;c.beginPath();c.ellipse(bx2,by2,4+((esd*3)%3),2+((esd*5)%2),esd%3,0,Math.PI*2);c.fill();
-          c.fillStyle=`rgba(255,140,30,${pulse*0.5})`;c.beginPath();c.ellipse(bx2,by2,2,1,esd%3,0,Math.PI*2);c.fill();
-        }
+          const pulse=0.18+Math.sin(t/700+esd)*0.08;
+          c.fillStyle=`rgba(180,50,8,${pulse})`;c.beginPath();c.ellipse(bx2,by2,3+((esd*3)%3),1.5+((esd*5)%2),esd%3,0,Math.PI*2);c.fill();
+          c.fillStyle=`rgba(255,120,20,${pulse*0.4})`;c.beginPath();c.arc(bx2,by2,1.5,0,Math.PI*2);c.fill();}
+        c.lineCap="butt";
       }else{
         // Bottomless pit
         c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
