@@ -781,13 +781,14 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   }
   if(s.npcTalk){
     s.npcTalk.timer+=dt;
-    s.npcTalk.charIdx=Math.min(s.npcTalk.lines[s.npcTalk.idx].length,Math.floor(s.npcTalk.timer/30));
+    // Join all lines into one continuous text, typewriter through it
+    if(!s.npcTalk.fullText)s.npcTalk.fullText=s.npcTalk.lines.join(" ");
+    s.npcTalk.charIdx=Math.min(s.npcTalk.fullText.length,Math.floor(s.npcTalk.timer/25));
     const ky=kyR.value;
     if(ky.has(" ")||ky.has("enter")||ky.has("e")||ky.has("z")||s.respawnClick){
       s.respawnClick=false;
-      if(s.npcTalk.charIdx>=s.npcTalk.lines[s.npcTalk.idx].length){
-        s.npcTalk.idx++;
-        if(s.npcTalk.idx>=s.npcTalk.lines.length){const wasDogDig=s.npcTalk.dogDig;const wasTreeGift=s.npcTalk.treeGift;const wasShopTrade=s.npcTalk.shopTrade;s.npcTalk=null;
+      if(s.npcTalk.charIdx>=s.npcTalk.fullText.length){
+        const wasDogDig=s.npcTalk.dogDig;const wasTreeGift=s.npcTalk.treeGift;const wasShopTrade=s.npcTalk.shopTrade;s.npcTalk=null;
           for(const ns3 of s.npcState)if(ns3.wait>5000)ns3.wait=2000;
           // Dog dug up a heart piece!
           if(wasDogDig){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
@@ -802,9 +803,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
           if(wasTreeGift){const dx2=s.p.x+PS/2,dy2=s.p.y-TL;
             s.drops.push({x:dx2,y:dy2-30,vy:-2,ground:dy2,type:"heartpiece_drop",t:0});
             sfx("heartpiece");s.shake.t=400;s.msg={text:"The Ancient Tree gave you a Heart Piece!",t:2500};
-            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2-20,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#2a6a18":"#fd3"})));}}
-        else{s.npcTalk.charIdx=0;s.npcTalk.timer=0;}
-      }else{s.npcTalk.charIdx=s.npcTalk.lines[s.npcTalk.idx].length;s.npcTalk.timer=99999;}
+            s.pt.push(...Array.from({length:15},()=>({x:dx2,y:dy2-20,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:800,c:Math.random()>.5?"#2a6a18":"#fd3"})));}
+      }else{s.npcTalk.charIdx=s.npcTalk.fullText.length;s.npcTalk.timer=99999;}
       ky.delete(" ");ky.delete("enter");ky.delete("e");ky.delete("z");
     }
     return;
@@ -3689,7 +3689,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.strokeStyle="rgba(253,211,51,0.5)";c.stroke();c.fillStyle="#fff";c.textAlign="center";c.fillText(s.msg.text,W2/2,my+20);c.textAlign="left";}
   // NPC Dialogue box
   if(s.npcTalk){const dlg=s.npcTalk;
-    const bx2=16,by2=H2-92,bw2=W2-32,bh2=84;const r3=6;
+    const bx2=16,by2=H2-100,bw2=W2-32,bh2=92;const r3=6;
     c.fillStyle="rgba(0,0,20,0.92)";
     c.beginPath();c.moveTo(bx2+r3,by2);c.lineTo(bx2+bw2-r3,by2);c.quadraticCurveTo(bx2+bw2,by2,bx2+bw2,by2+r3);
     c.lineTo(bx2+bw2,by2+bh2-r3);c.quadraticCurveTo(bx2+bw2,by2+bh2,bx2+bw2-r3,by2+bh2);
@@ -3702,14 +3702,19 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.lineTo(bx2,by2+r3);c.quadraticCurveTo(bx2,by2,bx2+r3,by2);c.stroke();
     c.lineWidth=1;
     c.fillStyle="#fd3";c.font="bold 11px monospace";c.textAlign="left";
-    c.fillText(dlg.name,bx2+10,by2+16);
-    // Show current line
-    c.fillStyle="#fff";c.font="12px monospace";
-    const line1=dlg.lines[dlg.idx];const shown1=line1.substring(0,dlg.charIdx);
-    c.fillText(shown1,bx2+10,by2+40);
-    c.fillStyle="#888";c.font="9px monospace";c.textAlign="right";
-    c.fillText(`${dlg.idx+1}/${dlg.lines.length}`,bx2+bw2-10,by2+16);
-    if(dlg.charIdx>=line1.length){const blink2=Math.sin(t/300)>0;
+    c.fillText(dlg.name,bx2+10,by2+14);
+    // Typewriter through all text, word-wrapped
+    c.fillStyle="#fff";c.font="11px monospace";
+    const full=dlg.fullText||dlg.lines.join(" ");
+    const shown=full.substring(0,dlg.charIdx);
+    const maxW=bw2-20;const lineH=14;let curLine="",ly2=by2+30;
+    const words=shown.split(" ");
+    for(const w of words){const test=curLine?curLine+" "+w:w;
+      if(c.measureText(test).width>maxW){c.fillText(curLine,bx2+10,ly2);ly2+=lineH;curLine=w;}
+      else{curLine=test;}}
+    if(curLine)c.fillText(curLine,bx2+10,ly2);
+    // Blinking arrow when all text shown
+    if(dlg.charIdx>=full.length){const blink2=Math.sin(t/300)>0;
       if(blink2){c.fillStyle="#fd3";c.font="bold 10px monospace";c.textAlign="center";c.fillText("\u25bc",bx2+bw2/2,by2+bh2-6);}}
     c.textAlign="left";}
   c.restore(); // end clip
