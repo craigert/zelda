@@ -548,7 +548,7 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
     else if(tl===T.JAR){s.pk.add(pk);s.hasJar=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Magic Jar! Carry spring water to heal!",t:3000};
       s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#8af":"#4cf"})));}
-    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
+    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=800;s.msg={text:"Master Sword! Double damage!",t:3000};
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
     else if(tl===T.TRIFORCE){s.pk.add(pk);p.tri[s.loc.di]=true;const c2=p.tri.filter(Boolean).length;sfx("triforce");
@@ -1460,7 +1460,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
       else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;sfx("itemget");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
-      else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("itemget");s.shake.t=600;s.freeze=500;s.msg={text:"Master Sword! Double damage!",t:3000};
+      else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=800;s.msg={text:"Master Sword! Double damage!",t:3000};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
       else if(d2.type==="hookshot"){p.hasHookshot=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Hookshot! Press V to fire at metal posts!",t:3500};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#0cc":"#8cf"})));}
