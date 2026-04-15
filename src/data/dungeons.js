@@ -265,12 +265,12 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     // Lava-surrounded treasure island (bottom-left) — only reachable via underground passage
     for(let x=1;x<=5;x++){m[8][x]=T.PIT;m[10][x]=T.PIT;}// lava moat top & bottom
     m[9][1]=T.PIT;m[9][5]=T.PIT;// lava moat sides
-    // The island itself
+    // The island itself — reachable via hookshot
     m[9][2]=T.FLOOR;m[9][3]=T.FLOOR;m[9][4]=T.FLOOR;
-    m[9][3]=T.KEY;// valuable key on the island
-    m[9][2]=T.STAIRS_DOWN;// passage arrival point
-    m[9][4]=T.RUPEE;
-    // Torches flanking the island (visible from above, tantalizing)
+    m[9][3]=T.KEY;m[9][4]=T.RUPEE;
+    m[9][2]=T.HOOKPOST;// hookshot target on island
+    m[7][3]=T.HOOKPOST;// hookpost on reachable floor to return
+    // Torches flanking the island (visible from above)
     m[8][2]=T.TORCH;m[8][4]=T.TORCH;
   }),enemies:[{x:3*TL,y:5*TL,hp:4,type:"fire_bat"},{x:12*TL,y:5*TL,hp:4,type:"fire_bat"}],
   traps:[{x:2,y:4,dir:"h",range:10},{x:7,y:2,dir:"v",range:7}]},
