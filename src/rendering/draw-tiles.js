@@ -1237,32 +1237,46 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
     case T.PIT:{
       const isLava=iD&&dg&&dg.th==="fire";
       if(isLava){
-        // Molten lava — glowing, flowing, alive
-        const lx=px*0.37+py*0.53;// per-tile seed
-        const flow1=Math.sin(t/800+lx)*0.5+0.5;
-        const flow2=Math.sin(t/600+lx*1.3+1)*0.5+0.5;
-        // Base deep red-orange
-        c.fillStyle="#4a1000";c.fillRect(px,py,TL,TL);
-        // Flowing bright lava streaks
-        const lg=c.createRadialGradient(px+10+flow1*12,py+10+flow2*12,2,px+16,py+16,18);
-        lg.addColorStop(0,"#ff6010");lg.addColorStop(0.4,"#d03008");lg.addColorStop(1,"#601000");
-        c.fillStyle=lg;c.fillRect(px,py,TL,TL);
-        // Hot spots — bright yellow-white patches that drift
-        const hx1=px+8+Math.sin(t/500+lx)*8,hy1=py+8+Math.cos(t/700+lx)*8;
-        const hx2=px+20+Math.sin(t/600+lx*2)*6,hy2=py+20+Math.cos(t/450+lx*2)*6;
-        c.fillStyle=`rgba(255,200,50,${0.3+flow1*0.2})`;c.beginPath();c.ellipse(hx1,hy1,5+flow2*2,3+flow1,t/2000+lx,0,Math.PI*2);c.fill();
-        c.fillStyle=`rgba(255,160,30,${0.25+flow2*0.15})`;c.beginPath();c.ellipse(hx2,hy2,4+flow1*2,2+flow2,t/1500+lx,0,Math.PI*2);c.fill();
-        // Surface crust — dark veins
-        c.strokeStyle=`rgba(40,8,0,${0.3+Math.sin(t/1000+lx)*0.1})`;c.lineWidth=1;
-        c.beginPath();c.moveTo(px+flow1*TL,py+4);c.quadraticCurveTo(px+16,py+16+flow2*4,px+TL-flow2*TL,py+TL-4);c.stroke();
-        c.beginPath();c.moveTo(px+4,py+flow2*TL);c.quadraticCurveTo(px+16+flow1*4,py+16,px+TL-4,py+TL-flow1*TL);c.stroke();
-        // Bubbles
-        const bub=Math.sin(t/300+lx*3);
-        if(bub>0.6){const bx=px+6+((lx*7)%20),by=py+6+((lx*11)%20),br=1+bub;
-          c.fillStyle=`rgba(255,220,80,${(bub-0.6)*2})`;c.beginPath();c.arc(bx,by,br,0,Math.PI*2);c.fill();}
-        // Edge darkening
-        c.fillStyle="rgba(30,5,0,0.3)";c.fillRect(px,py,TL,2);c.fillRect(px,py+TL-2,TL,2);
-        c.fillRect(px,py,2,TL);c.fillRect(px+TL-2,py,2,TL);
+        // Smooth flowing lava — layered glowing liquid
+        const sd=px*0.37+py*0.53;// per-tile seed for variation
+        // Slow smooth flow offsets
+        const fx=Math.sin(t/1200+sd)*8;const fy=Math.cos(t/1400+sd*1.3)*6;
+        const fx2=Math.sin(t/900+sd*0.7)*10;const fy2=Math.cos(t/1100+sd*1.1)*8;
+        // Layer 1: Deep dark red base
+        c.fillStyle="#3a0800";c.fillRect(px,py,TL,TL);
+        // Layer 2: Flowing orange-red mid layer (large smooth blobs)
+        for(let i=0;i<3;i++){const bsd=sd+i*47;
+          const bx2=px+8+Math.sin(t/1500+bsd)*10+i*8;const by2=py+8+Math.cos(t/1800+bsd)*8+i*6;
+          const br2=10+Math.sin(t/2000+bsd)*3;
+          const bg2=c.createRadialGradient(bx2,by2,0,bx2,by2,br2);
+          bg2.addColorStop(0,"rgba(220,80,10,0.7)");bg2.addColorStop(0.6,"rgba(180,40,5,0.4)");bg2.addColorStop(1,"rgba(100,15,0,0)");
+          c.fillStyle=bg2;c.fillRect(px,py,TL,TL);}
+        // Layer 3: Bright yellow-orange hot streams flowing across
+        c.strokeStyle="rgba(255,160,20,0.5)";c.lineWidth=3;
+        c.beginPath();c.moveTo(px+fx,py+8+fy*0.5);
+        c.quadraticCurveTo(px+16+fx2*0.5,py+16+fy2*0.3,px+TL+fx*0.7,py+24+fy*0.3);c.stroke();
+        c.strokeStyle="rgba(255,120,10,0.35)";c.lineWidth=2;
+        c.beginPath();c.moveTo(px+8+fx2*0.6,py+fy2);
+        c.quadraticCurveTo(px+20+fx*0.4,py+20+fy*0.5,px+TL-4+fx2*0.3,py+TL+fy2*0.4);c.stroke();
+        // Layer 4: Bright yellow-white hot spots (slow drifting)
+        for(let i=0;i<2;i++){const hsd=sd+i*83;
+          const hx=px+10+Math.sin(t/2000+hsd)*12;const hy=py+10+Math.cos(t/2400+hsd)*10;
+          const hp=Math.sin(t/1000+hsd)*0.15+0.35;
+          const hg=c.createRadialGradient(hx,hy,0,hx,hy,6+Math.sin(t/1500+hsd)*2);
+          hg.addColorStop(0,`rgba(255,240,120,${hp})`);hg.addColorStop(0.4,`rgba(255,180,40,${hp*0.6})`);hg.addColorStop(1,"rgba(255,100,10,0)");
+          c.fillStyle=hg;c.fillRect(px,py,TL,TL);}
+        // Layer 5: Surface shimmer — bright ripples
+        const shimmer=Math.sin(t/600+sd)*0.12+0.12;
+        c.fillStyle=`rgba(255,220,100,${shimmer})`;
+        c.beginPath();c.ellipse(px+16+fx*0.3,py+16+fy*0.3,12+Math.sin(t/1800+sd)*4,6+Math.cos(t/2200+sd)*2,t/5000+sd,0,Math.PI*2);c.fill();
+        // Layer 6: Bubbles — slow rising pops
+        for(let i=0;i<2;i++){const bsd2=sd+i*31;
+          const bubT=(t/800+bsd2*3)%3;// 0-3 cycle
+          if(bubT<1){const ba=bubT;const bx3=px+8+((bsd2*7)%18);const by3=py+20-ba*8;const br3=1.5+ba;
+            c.fillStyle=`rgba(255,200,60,${(1-ba)*0.6})`;c.beginPath();c.arc(bx3,by3,br3,0,Math.PI*2);c.fill();
+            c.fillStyle=`rgba(255,255,180,${(1-ba)*0.3})`;c.beginPath();c.arc(bx3-0.5,by3-0.5,br3*0.4,0,Math.PI*2);c.fill();}}
+        // Ambient glow — slight bloom
+        c.fillStyle=`rgba(255,100,20,${0.04+Math.sin(t/2000+sd)*0.02})`;c.fillRect(px-2,py-2,TL+4,TL+4);
       }else{
         // Bottomless pit
         c.fillStyle="#040408";c.fillRect(px,py,TL,TL);
