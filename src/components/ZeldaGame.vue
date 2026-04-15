@@ -3564,14 +3564,16 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   const nightAmount=getNightAmount(s.weather.timer);
   const isNight=nightAmount>0.3;
   if(!iD&&loc.scr!=="-1,2"){
-    // Ambient day/night tint (skip Sacred Lake — always serene)
-    const dayAmb=Math.sin(t/15000)*0.03;
-    if(nightAmount>0.05){
-      // Night: blue-dark overlay
-      c.fillStyle=`rgba(8,8,35,${nightAmount*0.55})`;c.fillRect(0,0,W2,H2);
-    }else{
-      c.fillStyle=dayAmb>0?`rgba(255,200,100,${dayAmb})`:`rgba(100,150,255,${-dayAmb})`;c.fillRect(0,0,W2,H2);
-    }
+    // Smooth continuous day/night tint — blends between warm day and cool night
+    // Warm golden day tint (strongest at noon, fades as night approaches)
+    const dayStr=(1-nightAmount);
+    const dayAmb=dayStr*Math.sin(t/15000)*0.03;
+    if(dayAmb>0){c.fillStyle=`rgba(255,200,100,${dayAmb})`;c.fillRect(0,0,W2,H2);}
+    // Sunset/sunrise orange tint (peaks during transition)
+    const sunsetStr=Math.sin(nightAmount*Math.PI)*0.08;// peaks at 0.5 nightAmount
+    if(sunsetStr>0.01){c.fillStyle=`rgba(200,100,40,${sunsetStr})`;c.fillRect(0,0,W2,H2);}
+    // Cool blue night tint (grows smoothly from 0 to full)
+    if(nightAmount>0){c.fillStyle=`rgba(8,8,35,${nightAmount*0.55})`;c.fillRect(0,0,W2,H2);}
   }
   // --- Weather rendering (overworld only) ---
   if(!iD&&s.weather.type!=="clear"&&loc.scr!=="-1,2"){const w=s.weather;
