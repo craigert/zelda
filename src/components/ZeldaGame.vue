@@ -1308,11 +1308,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
             s.treeGift=true;sfx("itemget");s.shake.t=400;
             s.npcTalk={name:npc.name,lines:["...*creak*... You carry the Master Sword!","The blade of legend... I can feel its power.","You are truly the hero of Hyrule.","Take this gift I have guarded for ages..."],idx:0,charIdx:0,timer:0,treeGift:true};
             npcHit=true;ns2.st="idle";ns2.wait=9999;break;}
-          if(!s._talkedNpcs)s._talkedNpcs=new Set();
-          const npcKey=loc.scr+":"+ni;const talked=s._talkedNpcs.has(npcKey);
-          s._talkedNpcs.add(npcKey);
-          const lines=talked&&npc.repeat?npc.repeat:npc.lines;
-          s.npcTalk={name:npc.name,lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
+          s.npcTalk={name:npc.name,lines:npc.lines,idx:0,charIdx:0,timer:0};sfx("pickup");npcHit=true;
           ns2.st="idle";ns2.wait=9999;// Stop wandering during talk
           // NPC faces player
           ns2.dir=Math.abs(ndx)>Math.abs(ndy)?(ndx>0?3:1):(ndy>0?0:2);
@@ -3707,12 +3703,10 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.lineWidth=1;
     c.fillStyle="#fd3";c.font="bold 11px monospace";c.textAlign="left";
     c.fillText(dlg.name,bx2+10,by2+16);
-    // Show current line + next line (2 lines visible at once)
+    // Show current line
     c.fillStyle="#fff";c.font="12px monospace";
     const line1=dlg.lines[dlg.idx];const shown1=line1.substring(0,dlg.charIdx);
-    c.fillText(shown1,bx2+10,by2+34);
-    const line2=dlg.lines[dlg.idx+1];
-    if(line2&&dlg.charIdx>=line1.length){c.fillStyle="#ccc";c.fillText(line2,bx2+10,by2+50);}
+    c.fillText(shown1,bx2+10,by2+40);
     c.fillStyle="#888";c.font="9px monospace";c.textAlign="right";
     c.fillText(`${dlg.idx+1}/${dlg.lines.length}`,bx2+bw2-10,by2+16);
     if(dlg.charIdx>=line1.length){const blink2=Math.sin(t/300)>0;
