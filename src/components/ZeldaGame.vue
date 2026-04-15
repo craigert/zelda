@@ -408,7 +408,7 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
   s.npcState=npcs?npcs.map(n=>({x:n.tx*TL,y:n.ty*TL,hx:n.tx*TL,hy:n.ty*TL,dir:2,mt:Math.random()*3000,st:"idle",wait:1000+Math.random()*2000,fixed:!!n.fixed||n.name.includes("Tree")||n.name==="Sign"})):[];
   // Trigger Dark Sanctum reveal when entering screen 3,2 with all 3 triforce pieces
   if(s.loc.ty==="ow"&&s.loc.scr==="3,2"&&s.finalOpen&&!s.sanctumRevealed){
-    s.sanctumRevealed=true;s.sanctumReveal={t:0,phase:"wait",dur:8000};s.freeze=9000;}
+    s.sanctumRevealed=true;s.sanctumReveal={t:0,phase:"wait",dur:8000};}
   // Always load blade traps for dungeons (even if room is cleared)
   s.bladeTraps=[];
   if(s.loc.ty==="dg"){const rm2=s.dg[s.loc.di].rooms[s.loc.scr];
