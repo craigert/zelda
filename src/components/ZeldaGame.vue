@@ -680,8 +680,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
       if(s.chest.reward){s.drops.push({x:s.chest.x+12,y:s.chest.y-(s.chest.itemY||0),vy:-1,ground:s.chest.y,type:s.chest.reward,t:0});}
-      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",hookshot:"Hookshot",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
-      const isSpecial=["bow","bomb_bag","master_sword","master_key","hookshot"].includes(s.chest.reward);
+      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",hookshot:"Hookshot",compass:"Compass",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
+      const isSpecial=["bow","bomb_bag","master_sword","master_key","hookshot","compass"].includes(s.chest.reward);
       sfx(isSpecial?"itemget":"pickup");
       s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
     // Still update particles during freeze
@@ -1484,6 +1484,8 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
       else if(d2.type==="hookshot"){p.hasHookshot=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Hookshot! Press V to fire at metal posts!",t:3500};
         s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#0cc":"#8cf"})));}
+      else if(d2.type==="compass"){if(s.loc.di>=0)p.compasses[s.loc.di]=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got the Compass! Boss and key rooms now show on the map.",t:3500};
+        s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:700,c:Math.random()>.5?"#fd3":"#8cf"})));}
       else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
         s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
       else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
@@ -1498,7 +1500,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         s.triforceHold={t:0,dur:3500,piece:tc2,px:p.x,py:p.y,warp:false};
         s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2+(Math.random()-.5)*30,y:p.y+PS/2+(Math.random()-.5)*30,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:800,c:"#fd3"})));}
       s.drops.splice(i,1);continue;}
-    if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana"].includes(d2.type))s.drops.splice(i,1);}
+    if(d2.t>8000&&!["triforce","heartcontainer","key_drop","bow","bomb_bag","master_sword","master_key","banana","hookshot","compass"].includes(d2.type))s.drops.splice(i,1);}
   // Boss victory auto-warp — delayed fade to dungeon entrance after collecting all items
   if(s.bossVictory&&s.bossVictory.fadeDelay!=null){
     s.bossVictory.fadeDelay-=dt;
@@ -3295,6 +3297,12 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
         c.fillStyle="#c070ff";c.beginPath();c.arc(rix,riy-3+bob3,4,0,Math.PI*2);c.fill();
         c.fillStyle="#a050dd";c.fillRect(rix-1,riy+1+bob3,2,8);
         c.fillRect(rix,riy+5+bob3,4,2);c.fillRect(rix,riy+7+bob3,3,2);}
+      else if(ch.reward==="compass"){// Compass icon
+        c.fillStyle="#d8a840";c.beginPath();c.arc(rix,riy+bob3,6,0,Math.PI*2);c.fill();
+        c.fillStyle="#f0ead8";c.beginPath();c.arc(rix,riy+bob3,4.5,0,Math.PI*2);c.fill();
+        const cna=t/400;c.strokeStyle="#cc2222";c.lineWidth=1.2;
+        c.beginPath();c.moveTo(rix,riy+bob3);c.lineTo(rix+Math.cos(cna-Math.PI/2)*4,riy+bob3+Math.sin(cna-Math.PI/2)*4);c.stroke();
+        c.fillStyle="#333";c.beginPath();c.arc(rix,riy+bob3,1,0,Math.PI*2);c.fill();}
       else{c.fillStyle="#fd3";c.beginPath();c.arc(rix,riy+bob3,6,0,Math.PI*2);c.fill();}
     }else{
       // Open chest (empty)
@@ -3367,6 +3375,13 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       const sy2=d2.y+bob2;c.fillStyle=`rgba(130,180,255,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,sy2,10,0,Math.PI*2);c.fill();
       c.fillStyle="#c0d8ff";c.beginPath();c.moveTo(d2.x,sy2-8);c.lineTo(d2.x-2,sy2+3);c.lineTo(d2.x+2,sy2+3);c.fill();
       c.fillStyle="#fd3";c.fillRect(d2.x-5,sy2+2,10,2);c.fillStyle="#6a4a2a";c.fillRect(d2.x-1,sy2+4,2,4);}
+    else if(d2.type==="compass"){// Compass drop
+      const cy3=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,cy3,10,0,Math.PI*2);c.fill();
+      c.fillStyle="#d8a840";c.beginPath();c.arc(d2.x,cy3,6,0,Math.PI*2);c.fill();
+      c.fillStyle="#f0ead8";c.beginPath();c.arc(d2.x,cy3,4.5,0,Math.PI*2);c.fill();
+      const cna2=t/400;c.strokeStyle="#cc2222";c.lineWidth=1.2;
+      c.beginPath();c.moveTo(d2.x,cy3);c.lineTo(d2.x+Math.cos(cna2-Math.PI/2)*4,cy3+Math.sin(cna2-Math.PI/2)*4);c.stroke();
+      c.fillStyle="#333";c.beginPath();c.arc(d2.x,cy3,1,0,Math.PI*2);c.fill();}
     else if(d2.type==="key_drop"){// Falling key
       const ky3=d2.y+bob2;c.fillStyle=`rgba(253,211,51,${0.2+Math.sin(t/200)*0.1})`;c.beginPath();c.arc(d2.x,ky3,10,0,Math.PI*2);c.fill();
       c.fillStyle="#fd3";c.beginPath();c.arc(d2.x,ky3-3,4,0,Math.PI*2);c.fill();

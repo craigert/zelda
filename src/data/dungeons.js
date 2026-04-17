@@ -13,7 +13,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][3]=T.WALL;m[3][4]=T.WALL;m[3][11]=T.WALL;m[3][12]=T.WALL;
     m[5][5]=T.TALLGRASS;m[5][10]=T.TALLGRASS;m[6][5]=T.TALLGRASS;m[6][10]=T.TALLGRASS;
     m[5][3]=T.TORCH;m[5][12]=T.TORCH;
-    m[5][7]=T.PUSH;m[4][8]=T.COMPASS;
+    m[5][7]=T.PUSH;
     // Overgrown patches
     m[4][4]=T.TALLGRASS;m[4][5]=T.TALLGRASS;m[7][4]=T.TALLGRASS;m[7][11]=T.TALLGRASS;
     m[3][6]=T.TALLGRASS;m[8][9]=T.TALLGRASS;m[8][10]=T.TALLGRASS;
@@ -65,7 +65,7 @@ const d1={name:"Forest Temple",color:"#1a3020",wc:"#3a6a3a",fc:"#2a4a28",th:"for
     m[3][8]=T.LADDER;m[4][8]=T.LADDER;
     // Treasure in the pit
     m[5][7]=T.HEART;m[6][6]=T.RUPEE;
-  }),enemies:[{x:6*TL,y:5*TL,hp:3,type:"vine_creeper"},{x:9*TL,y:6*TL,hp:2,type:"bat"}]},
+  }),enemies:[{x:6*TL,y:5*TL,hp:3,type:"vine_creeper"},{x:9*TL,y:6*TL,hp:2,type:"bat"}],reward:"compass"},
 
   // Central north — pit maze with bridges
   "0,-1":{tiles:mr(m=>{ae(m,["S","N","E"]);
@@ -205,7 +205,6 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     for(let y=3;y<=8;y++){m[y][2]=T.PIT;m[y][3]=T.PIT;m[y][12]=T.PIT;m[y][13]=T.PIT;}
     m[5][6]=T.SPIKE;m[5][9]=T.SPIKE;m[6][6]=T.SPIKE;m[6][9]=T.SPIKE;
     m[3][2]=T.TORCH;m[3][13]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
-    m[4][7]=T.COMPASS;
   }),enemies:[{x:5*TL,y:5*TL,hp:3,type:"fire_bat"},{x:10*TL,y:5*TL,hp:3,type:"fire_bat"}]},
 
   // East of entry — zigzag spike room
@@ -227,13 +226,13 @@ const d2={name:"Fire Cavern",color:"#2a1510",wc:"#6a3a2a",fc:"#4a2218",th:"fire"
     m[2][2]=T.TORCH;m[2][13]=T.TORCH;
   }),enemies:[{x:2*TL,y:3*TL,hp:4,type:"fire_bat"},{x:2*TL,y:8*TL,hp:4,type:"fire_bat"},{x:13*TL,y:3*TL,hp:4,type:"mage"},{x:13*TL,y:8*TL,hp:4,type:"skeleton"}]},
 
-  // Secret room (crack east wall of 1,0) — treasure cache
+  // Secret room (crack east wall of 1,0) — treasure cache with compass chest
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
-    m[4][7]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;
+    m[4][4]=T.RUPEE;m[4][11]=T.RUPEE;
+    m[7][4]=T.BOMB;m[7][11]=T.BOMB;
     m[3][6]=T.TORCH;m[3][9]=T.TORCH;m[8][6]=T.TORCH;m[8][9]=T.TORCH;
-  }),enemies:[]},
+  }),enemies:[],reward:"compass"},
 
   // Central hub — push block puzzle
   "0,0":{tiles:mr(m=>{ae(m,["S","E","W"]);m[0][7]=T.DOOR;m[0][8]=T.DOOR;
@@ -396,16 +395,15 @@ const d3={name:"Shadow Keep",color:"#12122a",wc:"#3a3a5e",fc:"#1e1e38",th:"shado
     m[6][3]=T.WALL;m[6][4]=T.WALL;m[8][11]=T.WALL;m[8][12]=T.WALL;
     m[2][7]=T.TORCH;m[9][7]=T.TORCH;
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
-    m[4][7]=T.COMPASS;
   }),enemies:[{x:4*TL,y:5*TL,hp:3,type:"ghost"},{x:11*TL,y:4*TL,hp:3,type:"knight"},{x:7*TL,y:8*TL,hp:3,type:"skeleton"}]},
 
-  // Secret room (crack east wall of 0,0) — treasure cache
+  // Secret room (crack east wall of 0,0) — treasure cache with compass chest
   "1,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
-    m[4][7]=T.RUPEE;m[6][7]=T.BOMB;m[6][8]=T.RUPEE;
+    m[4][4]=T.RUPEE;m[4][11]=T.RUPEE;
+    m[7][4]=T.BOMB;m[7][11]=T.RUPEE;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
-  }),enemies:[]},
+  }),enemies:[],reward:"compass"},
 
   // West wing — sunken center with ghosts
   "-1,0":{tiles:mr(m=>{ae(m,["E","N"]);
@@ -560,7 +558,7 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[3][4]=T.WALL;m[3][5]=T.WALL;m[3][10]=T.WALL;m[3][11]=T.WALL;
     m[8][4]=T.WALL;m[8][5]=T.WALL;m[8][10]=T.WALL;m[8][11]=T.WALL;
     m[2][3]=T.TORCH;m[2][12]=T.TORCH;m[9][3]=T.TORCH;m[9][12]=T.TORCH;
-    m[5][7]=T.PUSH;m[4][8]=T.COMPASS;
+    m[5][7]=T.PUSH;
   }),enemies:[{x:4*TL,y:5*TL,hp:5,type:"stalfos"},{x:11*TL,y:5*TL,hp:5,type:"ghost"},{x:7*TL,y:3*TL,hp:5,type:"stalfos"},{x:7*TL,y:8*TL,hp:5,type:"skeleton"}]},
 
   // East wing — dark spike room
@@ -572,13 +570,13 @@ const d4={name:"Dark Sanctum",color:"#0a0a0a",wc:"#3a1a3a",fc:"#1a0a1a",th:"sanc
     m[5][CO-1]=T.CRACK;m[6][CO-1]=T.CRACK;
   }),enemies:[{x:6*TL,y:5*TL,hp:5,type:"mage"},{x:9*TL,y:6*TL,hp:5,type:"ghost"},{x:3*TL,y:7*TL,hp:4,type:"knight"}]},
 
-  // Secret room (crack east wall of 1,0) — treasure cache
+  // Secret room (crack east wall of 1,0) — treasure cache with compass chest
   "2,0":{tiles:mr(m=>{
     m[5][0]=T.FLOOR;m[6][0]=T.FLOOR;
-    m[5][7]=T.RUPEE;m[5][8]=T.RUPEE;
-    m[4][6]=T.RUPEE;m[4][9]=T.RUPEE;m[6][6]=T.BOMB;m[6][9]=T.BOMB;
+    m[4][4]=T.RUPEE;m[4][11]=T.RUPEE;
+    m[7][4]=T.BOMB;m[7][11]=T.BOMB;
     m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[8][5]=T.TORCH;m[8][10]=T.TORCH;
-  }),enemies:[]},
+  }),enemies:[],reward:"compass"},
 
   // East upper — ghost arena (east leads to master key)
   // "Four Corners" push block puzzle — move 4 blocks into a square to reveal stairs
