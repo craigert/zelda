@@ -1633,6 +1633,33 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle=`rgba(255,200,150,${0.04+Math.sin(ht/500+px*0.2)*0.03})`;
       c.fillRect(px,py,TL,TL);
       break;}
+    case T.COMPASS:{// Compass item — brass dial with spinning needle
+      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      // Glow halo
+      const cg=Math.sin(t/300)*0.15+0.25;
+      c.fillStyle=`rgba(253,211,51,${cg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      // Brass outer ring
+      c.fillStyle="#b8862a";c.beginPath();c.arc(px+16,py+17,9,0,Math.PI*2);c.fill();
+      c.fillStyle="#d8a840";c.beginPath();c.arc(px+16,py+17,8,0,Math.PI*2);c.fill();
+      // White dial face
+      c.fillStyle="#f0ead8";c.beginPath();c.arc(px+16,py+17,6.5,0,Math.PI*2);c.fill();
+      // Cardinal marks
+      c.fillStyle="#333";c.font="bold 4px monospace";c.textAlign="center";
+      c.fillText("N",px+16,py+14);
+      c.textAlign="left";
+      // Spinning needle
+      const na=t/400;
+      const nx1=px+16+Math.cos(na-Math.PI/2)*5,ny1=py+17+Math.sin(na-Math.PI/2)*5;
+      const nx2=px+16-Math.cos(na-Math.PI/2)*4,ny2=py+17-Math.sin(na-Math.PI/2)*4;
+      c.strokeStyle="#cc2222";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(px+16,py+17);c.lineTo(nx1,ny1);c.stroke();
+      c.strokeStyle="#444";c.lineWidth=1.5;
+      c.beginPath();c.moveTo(px+16,py+17);c.lineTo(nx2,ny2);c.stroke();
+      // Center pin
+      c.fillStyle="#8a6a20";c.beginPath();c.arc(px+16,py+17,1.5,0,Math.PI*2);c.fill();
+      // Sparkle
+      const cs=Math.sin(t/200)*2;c.fillStyle="#fff";c.beginPath();c.arc(px+12+cs,py+12,1,0,Math.PI*2);c.fill();
+      break;}
     case T.EMPTY:c.fillStyle="#080808";c.fillRect(px,py,TL,TL);break;
     default:c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
   }

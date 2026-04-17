@@ -6,7 +6,7 @@ import { OW, OW_EN } from '../data/overworld.js';
 import { DG, DE } from '../data/dungeons.js';
 
 const FH=H2+HH;
-const tCols={[T.GRASS]:"#4aaa3a",[T.WATER]:"#2266aa",[T.TREE]:"#1a5a1a",[T.SAND]:"#d4b060",[T.PATH]:"#a08050",[T.ROCK]:"#777",[T.FLOWER]:"#4aaa3a",[T.BUSH]:"#2a7a2a",[T.TALLGRASS]:"#3a9a3a",[T.BRIDGE]:"#8b6914",[T.ICE]:"#aaddff",[T.ENTRANCE]:"#c8a030",[T.WALL]:"#555",[T.CRACK]:"#666",[T.EMPTY]:"#181818",[T.STUMP]:"#5a3a1a",[T.FLOOR]:"#555",[T.NPC]:"#4aaa3a",[T.HEART_PIECE]:"#f66",[T.MASTER_KEY]:"#c070ff",[T.SPIKE]:"#888",[T.PIT]:"#222",[T.TORCH]:"#f80",[T.DOOR]:"#8a6a2a",[T.BOSS_DOOR]:"#a04040",[T.KEY]:"#fd3",[T.HEART]:"#f44",[T.BOMB]:"#88f",[T.RUPEE]:"#4f4",[T.TRIFORCE]:"#fd3",[T.BOW]:"#8a6a2a",[T.BOMB_BAG]:"#8a6a2a",[T.MASTER_SWORD]:"#88ccff",[T.BANANA]:"#fd3",[T.LEDGE_S]:"#444",[T.LEDGE_N]:"#444",[T.LEDGE_E]:"#444",[T.LEDGE_W]:"#444",[T.LEVER]:"#a66",[T.PLATE]:"#999",[T.PUSH]:"#777",[T.TSWITCH]:"#aa8",[T.STAIRS_UP]:"#aa8844",[T.LADDER]:"#8a6a3a",[T.LOW_FLOOR]:"#333",[T.HOT_SPRING]:"#40a8a0",[T.HOOKPOST]:"#5a5a6a"};
+const tCols={[T.GRASS]:"#4aaa3a",[T.WATER]:"#2266aa",[T.TREE]:"#1a5a1a",[T.SAND]:"#d4b060",[T.PATH]:"#a08050",[T.ROCK]:"#777",[T.FLOWER]:"#4aaa3a",[T.BUSH]:"#2a7a2a",[T.TALLGRASS]:"#3a9a3a",[T.BRIDGE]:"#8b6914",[T.ICE]:"#aaddff",[T.ENTRANCE]:"#c8a030",[T.WALL]:"#555",[T.CRACK]:"#666",[T.EMPTY]:"#181818",[T.STUMP]:"#5a3a1a",[T.FLOOR]:"#555",[T.NPC]:"#4aaa3a",[T.HEART_PIECE]:"#f66",[T.MASTER_KEY]:"#c070ff",[T.SPIKE]:"#888",[T.PIT]:"#222",[T.TORCH]:"#f80",[T.DOOR]:"#8a6a2a",[T.BOSS_DOOR]:"#a04040",[T.KEY]:"#fd3",[T.HEART]:"#f44",[T.BOMB]:"#88f",[T.RUPEE]:"#4f4",[T.TRIFORCE]:"#fd3",[T.BOW]:"#8a6a2a",[T.BOMB_BAG]:"#8a6a2a",[T.MASTER_SWORD]:"#88ccff",[T.BANANA]:"#fd3",[T.LEDGE_S]:"#444",[T.LEDGE_N]:"#444",[T.LEDGE_E]:"#444",[T.LEDGE_W]:"#444",[T.LEVER]:"#a66",[T.PLATE]:"#999",[T.PUSH]:"#777",[T.TSWITCH]:"#aa8",[T.STAIRS_UP]:"#aa8844",[T.LADDER]:"#8a6a3a",[T.LOW_FLOOR]:"#333",[T.HOT_SPRING]:"#40a8a0",[T.HOOKPOST]:"#5a5a6a",[T.COMPASS]:"#d8a840"};
 
 // ========== SHARED CHROME ==========
 function drawFrame(c,t){
@@ -228,9 +228,10 @@ function drawDungeonMap(c,s,t){
     // Room border
     c.strokeStyle=isCurrent?"#ffe866":"rgba(150,130,80,0.4)";c.lineWidth=isCurrent?1.5:0.5;
     c.strokeRect(rx+2,ry+2,ms-4,ms-4);
-    // Boss room marker
+    // Boss room marker — only if compass obtained
     const rm=dg.rooms[rk];
-    if(rm?.enemies?.some(e=>e.type==="boss")){
+    const hasCompass=s.p.compasses&&s.p.compasses[s.loc.di];
+    if(hasCompass&&rm?.enemies?.some(e=>e.type==="boss")){
       c.fillStyle="#f44";
       // Skull icon
       c.beginPath();c.arc(rx+ms/2,ry+ms/2-1,4,0,Math.PI*2);c.fill();
@@ -241,11 +242,15 @@ function drawDungeonMap(c,s,t){
       c.fillStyle="#aa8844";c.font="bold 8px monospace";c.textAlign="center";
       c.fillText("\u25b2",rx+ms/2,ry+ms/2+3);c.textAlign="left";
     }
-    // Master key marker
-    if(rm?.tiles?.some(r=>r.includes(T.MASTER_KEY))){
+    // Master key marker — only if compass obtained
+    if(hasCompass&&rm?.tiles?.some(r=>r.includes(T.MASTER_KEY))){
       const found=s.p.masterKey[s.loc.di];
       c.fillStyle=found?"#555":"#c070ff";
       if(!found){c.font="bold 8px monospace";c.textAlign="center";c.fillText("\u2605",rx+ms/2,ry+ms/2+3);c.textAlign="left";}
+    }
+    // Key marker — only if compass obtained
+    if(hasCompass&&rm?.tiles?.some(r=>r.includes(T.KEY))){
+      c.fillStyle="#fd3";c.beginPath();c.arc(rx+ms/2+5,ry+ms/2+5,2,0,Math.PI*2);c.fill();
     }
   }
   // Current room blink
@@ -493,6 +498,13 @@ function drawEquipGrid(c,s,t){
         c.fillStyle="#ccc";c.beginPath();c.moveTo(cx+4,cy-6);c.lineTo(cx,cy-3);c.lineTo(cx+2,cy-1);c.closePath();c.fill();}}}:
     {name:"Bone",has:s.p.hasBone,draw:(cx,cy)=>{
       if(s.p.hasBone){c.fillStyle="#e8dcc8";c.fillRect(cx-5,cy-1,10,3);c.beginPath();c.arc(cx-5,cy,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+5,cy,2.5,0,Math.PI*2);c.fill();}}},
+    {name:"Compass",has:s.p.compasses&&s.p.compasses.some(Boolean),draw:(cx,cy)=>{
+      const count=s.p.compasses?s.p.compasses.filter(Boolean).length:0;
+      c.fillStyle="#d8a840";c.beginPath();c.arc(cx,cy,6,0,Math.PI*2);c.fill();
+      c.fillStyle="#f0ead8";c.beginPath();c.arc(cx,cy,4.5,0,Math.PI*2);c.fill();
+      c.strokeStyle="#cc2222";c.lineWidth=1.2;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+1,cy-4);c.stroke();
+      c.fillStyle="#333";c.beginPath();c.arc(cx,cy,1,0,Math.PI*2);c.fill();
+      if(count>0){c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="right";c.fillText(count+"/4",cx+12,cy+8);c.textAlign="left";}}},
   ];
 
   const cols=3,cellW=72,cellH=48;
