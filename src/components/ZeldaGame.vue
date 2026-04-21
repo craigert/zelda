@@ -102,7 +102,7 @@ function init() {
     sw:{a:false,t:0},loc:{ty:"ow",scr:"1,1",di:-1},
     hookshot:null,// {tipX,tipY,dx,dy,st:"extend"|"hit"|"pull"|"retract",spd,maxDist,target,t}
     en:[],pk:new Set(),dr:new Set(),cl:new Set(),bc:new Set(),mb:new Set(),co:new Set(),// bc = bombed cracks, mb = moved boulders, co = chests opened
-    msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],ec:0,
+    msg:{text:"",t:0},go:false,won:false,dg:dc(DG),pt:[],bugs:[],ec:0,
     title:true,saveSelect:false,saveSelIdx:0,
     fade:{a:false,alpha:0,dir:1,cb:null,t:0},
     shake:{x:0,y:0,t:0},
@@ -418,7 +418,7 @@ function igTrig(s,type){const m=ITEM_GET[type];if(!m)return false;
     s.pt.push({x:s.p.x+PS/2,y:s.p.y+PS/2,dx:Math.cos(a)*2.5,dy:Math.sin(a)*2-1.5,l:900,c:Math.random()>.5?"#fd3":"#fff"});}
   return true;}
 
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;s.itemGet=null;
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;s.itemGet=null;s.bugs=[];
   // Instant fog when entering shadow forest
   if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){s.weather.fog=0.50;s.weather.type="fog";}
   // Restore lit torches for this room (persists between visits)
@@ -1267,6 +1267,18 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         // Leaf particles
         const leafCount=tlB===T.BUSH?10:6;
         for(let i=0;i<leafCount;i++)s.pt.push({x:ftxB*TL+16,y:ftyB*TL+16,dx:(Math.random()-.5)*3.5,dy:-Math.random()*2.5-0.5,l:600,c:Math.random()>.5?"#3aaa2a":"#5ac038"});
+        // Tiny bugs flutter away (BotW-style) — more likely from tallgrass
+        const bugChance=tlB===T.TALLGRASS?0.6:0.35;
+        if(Math.random()<bugChance){const nBugs=1+Math.floor(Math.random()*3);
+          for(let i=0;i<nBugs;i++){const ang=-Math.PI/2+(Math.random()-.5)*Math.PI*0.9;
+            const spd=1.0+Math.random()*0.9;
+            const palette=[["#fff8a0","#ffd633"],["#a8e0ff","#5aa8ff"],["#ffb8d8","#ff7aa8"],["#c4ffb0","#7adb4a"]];
+            const col=palette[Math.floor(Math.random()*palette.length)];
+            s.bugs.push({x:ftxB*TL+16+(Math.random()-.5)*8,y:ftyB*TL+12+(Math.random()-.5)*6,
+              vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,t:0,l:1800+Math.random()*1200,
+              flap:Math.random()*Math.PI*2,flapSpd:0.5+Math.random()*0.4,
+              kind:Math.random()<0.55?0:1,wob:Math.random()*Math.PI*2,
+              col1:col[0],col2:col[1]});}}
         // Chance to drop an item — bushes 18%, tallgrass 10%
         const dropChance=tlB===T.BUSH?0.18:0.10;
         if(Math.random()<dropChance){const r=Math.random();
@@ -1471,6 +1483,13 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   }
   if(s.sw.a){s.sw.t-=dt;if(s.sw.t<=0)s.sw.a=false;}if(p.ifr>0)p.ifr-=dt;
   for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+  // Bugs from cut grass — flutter outward with wobble, then fade
+  for(let i=s.bugs.length-1;i>=0;i--){const b=s.bugs[i];b.t+=dt;
+    b.flap+=b.flapSpd*(dt/16);
+    const drag=Math.pow(0.97,dt/16);b.vx*=drag;b.vy=b.vy*drag-0.006*(dt/16);
+    const wob=Math.sin(b.t/130+b.wob)*0.5;
+    b.x+=(b.vx+wob)*(dt/16);b.y+=b.vy*(dt/16);
+    if(b.t>=b.l)s.bugs.splice(i,1);}
   for(let i=s.dmgNums.length-1;i>=0;i--){const dn=s.dmgNums[i];dn.y-=1.2*(dt/16);dn.t-=dt;if(dn.t<=0)s.dmgNums.splice(i,1);}
   if(s.roomFlash>0)s.roomFlash-=dt;
   for(let i=s.drops.length-1;i>=0;i--){const d2=s.drops[i];d2.t+=dt;
@@ -3675,6 +3694,24 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     c.fillStyle=pt.c;c.globalAlpha=pa*0.3;c.beginPath();c.arc(pt.x,pt.y,psz*2.5,0,Math.PI*2);c.fill();
     c.globalAlpha=pa;c.beginPath();c.arc(pt.x,pt.y,psz,0,Math.PI*2);c.fill();
     c.fillStyle="#fff";c.globalAlpha=pa*0.5;c.beginPath();c.arc(pt.x,pt.y,psz*0.4,0,Math.PI*2);c.fill();}c.globalAlpha=1;
+  // Bugs fluttering away from cut grass
+  for(const b of s.bugs){
+    const fadeIn=Math.min(1,b.t/150),fadeOut=b.t>b.l-400?Math.max(0,(b.l-b.t)/400):1;
+    const a=fadeIn*fadeOut;if(a<=0)continue;
+    const ws=0.55+Math.abs(Math.sin(b.flap))*0.55;// wing scale (flap)
+    if(b.kind===0){// Glowing firefly-style — soft halo + bright core
+      c.globalAlpha=a*0.35;c.fillStyle=b.col1;c.beginPath();c.arc(b.x,b.y,3.5,0,Math.PI*2);c.fill();
+      c.globalAlpha=a*0.8;c.fillStyle=b.col2;c.beginPath();c.arc(b.x,b.y,1.4,0,Math.PI*2);c.fill();
+      c.globalAlpha=a;c.fillStyle="#fff";c.beginPath();c.arc(b.x,b.y,0.6,0,Math.PI*2);c.fill();
+    }else{// Butterfly — two flapping wings + dark body
+      c.globalAlpha=a*0.85;c.fillStyle=b.col1;
+      c.beginPath();c.ellipse(b.x-1.6*ws,b.y-0.6,1.7*ws,1.3,0,0,Math.PI*2);c.fill();
+      c.beginPath();c.ellipse(b.x+1.6*ws,b.y-0.6,1.7*ws,1.3,0,0,Math.PI*2);c.fill();
+      c.globalAlpha=a*0.6;c.fillStyle=b.col2;
+      c.beginPath();c.ellipse(b.x-1.4*ws,b.y-0.4,0.8*ws,0.7,0,0,Math.PI*2);c.fill();
+      c.beginPath();c.ellipse(b.x+1.4*ws,b.y-0.4,0.8*ws,0.7,0,0,Math.PI*2);c.fill();
+      c.globalAlpha=a;c.fillStyle="#332";c.fillRect(b.x-0.4,b.y-1,0.9,2.2);
+    }}c.globalAlpha=1;
   for(const dn of s.dmgNums){c.globalAlpha=Math.min(1,dn.t/300);c.fillStyle=dn.c;c.font="bold 12px monospace";c.textAlign="center";c.fillText(dn.val,dn.x,dn.y);c.textAlign="left";}c.globalAlpha=1;
   if(s.roomFlash>0){c.fillStyle=`rgba(255,255,200,${s.roomFlash/500*0.25})`;c.fillRect(0,0,W2,H2);}
   // Dungeon darkness -- dark until torches are lit
