@@ -138,6 +138,7 @@ function init() {
     pitFall:{a:false,t:0,x:0,y:0}, // pit fall animation
     litTorchesAll:{}, // persisted lit torches per room
     triforceHold:null, // {t,dur,piece,px,py,warp} -- hold triforce above head
+    itemGet:null, // {type,name,desc,t,dur,px,py,pdir} -- item-get pose ceremony
     ledgeHop:0, // timer for hop animation when dropping off a ledge
     litTorches:new Set(), // "x,y" keys of torches lit by sword in current room
     combatLock:false, // true when room has enemies and exits are sealed
@@ -396,7 +397,28 @@ function applyVolume(vol){
 }
 
 // --- Game logic functions ---
-function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;
+// --- Item-get pose definitions ---
+const ITEM_GET={
+  bow:{name:"Bow",desc:"Press C to fire arrows (1 rupee each).",dur:2800},
+  bomb_bag:{name:"Bomb Bag",desc:"Press B to plant bombs.",dur:2800},
+  master_sword:{name:"Master Sword",desc:"Doubles your sword damage.",dur:3000},
+  master_key:{name:"Master Key",desc:"Opens the boss door of this dungeon.",dur:2600},
+  hookshot:{name:"Hookshot",desc:"Press V to grapple metal posts.",dur:2800},
+  compass:{name:"Compass",desc:"Boss and key rooms appear on the map.",dur:2800},
+  banana:{name:"Golden Banana",desc:"The shopkeeper might want this...",dur:2800},
+  bone:{name:"Bone",desc:"It looks valuable to someone.",dur:2500},
+  jar:{name:"Magic Jar",desc:"Carry spring water to heal yourself.",dur:2800},
+  heartcontainer:{name:"Heart Container",desc:"Maximum HP increased!",dur:2500},
+};
+function igTrig(s,type){const m=ITEM_GET[type];if(!m)return false;
+  s.itemGet={type,name:m.name,desc:m.desc,t:0,dur:m.dur,px:s.p.x,py:s.p.y,pdir:s.p.dir};
+  sfx("itemget");s.shake.t=200;
+  // Sparkle burst around the player
+  for(let i=0;i<14;i++){const a=Math.PI*2*i/14;
+    s.pt.push({x:s.p.x+PS/2,y:s.p.y+PS/2,dx:Math.cos(a)*2.5,dy:Math.sin(a)*2-1.5,l:900,c:Math.random()>.5?"#fd3":"#fff"});}
+  return true;}
+
+function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;s.itemGet=null;
   // Instant fog when entering shadow forest
   if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){s.weather.fog=0.50;s.weather.type="fog";}
   // Restore lit torches for this room (persists between visits)
@@ -532,26 +554,19 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
     const tl=m[ty][tx],pk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;if(s.pk.has(pk))continue;
     const cx=tx*TL,cy=ty*TL;if(!(p.x<cx+TL&&p.x+PS>cx&&p.y<cy+TL&&p.y+PS>cy))continue;
     if(tl===T.RUPEE){s.pk.add(pk);p.rupees+=5;s.msg={text:"Got rupees!",t:1000};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#4f4"})));}
-    else if(tl===T.MASTER_KEY){s.pk.add(pk);if(s.loc.di>=0)p.masterKey[s.loc.di]=true;s.msg={text:"Got the Master Key!",t:2000};sfx("pickup");s.shake.t=300;
-      s.pt.push(...Array.from({length:12},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#ffd633"})));}
+    else if(tl===T.MASTER_KEY){s.pk.add(pk);if(s.loc.di>=0)p.masterKey[s.loc.di]=true;igTrig(s,"master_key");}
     else if(tl===T.KEY){s.pk.add(pk);p.keys++;s.msg={text:"Got a key!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
     else if(tl===T.BOMB){if(!p.hasBombs){s.msg={text:"Need a Bomb Bag first!",t:1500};}else{s.pk.add(pk);p.bombs+=1;s.msg={text:"Got a bomb!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#88f"})));}}
     else if(tl===T.HEART_PIECE){s.pk.add(pk);p.heartPieces++;sfx("heartpiece");s.freeze=500;
       if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
       else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
       s.pt.push(...Array.from({length:10},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
-    else if(tl===T.BANANA){s.pk.add(pk);p.hasBanana=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Golden Banana! The shopkeeper might want this...",t:3500};
-      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#fa0"})));}
-    else if(tl===T.BOW){s.pk.add(pk);p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
-      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
-    else if(tl===T.BOMB_BAG){s.pk.add(pk);p.hasBombs=true;p.bombs+=5;sfx("triforce");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
-      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
-    else if(tl===T.JAR){s.pk.add(pk);s.hasJar=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Magic Jar! Carry spring water to heal!",t:3000};
-      s.pt.push(...Array.from({length:15},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#8af":"#4cf"})));}
-    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=800;s.msg={text:"Master Sword! Double damage!",t:3000};
-      s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
-    else if(tl===T.COMPASS){s.pk.add(pk);if(s.loc.di>=0)p.compasses[s.loc.di]=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got the Compass! Boss and key rooms now show on the map.",t:3500};
-      s.pt.push(...Array.from({length:12},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:700,c:Math.random()>.5?"#fd3":"#8cf"})));}
+    else if(tl===T.BANANA){s.pk.add(pk);p.hasBanana=true;igTrig(s,"banana");}
+    else if(tl===T.BOW){s.pk.add(pk);p.hasBow=true;igTrig(s,"bow");}
+    else if(tl===T.BOMB_BAG){s.pk.add(pk);p.hasBombs=true;p.bombs+=5;igTrig(s,"bomb_bag");}
+    else if(tl===T.JAR){s.pk.add(pk);s.hasJar=true;igTrig(s,"jar");}
+    else if(tl===T.MASTER_SWORD){s.pk.add(pk);p.hasMasterSword=true;igTrig(s,"master_sword");}
+    else if(tl===T.COMPASS){s.pk.add(pk);if(s.loc.di>=0)p.compasses[s.loc.di]=true;igTrig(s,"compass");}
     else if(tl===T.HEART){s.pk.add(pk);p.hp=Math.min(p.hp+2,p.mhp);s.msg={text:"Heart restored!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*3,dy:-Math.random()*2,l:500,c:"#f66"})));}
     else if(tl===T.TRIFORCE){s.pk.add(pk);p.tri[s.loc.di]=true;const c2=p.tri.filter(Boolean).length;sfx("triforce");
       s.pt.push(...Array.from({length:20},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:1000,c:"#fd3"})));
@@ -680,11 +695,22 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
   if(s.chest&&s.chest.state==="presenting"){s.chest.t+=dt;s.chest.itemY=Math.min(40,(s.chest.itemY||0)+2.5*(dt/16));
     if(s.chest.t>=1500){s.chest.state="open";s.chest.t=0;
       if(s.chest.reward){s.drops.push({x:s.chest.x+12,y:s.chest.y-(s.chest.itemY||0),vy:-1,ground:s.chest.y,type:s.chest.reward,t:0});}
-      const itemNames={bow:"Bow",bomb_bag:"Bomb Bag",master_sword:"Master Sword",master_key:"Master Key",hookshot:"Hookshot",compass:"Compass",heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
-      const isSpecial=["bow","bomb_bag","master_sword","master_key","hookshot","compass"].includes(s.chest.reward);
-      sfx(isSpecial?"itemget":"pickup");
-      s.msg={text:itemNames[s.chest.reward]?`You got the ${itemNames[s.chest.reward]}!`:"Treasure!",t:2000};}
+      const itemNames={heart:"Heart",rupee_blue:"Rupees",rupee_green:"Rupees"};
+      // For ceremonial items, defer the announcement to the item-get pose triggered on pickup.
+      // For minor rewards (heart/rupees/bomb), show a small message now.
+      if(ITEM_GET[s.chest.reward]){sfx("pickup");}
+      else{sfx("pickup");s.msg={text:itemNames[s.chest.reward]||"Treasure!",t:1800};}}
     // Still update particles during freeze
+    for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
+    return;}
+  // Item-get pose freeze -- player holds item aloft, name banner, dismissible after 800ms
+  if(s.itemGet){s.itemGet.t+=dt;
+    const ky=kyR.value;
+    if(s.itemGet.t>800&&(ky.has(" ")||ky.has("enter")))s.itemGet.t=s.itemGet.dur;
+    // Periodic sparkle around the held item
+    if(Math.random()<0.4){const ang=Math.random()*Math.PI*2,r=10+Math.random()*8;
+      s.pt.push({x:s.itemGet.px+PS/2+Math.cos(ang)*r,y:s.itemGet.py-12+Math.sin(ang)*r*0.6,dx:(Math.random()-.5)*0.6,dy:-Math.random()*0.5,l:600,c:Math.random()>.5?"#fff":"#fd3"});}
+    if(s.itemGet.t>=s.itemGet.dur)s.itemGet=null;
     for(let i=s.pt.length-1;i>=0;i--){const pt=s.pt[i];pt.x+=pt.dx*(dt/16);pt.y+=pt.dy*(dt/16);pt.l-=dt;if(pt.l<=0)s.pt.splice(i,1);}
     return;}
   // Deferred boss intro — trigger if no slide was active (e.g. entering via fade/stairs)
@@ -1472,27 +1498,20 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
         if(p.heartPieces>=4){p.heartPieces=0;p.mhp+=2;p.hp=p.mhp;sfx("triforce");s.shake.t=400;s.msg={text:"Heart Piece (4/4)! New heart container!",t:2500};}
         else{s.msg={text:`Heart Piece (${p.heartPieces}/4)`,t:2000};}
         s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ff3366":"#ffd633"})));}
-      else if(d2.type==="bone"){p.hasBone=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got a Bone! I wonder if this has any use?",t:3000};
-        s.pt.push(...Array.from({length:10},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:600,c:Math.random()>.5?"#ddd":"#aa9070"})));}
+      else if(d2.type==="bone"){p.hasBone=true;igTrig(s,"bone");}
       else if(d2.type==="rupee_purple"){p.rupees+=10;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+10",c:"#a4f"});}
       else if(d2.type==="rupee_red"){p.rupees+=20;sfx("pickup");s.dmgNums.push({x:p.x+PS/2,y:p.y,t:800,val:"+20",c:"#f44"});}
-      else if(d2.type==="bow"){p.hasBow=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Bow! Press C to shoot (costs 1 rupee)",t:3000};
-        s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#fd3":"#a06820"})));}
-      else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;sfx("itemget");s.shake.t=400;s.msg={text:"Got Bomb Bag! Press B to place bombs",t:3000};
-        s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#88f":"#f80"})));}
-      else if(d2.type==="master_sword"){p.hasMasterSword=true;sfx("triforce");s.shake.t=600;s.freeze=800;s.msg={text:"Master Sword! Double damage!",t:3000};
-        s.pt.push(...Array.from({length:20},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*6,l:1000,c:Math.random()>.5?"#8af":"#fff"})));}
-      else if(d2.type==="hookshot"){p.hasHookshot=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Hookshot! Press V to fire at metal posts!",t:3500};
-        s.pt.push(...Array.from({length:15},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#0cc":"#8cf"})));}
-      else if(d2.type==="compass"){if(s.loc.di>=0)p.compasses[s.loc.di]=true;sfx("itemget");s.shake.t=300;s.msg={text:"Got the Compass! Boss and key rooms now show on the map.",t:3500};
-        s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*4,dy:(Math.random()-.5)*4,l:700,c:Math.random()>.5?"#fd3":"#8cf"})));}
-      else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;sfx("itemget");s.shake.t=400;s.msg={text:"Got the Master Key!",t:2500};
-        s.pt.push(...Array.from({length:12},()=>({x:p.x+PS/2,y:p.y+PS/2,dx:(Math.random()-.5)*5,dy:(Math.random()-.5)*5,l:800,c:Math.random()>.5?"#c070ff":"#fd3"})));}
-      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;sfx("itemget");s.msg={text:"Heart Container! Max HP up!",t:2500};
+      else if(d2.type==="bow"){p.hasBow=true;igTrig(s,"bow");}
+      else if(d2.type==="bomb_bag"){p.hasBombs=true;p.bombs+=5;igTrig(s,"bomb_bag");}
+      else if(d2.type==="master_sword"){p.hasMasterSword=true;igTrig(s,"master_sword");}
+      else if(d2.type==="hookshot"){p.hasHookshot=true;igTrig(s,"hookshot");}
+      else if(d2.type==="compass"){if(s.loc.di>=0)p.compasses[s.loc.di]=true;igTrig(s,"compass");}
+      else if(d2.type==="master_key"){if(s.loc.di>=0)p.masterKey[s.loc.di]=true;igTrig(s,"master_key");}
+      else if(d2.type==="heartcontainer"){p.mhp+=2;p.hp=p.mhp;igTrig(s,"heartcontainer");
         if(d2.bossId&&!s.heartContainers.includes(d2.bossId))s.heartContainers.push(d2.bossId);
         // Auto-warp to entrance if boss defeated + triforce already collected + HC just collected
         if(s.bossVictory&&p.tri[s.bossVictory.di]){
-          s.bossVictory.fadeDelay=800;s.shake.t=300;}}
+          s.bossVictory.fadeDelay=800;}}
       else if(d2.type==="triforce"){p.tri[s.loc.di]=true;sfx("itemget");s.shake.t=500;
         const tc2=p.tri.filter(Boolean).length;
         if(tc2>=3&&!s.finalOpen){s.finalOpen=true;}
@@ -3455,6 +3474,108 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     // Golden glow intensifies when warp is ready
     if(th2.warp){const wp2=Math.min(1,(th2.t-2000)/500);
       c.fillStyle=`rgba(253,211,51,${wp2*0.08})`;c.fillRect(0,0,W2,H2);}
+  }else if(s.itemGet){// Item-get pose: player frozen with arms raised, item floating overhead
+    const ig=s.itemGet,igp=Math.min(1,ig.t/400);// arm-raise ramp
+    const fadeOut=ig.t>ig.dur-300?(ig.dur-ig.t)/300:1;// fade out near end
+    const hx=ig.px,hy=ig.py;
+    // Vignette dim behind player to focus the moment
+    const vg=c.createRadialGradient(hx+PS/2,hy+PS/2,40,hx+PS/2,hy+PS/2,Math.max(W2,H2));
+    vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,`rgba(0,0,0,${0.55*fadeOut})`);
+    c.fillStyle=vg;c.fillRect(0,0,W2,H2);
+    // Pickup flash
+    if(ig.t<250){const fa=1-ig.t/250;c.fillStyle=`rgba(255,255,220,${fa*0.45})`;c.fillRect(0,0,W2,H2);}
+    // Radial golden glow behind player
+    const rg=c.createRadialGradient(hx+PS/2,hy+PS/2,5,hx+PS/2,hy+PS/2,55+Math.sin(t/200)*8);
+    rg.addColorStop(0,`rgba(253,211,51,${(0.18+Math.sin(t/150)*0.05)*fadeOut})`);rg.addColorStop(1,"rgba(253,211,51,0)");
+    c.fillStyle=rg;c.fillRect(hx-50,hy-50,PS+100,PS+100);
+    // Player frozen, facing down, arms raised
+    c.fillStyle="rgba(0,0,0,0.2)";c.beginPath();c.ellipse(hx+12,hy+23,8,3,0,0,Math.PI*2);c.fill();
+    c.fillStyle="#6a3a18";c.beginPath();c.arc(hx+7,hy+22,3,0,Math.PI*2);c.fill();c.beginPath();c.arc(hx+17,hy+22,3,0,Math.PI*2);c.fill();
+    c.fillStyle="#c8b080";c.fillRect(hx+6,hy+17,4,5);c.fillRect(hx+14,hy+17,4,5);
+    const tL=p.redArmor?"#aa4848":"#48aa48",tD=p.redArmor?"#7a2a2a":"#2a7a2a";
+    const hL=p.redArmor?"#9a2a2a":"#2a9a2a",hD=p.redArmor?"#7a1a1a":"#1a7a1a",hB=p.redArmor?"#882222":"#22882a";
+    const igBg=c.createLinearGradient(hx+4,hy+8,hx+20,hy+18);igBg.addColorStop(0,tL);igBg.addColorStop(1,tD);
+    c.fillStyle=igBg;c.beginPath();c.moveTo(hx+5,hy+9);c.lineTo(hx+19,hy+9);c.lineTo(hx+20,hy+18);c.lineTo(hx+4,hy+18);c.closePath();c.fill();
+    c.fillStyle="#8a6a2a";c.fillRect(hx+4,hy+15,16,2);c.fillStyle="#d4b040";c.fillRect(hx+10,hy+15,4,2);
+    const armRaise=igp*12;
+    c.fillStyle=tL;c.fillRect(hx+1,hy+5-armRaise,4,8);c.fillRect(hx+19,hy+5-armRaise,4,8);
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+3,hy+4-armRaise,2.5,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(hx+21,hy+4-armRaise,2.5,0,Math.PI*2);c.fill();
+    c.fillStyle="#f0c8a0";c.beginPath();c.arc(hx+12,hy+5,6,0,Math.PI*2);c.fill();
+    c.fillStyle="#c8a030";c.beginPath();c.arc(hx+12,hy+3,6,Math.PI+0.3,Math.PI*2-0.3);c.fill();
+    const igHg=c.createLinearGradient(hx+4,hy-4,hx+20,hy+3);igHg.addColorStop(0,hL);igHg.addColorStop(1,hD);
+    c.fillStyle=igHg;c.beginPath();c.moveTo(hx+5,hy+2);c.lineTo(hx+12,hy-5);c.lineTo(hx+19,hy+2);c.closePath();c.fill();
+    c.fillStyle=hB;c.beginPath();c.ellipse(hx+12,hy+2,8,2,0,0,Math.PI*2);c.fill();
+    c.fillStyle="#222";c.beginPath();c.arc(hx+10,hy+4,1,0,Math.PI*2);c.fill();
+    c.beginPath();c.arc(hx+14,hy+4,1,0,Math.PI*2);c.fill();
+    c.strokeStyle="#aa6644";c.lineWidth=0.7;c.beginPath();c.arc(hx+12,hy+8,2,0.2,Math.PI-0.2);c.stroke();
+    // Item floating over head, with light column
+    const liftY=armRaise+10+Math.sin(t/200)*1.8;
+    const ix=hx+PS/2,iy=hy-liftY;
+    c.fillStyle=`rgba(253,211,51,${(0.10+Math.sin(t/200)*0.04)*fadeOut})`;
+    c.beginPath();c.moveTo(ix-12,hy);c.lineTo(ix+12,hy);c.lineTo(ix+5,iy-10);c.lineTo(ix-5,iy-10);c.fill();
+    // Outer aura
+    c.fillStyle=`rgba(253,211,51,${(0.35+Math.sin(t/150)*0.15)*fadeOut})`;c.beginPath();c.arc(ix,iy,14,0,Math.PI*2);c.fill();
+    // Item icon (mirror chest reward switch)
+    const bob=Math.sin(t/180)*1.5;const riy=iy+bob,rix=ix;
+    if(ig.type==="bow"){
+      c.strokeStyle="#8B5A2B";c.lineWidth=2;c.beginPath();c.arc(rix-2,riy,7,-Math.PI*0.4,Math.PI*0.4);c.stroke();
+      c.strokeStyle="#ddd";c.lineWidth=1;c.beginPath();c.moveTo(rix-2+Math.cos(-Math.PI*0.4)*7,riy+Math.sin(-Math.PI*0.4)*7);c.lineTo(rix-2+Math.cos(Math.PI*0.4)*7,riy+Math.sin(Math.PI*0.4)*7);c.stroke();
+      c.strokeStyle="#a06820";c.lineWidth=1.5;c.beginPath();c.moveTo(rix-4,riy);c.lineTo(rix+8,riy);c.stroke();
+    }else if(ig.type==="bomb_bag"){
+      c.fillStyle="#8B6B3A";c.beginPath();c.moveTo(rix-5,riy-1);c.lineTo(rix-6,riy+7);c.lineTo(rix+6,riy+7);c.lineTo(rix+5,riy-1);c.fill();
+      c.fillStyle="#333";c.beginPath();c.arc(rix,riy+3,4,0,Math.PI*2);c.fill();
+      c.fillStyle="#f80";c.beginPath();c.arc(rix+3,riy-2,1.5,0,Math.PI*2);c.fill();
+    }else if(ig.type==="master_sword"){
+      c.fillStyle="#c0d8ff";c.beginPath();c.moveTo(rix,riy-9);c.lineTo(rix-2,riy+4);c.lineTo(rix+2,riy+4);c.fill();
+      c.fillStyle="#fd3";c.fillRect(rix-5,riy+3,10,2);c.fillStyle="#6a4a2a";c.fillRect(rix-1,riy+5,2,5);
+      // Glow blade highlight
+      c.fillStyle="rgba(255,255,255,0.5)";c.fillRect(rix-0.5,riy-8,1,12);
+    }else if(ig.type==="master_key"){
+      c.fillStyle="#c070ff";c.beginPath();c.arc(rix,riy-3,4,0,Math.PI*2);c.fill();
+      c.fillStyle="#a050dd";c.fillRect(rix-1,riy+1,2,8);c.fillRect(rix,riy+5,4,2);c.fillRect(rix,riy+7,3,2);
+    }else if(ig.type==="hookshot"){
+      c.fillStyle="#aaa";c.fillRect(rix-2,riy-1,8,3);
+      c.fillStyle="#444";c.fillRect(rix-5,riy-2,3,5);
+      c.strokeStyle="#777";c.lineWidth=1;c.beginPath();c.moveTo(rix+6,riy);c.lineTo(rix-6,riy+1);c.lineTo(rix+6,riy+1);c.stroke();
+      c.fillStyle="#0cc";c.beginPath();c.arc(rix+7,riy+0.5,1.8,0,Math.PI*2);c.fill();
+    }else if(ig.type==="compass"){
+      c.fillStyle="#d8a840";c.beginPath();c.arc(rix,riy,7,0,Math.PI*2);c.fill();
+      c.fillStyle="#f0ead8";c.beginPath();c.arc(rix,riy,5.5,0,Math.PI*2);c.fill();
+      const cna=t/350;c.strokeStyle="#cc2222";c.lineWidth=1.4;
+      c.beginPath();c.moveTo(rix,riy);c.lineTo(rix+Math.cos(cna-Math.PI/2)*5,riy+Math.sin(cna-Math.PI/2)*5);c.stroke();
+      c.fillStyle="#333";c.beginPath();c.arc(rix,riy,1.2,0,Math.PI*2);c.fill();
+    }else if(ig.type==="banana"){
+      c.fillStyle="#ffd633";c.beginPath();c.moveTo(rix-6,riy+2);c.quadraticCurveTo(rix,riy-8,rix+6,riy+2);c.quadraticCurveTo(rix,riy+5,rix-6,riy+2);c.fill();
+      c.fillStyle="#a06820";c.fillRect(rix-7,riy+1,2,2);
+    }else if(ig.type==="bone"){
+      c.fillStyle="#e8dcc8";c.fillRect(rix-6,riy-1,12,3);
+      c.beginPath();c.arc(rix-6,riy,3,0,Math.PI*2);c.fill();c.beginPath();c.arc(rix+6,riy,3,0,Math.PI*2);c.fill();
+    }else if(ig.type==="jar"){
+      c.fillStyle="rgba(140,200,240,0.85)";c.beginPath();c.moveTo(rix-4,riy-4);c.lineTo(rix+4,riy-4);c.lineTo(rix+5,riy+5);c.lineTo(rix-5,riy+5);c.fill();
+      c.fillStyle="#aa8a3a";c.fillRect(rix-3,riy-5,6,2);
+      c.fillStyle="rgba(255,255,255,0.4)";c.fillRect(rix-3,riy-2,1.5,5);
+    }else if(ig.type==="heartcontainer"){
+      c.fillStyle="#ee3333";dH(c,rix-7,riy-7,14);
+      c.fillStyle="rgba(255,255,255,0.35)";c.fillRect(rix-4,riy-4,2,3);
+    }else{
+      c.fillStyle="#fd3";c.beginPath();c.arc(rix,riy,6,0,Math.PI*2);c.fill();}
+    // Sparkle ring
+    for(let i=0;i<8;i++){const sa=t/400+i*Math.PI/4,sr=14+Math.sin(t/250+i)*4;
+      const sx=ix+Math.cos(sa)*sr,sy=iy+Math.sin(sa)*sr*0.85;
+      c.fillStyle=`rgba(255,255,210,${(0.3+Math.sin(t/200+i)*0.2)*fadeOut})`;
+      c.beginPath();c.arc(sx,sy,1.5,0,Math.PI*2);c.fill();}
+    // Name banner near bottom of play area
+    if(ig.t>250){const bp=Math.min(1,(ig.t-250)/300);
+      const bx=W2/2,by=H2-66;
+      c.fillStyle=`rgba(0,0,0,${0.65*bp*fadeOut})`;c.fillRect(0,by-2,W2,46);
+      c.fillStyle=`rgba(253,211,51,${0.8*bp*fadeOut})`;c.fillRect(0,by-2,W2,1);c.fillRect(0,by+44,W2,1);
+      c.textAlign="center";
+      c.fillStyle=`rgba(255,236,160,${bp*fadeOut})`;c.font="bold 16px monospace";c.fillText(ig.name,bx,by+18);
+      c.fillStyle=`rgba(230,230,230,${bp*fadeOut})`;c.font="10px monospace";c.fillText(ig.desc,bx,by+34);
+      if(ig.t>1100){const pa=Math.sin(t/250)*0.3+0.55;
+        c.fillStyle=`rgba(200,200,200,${pa*fadeOut})`;c.font="8px monospace";c.fillText("[SPACE] continue",bx,H2-8);}
+      c.textAlign="left";}
   }else if(s.heroLand){// Hero descending from sky in pillar of light
     const hl=s.heroLand;
     const heroY=hl.landed?p.y:(hl.y!=null?hl.y:-40);
