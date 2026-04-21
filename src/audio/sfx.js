@@ -52,6 +52,24 @@ export function initSfx(){if(sfxReady)return;
   sfxSynths.pickup=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.12,sustain:0.1,release:0.1},volume:-14}}).toDestination();
   sfxSynths.hurt=new Tone.PolySynth(Tone.Synth,{maxPolyphony:2,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.001,decay:0.15,sustain:0,release:0.1},volume:-10}}).toDestination();
   sfxSynths.fanfare=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.01,decay:0.2,sustain:0.3,release:0.3},volume:-12}}).toDestination();
+
+  // === ITEM-GET FANFARE — triumphant rising flourish + held chord + sparkle ===
+  // Reverb gives the moment air and "magic"
+  const igRev=new Tone.Reverb({decay:1.6,wet:0.28}).toDestination();
+  // Lead: bright triangle for the rising arpeggio (cuts through clearly)
+  sfxSynths.itemgetLead=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"triangle"},envelope:{attack:0.005,decay:0.18,sustain:0.25,release:0.25},volume:-9}}).connect(igRev);
+  // Sub-octave layer for warmth/body
+  sfxSynths.itemgetSub=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"sine"},envelope:{attack:0.005,decay:0.2,sustain:0.3,release:0.3},volume:-14}}).connect(igRev);
+  // Held resolution chord: longer release for the "ahhhh" ring-out
+  sfxSynths.itemgetChord=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"triangle"},envelope:{attack:0.02,decay:0.5,sustain:0.5,release:1.2},volume:-10}}).connect(igRev);
+  // Bell-like top sparkle on the final chord
+  sfxSynths.itemgetBell=new Tone.PolySynth(Tone.Synth,{maxPolyphony:4,voice:Tone.Synth,options:{oscillator:{type:"sine"},envelope:{attack:0.001,decay:0.4,sustain:0,release:0.5},volume:-12}}).connect(igRev);
+  // High shimmer noise for the sparkle dust
+  sfxSynths.itemgetShimmer=makePool(()=>{
+    const n=new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.005,decay:0.3,sustain:0.05,release:0.2},volume:-22});
+    const hp=new Tone.Filter({frequency:8000,type:"highpass"});
+    n.connect(hp);hp.connect(igRev);return n;},2);
+
   sfxSynths.door=makePool(()=>new Tone.NoiseSynth({noise:{type:"brown"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1},volume:-14}).toDestination(),2);
   sfxSynths.dooropenTone=new Tone.PolySynth(Tone.Synth,{maxPolyphony:6,voice:Tone.Synth,options:{oscillator:{type:"square"},envelope:{attack:0.005,decay:0.18,sustain:0.15,release:0.2},volume:-10}}).toDestination();
   sfxSynths.bomb=makePool(()=>new Tone.NoiseSynth({noise:{type:"white"},envelope:{attack:0.001,decay:0.4,sustain:0.05,release:0.2},volume:-8}).toDestination(),3);
@@ -102,7 +120,27 @@ export function sfx(name,note){if(!sfxReady)return;
   else if(name==="kill"){const t=Tone.now();sfxSynths.hitKnock.trigger("A4","16n",t);sfxSynths.hitKnock.trigger("E4","16n",t+0.06);}
   else if(name==="bossdeath"){const t=Tone.now();["D5","F#5","A5","D6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.15));}
   else if(name==="triforce"){const t=Tone.now();["A4","C#5","E5","A5","C#6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.12));}
-  else if(name==="itemget"){const t=Tone.now();["C5","E5","G5","C6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.1));}
+  else if(name==="itemget"){
+    // Triumphant fanfare: rapid rising D-major arpeggio → held bright chord with bell + shimmer
+    const t=Tone.now();
+    // Pickup flourish (16th notes climbing)
+    const seq=[["D5",0],["F#5",0.07],["A5",0.14],["D6",0.21],["F#6",0.28]];
+    seq.forEach(([n2,off])=>{
+      sfxSynths.itemgetLead.triggerAttackRelease(n2,"16n",t+off);
+      // Sub-octave reinforcement, one octave down
+      const subN=Tone.Frequency(n2).transpose(-12).toNote();
+      sfxSynths.itemgetSub.triggerAttackRelease(subN,"16n",t+off);
+    });
+    // Held resolution chord: D major with octave doubling for fullness
+    const chordT=t+0.40;
+    sfxSynths.itemgetChord.triggerAttackRelease(["D4","F#4","A4","D5","F#5","A5"],"2n",chordT);
+    // Bell sparkle on top of the chord
+    sfxSynths.itemgetBell.triggerAttackRelease(["D6","A6"],"4n",chordT+0.02);
+    sfxSynths.itemgetBell.triggerAttackRelease(["F#6","D7"],"4n",chordT+0.18);
+    // Shimmer noise dust
+    sfxSynths.itemgetShimmer.trigger("8n",t+0.25);
+    sfxSynths.itemgetShimmer.trigger("4n",chordT+0.05);
+  }
   else if(name==="heartpiece"){const t=Tone.now();["F5","A5","C6","F6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n.",t+i*0.14));sfxSynths.fanfare.triggerAttackRelease("F6","4n",t+0.56);}
   else if(name==="secret"){const t=Tone.now();["G4","A4","B4","C5","D5","E5","F#5","G5"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"16n",t+i*0.07));sfxSynths.fanfare.triggerAttackRelease("G5","4n",t+0.56);}
   else if(name==="cursor"){sfxSynths.pickup.triggerAttackRelease("E5","32n");}
