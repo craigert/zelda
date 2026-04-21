@@ -412,7 +412,7 @@ const ITEM_GET={
 };
 function igTrig(s,type){const m=ITEM_GET[type];if(!m)return false;
   s.itemGet={type,name:m.name,desc:m.desc,t:0,dur:m.dur,px:s.p.x,py:s.p.y,pdir:s.p.dir};
-  sfx("itemget");s.shake.t=200;
+  sfx("itemfanfare");s.shake.t=200;
   // Sparkle burst around the player
   for(let i=0;i<14;i++){const a=Math.PI*2*i/14;
     s.pt.push({x:s.p.x+PS/2,y:s.p.y+PS/2,dx:Math.cos(a)*2.5,dy:Math.sin(a)*2-1.5,l:900,c:Math.random()>.5?"#fd3":"#fff"});}

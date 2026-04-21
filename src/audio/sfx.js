@@ -120,24 +120,20 @@ export function sfx(name,note){if(!sfxReady)return;
   else if(name==="kill"){const t=Tone.now();sfxSynths.hitKnock.trigger("A4","16n",t);sfxSynths.hitKnock.trigger("E4","16n",t+0.06);}
   else if(name==="bossdeath"){const t=Tone.now();["D5","F#5","A5","D6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.15));}
   else if(name==="triforce"){const t=Tone.now();["A4","C#5","E5","A5","C#6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.12));}
-  else if(name==="itemget"){
-    // Triumphant fanfare: rapid rising D-major arpeggio → held bright chord with bell + shimmer
+  else if(name==="itemget"){const t=Tone.now();["C5","E5","G5","C6","E6"].forEach((n2,i)=>sfxSynths.fanfare.triggerAttackRelease(n2,"8n",t+i*0.1));}
+  else if(name==="itemfanfare"){
+    // Triumphant fanfare for story items: rapid rising D-major arpeggio → held bright chord with bell + shimmer
     const t=Tone.now();
-    // Pickup flourish (16th notes climbing)
     const seq=[["D5",0],["F#5",0.07],["A5",0.14],["D6",0.21],["F#6",0.28]];
     seq.forEach(([n2,off])=>{
       sfxSynths.itemgetLead.triggerAttackRelease(n2,"16n",t+off);
-      // Sub-octave reinforcement, one octave down
       const subN=Tone.Frequency(n2).transpose(-12).toNote();
       sfxSynths.itemgetSub.triggerAttackRelease(subN,"16n",t+off);
     });
-    // Held resolution chord: D major with octave doubling for fullness
     const chordT=t+0.40;
     sfxSynths.itemgetChord.triggerAttackRelease(["D4","F#4","A4","D5","F#5","A5"],"2n",chordT);
-    // Bell sparkle on top of the chord
     sfxSynths.itemgetBell.triggerAttackRelease(["D6","A6"],"4n",chordT+0.02);
     sfxSynths.itemgetBell.triggerAttackRelease(["F#6","D7"],"4n",chordT+0.18);
-    // Shimmer noise dust
     sfxSynths.itemgetShimmer.trigger("8n",t+0.25);
     sfxSynths.itemgetShimmer.trigger("4n",chordT+0.05);
   }
