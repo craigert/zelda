@@ -554,6 +554,8 @@ function cPk(s){const p=s.p,m=gm(s);if(!m)return;const ptx=Math.floor((p.x+PS/2)
     const tl=m[ty][tx],pk=`${s.loc.ty}:${s.loc.di}:${s.loc.scr}:${tx},${ty}`;if(s.pk.has(pk))continue;
     const cx=tx*TL,cy=ty*TL;if(!(p.x<cx+TL&&p.x+PS>cx&&p.y<cy+TL&&p.y+PS>cy))continue;
     if(tl===T.RUPEE){s.pk.add(pk);p.rupees+=1;sfx("pickup");s.dmgNums.push({x:cx+16,y:cy+12,t:800,val:"+1",c:"#4f4"});s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#4f4"})));}
+    else if(tl===T.RUPEE_PURPLE){s.pk.add(pk);p.rupees+=10;sfx("itemget");s.dmgNums.push({x:cx+16,y:cy+12,t:1100,val:"+10",c:"#a4f"});s.pt.push(...Array.from({length:12},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:700,c:Math.random()>.5?"#a4f":"#c8f"})));}
+    else if(tl===T.RUPEE_RED){s.pk.add(pk);p.rupees+=20;sfx("itemget");s.dmgNums.push({x:cx+16,y:cy+12,t:1200,val:"+20",c:"#f44"});s.pt.push(...Array.from({length:16},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*5,dy:-Math.random()*4,l:800,c:Math.random()>.5?"#f44":"#fa6"})));}
     else if(tl===T.MASTER_KEY){s.pk.add(pk);if(s.loc.di>=0)p.masterKey[s.loc.di]=true;igTrig(s,"master_key");}
     else if(tl===T.KEY){s.pk.add(pk);p.keys++;s.msg={text:"Got a key!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#fd3"})));}
     else if(tl===T.BOMB){if(!p.hasBombs){s.msg={text:"Need a Bomb Bag first!",t:1500};}else{s.pk.add(pk);p.bombs+=1;s.msg={text:"Got a bomb!",t:1500};sfx("pickup");s.pt.push(...Array.from({length:6},()=>({x:cx+16,y:cy+16,dx:(Math.random()-.5)*4,dy:-Math.random()*3,l:600,c:"#88f"})));}}
@@ -2435,7 +2437,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
       c.fillStyle=iD&&dg?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
       for(let y2=0;y2<RO;y2++)for(let x2=0;x2<CO;x2++){let tl2=oldM[y2]?oldM[y2][x2]:T.EMPTY;
         const opk=`${loc.ty}:${loc.di}:${sl.prevScr}:${x2},${y2}`;
-        if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD||tl2===T.JAR||tl2===T.COMPASS)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
+        if((tl2===T.KEY||tl2===T.MASTER_KEY||tl2===T.HEART||tl2===T.HEART_PIECE||tl2===T.TRIFORCE||tl2===T.BOMB||tl2===T.RUPEE||tl2===T.RUPEE_PURPLE||tl2===T.RUPEE_RED||tl2===T.BOW||tl2===T.BOMB_BAG||tl2===T.MASTER_SWORD||tl2===T.JAR||tl2===T.COMPASS)&&s.pk.has(opk))tl2=iD?T.FLOOR:T.GRASS;
         if((tl2===T.DOOR||tl2===T.BOSS_DOOR)&&s.dr.has(opk))tl2=T.FLOOR;
         dT(c,tl2,x2*TL,y2*TL,iD,dg,t,null);}
       // Apply day/night tint and fog to old screen during slide
@@ -2561,7 +2563,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   c.fillStyle=iD?dg.color:"#2a3a28";c.fillRect(0,0,W2,H2);
   if(m)for(let y=0;y<RO;y++)for(let x=0;x<CO;x++){let tl=m[y][x];const px=x*TL,py=y*TL;
     const pk=`${loc.ty}:${loc.di}:${loc.scr}:${x},${y}`;
-    if((tl===T.KEY||tl===T.MASTER_KEY||tl===T.HEART||tl===T.HEART_PIECE||tl===T.TRIFORCE||tl===T.BOMB||tl===T.RUPEE||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.BANANA||tl===T.JAR||tl===T.COMPASS)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
+    if((tl===T.KEY||tl===T.MASTER_KEY||tl===T.HEART||tl===T.HEART_PIECE||tl===T.TRIFORCE||tl===T.BOMB||tl===T.RUPEE||tl===T.RUPEE_PURPLE||tl===T.RUPEE_RED||tl===T.BOW||tl===T.BOMB_BAG||tl===T.MASTER_SWORD||tl===T.BANANA||tl===T.JAR||tl===T.COMPASS)&&s.pk.has(pk))tl=iD?T.FLOOR:T.GRASS;
     if((tl===T.DOOR||tl===T.BOSS_DOOR)&&s.dr.has(pk))tl=T.FLOOR;
     let ei=null;
     if(tl===T.ENTRANCE&&!iD){for(const de of DE){if(de.s===loc.scr){for(const tp of de.t){if(tp[0]===x&&tp[1]===y){ei={di:de.d,qx:x-de.t[0][0],qy:y-de.t[0][1]};break;}}if(ei)break;}}}

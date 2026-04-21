@@ -15,6 +15,8 @@ export const CAVES=[
       m[5][7]=T.HEART_PIECE;m[5][8]=T.HEART;
       m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;
       m[4][7]=T.RUPEE;m[4][8]=T.RUPEE;m[6][7]=T.RUPEE;m[6][8]=T.RUPEE;
+      // Hidden purple rupee — bomb the cracked wall in the upper-left alcove
+      m[2][2]=T.RUPEE_PURPLE;m[1][2]=T.WALL;m[3][2]=T.WALL;m[2][1]=T.WALL;m[2][3]=T.CRACK;
     }),enemies:[]},
   }},
   {s:"3,0",t:[[10,4]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][7]=T.KEY;m[5][8]=T.HEART;m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[3][7]=T.TORCH;m[8][7]=T.TORCH;}),enemies:[]}},
@@ -35,6 +37,8 @@ export const CAVES=[
       m[4][7]=T.HEART;m[5][7]=T.HEART;m[5][8]=T.HEART;
       m[6][7]=T.BOMB;m[6][8]=T.BOMB;m[6][9]=T.BOMB;
       m[3][5]=T.TORCH;m[3][10]=T.TORCH;m[7][5]=T.TORCH;m[7][10]=T.TORCH;
+      // Hidden red rupee — bomb the eastern wall to reach a tiny alcove by the cliff
+      m[2][14]=T.RUPEE_RED;m[1][14]=T.WALL;m[3][14]=T.WALL;m[2][13]=T.CRACK;
     }),enemies:[]},
   }},
   {s:"1,2",t:[[3,9]],room:{tiles:mr(m=>{m[RO-1][7]=T.STAIRS_UP;m[RO-1][8]=T.STAIRS_UP;m[5][6]=T.KEY;m[5][7]=T.KEY;m[5][8]=T.HEART;m[5][9]=T.HEART;m[4][7]=T.TORCH;m[7][7]=T.TORCH;}),enemies:[]}},

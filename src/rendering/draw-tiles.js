@@ -1392,6 +1392,25 @@ export function dT(c,tl,px,py,iD,dg,t,ei){
       c.fillStyle="#4f4";c.beginPath();c.moveTo(rx2,ry2-8);c.lineTo(rx2+5,ry2-3);c.lineTo(rx2+5,ry2+3);c.lineTo(rx2,ry2+8);c.lineTo(rx2-5,ry2+3);c.lineTo(rx2-5,ry2-3);c.closePath();c.fill();
       c.fillStyle="#8f8";c.beginPath();c.moveTo(rx2,ry2-6);c.lineTo(rx2+4,ry2-2);c.lineTo(rx2,ry2);c.lineTo(rx2-4,ry2-2);c.closePath();c.fill();
       break;}
+    case T.RUPEE_PURPLE:{// Purple rupee +10 — slightly larger, vivid glow
+      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      const pg=Math.sin(t/280)*.18+.28;c.fillStyle=`rgba(180,90,255,${pg})`;c.beginPath();c.arc(px+16,py+16,12,0,Math.PI*2);c.fill();
+      const rx2=px+16,ry2=py+16;
+      c.fillStyle="#a04fdd";c.beginPath();c.moveTo(rx2,ry2-9);c.lineTo(rx2+6,ry2-3);c.lineTo(rx2+6,ry2+3);c.lineTo(rx2,ry2+9);c.lineTo(rx2-6,ry2+3);c.lineTo(rx2-6,ry2-3);c.closePath();c.fill();
+      c.fillStyle="#c780ff";c.beginPath();c.moveTo(rx2,ry2-7);c.lineTo(rx2+5,ry2-2);c.lineTo(rx2,ry2+1);c.lineTo(rx2-5,ry2-2);c.closePath();c.fill();
+      c.fillStyle="rgba(255,255,255,0.6)";c.fillRect(rx2-2,ry2-5,1.5,3);
+      break;}
+    case T.RUPEE_RED:{// Red rupee +20 — biggest, most ostentatious
+      c.fillStyle=iD?(dg.fc||dg.color):"#2d6a1e";c.fillRect(px,py,TL,TL);
+      const rgR=Math.sin(t/240)*.22+.32;c.fillStyle=`rgba(255,80,80,${rgR})`;c.beginPath();c.arc(px+16,py+16,13,0,Math.PI*2);c.fill();
+      // Sparkle ring
+      for(let i=0;i<4;i++){const sa=t/300+i*Math.PI/2,sr=10+Math.sin(t/200+i)*2;
+        c.fillStyle="rgba(255,220,200,0.55)";c.beginPath();c.arc(px+16+Math.cos(sa)*sr,py+16+Math.sin(sa)*sr,1.2,0,Math.PI*2);c.fill();}
+      const rx2=px+16,ry2=py+16;
+      c.fillStyle="#cc2222";c.beginPath();c.moveTo(rx2,ry2-10);c.lineTo(rx2+7,ry2-3);c.lineTo(rx2+7,ry2+3);c.lineTo(rx2,ry2+10);c.lineTo(rx2-7,ry2+3);c.lineTo(rx2-7,ry2-3);c.closePath();c.fill();
+      c.fillStyle="#ff5050";c.beginPath();c.moveTo(rx2,ry2-7);c.lineTo(rx2+5,ry2-2);c.lineTo(rx2,ry2+1);c.lineTo(rx2-5,ry2-2);c.closePath();c.fill();
+      c.fillStyle="rgba(255,255,255,0.7)";c.fillRect(rx2-2,ry2-6,1.8,3.5);
+      break;}
     case T.LEDGE_S:case T.LEDGE_N:case T.LEDGE_E:case T.LEDGE_W:{
       // Base floor (upper level)
       const lfc2=iD?(dg.fc||dg.color):"#2d6a1e";
