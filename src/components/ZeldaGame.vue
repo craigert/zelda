@@ -3758,7 +3758,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
   // Full cycle: ~5 minutes real time. Phase: 0=noon, 0.5=midnight
   const nightAmount=getNightAmount(s.weather.timer);
   const isNight=nightAmount>0.3;
-  if(!iD&&loc.scr!=="-1,2"){
+  if(!iD){
     // Smooth continuous day/night tint — blends between warm day and cool night
     // Warm golden day tint (strongest at noon, fades as night approaches)
     const dayStr=(1-nightAmount);
