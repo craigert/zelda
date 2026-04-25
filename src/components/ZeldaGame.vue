@@ -442,6 +442,9 @@ function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];
         for(let y=0;y<RO;y++)for(let x=0;x<CO;x++)if(m2[y][x]===T.PUSH)m2[y][x]=T.FLOOR;
         for(const[px,py]of rm2.origPush)m2[py][px]=T.PUSH;
         for(const[px,py]of rm2.squarePlates)if(m2[py][px]===T.FLOOR)m2[py][px]=T.PLATE;}}}
+  // Auto-mark dungeon reward rooms with no enemies as cleared so the chest spawns on first entry
+  if(s.loc.ty==="dg"&&!s.cl.has(rk)){const rmAuto=s.dg[s.loc.di]?.rooms[s.loc.scr];
+    if(rmAuto?.reward&&(!rmAuto.enemies||rmAuto.enemies.length===0))s.cl.add(rk);}
   if(s.cl.has(rk)){s.en=[];s.combatLock=false;
     // Re-spawn uncollected boss drops when re-entering a cleared boss room
     if(s.loc.ty==="dg"){const di2=s.loc.di;const rm2b=s.dg[di2]?.rooms[s.loc.scr];const boss=rm2b?.enemies?.find(e=>e.type==="boss");
