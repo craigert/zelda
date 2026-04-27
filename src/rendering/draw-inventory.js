@@ -507,7 +507,7 @@ function drawEquipGrid(c,s,t){
       if(count>0){c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="right";c.fillText(count+"/4",cx+12,cy+8);c.textAlign="left";}}},
   ];
 
-  const cols=3,cellW=72,cellH=48;
+  const cols=4,cellW=52,cellH=48;
   const startX=gx+10,startY=gy+10;
   for(let i=0;i<items.length;i++){
     const col=i%cols,row=Math.floor(i/cols);

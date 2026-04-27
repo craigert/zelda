@@ -1054,9 +1054,9 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
       for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*W2+w.wind*20,y:-8-Math.random()*40,vy:5+Math.random()*2,vx:w.wind*2+0.5,l:1,sp:0.3+Math.random()*0.2});}
       w.fog=Math.min(0.08,w.fog+dt*0.00002);
     }else if(w.type==="snow"){
-      const spawnRate=6;
-      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*(W2+40)-20,y:-4-Math.random()*30,vy:0.6+Math.random()*0.5,vx:w.wind+Math.sin(w.timer/600+i)*0.3,l:1,sp:1+Math.random()*2.5,wobble:Math.random()*Math.PI*2});}
-      w.fog=Math.min(0.12,w.fog+dt*0.00003);
+      const spawnRate=2;
+      for(let i=0;i<spawnRate;i++){w.drops.push({x:Math.random()*(W2+40)-20,y:-4-Math.random()*30,vy:0.5+Math.random()*0.4,vx:w.wind*0.7+Math.sin(w.timer/600+i)*0.25,l:1,sp:0.8+Math.random()*1.4,wobble:Math.random()*Math.PI*2});}
+      w.fog=Math.min(0.06,w.fog+dt*0.000015);
     }else if(w.type==="fog"){
       const isShadow=getBiome(s.loc.scr)==="shadow_forest";
       const fogMax=isShadow?0.50:0.25;
