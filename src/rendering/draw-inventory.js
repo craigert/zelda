@@ -381,7 +381,7 @@ function drawGearPage(c,s,t){
   drawSectionTitle(c,50,"EQUIPMENT");
   drawPaperDoll(c,s,t);
   drawEquipGrid(c,s,t);
-  drawDivider(c,282,"TRIFORCE & HEARTS");
+  drawDivider(c,234,"TRIFORCE & HEARTS");
   drawTriforceAndHearts(c,s,t);
 }
 
@@ -470,7 +470,7 @@ function drawPaperDoll(c,s,t){
 }
 
 function drawEquipGrid(c,s,t){
-  const gx=260,gy=62,gw=230,gh=208;
+  const gx=260,gy=62,gw=230,gh=160;
   c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(gx,gy,gw,gh);
   c.strokeStyle="rgba(184,150,42,0.3)";c.lineWidth=1;c.strokeRect(gx,gy,gw,gh);
 
@@ -499,13 +499,6 @@ function drawEquipGrid(c,s,t){
         c.fillStyle="#ccc";c.beginPath();c.moveTo(cx+4,cy-6);c.lineTo(cx,cy-3);c.lineTo(cx+2,cy-1);c.closePath();c.fill();}}}:
     {name:"Bone",has:s.p.hasBone,draw:(cx,cy)=>{
       if(s.p.hasBone){c.fillStyle="#e8dcc8";c.fillRect(cx-5,cy-1,10,3);c.beginPath();c.arc(cx-5,cy,2.5,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+5,cy,2.5,0,Math.PI*2);c.fill();}}},
-    {name:"Compass",has:s.p.compasses&&s.p.compasses.some(Boolean),draw:(cx,cy)=>{
-      const count=s.p.compasses?s.p.compasses.filter(Boolean).length:0;
-      c.fillStyle="#d8a840";c.beginPath();c.arc(cx,cy,6,0,Math.PI*2);c.fill();
-      c.fillStyle="#f0ead8";c.beginPath();c.arc(cx,cy,4.5,0,Math.PI*2);c.fill();
-      c.strokeStyle="#cc2222";c.lineWidth=1.2;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+1,cy-4);c.stroke();
-      c.fillStyle="#333";c.beginPath();c.arc(cx,cy,1,0,Math.PI*2);c.fill();
-      if(count>0){c.fillStyle="#fd3";c.font="bold 9px monospace";c.textAlign="left";c.fillText(count+"/4",cx+10,cy+3);c.textAlign="left";}}},
   ];
 
   const cols=3,cellW=72,cellH=48;
@@ -534,7 +527,7 @@ function drawEquipGrid(c,s,t){
 
 function drawTriforceAndHearts(c,s,t){
   // Side by side: triforce left, heart pieces right, evenly spaced
-  const cy=332,triS=34;
+  const cy=310,triS=45;
   const leftCx=W2/2-80,rightCx=W2/2+80;
 
   // ===== TRIFORCE (left) =====
@@ -585,7 +578,7 @@ function drawTriforceAndHearts(c,s,t){
   if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",leftCx,cy+triS+40);}
 
   // ===== HEART PIECES (right, same scale as triforce) =====
-  const hsz=46,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
+  const hsz=58,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
   const hp=s.p.heartPieces;
   // Glow
   const hglow=Math.sin(t/800)*0.06+0.1;
@@ -637,20 +630,26 @@ function drawDungeonProgress(c,s,t){
     // Dungeon name
     c.fillStyle=d.col;c.font="bold 8px monospace";c.textAlign="center";
     c.fillText(d.name,cx,y+10);
-    // Master key icon
-    c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#333";
-    c.font="8px monospace";c.fillText(s.p.masterKey[d.di]?"\u2605":"\u2606",cx-15,y+24);
     // Triforce icon (not for D4)
     if(d.di<3){
       c.fillStyle=s.p.tri[d.di]?"#fd3":"#333";
-      c.beginPath();c.moveTo(cx+2,y+17);c.lineTo(cx+7,y+25);c.lineTo(cx-3,y+25);c.closePath();c.fill();
+      c.beginPath();c.moveTo(cx-25,y+17);c.lineTo(cx-20,y+25);c.lineTo(cx-30,y+25);c.closePath();c.fill();
     }
+    // Master key icon
+    c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#333";
+    c.font="8px monospace";c.fillText(s.p.masterKey[d.di]?"\u2605":"\u2606",cx-10,y+24);
+    // Compass icon — small dial
+    {const has=s.p.compasses&&s.p.compasses[d.di];const ccx=cx+8,ccy=y+22;
+      c.fillStyle=has?"#d8a840":"#333";c.beginPath();c.arc(ccx,ccy,4,0,Math.PI*2);c.fill();
+      c.fillStyle=has?"#f0ead8":"#222";c.beginPath();c.arc(ccx,ccy,2.8,0,Math.PI*2);c.fill();
+      if(has){const cna=t/350;c.strokeStyle="#cc2222";c.lineWidth=0.9;
+        c.beginPath();c.moveTo(ccx,ccy);c.lineTo(ccx+Math.cos(cna-Math.PI/2)*2.5,ccy+Math.sin(cna-Math.PI/2)*2.5);c.stroke();}}
     // Room count
     const dg=s.dg[d.di];if(dg){
       const rks=Object.keys(dg.rooms);
       const cleared=rks.filter(rk=>s.cl.has(`dg:${d.di}:${rk}`)).length;
       c.fillStyle="#666";c.font="7px monospace";
-      c.fillText(`${cleared}/${rks.length}`,cx+15,y+24);
+      c.fillText(`${cleared}/${rks.length}`,cx+24,y+24);
     }
   }
   c.textAlign="left";
