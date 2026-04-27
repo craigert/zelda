@@ -322,25 +322,32 @@ function drawDungeonProgressPolished(c,s,t){
     // Triforce (D1-D3)
     if(d.di<3){
       c.fillStyle=s.p.tri[d.di]?"#fd3":"#2a2a2a";
-      c.beginPath();c.moveTo(cx2-18,iy);c.lineTo(cx2-13,iy+8);c.lineTo(cx2-23,iy+8);c.closePath();c.fill();
-      if(s.p.tri[d.di]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(cx2-18,iy+2);c.lineTo(cx2-15,iy+7);c.lineTo(cx2-21,iy+7);c.closePath();c.fill();}
+      c.beginPath();c.moveTo(cx2-26,iy);c.lineTo(cx2-21,iy+8);c.lineTo(cx2-31,iy+8);c.closePath();c.fill();
+      if(s.p.tri[d.di]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(cx2-26,iy+2);c.lineTo(cx2-23,iy+7);c.lineTo(cx2-29,iy+7);c.closePath();c.fill();}
     }else{// D4 — crown icon
-      c.fillStyle=s.won?"#fd3":"#2a2a2a";c.font="9px monospace";c.fillText(s.won?"\u2654":"\u265a",cx2-18,iy+8);}
+      c.fillStyle=s.won?"#fd3":"#2a2a2a";c.font="9px monospace";c.fillText(s.won?"\u2654":"\u265a",cx2-26,iy+8);}
     // Master key
     c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#2a2a2a";
-    c.beginPath();c.arc(cx2,iy+2,3,0,Math.PI*2);c.fill();
-    c.fillRect(cx2-0.5,iy+5,1,5);if(s.p.masterKey[d.di]){c.fillRect(cx2,iy+7,2,1);c.fillRect(cx2,iy+9,1.5,1);}
+    c.beginPath();c.arc(cx2-12,iy+2,3,0,Math.PI*2);c.fill();
+    c.fillRect(cx2-12.5,iy+5,1,5);if(s.p.masterKey[d.di]){c.fillRect(cx2-12,iy+7,2,1);c.fillRect(cx2-12,iy+9,1.5,1);}
+    // Compass dial
+    {const has=s.p.compasses&&s.p.compasses[d.di];const ccx=cx2+2,ccy=iy+5;
+      c.fillStyle=has?"#d8a840":"#2a2a2a";c.beginPath();c.arc(ccx,ccy,4,0,Math.PI*2);c.fill();
+      c.fillStyle=has?"#f0ead8":"#1a1a1a";c.beginPath();c.arc(ccx,ccy,2.8,0,Math.PI*2);c.fill();
+      if(has){const cna=t/350;c.strokeStyle="#cc2222";c.lineWidth=0.9;
+        c.beginPath();c.moveTo(ccx,ccy);c.lineTo(ccx+Math.cos(cna-Math.PI/2)*2.5,ccy+Math.sin(cna-Math.PI/2)*2.5);c.stroke();}}
     // Room progress bar
     const dg=s.dg[d.di];let cleared=0,total=0;
     if(dg){const rks=Object.keys(dg.rooms);total=rks.length;for(const rk of rks)if(s.cl.has(`dg:${d.di}:${rk}`))cleared++;}
-    const barX=cx2+10,barW=cellW/2-16,barY=iy+2;
+    const barX=cx2+12,barW=cellW/2-18,barY=iy+2;
     c.fillStyle="rgba(0,0,0,0.4)";c.fillRect(barX,barY,barW,6);
     if(total>0){c.fillStyle=cleared===total?d.col:"#666";c.fillRect(barX,barY,barW*(cleared/total),6);}
-    c.fillStyle="#999";c.font="6px monospace";c.fillText(`${cleared}/${total}`,cx2+10+barW/2,iy+16);
+    c.fillStyle="#999";c.font="6px monospace";c.fillText(`${cleared}/${total}`,barX+barW/2,iy+16);
     // Labels
     c.fillStyle="#555";c.font="5px monospace";
-    if(d.di<3)c.fillText("\u25b2",cx2-18,iy+16);
-    c.fillText("\u2605",cx2,iy+16);
+    if(d.di<3)c.fillText("\u25b2",cx2-26,iy+16);
+    c.fillText("\u2605",cx2-12,iy+16);
+    c.fillText("\u25cb",cx2+2,iy+16);
   }
   c.textAlign="left";
 }
@@ -420,14 +427,20 @@ function drawPaperDoll(c,s,t){
         c.fillStyle="#8a6830";c.fillRect(cx-3,cy+3,7,3);
       }
     }},
-    {x:pcx-48,y:pcy-20,label:"M.SHIELD",has:s.hasShieldUp,draw:(cx,cy)=>{
+    {x:pcx-48,y:pcy-20,label:s.hasShieldUp?"M.SHIELD":"SHIELD",has:true,draw:(cx,cy)=>{
       if(s.hasShieldUp){
         c.fillStyle="#4488ff";c.beginPath();c.moveTo(cx,cy-7);c.lineTo(cx+6,cy-3);c.lineTo(cx+5,cy+5);c.lineTo(cx,cy+8);c.lineTo(cx-5,cy+5);c.lineTo(cx-6,cy-3);c.closePath();c.fill();
         c.strokeStyle="#fd3";c.lineWidth=1;c.stroke();
         c.fillStyle="#fd3";c.beginPath();c.moveTo(cx,cy-2);c.lineTo(cx+3,cy+3);c.lineTo(cx-3,cy+3);c.closePath();c.fill();
       }else{
-        c.strokeStyle="#444";c.lineWidth=1;c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx+5,cy-2);c.lineTo(cx+4,cy+4);c.lineTo(cx,cy+7);c.lineTo(cx-4,cy+4);c.lineTo(cx-5,cy-2);c.closePath();c.stroke();
-        c.fillStyle="#444";c.font="bold 8px monospace";c.textAlign="center";c.fillText("?",cx,cy+3);c.textAlign="left";
+        // Basic wooden shield — brown with metal rim and center boss
+        c.fillStyle="#8a5a2a";c.beginPath();c.moveTo(cx,cy-7);c.lineTo(cx+6,cy-3);c.lineTo(cx+5,cy+5);c.lineTo(cx,cy+8);c.lineTo(cx-5,cy+5);c.lineTo(cx-6,cy-3);c.closePath();c.fill();
+        c.strokeStyle="#5a3a1a";c.lineWidth=1;c.stroke();
+        // Wood grain
+        c.strokeStyle="rgba(60,30,10,0.4)";c.lineWidth=0.5;c.beginPath();c.moveTo(cx-3,cy-5);c.lineTo(cx+3,cy+6);c.stroke();
+        // Center boss (metal stud)
+        c.fillStyle="#bbb";c.beginPath();c.arc(cx,cy,2,0,Math.PI*2);c.fill();
+        c.fillStyle="#888";c.beginPath();c.arc(cx+0.5,cy+0.5,1,0,Math.PI*2);c.fill();
       }
     }},
     {x:pcx,y:pcy+50,label:"ARMOR",has:s.p.redArmor,draw:(cx,cy)=>{
