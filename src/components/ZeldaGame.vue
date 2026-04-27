@@ -114,7 +114,7 @@ function init() {
     freeze:0,
     roomFlash:0,
     respawn:{ty:"ow",scr:"1,1",di:-1,x:7*TL,y:9*TL},
-    heartContainers:[],
+    heartContainers:[],dgFound:[false,false,false,false],
     finalOpen:false,
     triMu:false,
     bProj:[],
@@ -308,6 +308,7 @@ function saveGame(s) {
       cl: [...s.cl].filter(k=>!k.startsWith("ow:")),
       bc: [...(s.bc||[])],mb: [...(s.mb||[])],mbV2:true,co: [...(s.co||[])],
       heartContainers: [...s.heartContainers],
+      dgFound: [...(s.dgFound||[false,false,false,false])],
       finalOpen: s.finalOpen,
       respawn: { ...s.respawn },
       hasLantern: s.hasLantern, hasShieldUp: s.hasShieldUp, hasJar: s.hasJar, springWater: s.springWater, shopVisited: s.shopVisited, dogDug: s.dogDug||false, treeGift: s.treeGift||false, sanctumRevealed: s.sanctumRevealed||false, sanctumDark: s.sanctumDark||false,
@@ -341,6 +342,7 @@ function applySave(s, save) {
   s.cl.delete("dg:3:0,-4");// Always respawn Dark King on load
   s.bc = new Set(save.bc||[]);s.mb = new Set(save.mbV2?save.mb:[]);s.co = new Set(save.co||[]);// mbV2: clear stale boulder data from old saves
   s.heartContainers = [...save.heartContainers];
+  s.dgFound = save.dgFound ? [...save.dgFound] : [false,false,false,false];
   s.finalOpen = save.finalOpen; s.hasLantern = save.hasLantern || false; s.hasShieldUp = save.hasShieldUp || false; s.hasJar = save.hasJar || false; s.springWater = save.springWater || 0; s.shopVisited = save.shopVisited || false; s.dogDug = save.dogDug || false; s.treeGift = save.treeGift || false; s.sanctumRevealed = save.sanctumRevealed || false; s.sanctumDark = save.sanctumDark || false;
   s.respawn = { ...save.respawn };
   s.bossWarps = save.bossWarps ? [...save.bossWarps] : [];
@@ -419,6 +421,10 @@ function igTrig(s,type){const m=ITEM_GET[type];if(!m)return false;
   return true;}
 
 function le(s){s.bProj=[];s.pArrows=[];s.chest=null;s.activeBombs=[];s.drops=[];s.shop=null;s.shopGround=null;s._shopClosed=false;s.fireTrails=[];s.bossFight=false;s._tswitchHit=null;s.hookshot=null;s.itemGet=null;s.bugs=[];
+  // Mark dungeons as discovered when the player enters them or steps onto their overworld entrance screen
+  if(!s.dgFound)s.dgFound=[false,false,false,false];
+  if(s.loc.ty==="dg"&&s.loc.di>=0&&s.loc.di<4)s.dgFound[s.loc.di]=true;
+  else if(s.loc.ty==="ow"){for(let i=0;i<DE.length;i++)if(DE[i].s===s.loc.scr)s.dgFound[i]=true;}
   // Instant fog when entering shadow forest
   if(s.loc.ty==="ow"&&getBiome(s.loc.scr)==="shadow_forest"){s.weather.fog=0.50;s.weather.type="fog";}
   // Restore lit torches for this room (persists between visits)
@@ -901,7 +907,7 @@ function upd(dt){const s=stR.value;if(!s||s.title||s.saveSelect||s.paused)return
     if(s.won){stopMu();if(customAuRef.value){customAuRef.value.pause();customAuRef.value=null;}
       const ns=init();ns.title=true;stR.value=ns;ltRef.value=null;return;}
     const old=s;const ns=init();ns.title=false;ns.p.keys=old.p.keys;ns.p.bombs=old.p.bombs;ns.p.rupees=old.p.rupees;ns.p.tri=[...old.p.tri];ns.p.masterKey=[...old.p.masterKey];ns.p.compasses=[...old.p.compasses];ns.p.mhp=old.p.mhp;ns.p.hp=ns.p.mhp;ns.p.heartPieces=old.p.heartPieces;ns.p.hasBow=old.p.hasBow;ns.p.hasBombs=old.p.hasBombs;ns.p.hasMasterSword=old.p.hasMasterSword;ns.p.redArmor=old.p.redArmor;ns.p.hasBanana=old.p.hasBanana;ns.p.hasBone=old.p.hasBone;ns.p.hasHookshot=old.p.hasHookshot;
-    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.co=old.co;ns.mb=old.mb;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;ns.treeGift=old.treeGift;
+    ns.pk=old.pk;ns.dr=old.dr;ns.cl=old.cl;ns.bc=old.bc;ns.co=old.co;ns.mb=old.mb;ns.dg=old.dg;ns.heartContainers=[...old.heartContainers];ns.dgFound=[...(old.dgFound||[false,false,false,false])];ns.finalOpen=old.finalOpen;ns.bossWarps=[...(old.bossWarps||[])];ns.hasLantern=old.hasLantern;ns.hasShieldUp=old.hasShieldUp;ns.hasJar=old.hasJar;ns.springWater=old.springWater||0;ns.shopVisited=old.shopVisited;ns.dogDug=old.dogDug;ns.treeGift=old.treeGift;
     ns.loc.ty=old.respawn.ty;ns.loc.scr=old.respawn.scr;ns.loc.di=old.respawn.di;ns.p.x=old.respawn.x;ns.p.y=old.respawn.y;
     ns.respawn={...old.respawn};// preserve respawn point for subsequent deaths
     stR.value=ns;le(ns);saveGame(ns);}return;}

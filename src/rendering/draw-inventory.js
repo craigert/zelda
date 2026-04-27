@@ -143,8 +143,9 @@ function drawOverworldMap(c,s,t){
   c.strokeStyle="rgba(184,150,42,0.08)";c.lineWidth=0.5;
   for(let gx=0;gx<=oxX-onX+1;gx++){const lx=omX+gx*cW;c.beginPath();c.moveTo(lx,omY);c.lineTo(lx,omY+gH);c.stroke();}
   for(let gy=0;gy<=oxY-onY+1;gy++){const ly=omY+gy*cH;c.beginPath();c.moveTo(omX,ly);c.lineTo(omX+gW,ly);c.stroke();}
-  // Dungeon entrance markers
+  // Dungeon entrance markers — only shown after the player has discovered them
   for(let di=0;di<DE.length;di++){
+    if(!s.dgFound||!s.dgFound[di])continue;
     const de=DE[di];
     const[dx,dy]=de.s.split(",").map(Number);
     const ex=omX+(dx-onX)*cW+cW/2,ey=omY+(dy-onY)*cH+cH/2;
@@ -380,7 +381,7 @@ function drawGearPage(c,s,t){
   drawSectionTitle(c,50,"EQUIPMENT");
   drawPaperDoll(c,s,t);
   drawEquipGrid(c,s,t);
-  drawDivider(c,234,"TRIFORCE & HEARTS");
+  drawDivider(c,282,"TRIFORCE & HEARTS");
   drawTriforceAndHearts(c,s,t);
 }
 
@@ -469,7 +470,7 @@ function drawPaperDoll(c,s,t){
 }
 
 function drawEquipGrid(c,s,t){
-  const gx=260,gy=62,gw=230,gh=160;
+  const gx=260,gy=62,gw=230,gh=208;
   c.fillStyle="rgba(0,0,0,0.35)";c.fillRect(gx,gy,gw,gh);
   c.strokeStyle="rgba(184,150,42,0.3)";c.lineWidth=1;c.strokeRect(gx,gy,gw,gh);
 
@@ -504,10 +505,10 @@ function drawEquipGrid(c,s,t){
       c.fillStyle="#f0ead8";c.beginPath();c.arc(cx,cy,4.5,0,Math.PI*2);c.fill();
       c.strokeStyle="#cc2222";c.lineWidth=1.2;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+1,cy-4);c.stroke();
       c.fillStyle="#333";c.beginPath();c.arc(cx,cy,1,0,Math.PI*2);c.fill();
-      if(count>0){c.fillStyle="#fd3";c.font="bold 7px monospace";c.textAlign="right";c.fillText(count+"/4",cx+12,cy+8);c.textAlign="left";}}},
+      if(count>0){c.fillStyle="#fd3";c.font="bold 9px monospace";c.textAlign="left";c.fillText(count+"/4",cx+10,cy+3);c.textAlign="left";}}},
   ];
 
-  const cols=4,cellW=52,cellH=48;
+  const cols=3,cellW=72,cellH=48;
   const startX=gx+10,startY=gy+10;
   for(let i=0;i<items.length;i++){
     const col=i%cols,row=Math.floor(i/cols);
@@ -533,7 +534,7 @@ function drawEquipGrid(c,s,t){
 
 function drawTriforceAndHearts(c,s,t){
   // Side by side: triforce left, heart pieces right, evenly spaced
-  const cy=310,triS=45;
+  const cy=350,triS=38;
   const leftCx=W2/2-80,rightCx=W2/2+80;
 
   // ===== TRIFORCE (left) =====
@@ -584,7 +585,7 @@ function drawTriforceAndHearts(c,s,t){
   if(allCollected){c.fillStyle="#d4a820";c.font="bold 8px monospace";c.fillText("POWER OF THE GODS",leftCx,cy+triS+40);}
 
   // ===== HEART PIECES (right, same scale as triforce) =====
-  const hsz=58,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
+  const hsz=46,hx=rightCx-hsz/2,hy=cy-hsz/2-4;
   const hp=s.p.heartPieces;
   // Glow
   const hglow=Math.sin(t/800)*0.06+0.1;
