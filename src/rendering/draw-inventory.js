@@ -319,23 +319,23 @@ function drawDungeonProgressPolished(c,s,t){
     c.fillStyle="#ddd";c.font="bold 7px monospace";c.fillText(d.name,cx2,y+13);
     // Icons row
     const iy=y+20;
-    // Triforce (D1-D3)
-    if(d.di<3){
-      c.fillStyle=s.p.tri[d.di]?"#fd3":"#2a2a2a";
-      c.beginPath();c.moveTo(cx2-26,iy);c.lineTo(cx2-21,iy+8);c.lineTo(cx2-31,iy+8);c.closePath();c.fill();
-      if(s.p.tri[d.di]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(cx2-26,iy+2);c.lineTo(cx2-23,iy+7);c.lineTo(cx2-29,iy+7);c.closePath();c.fill();}
-    }else{// D4 — crown icon
-      c.fillStyle=s.won?"#fd3":"#2a2a2a";c.font="9px monospace";c.fillText(s.won?"\u2654":"\u265a",cx2-26,iy+8);}
-    // Master key
-    c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#2a2a2a";
-    c.beginPath();c.arc(cx2-12,iy+2,3,0,Math.PI*2);c.fill();
-    c.fillRect(cx2-12.5,iy+5,1,5);if(s.p.masterKey[d.di]){c.fillRect(cx2-12,iy+7,2,1);c.fillRect(cx2-12,iy+9,1.5,1);}
-    // Compass dial
-    {const has=s.p.compasses&&s.p.compasses[d.di];const ccx=cx2+2,ccy=iy+5;
+    // Compass dial (leftmost)
+    {const has=s.p.compasses&&s.p.compasses[d.di];const ccx=cx2-26,ccy=iy+5;
       c.fillStyle=has?"#d8a840":"#2a2a2a";c.beginPath();c.arc(ccx,ccy,4,0,Math.PI*2);c.fill();
       c.fillStyle=has?"#f0ead8":"#1a1a1a";c.beginPath();c.arc(ccx,ccy,2.8,0,Math.PI*2);c.fill();
       if(has){const cna=t/350;c.strokeStyle="#cc2222";c.lineWidth=0.9;
         c.beginPath();c.moveTo(ccx,ccy);c.lineTo(ccx+Math.cos(cna-Math.PI/2)*2.5,ccy+Math.sin(cna-Math.PI/2)*2.5);c.stroke();}}
+    // Master key
+    c.fillStyle=s.p.masterKey[d.di]?"#c070ff":"#2a2a2a";
+    c.beginPath();c.arc(cx2-12,iy+2,3,0,Math.PI*2);c.fill();
+    c.fillRect(cx2-12.5,iy+5,1,5);if(s.p.masterKey[d.di]){c.fillRect(cx2-12,iy+7,2,1);c.fillRect(cx2-12,iy+9,1.5,1);}
+    // Triforce / crown (rightmost)
+    if(d.di<3){
+      c.fillStyle=s.p.tri[d.di]?"#fd3":"#2a2a2a";
+      c.beginPath();c.moveTo(cx2+2,iy);c.lineTo(cx2+7,iy+8);c.lineTo(cx2-3,iy+8);c.closePath();c.fill();
+      if(s.p.tri[d.di]){c.fillStyle="#ffe866";c.beginPath();c.moveTo(cx2+2,iy+2);c.lineTo(cx2+5,iy+7);c.lineTo(cx2-1,iy+7);c.closePath();c.fill();}
+    }else{// D4 — crown icon
+      c.fillStyle=s.won?"#fd3":"#2a2a2a";c.font="9px monospace";c.fillText(s.won?"\u2654":"\u265a",cx2+2,iy+8);}
     // Room progress bar
     const dg=s.dg[d.di];let cleared=0,total=0;
     if(dg){const rks=Object.keys(dg.rooms);total=rks.length;for(const rk of rks)if(s.cl.has(`dg:${d.di}:${rk}`))cleared++;}
@@ -345,9 +345,9 @@ function drawDungeonProgressPolished(c,s,t){
     c.fillStyle="#999";c.font="6px monospace";c.fillText(`${cleared}/${total}`,barX+barW/2,iy+16);
     // Labels
     c.fillStyle="#555";c.font="5px monospace";
-    if(d.di<3)c.fillText("\u25b2",cx2-26,iy+16);
+    c.fillText("\u25cb",cx2-26,iy+16);
     c.fillText("\u2605",cx2-12,iy+16);
-    c.fillText("\u25cb",cx2+2,iy+16);
+    if(d.di<3)c.fillText("\u25b2",cx2+2,iy+16);
   }
   c.textAlign="left";
 }
