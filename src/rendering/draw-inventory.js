@@ -534,7 +534,7 @@ function drawEquipGrid(c,s,t){
 
 function drawTriforceAndHearts(c,s,t){
   // Side by side: triforce left, heart pieces right, evenly spaced
-  const cy=350,triS=38;
+  const cy=332,triS=34;
   const leftCx=W2/2-80,rightCx=W2/2+80;
 
   // ===== TRIFORCE (left) =====
