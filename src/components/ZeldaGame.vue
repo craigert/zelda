@@ -3912,7 +3912,7 @@ function drw(t){const cv=cvRef.value;if(!cv)return;const c=cv.getContext("2d");c
     for(const ok of owKeys){const[cx2,cy2]=ok.split(",").map(Number);
       let col="#3a5a2a";if(ok===loc.scr)col="#fd3";
       c.fillStyle=col;c.fillRect(omX+op+(cx2-onX)*os+1,omY+op+(cy2-onY)*os+1,os-2,os-2);
-      for(const de2 of DE){if(de2.s===ok){c.fillStyle=ok===loc.scr?"#000":"#222";c.fillRect(omX+op+(cx2-onX)*os+os/2-2,omY+op+(cy2-onY)*os+os/2-2,4,4);}}}
+      for(const de2 of DE){if(de2.s===ok){const def=de2.d<3?s.p.tri[de2.d]:s.finalOpen;if(def){c.fillStyle=ok===loc.scr?"#000":"#222";c.fillRect(omX+op+(cx2-onX)*os+os/2-2,omY+op+(cy2-onY)*os+os/2-2,4,4);}}}}
     c.globalAlpha=1;
   }
   if(s.timedDoors.length>0){const td=s.timedDoors[0];const pct=td.t/5000;
